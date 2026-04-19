@@ -1,0 +1,38 @@
+<svg width="1600" height="1080" viewBox="0 0 1600 1080" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="221" y1="56" x2="1428" y2="1027" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#171311"/>
+      <stop offset="0.58" stop-color="#090807"/>
+      <stop offset="1" stop-color="#030303"/>
+    </linearGradient>
+    <radialGradient id="spot" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(1128 282) rotate(139.3) scale(532 433)">
+      <stop stop-color="#F0CA90" stop-opacity="0.34"/>
+      <stop offset="1" stop-color="#F0CA90" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="metal" x1="804" y1="305" x2="1045" y2="687" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFE5B8"/>
+      <stop offset="0.48" stop-color="#C69254"/>
+      <stop offset="1" stop-color="#7A4F27"/>
+    </linearGradient>
+    <filter id="blur" x="768" y="34" width="720" height="720" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feGaussianBlur stdDeviation="90"/>
+    </filter>
+  </defs>
+  <rect width="1600" height="1080" fill="url(#bg)"/>
+  <g filter="url(#blur)" opacity="0.94">
+    <circle cx="1128" cy="394" r="180" fill="url(#spot)"/>
+  </g>
+  <rect x="76" y="76" width="1448" height="928" rx="34" fill="rgba(255,255,255,0.015)" stroke="rgba(240,202,144,0.14)"/>
+  <rect x="124" y="124" width="1352" height="832" rx="24" fill="rgba(8,7,6,0.62)"/>
+  <path d="M258 791C423.333 629.667 580.667 500.333 730 403C800.667 356.333 891.333 329.333 1002 322C1088.67 316.667 1162.33 335.333 1223 378" stroke="rgba(255,246,233,0.28)" stroke-width="4" stroke-linecap="round"/>
+  <path d="M1058 264C1127.93 264 1184.63 320.705 1184.63 390.63V485.37C1184.63 555.295 1127.93 612 1058 612H992C922.075 612 865.37 555.295 865.37 485.37V390.63C865.37 320.705 922.075 264 992 264H1058Z" fill="url(#metal)"/>
+  <circle cx="1025" cy="438" r="81" fill="#17110E" fill-opacity="0.88"/>
+  <circle cx="1025" cy="438" r="46" fill="#FFF2D8" fill-opacity="0.92"/>
+  <rect x="254" y="213" width="244" height="42" rx="21" fill="rgba(255,255,255,0.04)" stroke="rgba(240,202,144,0.16)"/>
+  <text x="287" y="240" fill="#FFF6E9" font-family="Arial, sans-serif" font-size="16" letter-spacing="5">CAMPAIGN REEL</text>
+  <text x="250" y="824" fill="#FFF6E9" font-family="Georgia, serif" font-size="64">Motion placeholder for sparkle, scale, and light</text>
+  <text x="250" y="882" fill="#B8A994" font-family="Arial, sans-serif" font-size="24">A still frame designed to suggest a short luxury reel before final product video arrives.</text>
+  <circle cx="1360" cy="852" r="72" fill="rgba(255,255,255,0.06)" stroke="rgba(255,246,233,0.24)" stroke-width="2"/>
+  <path d="M1340 818L1395 852L1340 886V818Z" fill="#FFF6E9"/>
+  <text x="1298" y="948" fill="#FFF6E9" font-family="Arial, sans-serif" font-size="16" letter-spacing="4">02:18 REEL</text>
+</svg>

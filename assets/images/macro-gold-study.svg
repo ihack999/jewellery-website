@@ -1,0 +1,68 @@
+<svg width="1600" height="2000" viewBox="0 0 1600 2000" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="220" y1="140" x2="1380" y2="1840" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#1B1613"/>
+      <stop offset="0.5" stop-color="#0C0908"/>
+      <stop offset="1" stop-color="#050404"/>
+    </linearGradient>
+    <radialGradient id="glowA" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(436 534) rotate(55.4) scale(742 801)">
+      <stop stop-color="#F5D9AE" stop-opacity="0.42"/>
+      <stop offset="1" stop-color="#F5D9AE" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="glowB" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(1108 1512) rotate(118.2) scale(688 761)">
+      <stop stop-color="#8A6742" stop-opacity="0.34"/>
+      <stop offset="1" stop-color="#8A6742" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="gold" x1="506" y1="540" x2="1148" y2="1434" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFE8C1"/>
+      <stop offset="0.28" stop-color="#E6BC7A"/>
+      <stop offset="0.58" stop-color="#B98143"/>
+      <stop offset="0.82" stop-color="#FFD59C"/>
+      <stop offset="1" stop-color="#8A5E2F"/>
+    </linearGradient>
+    <linearGradient id="goldDark" x1="672" y1="724" x2="1002" y2="1278" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#9C6B34"/>
+      <stop offset="1" stop-color="#4E341C"/>
+    </linearGradient>
+    <filter id="blurA" x="34" y="132" width="1118" height="1118" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feGaussianBlur stdDeviation="120"/>
+    </filter>
+    <filter id="blurB" x="700" y="1082" width="866" height="866" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feGaussianBlur stdDeviation="110"/>
+    </filter>
+  </defs>
+  <rect width="1600" height="2000" fill="url(#bg)"/>
+  <g opacity="0.92">
+    <g filter="url(#blurA)">
+      <circle cx="593" cy="691" r="319" fill="url(#glowA)"/>
+    </g>
+    <g filter="url(#blurB)">
+      <circle cx="1133" cy="1515" r="213" fill="url(#glowB)"/>
+    </g>
+  </g>
+  <rect x="138" y="128" width="1324" height="1744" rx="48" fill="rgba(255,255,255,0.02)" stroke="rgba(240,202,144,0.14)"/>
+  <g opacity="0.7">
+    <path d="M1138 726C1138 932.552 970.552 1100 764 1100C557.448 1100 390 932.552 390 726C390 519.448 557.448 352 764 352C970.552 352 1138 519.448 1138 726Z" fill="url(#gold)"/>
+    <path d="M1232 1236C1232 1442.55 1064.55 1610 858 1610C651.448 1610 484 1442.55 484 1236C484 1029.45 651.448 862 858 862C1064.55 862 1232 1029.45 1232 1236Z" fill="url(#goldDark)"/>
+  </g>
+  <g>
+    <path d="M468 1156C468 875.899 695.899 648 976 648H1028C1141.4 648 1233 739.595 1233 853V853C1233 966.405 1141.4 1058 1028 1058H976C912.307 1058 860.5 1109.81 860.5 1173.5V1173.5C860.5 1237.19 912.307 1289 976 1289H1048C1165.67 1289 1261 1384.33 1261 1502V1502C1261 1619.67 1165.67 1715 1048 1715H984C692.951 1715 457 1479.05 457 1188V1156H468Z" fill="url(#gold)"/>
+    <path d="M1168 851C1168 926.663 1106.66 988 1031 988H968C865.275 988 782 1071.28 782 1174C782 1276.72 865.275 1360 968 1360H1058C1136.43 1360 1200 1423.57 1200 1502C1200 1580.43 1136.43 1644 1058 1644H987C731.293 1644 524 1436.71 524 1181V1157C524 914.54 720.54 718 963 718H1031C1106.66 718 1168 779.337 1168 855V851Z" fill="#0D0A09" fill-opacity="0.28"/>
+  </g>
+  <g>
+    <circle cx="969" cy="1171" r="96" fill="#090807" fill-opacity="0.88"/>
+    <circle cx="969" cy="1171" r="83" fill="url(#goldDark)"/>
+    <circle cx="969" cy="1171" r="50" fill="#16110E"/>
+    <circle cx="969" cy="1171" r="33" fill="#FFF4E0" fill-opacity="0.88"/>
+  </g>
+  <g opacity="0.65">
+    <path d="M410 1570C630 1424.67 863.333 1419.33 1110 1554" stroke="rgba(255,246,233,0.38)" stroke-width="2" stroke-linecap="round"/>
+    <path d="M520 424C722.667 311.333 946.667 304.667 1192 404" stroke="rgba(255,246,233,0.26)" stroke-width="2" stroke-linecap="round"/>
+  </g>
+  <g opacity="0.84">
+    <rect x="224" y="1608" width="115" height="34" rx="17" fill="rgba(255,255,255,0.04)" stroke="rgba(240,202,144,0.14)"/>
+    <text x="249" y="1630" fill="#FFF6E9" font-family="Arial, sans-serif" font-size="14" letter-spacing="4">MACRO</text>
+    <text x="224" y="1696" fill="#FFF6E9" font-family="Georgia, serif" font-size="58">Stone setting study</text>
+    <text x="224" y="1746" fill="#B8A994" font-family="Arial, sans-serif" font-size="22">Close-up placeholder art shaped to suggest hallmarks, weight, and surface finish.</text>
+  </g>
+</svg>

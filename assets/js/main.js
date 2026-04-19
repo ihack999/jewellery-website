@@ -162,13 +162,18 @@ const money = new Intl.NumberFormat("en-CA", {
 
 function productCardMarkup(product, index = 0) {
   const revealStyle = ["fade-up", "fade-left", "fade-right"][index % 3];
+  const lifestyleImage = product.gallery[2] || product.gallery[1] || product.heroImage;
 
   return `
     <article class="product-card" data-reveal="${revealStyle}">
       <a class="product-card__link" href="product.html?slug=${product.slug}">
         <div class="product-card__media">
           <span class="product-card__eyebrow">${product.category}</span>
-          <img src="${product.heroImage}" alt="${product.name}" loading="lazy">
+          <div class="product-card__image-stack">
+            <img class="product-card__image product-card__image--primary" src="${product.heroImage}" alt="${product.name}" loading="lazy">
+            <img class="product-card__image product-card__image--secondary" src="${lifestyleImage}" alt="${product.name} on the body" loading="lazy">
+            <span class="product-card__media-note">Macro to lifestyle view</span>
+          </div>
         </div>
         <div class="product-card__body">
           <h3>${product.name}</h3>
@@ -491,7 +496,7 @@ function renderProductPage() {
 
   if (cartButton && cartStatus) {
     cartButton.addEventListener("click", () => {
-      cartStatus.textContent = "Cart flow is staged for design review. Product details are ready to connect to checkout later.";
+      cartStatus.textContent = "Direct consultation is handling purchase flow for now. The piece and its specifications are ready for the next step.";
     });
   }
 }
