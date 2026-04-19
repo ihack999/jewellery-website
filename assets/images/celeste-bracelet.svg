@@ -1,0 +1,22 @@
+<svg width="800" height="960" viewBox="0 0 800 960" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="celesteMetal" x1="198" y1="462" x2="602" y2="562" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FDFEFF"/>
+      <stop offset="0.42" stop-color="#D0D6DD"/>
+      <stop offset="1" stop-color="#FBFBFC"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="960" fill="#FAFAFB"/>
+  <rect x="72" y="72" width="656" height="816" rx="36" fill="#FFFFFF"/>
+  <ellipse cx="400" cy="729" rx="170" ry="24" fill="#E4E8EE"/>
+  <path d="M196 485C245 435 292 424 338 453C372 474 405 537 443 537C479 537 504 482 540 460C584 433 627 444 679 485" stroke="url(#celesteMetal)" stroke-width="22" stroke-linecap="round"/>
+  <g fill="#F8FBFD" stroke="#D9E0E7" stroke-width="4">
+    <ellipse cx="228" cy="484" rx="31" ry="24"/>
+    <ellipse cx="288" cy="465" rx="34" ry="25"/>
+    <ellipse cx="348" cy="485" rx="34" ry="25"/>
+    <ellipse cx="454" cy="515" rx="34" ry="25"/>
+    <ellipse cx="514" cy="485" rx="34" ry="25"/>
+    <ellipse cx="574" cy="466" rx="34" ry="25"/>
+    <ellipse cx="632" cy="484" rx="31" ry="24"/>
+  </g>
+</svg>

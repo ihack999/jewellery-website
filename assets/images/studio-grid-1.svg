@@ -1,0 +1,14 @@
+<svg width="720" height="720" viewBox="0 0 720 720" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="studioOneAccent" x1="90" y1="92" x2="575" y2="596" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#165BB8" stop-opacity="0.15"/>
+      <stop offset="1" stop-color="#4EC5E3" stop-opacity="0.06"/>
+    </linearGradient>
+  </defs>
+  <rect width="720" height="720" fill="#F7F8F9"/>
+  <rect x="78" y="82" width="564" height="556" rx="34" fill="#FFFFFF"/>
+  <rect x="115" y="112" width="490" height="492" rx="26" fill="url(#studioOneAccent)"/>
+  <ellipse cx="362" cy="474" rx="154" ry="22" fill="#E1E6EC"/>
+  <circle cx="365" cy="332" r="118" fill="none" stroke="#EEF2F7" stroke-width="34"/>
+  <path d="M364 174L402 111L440 174H364Z" fill="#FBFCFF" stroke="#D9DFE9" stroke-width="5"/>
+</svg>

@@ -1,0 +1,20 @@
+<svg width="800" height="960" viewBox="0 0 800 960" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="wornAccent" x1="167" y1="170" x2="593" y2="781" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#4EC5E3" stop-opacity="0.1"/>
+      <stop offset="1" stop-color="#165BB8" stop-opacity="0.04"/>
+    </linearGradient>
+    <linearGradient id="skinTone" x1="280" y1="372" x2="533" y2="736" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F2E2D8"/>
+      <stop offset="1" stop-color="#DDC0B2"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="960" fill="#F6F7F8"/>
+  <rect x="92" y="92" width="616" height="776" rx="32" fill="#FCFCFC"/>
+  <ellipse cx="404" cy="797" rx="170" ry="22" fill="#E2E7EC"/>
+  <path d="M239 592C258 474 351 391 460 402C564 412 624 478 632 564C639 645 584 734 478 764C335 806 216 735 239 592Z" fill="url(#skinTone)"/>
+  <path d="M319 495C366 453 460 451 529 498" stroke="#EAD2C8" stroke-width="18" stroke-linecap="round"/>
+  <ellipse cx="470" cy="535" rx="66" ry="52" fill="none" stroke="#F8FAFC" stroke-width="18"/>
+  <path d="M463 467L490 420L517 467H463Z" fill="#FBFDFF" stroke="#D8E0E9" stroke-width="5"/>
+  <path d="M181 235C311 118 516 108 619 192C662 228 690 289 661 352C609 464 468 523 332 508C224 495 121 430 138 322C145 282 153 259 181 235Z" fill="url(#wornAccent)"/>
+</svg>

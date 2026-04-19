@@ -1,0 +1,13 @@
+<svg width="128" height="128" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="emblemGradient" x1="18" y1="18" x2="110" y2="110" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#165BB8"/>
+      <stop offset="1" stop-color="#4EC5E3"/>
+    </linearGradient>
+  </defs>
+  <circle cx="64" cy="64" r="58" fill="url(#emblemGradient)"/>
+  <circle cx="64" cy="64" r="57" stroke="rgba(255,255,255,0.38)" stroke-width="2"/>
+  <path d="M36 44H92" stroke="white" stroke-width="1.5" stroke-linecap="round" opacity="0.55"/>
+  <text x="64" y="74" text-anchor="middle" fill="white" font-size="34" font-family="Cormorant Garamond, Georgia, serif" letter-spacing="4">TJC</text>
+  <text x="64" y="94" text-anchor="middle" fill="white" font-size="8" font-family="Manrope, Arial, sans-serif" letter-spacing="2.4" opacity="0.85">TORONTO JEWELS CURATION</text>
+</svg>

@@ -1,0 +1,19 @@
+<svg width="800" height="960" viewBox="0 0 800 960" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="detailAccent" x1="171" y1="180" x2="615" y2="757" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#165BB8" stop-opacity="0.1"/>
+      <stop offset="1" stop-color="#4EC5E3" stop-opacity="0.05"/>
+    </linearGradient>
+    <linearGradient id="detailMetal" x1="270" y1="336" x2="528" y2="596" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFFFF"/>
+      <stop offset="0.5" stop-color="#CCD2D9"/>
+      <stop offset="1" stop-color="#FBFCFD"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="960" fill="#F7F8F9"/>
+  <rect x="94" y="92" width="612" height="776" rx="32" fill="#FCFCFC"/>
+  <circle cx="405" cy="472" r="214" fill="url(#detailAccent)"/>
+  <circle cx="402" cy="485" r="136" fill="none" stroke="url(#detailMetal)" stroke-width="40"/>
+  <path d="M401 270L450 183L499 270H401Z" fill="#FBFDFF" stroke="#D9E1EB" stroke-width="8"/>
+  <path d="M450 183L401 270L450 302L499 270L450 183Z" fill="#EEF4FB" stroke="#DEE6EF" stroke-width="4"/>
+</svg>

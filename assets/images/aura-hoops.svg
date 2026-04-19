@@ -1,0 +1,16 @@
+<svg width="800" height="960" viewBox="0 0 800 960" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="auraGold" x1="207" y1="322" x2="592" y2="676" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FBFCFD"/>
+      <stop offset="0.45" stop-color="#D8C18C"/>
+      <stop offset="1" stop-color="#F8F5ED"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="960" fill="#FAFAFB"/>
+  <rect x="72" y="72" width="656" height="816" rx="36" fill="#FFFFFF"/>
+  <ellipse cx="400" cy="736" rx="170" ry="24" fill="#E4E8EE"/>
+  <circle cx="314" cy="479" r="128" fill="none" stroke="url(#auraGold)" stroke-width="28"/>
+  <circle cx="492" cy="523" r="108" fill="none" stroke="url(#auraGold)" stroke-width="24"/>
+  <path d="M314 351C314 351 334 337 350 340" stroke="#F6F1E6" stroke-width="8" stroke-linecap="round"/>
+  <path d="M492 415C492 415 509 405 524 408" stroke="#F6F1E6" stroke-width="7" stroke-linecap="round"/>
+</svg>

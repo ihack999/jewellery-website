@@ -1,0 +1,25 @@
+<svg width="1200" height="980" viewBox="0 0 1200 980" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="heroAccent" x1="312" y1="122" x2="933" y2="782" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#165BB8" stop-opacity="0.12"/>
+      <stop offset="1" stop-color="#4EC5E3" stop-opacity="0.08"/>
+    </linearGradient>
+    <linearGradient id="heroMetal" x1="456" y1="388" x2="755" y2="689" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FDFDFD"/>
+      <stop offset="0.5" stop-color="#D5D9DF"/>
+      <stop offset="1" stop-color="#F8FAFB"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="980" fill="#F6F7F8"/>
+  <rect x="108" y="106" width="984" height="768" rx="44" fill="#FBFBFB"/>
+  <path d="M184 276C351 132 684 117 938 250C1018 293 1058 388 1010 459C924 587 735 696 523 734C370 761 233 723 177 632C129 553 122 409 184 276Z" fill="url(#heroAccent)"/>
+  <ellipse cx="667" cy="745" rx="256" ry="36" fill="#E5E8ED"/>
+  <path d="M643 345C643 275 699 219 769 219H800C870 219 926 275 926 345V392C926 431 894 463 855 463H714C675 463 643 431 643 392V345Z" fill="url(#heroMetal)"/>
+  <path d="M546 352C546 290 596 240 658 240H715V498H658C596 498 546 448 546 386V352Z" fill="#EEF2F5"/>
+  <path d="M696 234L741 155L787 234H696Z" fill="#F9FBFE" stroke="#D9DDE3" stroke-width="8"/>
+  <path d="M741 155L695 234L741 261L787 234L741 155Z" fill="#F1F6FC" stroke="#D8E5F4" stroke-width="4"/>
+  <path d="M548 304C604 323 657 372 714 454" stroke="#C6CBD2" stroke-width="10" stroke-linecap="round" opacity="0.9"/>
+  <path d="M779 219C779 219 845 226 880 275C915 324 901 390 901 390" stroke="#F7FAFD" stroke-width="12" stroke-linecap="round"/>
+  <rect x="185" y="164" width="122" height="34" rx="17" fill="#FFFFFF" stroke="#D9DDE3"/>
+  <text x="246" y="186" text-anchor="middle" fill="#165BB8" font-size="13" font-family="Manrope, Arial, sans-serif" letter-spacing="2">BESPOKE</text>
+</svg>

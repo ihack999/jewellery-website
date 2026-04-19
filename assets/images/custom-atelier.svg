@@ -1,0 +1,27 @@
+<svg width="980" height="1120" viewBox="0 0 980 1120" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="atelierAccent" x1="175" y1="125" x2="774" y2="944" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#4EC5E3" stop-opacity="0.13"/>
+      <stop offset="1" stop-color="#165BB8" stop-opacity="0.08"/>
+    </linearGradient>
+    <linearGradient id="handTone" x1="310" y1="420" x2="720" y2="816" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F5E7DD"/>
+      <stop offset="1" stop-color="#DEC7BC"/>
+    </linearGradient>
+    <linearGradient id="ringMetal" x1="480" y1="580" x2="620" y2="700" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FAFBFC"/>
+      <stop offset="0.45" stop-color="#CBD0D8"/>
+      <stop offset="1" stop-color="#F8F9FB"/>
+    </linearGradient>
+  </defs>
+  <rect width="980" height="1120" fill="#F4F5F7"/>
+  <rect x="92" y="86" width="796" height="948" rx="36" fill="#FCFCFC"/>
+  <path d="M171 328C237 179 466 105 659 173C852 241 933 442 833 611C717 806 435 888 258 806C102 735 103 483 171 328Z" fill="url(#atelierAccent)"/>
+  <path d="M302 698C351 575 476 499 600 505C706 509 786 578 801 675C817 776 748 851 640 877C495 912 323 843 302 698Z" fill="url(#handTone)"/>
+  <path d="M258 757C274 650 343 571 433 554C510 539 581 577 633 638C682 697 689 776 641 827C594 876 514 897 427 884C320 867 243 827 258 757Z" fill="#E7D5CA"/>
+  <ellipse cx="555" cy="667" rx="74" ry="62" fill="none" stroke="url(#ringMetal)" stroke-width="22"/>
+  <path d="M548 576L577 524L608 576H548Z" fill="#FCFEFF" stroke="#D8E0EA" stroke-width="5"/>
+  <path d="M577 524L548 576L577 593L608 576L577 524Z" fill="#F0F5FB" stroke="#E1E8F0" stroke-width="3"/>
+  <rect x="187" y="169" width="158" height="40" rx="20" fill="#FFFFFF" stroke="#D9DDE3"/>
+  <text x="266" y="195" text-anchor="middle" fill="#165BB8" font-size="14" font-family="Manrope, Arial, sans-serif" letter-spacing="2">PRIVATE CONSULTATION</text>
+</svg>

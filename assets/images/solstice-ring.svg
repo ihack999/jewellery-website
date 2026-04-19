@@ -1,0 +1,16 @@
+<svg width="800" height="960" viewBox="0 0 800 960" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="solsticeMetal" x1="285" y1="301" x2="544" y2="570" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFFFF"/>
+      <stop offset="0.5" stop-color="#D0D5DC"/>
+      <stop offset="1" stop-color="#FBFCFD"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="960" fill="#FAFAFB"/>
+  <rect x="72" y="72" width="656" height="816" rx="36" fill="#FFFFFF"/>
+  <ellipse cx="400" cy="736" rx="168" ry="24" fill="#E4E8EE"/>
+  <circle cx="400" cy="508" r="145" fill="none" stroke="url(#solsticeMetal)" stroke-width="42"/>
+  <path d="M398 243L443 163L489 243H398Z" fill="#FBFDFF" stroke="#DAE1EA" stroke-width="8"/>
+  <path d="M443 163L398 243L443 271L489 243L443 163Z" fill="#EEF4FB" stroke="#DAE1EA" stroke-width="4"/>
+  <path d="M289 420C327 377 361 358 400 358C446 358 479 382 518 432" stroke="#E7EBF0" stroke-width="11" stroke-linecap="round"/>
+</svg>

@@ -1,0 +1,15 @@
+<svg width="720" height="720" viewBox="0 0 720 720" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="studioTwoAccent" x1="176" y1="133" x2="536" y2="628" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#4EC5E3" stop-opacity="0.11"/>
+      <stop offset="1" stop-color="#165BB8" stop-opacity="0.08"/>
+    </linearGradient>
+  </defs>
+  <rect width="720" height="720" fill="#F4F5F7"/>
+  <rect x="88" y="96" width="544" height="528" rx="32" fill="#FCFCFC"/>
+  <rect x="127" y="144" width="466" height="432" rx="20" fill="#F8FAFC"/>
+  <rect x="207" y="207" width="308" height="252" rx="26" fill="url(#studioTwoAccent)"/>
+  <circle cx="360" cy="334" r="86" fill="none" stroke="#CBD1D9" stroke-width="24"/>
+  <path d="M315 280H405" stroke="#F8FBFD" stroke-width="12" stroke-linecap="round"/>
+  <path d="M185 522H535" stroke="#D7DCE3" stroke-width="6" stroke-linecap="round"/>
+</svg>

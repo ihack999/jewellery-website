@@ -1,0 +1,16 @@
+<svg width="800" height="960" viewBox="0 0 800 960" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="signetMetal" x1="260" y1="282" x2="556" y2="610" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFFFF"/>
+      <stop offset="0.48" stop-color="#D0D4DC"/>
+      <stop offset="1" stop-color="#FBFCFE"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="960" fill="#FAFAFB"/>
+  <rect x="72" y="72" width="656" height="816" rx="36" fill="#FFFFFF"/>
+  <ellipse cx="400" cy="742" rx="176" ry="24" fill="#E4E8EE"/>
+  <path d="M279 457C279 390 333 336 400 336C467 336 521 390 521 457V516C521 583 467 637 400 637C333 637 279 583 279 516V457Z" fill="url(#signetMetal)"/>
+  <rect x="308" y="233" width="184" height="128" rx="28" fill="#F8FAFC" stroke="#D9E0E8" stroke-width="8"/>
+  <path d="M308 360C308 360 338 411 400 411C462 411 492 360 492 360" stroke="#E1E7EE" stroke-width="10" stroke-linecap="round"/>
+  <path d="M332 282H468" stroke="#D8E0E8" stroke-width="4" stroke-linecap="round"/>
+</svg>

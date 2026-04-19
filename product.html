@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="View jewellery details, materials, and care information for Toronto Jewels Curation pieces.">
+    <title>Product | Toronto Jewels Curation</title>
+    <link rel="icon" type="image/svg+xml" href="assets/images/logo-emblem.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/styles.css">
+    <script src="assets/js/main.js" defer></script>
+  </head>
+  <body data-page="shop">
+    <div class="page-shell">
+      <div class="announcement-bar">
+        <div class="announcement-bar__inner">
+          <span>Custom jewellery consultations now open</span>
+          <span>Toronto based</span>
+        </div>
+      </div>
+
+      <header class="site-header">
+        <div class="site-header__inner">
+          <a class="brand" href="index.html" aria-label="Toronto Jewels Curation home">
+            <img src="assets/images/logo-wordmark.svg" alt="Toronto Jewels Curation">
+          </a>
+          <nav class="primary-nav" aria-label="Primary navigation">
+            <ul class="primary-nav__list">
+              <li><a href="index.html" data-page="home">Home</a></li>
+              <li><a href="shop.html" data-page="shop">Shop</a></li>
+              <li><a href="curated-luxuries.html" data-page="luxuries">Luxuries</a></li>
+              <li><a href="customs.html" data-page="customs">Customs</a></li>
+              <li><a href="about.html" data-page="about">About</a></li>
+              <li><a href="contact.html" data-page="contact">Contact</a></li>
+            </ul>
+          </nav>
+          <div class="header-actions">
+            <button class="icon-button" type="button" aria-label="Search catalogue">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="1.6"/>
+                <path d="M16 16L21 21" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+              </svg>
+            </button>
+            <button class="icon-button" type="button" aria-label="View cart">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M4 7H20L18.2 18H5.8L4 7Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+                <path d="M9 7V5.8C9 4.25 10.34 3 12 3C13.66 3 15 4.25 15 5.8V7" stroke="currentColor" stroke-width="1.6"/>
+              </svg>
+            </button>
+            <button class="menu-toggle" type="button" aria-label="Toggle menu" aria-expanded="false" data-menu-toggle>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M4 8H20" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                <path d="M4 16H20" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <main>
+        <section class="section section--surface" data-product-page>
+          <div class="container">
+            <div class="breadcrumbs" data-reveal>
+              <a href="index.html">Home</a>
+              <span>/</span>
+              <a href="shop.html">Shop</a>
+              <span>/</span>
+              <span data-product-name>Product</span>
+            </div>
+
+            <div class="product-layout">
+              <div data-reveal>
+                <div class="gallery-main">
+                  <img src="assets/images/solstice-ring.svg" alt="Product image" data-product-main-image>
+                </div>
+                <div class="thumbnail-grid" data-product-thumbnails></div>
+              </div>
+
+              <div class="product-info" data-reveal>
+                <span class="eyebrow" data-product-category>Rings</span>
+                <div class="accent-rule"></div>
+                <h1 data-product-name>Solstice Ring</h1>
+                <div class="product-price" data-product-price>$850</div>
+                <p class="product-meta" data-product-materials>14k gold with diamond</p>
+                <p data-product-description>
+                  A clean diamond ring designed to feel luminous, balanced, and easy to wear.
+                </p>
+
+                <div class="form-grid" style="margin-top: 2rem;">
+                  <div class="form-field">
+                    <label for="size">Size</label>
+                    <select id="size" name="size">
+                      <option>5</option>
+                      <option>6</option>
+                      <option>7</option>
+                      <option>8</option>
+                      <option>9</option>
+                    </select>
+                  </div>
+                  <div class="form-field">
+                    <label for="quantity">Quantity</label>
+                    <select id="quantity" name="quantity">
+                      <option>1</option>
+                      <option>2</option>
+                      <option>3</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="product-action-group">
+                  <button class="button" type="button" data-cart-button>Add to Cart</button>
+                  <a class="button-secondary" href="customs.html">Ask About Customizing</a>
+                </div>
+
+                <p class="status-note" data-cart-status></p>
+
+                <ul class="product-notes">
+                  <li><strong>Shipping</strong><span data-product-shipping>Tracked delivery with gift-ready packaging.</span></li>
+                  <li><strong>Packaging</strong><span>Presented in a structured keepsake box.</span></li>
+                  <li><strong>Care</strong><span data-product-care>Store in a soft pouch and clean gently.</span></li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="section section--surface">
+          <div class="container details-stack">
+            <article class="info-panel" data-reveal>
+              <h3>Description</h3>
+              <p>
+                Each piece in the collection is chosen for proportion, wearability, and a polished finish.
+                The styling stays intentional and clean so the design itself remains the focus.
+              </p>
+            </article>
+
+            <article class="info-panel" data-reveal>
+              <h3>Materials and Details</h3>
+              <ul class="stacked-detail" data-product-specs></ul>
+            </article>
+
+            <article class="info-panel" data-reveal>
+              <h3>Care and Shipping</h3>
+              <p>
+                Each order is packed in a gift-ready keepsake box and shipped with tracking.
+                Care instructions are included so the finish stays bright over time.
+              </p>
+            </article>
+          </div>
+        </section>
+
+        <section class="section section--soft">
+          <div class="container">
+            <div class="section-heading" data-reveal>
+              <span class="eyebrow">Related pieces</span>
+              <div class="accent-rule"></div>
+              <h2>You may also like</h2>
+            </div>
+            <div class="product-grid" data-related-products></div>
+          </div>
+        </section>
+      </main>
+
+      <footer class="footer">
+        <div class="container">
+          <div class="footer-grid">
+            <div class="footer-brand">
+              <img src="assets/images/logo-wordmark.svg" alt="Toronto Jewels Curation">
+              <p>Curated jewellery and bespoke pieces with a polished, editorial point of view.</p>
+            </div>
+            <div class="footer-column">
+              <h3>Shop</h3>
+              <ul>
+                <li><a href="shop.html">All Pieces</a></li>
+                <li><a href="curated-luxuries.html">Curated Luxuries</a></li>
+                <li><a href="shop.html">Rings</a></li>
+                <li><a href="shop.html">Necklaces</a></li>
+                <li><a href="shop.html">Bracelets</a></li>
+              </ul>
+            </div>
+            <div class="footer-column">
+              <h3>Customs</h3>
+              <ul>
+                <li><a href="customs.html">Start a Request</a></li>
+                <li><a href="customs.html#process">Process</a></li>
+                <li><a href="customs.html#faq">FAQ</a></li>
+              </ul>
+            </div>
+            <div class="footer-column">
+              <h3>Contact</h3>
+              <ul>
+                <li><a href="mailto:info@torontojewelscuration.com">info@torontojewelscuration.com</a></li>
+                <li><a href="https://instagram.com" target="_blank" rel="noreferrer">Instagram</a></li>
+                <li><a href="contact.html">Toronto, Ontario</a></li>
+              </ul>
+            </div>
+          </div>
+          <div class="footer-bottom">
+            <span>Copyright <span data-year></span> Toronto Jewels Curation</span>
+            <span>Privacy Policy</span>
+          </div>
+        </div>
+      </footer>
+    </div>
+  </body>
+</html>
