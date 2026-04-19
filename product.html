@@ -60,9 +60,9 @@
       </header>
 
       <main>
-        <section class="section section--surface" data-product-page>
+        <section class="section section--surface product-stage" data-product-page>
           <div class="container">
-            <div class="breadcrumbs" data-reveal>
+            <div class="breadcrumbs" data-reveal="fade-up">
               <a href="index.html">Home</a>
               <span>/</span>
               <a href="shop.html">Shop</a>
@@ -70,23 +70,56 @@
               <span data-product-name>Product</span>
             </div>
 
-            <div class="product-layout">
-              <div data-reveal>
-                <div class="gallery-main">
+            <div class="product-showcase">
+              <div class="product-visual-column" data-reveal="zoom">
+                <article class="gallery-main product-visual-frame product-visual-frame--hero">
                   <img src="assets/images/solstice-ring.svg" alt="Product image" data-product-main-image>
+                  <div class="product-visual-caption">
+                    <span class="product-visual-tag" data-product-category-badge>Rings</span>
+                    <p data-product-short-description>A luminous ring designed to feel balanced, crisp, and quietly striking.</p>
+                  </div>
+                </article>
+
+                <div class="product-support-grid" data-stagger>
+                  <article class="product-visual-frame product-visual-frame--secondary" data-reveal="fade-up">
+                    <img src="assets/images/detail-closeup.svg" alt="Product detail view" data-product-support-image-one>
+                    <div class="product-support-copy">
+                      <span class="tiny-note">Close study</span>
+                      <p data-product-support-copy-one>Surface, proportion, and finish are doing most of the visual work.</p>
+                    </div>
+                  </article>
+                  <article class="product-visual-frame product-visual-frame--secondary" data-reveal="fade-up">
+                    <img src="assets/images/worn-detail.svg" alt="Product worn detail" data-product-support-image-two>
+                    <div class="product-support-copy">
+                      <span class="tiny-note">On the body</span>
+                      <p data-product-support-copy-two>The silhouette is designed to feel composed in movement, not only in still photography.</p>
+                    </div>
+                  </article>
                 </div>
-                <div class="thumbnail-grid" data-product-thumbnails></div>
+
+                <div class="thumbnail-grid product-thumbnail-grid" data-product-thumbnails></div>
               </div>
 
-              <div class="product-info" data-reveal>
+              <div class="product-info product-panel" data-reveal="fade-left">
                 <span class="eyebrow" data-product-category>Rings</span>
                 <div class="accent-rule"></div>
                 <h1 data-product-name>Solstice Ring</h1>
-                <div class="product-price" data-product-price>$850</div>
+                <div class="product-price-row">
+                  <div class="product-price" data-product-price>$850</div>
+                  <span class="product-meta product-meta--pill">Private collection piece</span>
+                </div>
                 <p class="product-meta" data-product-materials>14k gold with diamond</p>
                 <p data-product-description>
                   A clean diamond ring designed to feel luminous, balanced, and easy to wear.
                 </p>
+                <div class="product-atelier-note">
+                  <span class="tiny-note">Atelier adaptation</span>
+                  <p>Prefer a different metal, stone scale, or finish? This silhouette can move into a private custom conversation without losing its core character.</p>
+                </div>
+                <div class="product-consult-strip">
+                  <span class="product-consult-strip__label">Consultation ready</span>
+                  <p>Available to personalize through a private discussion on stone scale, finish, and timing.</p>
+                </div>
 
                 <div class="form-grid" style="margin-top: 2rem;">
                   <div class="form-field">
@@ -126,6 +159,36 @@
           </div>
         </section>
 
+        <section class="section section--surface product-editorial-band">
+          <div class="container product-editorial-grid">
+            <div class="product-editorial-copy" data-reveal="fade-up">
+              <span class="eyebrow">Editorial detail</span>
+              <div class="accent-rule"></div>
+              <h2 data-product-editorial-heading>Designed to feel resolved from every angle</h2>
+              <p data-product-editorial-copy>
+                The object should feel considered in stillness and in motion, with enough restraint to stay elegant over time.
+              </p>
+            </div>
+
+            <div class="product-editorial-stack" data-stagger>
+              <article class="product-editorial-card" data-reveal="fade-left">
+                <img src="assets/images/packaging-scale.svg" alt="Presentation and packaging view" data-product-editorial-image-one>
+                <div class="product-editorial-card__body">
+                  <span class="tiny-note">Presentation</span>
+                  <p data-product-editorial-caption-one>Packaging and presentation should feel as exacting as the object itself.</p>
+                </div>
+              </article>
+              <article class="product-editorial-card" data-reveal="fade-right">
+                <img src="assets/images/detail-closeup.svg" alt="Craft and material detail" data-product-editorial-image-two>
+                <div class="product-editorial-card__body">
+                  <span class="tiny-note">Finish</span>
+                  <p data-product-editorial-caption-two>The finish is kept precise so the piece reads luxurious without needing excess ornament.</p>
+                </div>
+              </article>
+            </div>
+          </div>
+        </section>
+
         <section class="section section--surface">
           <div class="container details-stack">
             <article class="info-panel" data-reveal>
@@ -158,7 +221,7 @@
               <div class="accent-rule"></div>
               <h2>You may also like</h2>
             </div>
-            <div class="product-grid" data-related-products></div>
+            <div class="product-grid" data-related-products data-stagger></div>
           </div>
         </section>
       </main>

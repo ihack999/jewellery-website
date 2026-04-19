@@ -160,17 +160,24 @@ const money = new Intl.NumberFormat("en-CA", {
   maximumFractionDigits: 0
 });
 
-function productCardMarkup(product) {
+function productCardMarkup(product, index = 0) {
+  const revealStyle = ["fade-up", "fade-left", "fade-right"][index % 3];
+
   return `
-    <article class="product-card" data-reveal>
+    <article class="product-card" data-reveal="${revealStyle}">
       <a class="product-card__link" href="product.html?slug=${product.slug}">
         <div class="product-card__media">
+          <span class="product-card__eyebrow">${product.category}</span>
           <img src="${product.heroImage}" alt="${product.name}" loading="lazy">
         </div>
         <div class="product-card__body">
           <h3>${product.name}</h3>
           <p class="product-card__materials">${product.materials}</p>
-          <span class="product-card__price">${money.format(product.price)}</span>
+          <p class="product-card__description">${product.shortDescription}</p>
+          <div class="product-card__footer">
+            <span class="product-card__price">${money.format(product.price)}</span>
+            <span class="product-card__view">Discover</span>
+          </div>
         </div>
       </a>
     </article>
@@ -182,7 +189,8 @@ function renderProductCollection(container, items) {
     return;
   }
 
-  container.innerHTML = items.map(productCardMarkup).join("");
+  container.innerHTML = items.map((product, index) => productCardMarkup(product, index)).join("");
+  setupRevealStaggers(container);
 }
 
 function setupHeader() {
@@ -190,6 +198,35 @@ function setupHeader() {
   const menuButton = document.querySelector("[data-menu-toggle]");
   const navLinks = document.querySelectorAll(".primary-nav a");
   const header = document.querySelector(".site-header");
+  const primaryNav = document.querySelector(".primary-nav");
+  const navList = document.querySelector(".primary-nav__list");
+  let lastScrollY = window.scrollY;
+
+  let indicator = null;
+
+  if (navList && navLinks.length) {
+    indicator = document.createElement("span");
+    indicator.className = "primary-nav__indicator";
+    indicator.setAttribute("aria-hidden", "true");
+    navList.appendChild(indicator);
+  }
+
+  const moveIndicator = (target) => {
+    if (!indicator || !navList || !target) {
+      return;
+    }
+
+    const listRect = navList.getBoundingClientRect();
+    const targetRect = target.getBoundingClientRect();
+    const x = targetRect.left - listRect.left;
+
+    indicator.style.width = `${targetRect.width}px`;
+    indicator.style.height = `${targetRect.height}px`;
+    indicator.style.transform = `translate(${x}px, -50%)`;
+    indicator.style.opacity = "1";
+  };
+
+  const getActiveLink = () => navList?.querySelector("a.is-active") || navLinks[0];
 
   if (menuButton) {
     menuButton.addEventListener("click", () => {
@@ -199,10 +236,33 @@ function setupHeader() {
     });
   }
 
+  if (primaryNav && !primaryNav.querySelector(".primary-nav__overlay-copy")) {
+    const overlay = document.createElement("div");
+    overlay.className = "primary-nav__overlay-copy";
+    overlay.innerHTML = `
+      <p class="primary-nav__eyebrow">Private menu</p>
+      <h2>Move through the collection like a private presentation.</h2>
+      <p>Curated pieces, custom conversations, and premium sourcing presented with more atmosphere than a standard mobile menu.</p>
+      <div class="primary-nav__contact-row">
+        <a href="mailto:info@torontojewelscuration.com">info@torontojewelscuration.com</a>
+        <span>Toronto, Ontario</span>
+      </div>
+    `;
+    primaryNav.appendChild(overlay);
+  }
+
   navLinks.forEach((link) => {
     if (link.dataset.page === body.dataset.page) {
       link.classList.add("is-active");
     }
+
+    link.addEventListener("mouseenter", () => {
+      moveIndicator(link);
+    });
+
+    link.addEventListener("focus", () => {
+      moveIndicator(link);
+    });
 
     link.addEventListener("click", () => {
       body.classList.remove("nav-open");
@@ -212,16 +272,45 @@ function setupHeader() {
     });
   });
 
+  if (navList && indicator) {
+    navList.addEventListener("mouseleave", () => {
+      moveIndicator(getActiveLink());
+    });
+
+    window.addEventListener("resize", () => {
+      moveIndicator(getActiveLink());
+    });
+  }
+
   const onScroll = () => {
     if (!header) {
       return;
     }
 
     header.classList.toggle("is-scrolled", window.scrollY > 8);
+    header.classList.toggle("is-condensed", window.scrollY > 120);
+
+    if (window.scrollY > lastScrollY + 12 && window.scrollY > 180) {
+      header.classList.add("is-hidden");
+    } else if (window.scrollY < lastScrollY - 12 || window.scrollY <= 180) {
+      header.classList.remove("is-hidden");
+    }
+
+    lastScrollY = window.scrollY;
   };
 
   onScroll();
   window.addEventListener("scroll", onScroll, { passive: true });
+  moveIndicator(getActiveLink());
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && body.classList.contains("nav-open")) {
+      body.classList.remove("nav-open");
+      if (menuButton) {
+        menuButton.setAttribute("aria-expanded", "false");
+      }
+    }
+  });
 }
 
 function renderFeaturedProducts() {
@@ -273,11 +362,63 @@ function renderProductPage() {
 
   page.querySelector("[data-product-name]").textContent = product.name;
   page.querySelector("[data-product-category]").textContent = product.category.charAt(0).toUpperCase() + product.category.slice(1);
+  const categoryLabel = product.category.charAt(0).toUpperCase() + product.category.slice(1);
+  const editorialHeading = `A ${categoryLabel.toLowerCase()} shaped to feel composed in every view`;
+  const editorialCopy = `${product.name} is built around ${product.materials.toLowerCase()} and a controlled silhouette, so it reads like a finished object rather than a trend piece.`;
+  const supportCopyOne = `${product.name} holds attention through material contrast, edge control, and deliberate proportion.`;
+  const supportCopyTwo = `The piece is intended to sit with ease on the body while still carrying a clear point of view.`;
+  const editorialCaptionOne = `${product.shipping}`;
+  const editorialCaptionTwo = `${product.care}`;
+
   page.querySelector("[data-product-price]").textContent = money.format(product.price);
   page.querySelector("[data-product-materials]").textContent = product.materials;
   page.querySelector("[data-product-description]").textContent = product.description;
   page.querySelector("[data-product-shipping]").textContent = product.shipping;
   page.querySelector("[data-product-care]").textContent = product.care;
+  const categoryBadge = page.querySelector("[data-product-category-badge]");
+  const shortDescription = page.querySelector("[data-product-short-description]");
+  const supportImageOne = page.querySelector("[data-product-support-image-one]");
+  const supportImageTwo = page.querySelector("[data-product-support-image-two]");
+  const supportCopyNodeOne = page.querySelector("[data-product-support-copy-one]");
+  const supportCopyNodeTwo = page.querySelector("[data-product-support-copy-two]");
+  const editorialHeadingNode = page.querySelector("[data-product-editorial-heading]");
+  const editorialCopyNode = page.querySelector("[data-product-editorial-copy]");
+  const editorialImageOne = page.querySelector("[data-product-editorial-image-one]");
+  const editorialImageTwo = page.querySelector("[data-product-editorial-image-two]");
+  const editorialCaptionNodeOne = page.querySelector("[data-product-editorial-caption-one]");
+  const editorialCaptionNodeTwo = page.querySelector("[data-product-editorial-caption-two]");
+
+  if (categoryBadge) {
+    categoryBadge.textContent = categoryLabel;
+  }
+
+  if (shortDescription) {
+    shortDescription.textContent = product.shortDescription;
+  }
+
+  if (supportCopyNodeOne) {
+    supportCopyNodeOne.textContent = supportCopyOne;
+  }
+
+  if (supportCopyNodeTwo) {
+    supportCopyNodeTwo.textContent = supportCopyTwo;
+  }
+
+  if (editorialHeadingNode) {
+    editorialHeadingNode.textContent = editorialHeading;
+  }
+
+  if (editorialCopyNode) {
+    editorialCopyNode.textContent = editorialCopy;
+  }
+
+  if (editorialCaptionNodeOne) {
+    editorialCaptionNodeOne.textContent = editorialCaptionOne;
+  }
+
+  if (editorialCaptionNodeTwo) {
+    editorialCaptionNodeTwo.textContent = editorialCaptionTwo;
+  }
 
   const mainImage = page.querySelector("[data-product-main-image]");
   const thumbnailGrid = page.querySelector("[data-product-thumbnails]");
@@ -290,6 +431,26 @@ function renderProductPage() {
   };
 
   updateMainImage(product.gallery[0]);
+
+  if (supportImageOne) {
+    supportImageOne.src = product.gallery[1] || product.gallery[0];
+    supportImageOne.alt = `${product.name} detail view`;
+  }
+
+  if (supportImageTwo) {
+    supportImageTwo.src = product.gallery[2] || product.gallery[0];
+    supportImageTwo.alt = `${product.name} worn view`;
+  }
+
+  if (editorialImageOne) {
+    editorialImageOne.src = product.gallery[3] || product.gallery[1] || product.gallery[0];
+    editorialImageOne.alt = `${product.name} presentation view`;
+  }
+
+  if (editorialImageTwo) {
+    editorialImageTwo.src = product.gallery[1] || product.gallery[0];
+    editorialImageTwo.alt = `${product.name} finish detail`;
+  }
 
   thumbnailGrid.innerHTML = product.gallery
     .map(
@@ -391,14 +552,21 @@ function setupAppointmentModal() {
 
   const form = modal.querySelector("[data-appointment-form]");
   const triggers = document.querySelectorAll("[data-appointment-trigger]");
+  let lastFocusedTrigger = null;
 
   const closeModal = () => {
     modal.classList.remove("is-open");
     modal.setAttribute("aria-hidden", "true");
     document.body.classList.remove("modal-open");
+
+    if (lastFocusedTrigger instanceof HTMLElement) {
+      lastFocusedTrigger.focus();
+    }
   };
 
-  const openModal = (selectedItem) => {
+  const openModal = (selectedItem, trigger) => {
+    lastFocusedTrigger = trigger || document.activeElement;
+
     if (form) {
       form.dataset.selectedItem = selectedItem;
       syncSelectedPiece(form);
@@ -411,11 +579,18 @@ function setupAppointmentModal() {
     modal.classList.add("is-open");
     modal.setAttribute("aria-hidden", "false");
     document.body.classList.add("modal-open");
+
+    const firstFocusable = modal.querySelector("input, select, textarea, button");
+    if (firstFocusable instanceof HTMLElement) {
+      window.requestAnimationFrame(() => {
+        firstFocusable.focus();
+      });
+    }
   };
 
   triggers.forEach((trigger) => {
     trigger.addEventListener("click", () => {
-      openModal(trigger.dataset.appointmentTrigger || "Selected piece");
+      openModal(trigger.dataset.appointmentTrigger || "Selected piece", trigger);
     });
   });
 
@@ -491,6 +666,258 @@ function setYear() {
   });
 }
 
+function applyStagger(group) {
+  if (!group) {
+    return;
+  }
+
+  const items = Array.from(group.children).filter((child) => child.matches("[data-reveal]"));
+
+  items.forEach((item, index) => {
+    item.style.setProperty("--reveal-delay", `${Math.min(index * 110, 550)}ms`);
+  });
+}
+
+function setupRevealStaggers(scope = document) {
+  const groups = [];
+
+  if (scope instanceof Element && scope.hasAttribute("data-stagger")) {
+    groups.push(scope);
+  }
+
+  if ("querySelectorAll" in scope) {
+    groups.push(...scope.querySelectorAll("[data-stagger]"));
+  }
+
+  groups.forEach(applyStagger);
+}
+
+function setupAmbientMotion() {
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    return;
+  }
+
+  const layers = Array.from(document.querySelectorAll("[data-parallax]"));
+
+  if (!layers.length) {
+    return;
+  }
+
+  let frameId = null;
+
+  const update = () => {
+    const viewportHeight = window.innerHeight;
+    const documentHeight = Math.max(document.documentElement.scrollHeight - viewportHeight, 1);
+    const progress = Math.min(window.scrollY / documentHeight, 1);
+
+    document.documentElement.style.setProperty("--scroll-progress", progress.toFixed(3));
+
+    layers.forEach((layer) => {
+      const speed = Number(layer.dataset.parallax || "0.08");
+      const rect = layer.getBoundingClientRect();
+      const distanceFromCenter = rect.top + rect.height / 2 - viewportHeight / 2;
+      const offset = distanceFromCenter * -speed;
+
+      layer.style.setProperty("--parallax-offset", `${offset.toFixed(2)}px`);
+    });
+
+    frameId = null;
+  };
+
+  const requestUpdate = () => {
+    if (frameId !== null) {
+      return;
+    }
+
+    frameId = window.requestAnimationFrame(update);
+  };
+
+  update();
+  window.addEventListener("scroll", requestUpdate, { passive: true });
+  window.addEventListener("resize", requestUpdate);
+}
+
+function setupStorySequence() {
+  document.querySelectorAll("[data-story-sequence]").forEach((sequence) => {
+    const steps = Array.from(sequence.querySelectorAll("[data-story-step]"));
+    const panels = Array.from(sequence.querySelectorAll("[data-story-panel]"));
+    const progressBar = sequence.querySelector("[data-story-progress]");
+
+    if (!steps.length || !panels.length) {
+      return;
+    }
+
+    const activate = (stepId) => {
+      const stepIndex = steps.findIndex((step) => step.dataset.storyStep === stepId);
+      const safeIndex = stepIndex === -1 ? 0 : stepIndex;
+
+      steps.forEach((step, index) => {
+        step.classList.toggle("is-active", index === safeIndex);
+      });
+
+      panels.forEach((panel) => {
+        panel.classList.toggle("is-active", panel.dataset.storyPanel === stepId);
+      });
+
+      if (progressBar) {
+        progressBar.style.height = `${((safeIndex + 1) / steps.length) * 100}%`;
+      }
+    };
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visibleEntry = entries
+          .filter((entry) => entry.isIntersecting)
+          .sort((left, right) => right.intersectionRatio - left.intersectionRatio)[0];
+
+        if (!visibleEntry) {
+          return;
+        }
+
+        activate(visibleEntry.target.dataset.storyStep || steps[0].dataset.storyStep);
+      },
+      {
+        threshold: [0.35, 0.55, 0.75],
+        rootMargin: "-18% 0px -18% 0px"
+      }
+    );
+
+    steps.forEach((step) => observer.observe(step));
+    activate(steps[0].dataset.storyStep);
+  });
+}
+
+function setupHoverLighting() {
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    return;
+  }
+
+  const targets = document.querySelectorAll(
+    ".product-card, .luxury-card, .studio-card, .info-panel, .process-card, .hero-stat, .hero-frame, .page-banner, .editorial-panel, .image-panel, .gallery-main, .story-card, .button, .button-secondary"
+  );
+
+  targets.forEach((target) => {
+    const updatePointer = (event) => {
+      const rect = target.getBoundingClientRect();
+      const x = ((event.clientX - rect.left) / rect.width) * 100;
+      const y = ((event.clientY - rect.top) / rect.height) * 100;
+
+      target.style.setProperty("--pointer-x", `${x.toFixed(2)}%`);
+      target.style.setProperty("--pointer-y", `${y.toFixed(2)}%`);
+    };
+
+    target.addEventListener("pointerenter", (event) => {
+      target.classList.add("is-lit");
+      updatePointer(event);
+    });
+
+    target.addEventListener("pointermove", updatePointer);
+
+    target.addEventListener("pointerleave", () => {
+      target.classList.remove("is-lit");
+    });
+  });
+}
+
+function setupCustomCursor() {
+  const supportsCursor = window.matchMedia("(hover: hover) and (pointer: fine) and (min-width: 1100px)").matches;
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  if (!supportsCursor || reduceMotion) {
+    return;
+  }
+
+  const body = document.body;
+  const cursor = document.createElement("div");
+  cursor.className = "custom-cursor";
+  cursor.setAttribute("aria-hidden", "true");
+  cursor.innerHTML = `
+    <span class="custom-cursor__ring"></span>
+    <span class="custom-cursor__core"></span>
+  `;
+  document.body.appendChild(cursor);
+  body.classList.add("has-custom-cursor");
+
+  let rafId = null;
+  let pointerX = window.innerWidth / 2;
+  let pointerY = window.innerHeight / 2;
+
+  const update = () => {
+    cursor.style.setProperty("--cursor-x", `${pointerX}px`);
+    cursor.style.setProperty("--cursor-y", `${pointerY}px`);
+    rafId = null;
+  };
+
+  const requestUpdate = () => {
+    if (rafId !== null) {
+      return;
+    }
+
+    rafId = window.requestAnimationFrame(update);
+  };
+
+  document.addEventListener("pointermove", (event) => {
+    pointerX = event.clientX;
+    pointerY = event.clientY;
+    cursor.classList.add("is-visible");
+    requestUpdate();
+  });
+
+  document.addEventListener("pointerdown", () => {
+    cursor.classList.add("is-pressed");
+  });
+
+  document.addEventListener("pointerup", () => {
+    cursor.classList.remove("is-pressed");
+  });
+
+  document.addEventListener("mouseleave", () => {
+    cursor.classList.remove("is-visible");
+  });
+
+  const hoverTargets = document.querySelectorAll("a, button, input, select, textarea, .product-card, .luxury-card, .story-card");
+  hoverTargets.forEach((target) => {
+    target.addEventListener("pointerenter", () => {
+      cursor.classList.add("is-hovering");
+    });
+
+    target.addEventListener("pointerleave", () => {
+      cursor.classList.remove("is-hovering");
+    });
+  });
+}
+
+function setupMagneticElements() {
+  const supportsMagnetic = window.matchMedia("(hover: hover) and (pointer: fine) and (min-width: 1100px)").matches;
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  if (!supportsMagnetic || reduceMotion) {
+    return;
+  }
+
+  const targets = document.querySelectorAll(".button, .button-secondary, .icon-button, .menu-toggle, .primary-nav a");
+
+  targets.forEach((target) => {
+    target.classList.add("is-magnetic");
+
+    const reset = () => {
+      target.style.transform = "";
+    };
+
+    target.addEventListener("pointermove", (event) => {
+      const rect = target.getBoundingClientRect();
+      const offsetX = event.clientX - rect.left - rect.width / 2;
+      const offsetY = event.clientY - rect.top - rect.height / 2;
+      const strength = target.matches(".primary-nav a") ? 0.14 : 0.18;
+
+      target.style.transform = `translate(${(offsetX * strength).toFixed(2)}px, ${(offsetY * strength).toFixed(2)}px)`;
+    });
+
+    target.addEventListener("pointerleave", reset);
+    target.addEventListener("blur", reset);
+  });
+}
+
 let observer;
 
 function revealVisible() {
@@ -533,6 +960,12 @@ document.addEventListener("DOMContentLoaded", () => {
   setupFilePickers();
   setupAppointmentModal();
   setupCustomForm();
+  setupStorySequence();
+  setupHoverLighting();
+  setupCustomCursor();
+  setupMagneticElements();
   setYear();
+  setupRevealStaggers();
+  setupAmbientMotion();
   revealVisible();
 });

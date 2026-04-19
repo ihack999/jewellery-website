@@ -62,12 +62,20 @@
       <main>
         <section class="section section--surface">
           <div class="container page-hero">
-            <div class="page-hero__copy" data-reveal>
+            <div class="page-hero__copy" data-reveal="fade-up">
               <span class="eyebrow">Shop</span>
               <div class="accent-rule"></div>
-              <h1>Shop the Collection</h1>
+              <h1>Collected pieces with a quieter kind of impact</h1>
+              <p class="page-hero__meta">
+                Explore the collection in a cleaner, more editorial cadence designed to feel premium
+                even before final photography is introduced.
+              </p>
+              <div class="button-row">
+                <a class="button" href="#collection-grid">Explore the edit</a>
+                <a class="button-secondary" href="curated-luxuries.html">View curated luxuries</a>
+              </div>
             </div>
-            <div class="page-banner" data-reveal>
+            <div class="page-banner hero-frame" data-reveal="zoom">
               <img src="assets/images/hero-editorial.svg" alt="Shop banner featuring jewellery composition">
             </div>
           </div>
@@ -75,19 +83,22 @@
 
         <section class="section section--surface section--tight">
           <div class="container">
-            <div class="filter-bar" aria-label="Shop filters" data-reveal>
+            <div class="filter-bar" aria-label="Shop filters" data-reveal="fade-up">
               <button class="filter-chip is-active" type="button" data-filter="all">All</button>
               <button class="filter-chip" type="button" data-filter="rings">Rings</button>
               <button class="filter-chip" type="button" data-filter="necklaces">Necklaces</button>
               <button class="filter-chip" type="button" data-filter="bracelets">Bracelets</button>
               <button class="filter-chip" type="button" data-filter="earrings">Earrings</button>
             </div>
+            <p class="collection-note" data-reveal="fade-up">
+              Move through the collection like a curation wall: fewer distractions, stronger framing, and clearer hierarchy.
+            </p>
           </div>
         </section>
 
-        <section class="section section--surface">
+        <section class="section section--surface" id="collection-grid">
           <div class="container">
-            <div class="product-grid" data-shop-products></div>
+            <div class="product-grid" data-shop-products data-stagger></div>
           </div>
         </section>
 

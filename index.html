@@ -63,37 +63,188 @@
 
       <main>
         <section class="hero section section--surface">
-          <div class="container hero-grid">
-            <div class="hero-copy" data-reveal>
+          <div class="container hero-grid hero-grid--grand">
+            <div class="hero-copy" data-reveal="fade-up">
               <span class="eyebrow">Toronto Jewels Curation</span>
               <div class="accent-rule"></div>
-              <span class="kicker">Custom atelier</span>
+              <span class="kicker">Private custom atelier</span>
               <h1>Custom jewellery and curated pieces designed to feel timeless</h1>
-              <p>
+              <p class="hero-copy__lead">
                 Discover signature designs or begin a custom piece shaped around your vision,
                 style, and story.
               </p>
+              <div class="hero-stat-grid" data-stagger>
+                <article class="hero-stat" data-reveal="fade-up">
+                  <strong>Bespoke</strong>
+                  <span>Private custom development with a quieter, more elevated point of view.</span>
+                </article>
+                <article class="hero-stat" data-reveal="fade-up">
+                  <strong>Curated</strong>
+                  <span>A concise assortment designed to feel like selection, not excess.</span>
+                </article>
+                <article class="hero-stat" data-reveal="fade-up">
+                  <strong>Heirloom-minded</strong>
+                  <span>Shapes, finishes, and proportions meant to hold value visually over time.</span>
+                </article>
+              </div>
               <div class="button-row">
                 <a class="button" href="shop.html">Shop Collection</a>
                 <a class="button-secondary" href="customs.html">Start a Custom Order</a>
               </div>
             </div>
 
-            <div class="image-panel" data-reveal>
-              <img src="assets/images/hero-editorial.svg" alt="Editorial jewellery hero composition">
+            <div class="hero-visual">
+              <span class="hero-orbit hero-orbit--one" aria-hidden="true" data-parallax="0.06"></span>
+              <span class="hero-orbit hero-orbit--two" aria-hidden="true" data-parallax="-0.04"></span>
+              <div class="image-panel hero-frame" data-reveal="zoom">
+                <img src="assets/images/hero-editorial.svg" alt="Editorial jewellery hero composition">
+              </div>
+              <aside class="hero-note" data-parallax="-0.08">
+                <span class="hero-note__eyebrow">A luxury site should feel expensive before photography arrives</span>
+                <p>Large composition, restrained spacing, rich surfaces, and slower motion do the work while the imagery is still placeholder art.</p>
+              </aside>
+            </div>
+          </div>
+        </section>
+
+        <section class="marquee-strip" aria-label="Brand values">
+          <div class="marquee-track">
+            <span>Private sourcing</span>
+            <span>Bespoke consultations</span>
+            <span>Heirloom silhouettes</span>
+            <span>Quiet luxury</span>
+            <span>Toronto atelier</span>
+            <span>Precious metals</span>
+            <span>Private sourcing</span>
+            <span>Bespoke consultations</span>
+            <span>Heirloom silhouettes</span>
+            <span>Quiet luxury</span>
+          </div>
+        </section>
+
+        <section class="story-sequence section section--surface" data-story-sequence>
+          <div class="container story-sequence__grid">
+            <div class="story-sequence__visual-wrap">
+              <div class="story-sequence__visual" data-parallax="0.03">
+                <div class="story-progress"><span data-story-progress></span></div>
+
+                <article class="story-card is-active" data-story-panel="arrival">
+                  <div class="story-card__frame story-card__frame--tall">
+                    <img src="assets/images/hero-editorial.svg" alt="Editorial composition highlighting a sculptural jewellery silhouette">
+                    <span class="story-card__veil"></span>
+                    <span class="story-card__orb story-card__orb--one"></span>
+                    <span class="story-card__orb story-card__orb--two"></span>
+                    <div class="story-card__caption">
+                      <span class="story-card__tag">Arrival</span>
+                      <p>The first impression should feel composed, quiet, and expensive before a visitor reads a word.</p>
+                    </div>
+                  </div>
+                </article>
+
+                <article class="story-card" data-story-panel="materiality">
+                  <div class="story-card__frame story-card__frame--wide">
+                    <img src="assets/images/detail-closeup.svg" alt="Close-up presentation of a premium jewellery detail">
+                    <span class="story-card__veil"></span>
+                    <span class="story-card__orb story-card__orb--one"></span>
+                    <span class="story-card__orb story-card__orb--three"></span>
+                    <div class="story-card__caption">
+                      <span class="story-card__tag">Materiality</span>
+                      <p>Framing, masks, reflective overlays, and controlled contrast make placeholders feel more like campaign art than mockups.</p>
+                    </div>
+                  </div>
+                </article>
+
+                <article class="story-card" data-story-panel="atelier">
+                  <div class="story-card__frame story-card__frame--split">
+                    <img src="assets/images/custom-atelier.svg" alt="Atelier composition representing bespoke jewellery development">
+                    <span class="story-card__veil"></span>
+                    <span class="story-card__orb story-card__orb--two"></span>
+                    <span class="story-card__orb story-card__orb--three"></span>
+                    <div class="story-card__caption">
+                      <span class="story-card__tag">Atelier</span>
+                      <p>The site should move like a private consultation: slower pacing, stronger hierarchy, and fewer generic storefront cues.</p>
+                    </div>
+                  </div>
+                </article>
+
+                <article class="story-card" data-story-panel="afterglow">
+                  <div class="story-card__frame story-card__frame--portrait">
+                    <img src="assets/images/worn-detail.svg" alt="Luxury jewellery worn in an editorial-inspired composition">
+                    <span class="story-card__veil"></span>
+                    <span class="story-card__orb story-card__orb--one"></span>
+                    <span class="story-card__orb story-card__orb--four"></span>
+                    <div class="story-card__caption">
+                      <span class="story-card__tag">Afterglow</span>
+                      <p>Motion finishes the illusion: slow reveals, sticky scenes, and light that seems to move across the objects as you scroll.</p>
+                    </div>
+                  </div>
+                </article>
+              </div>
+            </div>
+
+            <div class="story-sequence__steps">
+              <article class="story-step is-active" data-story-step="arrival">
+                <span class="story-step__index">01</span>
+                <span class="eyebrow">First impression</span>
+                <div class="accent-rule"></div>
+                <h2>Luxury reads through atmosphere long before it reads through content</h2>
+                <p>
+                  The homepage should open like a campaign reveal, not a catalogue. That means fewer competing boxes,
+                  more tension in the composition, and a slower pace between the headline and the first collection view.
+                </p>
+              </article>
+
+              <article class="story-step" data-story-step="materiality">
+                <span class="story-step__index">02</span>
+                <span class="eyebrow">Surface and light</span>
+                <div class="accent-rule"></div>
+                <h2>Placeholders can still feel premium when the framing behaves like art direction</h2>
+                <p>
+                  Clip paths, floating veils, glassy borders, and controlled glow lines make the SVG imagery feel intentionally presented
+                  rather than temporarily dropped into generic rectangles.
+                </p>
+              </article>
+
+              <article class="story-step" data-story-step="atelier">
+                <span class="story-step__index">03</span>
+                <span class="eyebrow">Private process</span>
+                <div class="accent-rule"></div>
+                <h2>The site should feel closer to entering an atelier than browsing a template storefront</h2>
+                <p>
+                  Scroll-pinned storytelling lets the layout behave like a guided presentation. Visitors stay oriented while the narrative advances,
+                  which gives the brand more authority and composure.
+                </p>
+              </article>
+
+              <article class="story-step" data-story-step="afterglow">
+                <span class="story-step__index">04</span>
+                <span class="eyebrow">Lasting impression</span>
+                <div class="accent-rule"></div>
+                <h2>Micro-motion should feel like reflective light, not interface decoration</h2>
+                <p>
+                  Hover lighting, refined modal entry, and a more tailored navigation system create the sense that every surface on the site
+                  was considered at the same level as the objects themselves.
+                </p>
+              </article>
             </div>
           </div>
         </section>
 
         <section class="section section--surface">
           <div class="container">
-            <div class="section-heading section-heading--center" data-reveal>
-              <span class="eyebrow">Signature pieces</span>
-              <div class="accent-rule" style="margin-inline:auto;"></div>
-              <h2>A collection of refined designs made to wear often and keep for generations</h2>
+            <div class="section-intro-grid">
+              <div class="section-heading" data-reveal="fade-up">
+                <span class="eyebrow">Signature pieces</span>
+                <div class="accent-rule"></div>
+                <h2>A collection of refined designs made to wear often and keep for generations</h2>
+              </div>
+              <p class="section-caption" data-reveal="fade-left">
+                The collection should read more like a private edit than a storefront wall. Fewer objects,
+                more breathing room, and surfaces that feel like jewellery boxes rather than generic cards.
+              </p>
             </div>
 
-            <div class="product-grid" data-featured-products></div>
+            <div class="product-grid" data-featured-products data-stagger></div>
           </div>
         </section>
 
@@ -119,23 +270,23 @@
         </section>
 
         <section class="section section--surface section--tight">
-          <div class="container value-strip" data-reveal>
-            <article class="value-card">
+          <div class="container value-strip" data-stagger>
+            <article class="value-card" data-reveal="fade-up">
               <div class="value-card__icon">01</div>
               <h3>Hand-Finished</h3>
               <p>Crafted with attention to detail and a polished final finish.</p>
             </article>
-            <article class="value-card">
+            <article class="value-card" data-reveal="fade-up">
               <div class="value-card__icon">02</div>
               <h3>Custom Design</h3>
               <p>Pieces shaped around your vision, your occasion, and your style.</p>
             </article>
-            <article class="value-card">
+            <article class="value-card" data-reveal="fade-up">
               <div class="value-card__icon">03</div>
               <h3>Gift-Ready Packaging</h3>
               <p>Elegant presentation designed for keepsakes and special moments.</p>
             </article>
-            <article class="value-card">
+            <article class="value-card" data-reveal="fade-up">
               <div class="value-card__icon">04</div>
               <h3>Personal Support</h3>
               <p>Direct communication throughout the request and ordering process.</p>
@@ -170,7 +321,7 @@
               <h2>Quiet details, process moments, and polished finishes</h2>
             </div>
 
-            <div class="studio-grid">
+            <div class="studio-grid" data-stagger>
               <article class="studio-card" data-reveal>
                 <img src="assets/images/studio-grid-1.svg" alt="Jewellery close-up">
               </article>
