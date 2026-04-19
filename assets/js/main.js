@@ -162,23 +162,16 @@ const money = new Intl.NumberFormat("en-CA", {
 
 function productCardMarkup(product, index = 0) {
   const revealStyle = ["fade-up", "fade-left", "fade-right"][index % 3];
-  const lifestyleImage = product.gallery[2] || product.gallery[1] || product.heroImage;
 
   return `
     <article class="product-card" data-reveal="${revealStyle}">
       <a class="product-card__link" href="product.html?slug=${product.slug}">
         <div class="product-card__media">
-          <span class="product-card__eyebrow">${product.category}</span>
-          <div class="product-card__image-stack">
-            <img class="product-card__image product-card__image--primary" src="${product.heroImage}" alt="${product.name}" loading="lazy">
-            <img class="product-card__image product-card__image--secondary" src="${lifestyleImage}" alt="${product.name} on the body" loading="lazy">
-            <span class="product-card__media-note">Macro to lifestyle view</span>
-          </div>
+          <img src="${product.heroImage}" alt="${product.name}" loading="lazy">
         </div>
         <div class="product-card__body">
           <h3>${product.name}</h3>
           <p class="product-card__materials">${product.materials}</p>
-          <p class="product-card__description">${product.shortDescription}</p>
           <div class="product-card__footer">
             <span class="product-card__price">${money.format(product.price)}</span>
             <span class="product-card__view">Discover</span>
@@ -203,11 +196,20 @@ function setupHeader() {
   const menuButton = document.querySelector("[data-menu-toggle]");
   const navLinks = document.querySelectorAll(".primary-nav a");
   const header = document.querySelector(".site-header");
-  const primaryNav = document.querySelector(".primary-nav");
+  const headerActions = document.querySelector(".header-actions");
   const navList = document.querySelector(".primary-nav__list");
-  let lastScrollY = window.scrollY;
 
   let indicator = null;
+
+  if (headerActions && !headerActions.querySelector(".header-primary-links")) {
+    const primaryLinks = document.createElement("div");
+    primaryLinks.className = "header-primary-links";
+    primaryLinks.innerHTML = `
+      <a class="header-primary-link" href="shop.html">Shop</a>
+      <a class="header-primary-link header-primary-link--accent" href="customs.html">Customs</a>
+    `;
+    headerActions.insertBefore(primaryLinks, menuButton || headerActions.firstChild);
+  }
 
   if (navList && navLinks.length) {
     indicator = document.createElement("span");
@@ -239,21 +241,6 @@ function setupHeader() {
       menuButton.setAttribute("aria-expanded", String(!expanded));
       body.classList.toggle("nav-open");
     });
-  }
-
-  if (primaryNav && !primaryNav.querySelector(".primary-nav__overlay-copy")) {
-    const overlay = document.createElement("div");
-    overlay.className = "primary-nav__overlay-copy";
-    overlay.innerHTML = `
-      <p class="primary-nav__eyebrow">Private menu</p>
-      <h2>Move through the collection like a private presentation.</h2>
-      <p>Curated pieces, custom conversations, and premium sourcing presented with more atmosphere than a standard mobile menu.</p>
-      <div class="primary-nav__contact-row">
-        <a href="mailto:info@torontojewelscuration.com">info@torontojewelscuration.com</a>
-        <span>Toronto, Ontario</span>
-      </div>
-    `;
-    primaryNav.appendChild(overlay);
   }
 
   navLinks.forEach((link) => {
@@ -293,15 +280,6 @@ function setupHeader() {
     }
 
     header.classList.toggle("is-scrolled", window.scrollY > 8);
-    header.classList.toggle("is-condensed", window.scrollY > 120);
-
-    if (window.scrollY > lastScrollY + 12 && window.scrollY > 180) {
-      header.classList.add("is-hidden");
-    } else if (window.scrollY < lastScrollY - 12 || window.scrollY <= 180) {
-      header.classList.remove("is-hidden");
-    }
-
-    lastScrollY = window.scrollY;
   };
 
   onScroll();
@@ -315,6 +293,40 @@ function setupHeader() {
         menuButton.setAttribute("aria-expanded", "false");
       }
     }
+  });
+}
+
+function syncCustomRequestFields(form) {
+  const pieceType = form.querySelector("[data-piece-type-select]");
+  if (!pieceType) {
+    return;
+  }
+
+  const value = pieceType.value.trim().toLowerCase();
+
+  form.querySelectorAll("[data-piece-type-only]").forEach((section) => {
+    const shouldShow = section.dataset.pieceTypeOnly.toLowerCase() === value;
+    section.hidden = !shouldShow;
+    section.setAttribute("aria-hidden", String(!shouldShow));
+
+    section.querySelectorAll("input, select, textarea").forEach((field) => {
+      if (!shouldShow) {
+        field.value = "";
+      }
+    });
+  });
+}
+
+function setupCustomRequestFlow() {
+  document.querySelectorAll("[data-custom-request-flow]").forEach((form) => {
+    const pieceType = form.querySelector("[data-piece-type-select]");
+    if (!pieceType) {
+      return;
+    }
+
+    const update = () => syncCustomRequestFields(form);
+    pieceType.addEventListener("change", update);
+    update();
   });
 }
 
@@ -642,6 +654,10 @@ function setupCustomForm() {
 
         form.reset();
 
+        if (form.hasAttribute("data-custom-request-flow")) {
+          syncCustomRequestFields(form);
+        }
+
         if (form.hasAttribute("data-appointment-form")) {
           syncSelectedPiece(form);
         }
@@ -964,13 +980,9 @@ document.addEventListener("DOMContentLoaded", () => {
   setupFaq();
   setupFilePickers();
   setupAppointmentModal();
+  setupCustomRequestFlow();
   setupCustomForm();
-  setupStorySequence();
-  setupHoverLighting();
-  setupCustomCursor();
-  setupMagneticElements();
   setYear();
   setupRevealStaggers();
-  setupAmbientMotion();
   revealVisible();
 });

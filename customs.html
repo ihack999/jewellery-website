@@ -61,73 +61,39 @@
 
       <main>
         <section class="section section--surface">
-          <div class="container split-grid">
-            <div class="split-copy" data-reveal>
+          <div class="container split-grid split-grid--custom-order">
+            <div class="split-copy" data-reveal="fade-up">
               <span class="eyebrow">Custom orders</span>
               <div class="accent-rule"></div>
-              <h1>Design your custom jewellery pieces</h1>
+              <h1>Start a custom order with a clear, personal brief</h1>
               <p>
-                Share your vision with us whether you have a clear concept or just a starting point.
-                We will review your request and guide you through the next steps.
+                Share the essentials and we will review your request personally, then come back with the clearest next step.
               </p>
               <div class="button-row">
-                <a class="button" href="#request-form">Begin Below</a>
+                <a class="button" href="#request-form">Start Your Request</a>
+                <a class="button-secondary" href="mailto:info@torontojewelscuration.com">Email the Atelier</a>
               </div>
             </div>
 
-            <div class="editorial-panel" data-reveal>
+            <div class="editorial-panel" data-reveal="fade-up">
               <img src="assets/images/custom-atelier.svg" alt="Custom jewellery request hero illustration">
             </div>
           </div>
         </section>
 
-        <section class="section section--soft" id="process">
-          <div class="container">
-            <div class="section-heading section-heading--center" data-reveal>
-              <span class="eyebrow">How it works</span>
-              <div class="accent-rule" style="margin-inline:auto;"></div>
-              <h2>How the process works</h2>
-            </div>
-
-            <div class="process-grid">
-              <article class="process-card" data-reveal>
-                <div class="process-number">1</div>
-                <h3>Submit your request</h3>
-                <p>Tell us what you want to create and share the key details.</p>
-              </article>
-              <article class="process-card" data-reveal>
-                <div class="process-number">2</div>
-                <h3>We review your details</h3>
-                <p>We look at your inspiration, preferences, and budget direction.</p>
-              </article>
-              <article class="process-card" data-reveal>
-                <div class="process-number">3</div>
-                <h3>We contact you</h3>
-                <p>We discuss options, pricing, timeline, and the clearest next step.</p>
-              </article>
-              <article class="process-card" data-reveal>
-                <div class="process-number">4</div>
-                <h3>Your piece begins</h3>
-                <p>Once approved, the design and creation process moves forward.</p>
-              </article>
-            </div>
-          </div>
-        </section>
-
         <section class="section section--surface" id="request-form">
-          <div class="content-width form-shell" data-reveal>
+          <div class="content-width form-shell form-shell--stacked" data-reveal="fade-up">
             <div class="form-header">
               <span class="eyebrow">Custom Request Form</span>
               <div class="accent-rule"></div>
               <h2>Tell us what you are imagining</h2>
               <p>
-                Share your design direction, materials, budget, and inspiration.
-                We will review the request personally and reach out with next steps.
+                Keep it simple. Share the core details and we will review the request personally.
               </p>
             </div>
 
             <form
-              class="form-grid"
+              class="form-grid form-grid--stacked"
               name="custom-request"
               method="POST"
               action="/customs.html"
@@ -135,99 +101,152 @@
               data-netlify-honeypot="bot-field"
               enctype="multipart/form-data"
               data-custom-form
+              data-custom-request-flow
             >
               <input type="hidden" name="form-name" value="custom-request">
               <p class="sr-only">
                 <label>Do not fill this out if you're human: <input name="bot-field"></label>
               </p>
-              <div class="form-field">
-                <label for="full-name">Full Name</label>
-                <input id="full-name" name="full-name" type="text" autocomplete="name" required>
-              </div>
-
-              <div class="form-field">
-                <label for="email-address">Email Address</label>
-                <input id="email-address" name="email-address" type="email" autocomplete="email" required>
-              </div>
-
-              <div class="form-field">
-                <label for="phone-number">Phone Number (optional)</label>
-                <input id="phone-number" name="phone-number" type="tel" autocomplete="tel">
-              </div>
-
-              <div class="form-field">
-                <label for="piece-type">Piece Type</label>
-                <select id="piece-type" name="piece-type" required>
-                  <option value="">Select a type</option>
-                  <option>Ring</option>
-                  <option>Necklace</option>
-                  <option>Bracelet</option>
-                  <option>Earrings</option>
-                  <option>Other</option>
-                </select>
-              </div>
-
-              <div class="form-field">
-                <label for="metal-preference">Metal Preference</label>
-                <input id="metal-preference" name="metal-preference" type="text" placeholder="Platinum, 18k gold, 14k gold">
-              </div>
-
-              <div class="form-field">
-                <label for="stone-preference">Stone Preference</label>
-                <input id="stone-preference" name="stone-preference" type="text" placeholder="Diamond, crystal, sapphire, none">
-              </div>
-
-              <div class="form-field">
-                <label for="finish-preference">Finish Preference</label>
-                <input id="finish-preference" name="finish-preference" type="text" placeholder="Yellow gold, white gold, other">
-              </div>
-
-              <div class="form-field">
-                <label for="dimensions">Ring Size or Dimensions</label>
-                <input id="dimensions" name="dimensions" type="text" placeholder="Size 7, bracelet length, pendant scale">
-              </div>
-
-              <div class="form-field">
-                <span class="fieldset-title">Budget</span>
-                <div class="option-grid">
-                  <label class="option-chip"><input type="radio" name="budget" value="500 to 1000">$500 to $1,000</label>
-                  <label class="option-chip"><input type="radio" name="budget" value="1000 to 5000">$1,000 to $5,000</label>
-                  <label class="option-chip"><input type="radio" name="budget" value="5000 to 10000">$5,000 to $10,000</label>
-                  <label class="option-chip"><input type="radio" name="budget" value="10000 plus">$10,000+</label>
+              <section class="form-section">
+                <div class="form-section__intro">
+                  <h3>Contact</h3>
+                  <p>How should we reach you?</p>
                 </div>
-              </div>
+                <div class="form-section__stack">
+                  <div class="form-field">
+                    <label for="full-name">Full Name</label>
+                    <input id="full-name" name="full-name" type="text" autocomplete="name" required>
+                  </div>
 
-              <div class="form-field">
-                <label for="occasion">Occasion</label>
-                <input id="occasion" name="occasion" type="text" placeholder="Gift, personal piece, engagement, event">
-              </div>
+                  <div class="form-field">
+                    <label for="email-address">Email Address</label>
+                    <input id="email-address" name="email-address" type="email" autocomplete="email" required>
+                  </div>
 
-              <div class="form-field">
-                <label for="needed-by">Needed By Date</label>
-                <input id="needed-by" name="needed-by" type="date">
-              </div>
-
-              <div class="form-field">
-                <label for="inspiration-upload">Upload Inspiration</label>
-                <div class="file-picker" data-file-picker>
-                  <input id="inspiration-upload" name="inspiration-upload" type="file" accept="image/*" data-file-input>
-                  <label class="file-picker__label" for="inspiration-upload">
-                    <span class="file-picker__badge">Inspiration Upload</span>
-                    <strong>Drop a reference image here or browse your files</strong>
-                    <span class="file-picker__meta" data-file-name>No file selected yet</span>
-                  </label>
+                  <div class="form-field">
+                    <label for="phone-number">Phone Number (optional)</label>
+                    <input id="phone-number" name="phone-number" type="tel" autocomplete="tel">
+                  </div>
                 </div>
-              </div>
+              </section>
 
-              <div class="form-field">
-                <label for="inspiration-link">Inspiration Link</label>
-                <input id="inspiration-link" name="inspiration-link" type="url" placeholder="https://">
-              </div>
+              <section class="form-section">
+                <div class="form-section__intro">
+                  <h3>Piece Type</h3>
+                  <p>Tell us the kind of piece you want to create and your timing.</p>
+                </div>
+                <div class="form-section__stack">
+                  <div class="form-field">
+                    <label for="piece-type">Piece Type</label>
+                    <select id="piece-type" name="piece-type" required data-piece-type-select>
+                      <option value="">Select a type</option>
+                      <option>Ring</option>
+                      <option>Necklace</option>
+                      <option>Bracelet</option>
+                      <option>Earrings</option>
+                      <option>Other</option>
+                    </select>
+                  </div>
 
-              <div class="form-field">
-                <label for="description">Description</label>
-                <textarea id="description" name="description" placeholder="Tell us what you are imagining, what you love, and any details we should know."></textarea>
-              </div>
+                  <div class="form-field" data-piece-type-only="Ring" hidden aria-hidden="true">
+                    <label for="ring-size">Ring Size</label>
+                    <input id="ring-size" name="ring-size" type="text" placeholder="Size 6.5, Size 7, unsure yet">
+                  </div>
+
+                  <div class="form-field">
+                    <label for="dimensions">Bracelet Size or Necklace Length (optional)</label>
+                    <input id="dimensions" name="dimensions" type="text" placeholder="7 inch bracelet, 18 inch chain, pendant scale">
+                  </div>
+
+                  <div class="form-field">
+                    <label for="occasion">Occasion</label>
+                    <input id="occasion" name="occasion" type="text" placeholder="Gift, personal piece, engagement, event">
+                  </div>
+
+                  <div class="form-field">
+                    <label for="needed-by">Needed By Date</label>
+                    <input id="needed-by" name="needed-by" type="date">
+                  </div>
+                </div>
+              </section>
+
+              <section class="form-section">
+                <div class="form-section__intro">
+                  <h3>Materials &amp; Stones</h3>
+                  <p>Share the broad material direction you already know.</p>
+                </div>
+                <div class="form-section__stack">
+                  <div class="form-field">
+                    <label for="metal-preference">Metal Preference</label>
+                    <input id="metal-preference" name="metal-preference" type="text" placeholder="Platinum, 18k gold, 14k gold">
+                  </div>
+
+                  <div class="form-field">
+                    <label for="stone-preference">Stone Preference</label>
+                    <input id="stone-preference" name="stone-preference" type="text" placeholder="Diamond, sapphire, emerald, no stone">
+                  </div>
+
+                  <div class="form-field">
+                    <label for="finish-preference">Finish Preference</label>
+                    <input id="finish-preference" name="finish-preference" type="text" placeholder="Yellow gold, white gold, brushed, high polish">
+                  </div>
+                </div>
+              </section>
+
+              <section class="form-section">
+                <div class="form-section__intro">
+                  <h3>Budget</h3>
+                  <p>A range helps us shape the most realistic next step.</p>
+                </div>
+                <div class="form-section__stack">
+                  <div class="form-field">
+                    <div class="option-grid option-grid--stacked">
+                      <label class="option-chip"><input type="radio" name="budget" value="500 to 1000">$500 to $1,000</label>
+                      <label class="option-chip"><input type="radio" name="budget" value="1000 to 5000">$1,000 to $5,000</label>
+                      <label class="option-chip"><input type="radio" name="budget" value="5000 to 10000">$5,000 to $10,000</label>
+                      <label class="option-chip"><input type="radio" name="budget" value="10000 plus">$10,000+</label>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              <section class="form-section">
+                <div class="form-section__intro">
+                  <h3>Inspiration</h3>
+                  <p>Upload a reference or include a link if you have one.</p>
+                </div>
+                <div class="form-section__stack">
+                  <div class="form-field">
+                    <label for="inspiration-upload">Upload Inspiration</label>
+                    <div class="file-picker" data-file-picker>
+                      <input id="inspiration-upload" name="inspiration-upload" type="file" accept="image/*" data-file-input>
+                      <label class="file-picker__label" for="inspiration-upload">
+                        <span class="file-picker__badge">Inspiration Upload</span>
+                        <strong>Drop a reference image here or browse your files</strong>
+                        <span class="file-picker__meta" data-file-name>No file selected yet</span>
+                      </label>
+                    </div>
+                  </div>
+
+                  <div class="form-field">
+                    <label for="inspiration-link">Inspiration Link</label>
+                    <input id="inspiration-link" name="inspiration-link" type="url" placeholder="https://">
+                  </div>
+                </div>
+              </section>
+
+              <section class="form-section">
+                <div class="form-section__intro">
+                  <h3>Notes</h3>
+                  <p>Tell us what matters most about the piece.</p>
+                </div>
+                <div class="form-section__stack">
+                  <div class="form-field">
+                    <label for="description">Description</label>
+                    <textarea id="description" name="description" placeholder="Tell us what you are imagining, what you love, and any details we should know."></textarea>
+                  </div>
+                </div>
+              </section>
 
               <div class="button-row">
                 <button class="button" type="submit">Submit Custom Request</button>
@@ -246,6 +265,7 @@
           <input name="email-address">
           <input name="phone-number">
           <input name="piece-type">
+          <input name="ring-size">
           <input name="metal-preference">
           <input name="stone-preference">
           <input name="finish-preference">
@@ -258,50 +278,31 @@
           <textarea name="description"></textarea>
         </form>
 
-        <section class="section section--surface" id="faq">
-          <div class="content-width">
-            <div class="faq-heading" data-reveal>
-              <span class="eyebrow">Custom Order FAQ</span>
-              <div class="accent-rule"></div>
-              <h2>Questions before you begin</h2>
-            </div>
-
-            <div class="faq-list">
-              <article class="faq-item" data-reveal>
-                <button class="faq-question" type="button"><span>How long does the process take?</span><span>+</span></button>
-                <div class="faq-answer"><p>Timing depends on complexity, but most custom projects begin with a response within a few business days and move into a defined production timeline after approval.</p></div>
-              </article>
-              <article class="faq-item" data-reveal>
-                <button class="faq-question" type="button"><span>Do I need a full design idea before submitting?</span><span>+</span></button>
-                <div class="faq-answer"><p>No. A reference image, a broad direction, or even an occasion and budget is enough to start a productive conversation.</p></div>
-              </article>
-              <article class="faq-item" data-reveal>
-                <button class="faq-question" type="button"><span>Can I request changes after submission?</span><span>+</span></button>
-                <div class="faq-answer"><p>Yes. The review stage is designed to clarify preferences before production begins, so feedback and refinement are part of the process.</p></div>
-              </article>
-              <article class="faq-item" data-reveal>
-                <button class="faq-question" type="button"><span>Do you work within a set budget?</span><span>+</span></button>
-                <div class="faq-answer"><p>Yes. Budget direction helps shape material options and design scope early, which keeps the conversation focused and realistic.</p></div>
-              </article>
-              <article class="faq-item" data-reveal>
-                <button class="faq-question" type="button"><span>Do you offer consultations?</span><span>+</span></button>
-                <div class="faq-answer"><p>Yes. Requests are reviewed personally and can move into a more detailed consultation once the concept and scope are clear.</p></div>
-              </article>
-            </div>
+        <section class="section section--soft section--tight" id="process">
+          <div class="content-width process-strip" data-stagger>
+            <article class="process-strip__item" data-reveal="fade-up">
+              <strong>1</strong>
+              <span>Submit the request with your core preferences.</span>
+            </article>
+            <article class="process-strip__item" data-reveal="fade-up">
+              <strong>2</strong>
+              <span>We review it personally and refine the next step.</span>
+            </article>
+            <article class="process-strip__item" data-reveal="fade-up">
+              <strong>3</strong>
+              <span>Once approved, the custom piece moves into production.</span>
+            </article>
           </div>
         </section>
 
-        <section class="section section--soft">
-          <div class="content-width cta-panel" data-reveal>
+        <section class="section section--surface section--tight">
+          <div class="content-width cta-panel cta-panel--simple" data-reveal="fade-up">
             <div>
               <span class="eyebrow">A conversation first</span>
               <div class="accent-rule"></div>
-              <h2>Every custom request starts with a conversation</h2>
-              <p>
-                Whether your idea is fully formed or still taking shape, we are here to help turn it into a finished piece with clarity and care.
-              </p>
+              <h2>Every custom request is reviewed personally</h2>
+              <p>Once we receive the brief, we will follow up with the clearest next step for design, sourcing, timeline, and pricing direction.</p>
             </div>
-            <a class="button" href="mailto:info@torontojewelscuration.com">Email the Atelier</a>
           </div>
         </section>
       </main>
