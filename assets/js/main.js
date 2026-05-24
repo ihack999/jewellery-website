@@ -184,6 +184,7 @@ function renderProductCollection(container, items) {
 
   container.innerHTML = items.map(productCardMarkup).join("");
   applyRevealDelays(container);
+  setupDepthCards(container);
 }
 
 function setupHeader() {
@@ -624,6 +625,127 @@ function setupHeroMotion() {
   window.addEventListener("resize", requestUpdate);
 }
 
+function setupDepthCards(scope = document) {
+  const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+  if (mediaQuery.matches) {
+    return;
+  }
+
+  const selector = [
+    ".product-card",
+    ".custom-type-card",
+    ".luxury-card",
+    ".process-card",
+    ".custom-entry__media",
+    ".custom-entry__content",
+    ".editorial-panel",
+    ".gallery-main",
+    ".custom-request-panel",
+    ".cta-panel",
+    ".info-panel"
+  ].join(", ");
+  const cards = [];
+
+  if (scope.matches && scope.matches(selector)) {
+    cards.push(scope);
+  }
+
+  if (scope.querySelectorAll) {
+    cards.push(...scope.querySelectorAll(selector));
+  }
+
+  cards.forEach((card) => {
+    if (card.dataset.depthReady === "true") {
+      return;
+    }
+
+    card.dataset.depthReady = "true";
+    card.classList.add("depth-card");
+
+    if (!card.querySelector(":scope > .depth-glare")) {
+      const glare = document.createElement("span");
+      glare.className = "depth-glare";
+      glare.setAttribute("aria-hidden", "true");
+      card.appendChild(glare);
+    }
+
+    const resetDepth = () => {
+      card.style.setProperty("--tilt-x", "0deg");
+      card.style.setProperty("--tilt-y", "0deg");
+      card.style.setProperty("--glare-opacity", "0");
+    };
+
+    card.addEventListener("pointermove", (event) => {
+      if (event.pointerType === "touch") {
+        return;
+      }
+
+      const rect = card.getBoundingClientRect();
+      const x = (event.clientX - rect.left) / rect.width;
+      const y = (event.clientY - rect.top) / rect.height;
+      const tiltX = (0.5 - y) * 7;
+      const tiltY = (x - 0.5) * 8;
+
+      card.style.setProperty("--tilt-x", `${tiltX.toFixed(2)}deg`);
+      card.style.setProperty("--tilt-y", `${tiltY.toFixed(2)}deg`);
+      card.style.setProperty("--glare-x", `${(x * 100).toFixed(1)}%`);
+      card.style.setProperty("--glare-y", `${(y * 100).toFixed(1)}%`);
+      card.style.setProperty("--glare-opacity", "0.42");
+    });
+
+    card.addEventListener("pointerleave", resetDepth);
+    card.addEventListener("blur", resetDepth, true);
+  });
+}
+
+function setupMagneticActions(scope = document) {
+  const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+  if (mediaQuery.matches) {
+    return;
+  }
+
+  const selector = ".button, .button-secondary, .header-cta";
+  const actions = [];
+
+  if (scope.matches && scope.matches(selector)) {
+    actions.push(scope);
+  }
+
+  if (scope.querySelectorAll) {
+    actions.push(...scope.querySelectorAll(selector));
+  }
+
+  actions.forEach((action) => {
+    if (action.dataset.magneticReady === "true") {
+      return;
+    }
+
+    action.dataset.magneticReady = "true";
+
+    const resetMagnet = () => {
+      action.style.setProperty("--magnet-x", "0px");
+      action.style.setProperty("--magnet-y", "0px");
+    };
+
+    action.addEventListener("pointermove", (event) => {
+      if (event.pointerType === "touch") {
+        return;
+      }
+
+      const rect = action.getBoundingClientRect();
+      const x = ((event.clientX - rect.left) / rect.width - 0.5) * 8;
+      const y = ((event.clientY - rect.top) / rect.height - 0.5) * 6;
+      action.style.setProperty("--magnet-x", `${x.toFixed(2)}px`);
+      action.style.setProperty("--magnet-y", `${y.toFixed(2)}px`);
+    });
+
+    action.addEventListener("pointerleave", resetMagnet);
+    action.addEventListener("blur", resetMagnet);
+  });
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   setupScrollProgress();
   setupHeader();
@@ -636,6 +758,8 @@ document.addEventListener("DOMContentLoaded", () => {
   setupCustomForm();
   setYear();
   setupHeroMotion();
+  setupDepthCards();
+  setupMagneticActions();
   applyRevealDelays();
   revealVisible();
 });
