@@ -11,6 +11,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="assets/css/styles.css">
     <script src="assets/js/main.js" defer></script>
+    <script src="assets/js/designer.js" type="module"></script>
   </head>
   <body data-page="customs">
     <div class="page-shell">
@@ -72,13 +73,125 @@
                 We will review your request and guide you through the next steps.
               </p>
               <div class="button-row">
-                <a class="button" href="#request-form">Start Your Custom Request</a>
+                <a class="button" href="#design-studio">Open Design Studio</a>
+                <a class="button-secondary" href="#request-form">Start Your Custom Request</a>
               </div>
             </div>
 
             <div class="editorial-panel" data-reveal>
               <img src="assets/images/drive/img-1784.jpg" alt="Custom diamond ring inspiration worn on hand">
             </div>
+          </div>
+        </section>
+
+        <section class="design-studio" id="design-studio" data-design-studio>
+          <div class="design-studio__stage" aria-label="Custom jewellery design preview">
+            <canvas class="design-studio__canvas" data-designer-canvas aria-label="Interactive custom jewellery preview"></canvas>
+            <div class="design-studio__fallback" data-designer-fallback hidden>
+              <canvas data-designer-fallback-canvas aria-label="Custom jewellery preview"></canvas>
+            </div>
+          </div>
+
+          <div class="design-studio__overlay">
+            <div class="design-studio__intro" data-reveal>
+              <span class="eyebrow">Design studio</span>
+              <div class="accent-rule"></div>
+              <h2>Build a starting point for your custom piece</h2>
+              <p>
+                Choose the piece, metal, stone, size, and detail direction. Send the design into the request form when it feels right.
+              </p>
+            </div>
+
+            <form class="designer-panel" data-designer-controls data-reveal>
+              <div class="designer-panel__group">
+                <label for="designer-piece">Piece</label>
+                <select id="designer-piece" data-designer-field="piece">
+                  <option>Ring</option>
+                  <option>Necklace</option>
+                  <option>Bracelet</option>
+                  <option>Earrings</option>
+                </select>
+              </div>
+
+              <fieldset class="designer-panel__group">
+                <legend>Metal</legend>
+                <div class="swatch-row">
+                  <label class="swatch-option"><input type="radio" name="designer-metal" value="White Gold" data-designer-field="metal" checked><span style="--swatch:#e8eef1;"></span>White Gold</label>
+                  <label class="swatch-option"><input type="radio" name="designer-metal" value="Platinum" data-designer-field="metal"><span style="--swatch:#d9e1e5;"></span>Platinum</label>
+                  <label class="swatch-option"><input type="radio" name="designer-metal" value="Yellow Gold" data-designer-field="metal"><span style="--swatch:#d5a647;"></span>Yellow Gold</label>
+                  <label class="swatch-option"><input type="radio" name="designer-metal" value="Rose Gold" data-designer-field="metal"><span style="--swatch:#c98778;"></span>Rose Gold</label>
+                </div>
+              </fieldset>
+
+              <div class="designer-panel__split">
+                <div class="designer-panel__group">
+                  <label for="designer-setting">Setting</label>
+                  <select id="designer-setting" data-designer-field="setting">
+                    <option>Prong</option>
+                    <option>Bezel</option>
+                    <option>Cathedral</option>
+                  </select>
+                </div>
+
+                <div class="designer-panel__group">
+                  <label for="designer-finish">Finish</label>
+                  <select id="designer-finish" data-designer-field="finish">
+                    <option>High Polish</option>
+                    <option>Soft Satin</option>
+                    <option>Milgrain Edge</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="designer-panel__split">
+                <div class="designer-panel__group">
+                  <label for="designer-shape">Stone Shape</label>
+                  <select id="designer-shape" data-designer-field="shape">
+                    <option>Round</option>
+                    <option>Pear</option>
+                    <option>Oval</option>
+                    <option>Cushion</option>
+                  </select>
+                </div>
+
+                <div class="designer-panel__group">
+                  <label for="designer-stone">Stone Color</label>
+                  <select id="designer-stone" data-designer-field="stone">
+                    <option>Clear Diamond</option>
+                    <option>Blush Sapphire</option>
+                    <option>Blue Sapphire</option>
+                    <option>Emerald Green</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="designer-panel__group">
+                <label for="designer-size">Stone Size <span data-designer-size-label>1.2 ct feel</span></label>
+                <input id="designer-size" type="range" min="0.8" max="2.4" step="0.1" value="1.2" data-designer-field="size">
+              </div>
+
+              <div class="designer-panel__group">
+                <label for="designer-weight">Band / Chain Weight <span data-designer-weight-label>Classic</span></label>
+                <input id="designer-weight" type="range" min="0.85" max="1.35" step="0.05" value="1" data-designer-field="weight">
+              </div>
+
+              <div class="designer-panel__split">
+                <label class="toggle-option"><input type="checkbox" data-designer-field="halo" checked><span>Halo detail</span></label>
+                <label class="toggle-option"><input type="checkbox" data-designer-field="accent" checked><span>Accent stones</span></label>
+              </div>
+
+              <div class="designer-panel__group">
+                <label for="designer-engraving">Engraving</label>
+                <input id="designer-engraving" type="text" maxlength="32" placeholder="Initials, date, or short phrase" data-designer-field="engraving">
+              </div>
+
+              <div class="designer-summary" data-designer-summary></div>
+
+              <div class="button-row">
+                <button class="button" type="button" data-send-design>Send Design to Request Form</button>
+                <a class="button-secondary" href="#request-form">Skip to Form</a>
+              </div>
+            </form>
           </div>
         </section>
 
@@ -123,6 +236,7 @@
               data-custom-form
             >
               <input type="hidden" name="form-name" value="custom-request">
+              <input type="hidden" name="design-summary" data-design-summary-field>
               <p class="sr-only">
                 <label>Do not fill this out if you're human: <input name="bot-field"></label>
               </p>
@@ -227,6 +341,7 @@
 
         <form name="custom-request" data-netlify="true" data-netlify-honeypot="bot-field" hidden>
           <input type="hidden" name="form-name" value="custom-request">
+          <input name="design-summary">
           <input name="bot-field">
           <input name="full-name">
           <input name="email-address">
