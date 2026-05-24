@@ -1,155 +1,155 @@
 const products = [
   {
-    slug: "solstice-ring",
-    name: "Solstice Ring",
+    slug: "pear-halo-ring",
+    name: "Pear Halo Ring",
     category: "rings",
-    materials: "14k gold with diamond",
+    materials: "14k white gold with pear-cut centre stone",
     price: 850,
-    shortDescription: "A luminous ring designed to feel balanced, crisp, and quietly striking.",
+    shortDescription: "A luminous pear-cut ring with a delicate halo and refined pavé band.",
     description:
-      "The Solstice Ring is shaped around a clean central stone and a softly sculpted band, offering a refined statement that still feels wearable every day.",
+      "The Pear Halo Ring is shaped around a cool-toned pear-cut centre stone, a bright halo, and a slender pavé band that keeps the statement polished and wearable.",
     specs: [
-      ["Materials", "14k gold, diamond setting"],
+      ["Materials", "14k white gold, pear-cut centre stone"],
       ["Sizing", "Available in sizes 5 to 9"],
-      ["Finish", "High polish with soft edges"],
+      ["Finish", "High polish with pavé detailing"],
       ["Timeline", "Ready to ship in 5 to 7 business days"]
     ],
     care: "Store in its pouch and clean gently with a soft jewellery cloth.",
     shipping: "Complimentary gift-ready packaging with tracked Canadian shipping.",
-    heroImage: "assets/images/solstice-ring.svg",
+    heroImage: "assets/images/drive/img-8503.jpg",
     gallery: [
-      "assets/images/solstice-ring.svg",
-      "assets/images/detail-closeup.svg",
-      "assets/images/worn-detail.svg",
-      "assets/images/packaging-scale.svg"
+      "assets/images/drive/img-8503.jpg",
+      "assets/images/drive/img-1784.jpg",
+      "assets/images/drive/img-4405-a.jpg",
+      "assets/images/drive/img-2897.jpg"
     ],
     featured: true
   },
   {
-    slug: "luna-pendant-necklace",
-    name: "Luna Pendant Necklace",
+    slug: "diamond-tennis-necklace",
+    name: "Diamond Tennis Necklace",
     category: "necklaces",
-    materials: "Sterling silver with crystal detail",
-    price: 180,
-    shortDescription: "A minimal pendant with cool-toned shine and an easy everyday length.",
+    materials: "Sterling silver with crystal-set line",
+    price: 680,
+    shortDescription: "A bright tennis-style necklace with clean sparkle and an easy neckline.",
     description:
-      "Luna balances a softly faceted pendant with a clean chain profile, giving it enough light play for occasion dressing while remaining understated for daily wear.",
+      "The Diamond Tennis Necklace follows the collarbone with a continuous line of bright stones, giving special-occasion polish while staying clean enough for modern styling.",
     specs: [
-      ["Materials", "Sterling silver, crystal detail"],
-      ["Length", "18 inches with extender"],
-      ["Finish", "Mirror finish chain"],
+      ["Materials", "Sterling silver, crystal-set links"],
+      ["Length", "16 inches with extender"],
+      ["Finish", "High polish setting"],
       ["Timeline", "Ready to ship in 3 to 5 business days"]
     ],
-    care: "Avoid fragrance contact and store flat to protect the chain finish.",
+    care: "Avoid fragrance contact and store flat to protect the stone setting.",
     shipping: "Wrapped in a structured keepsake box with polishing cloth included.",
-    heroImage: "assets/images/luna-pendant.svg",
+    heroImage: "assets/images/drive/img-4403.jpg",
     gallery: [
-      "assets/images/luna-pendant.svg",
-      "assets/images/detail-closeup.svg",
-      "assets/images/worn-detail.svg",
-      "assets/images/packaging-scale.svg"
+      "assets/images/drive/img-4403.jpg",
+      "assets/images/drive/img-2897.jpg",
+      "assets/images/drive/img-9576.jpg",
+      "assets/images/drive/img-1784.jpg"
     ],
     featured: true
   },
   {
-    slug: "eterna-tennis-bracelet",
-    name: "Eterna Tennis Bracelet",
+    slug: "diamond-bracelet-stack",
+    name: "Diamond Bracelet Stack",
     category: "bracelets",
-    materials: "14k gold with diamonds",
+    materials: "Sterling silver with diamond-like stones",
     price: 1200,
-    shortDescription: "A polished bracelet with a structured rhythm of light-catching stones.",
+    shortDescription: "A layered bracelet stack with crisp stone settings and editorial shine.",
     description:
-      "Eterna is designed to sit close to the wrist with a precise line of diamond-set links, giving the bracelet a clean editorial character rather than overt flash.",
+      "The Diamond Bracelet Stack brings together slim tennis-style bracelets with a clean, light-catching rhythm designed for polished evening styling.",
     specs: [
-      ["Materials", "14k gold, diamond-set links"],
-      ["Length", "7 inches"],
-      ["Closure", "Low-profile hidden clasp"],
+      ["Materials", "Sterling silver, crystal-set links"],
+      ["Length", "6.75 to 7 inches"],
+      ["Closure", "Low-profile box clasp"],
       ["Timeline", "Made to order in 2 to 3 weeks"]
     ],
     care: "Store flat and separate from harder pieces to avoid surface marks.",
     shipping: "Insured delivery and concierge tracking update included.",
-    heroImage: "assets/images/eterna-bracelet.svg",
+    heroImage: "assets/images/drive/img-4406.jpg",
     gallery: [
-      "assets/images/eterna-bracelet.svg",
-      "assets/images/detail-closeup.svg",
-      "assets/images/worn-detail.svg",
-      "assets/images/packaging-scale.svg"
+      "assets/images/drive/img-4406.jpg",
+      "assets/images/drive/img-4427.jpg",
+      "assets/images/drive/img-4413.jpg",
+      "assets/images/drive/img-4415-a.jpg"
     ],
     featured: true
   },
   {
-    slug: "aura-hoop-earrings",
-    name: "Aura Hoop Earrings",
+    slug: "vintage-halo-stud-earrings",
+    name: "Vintage Halo Stud Earrings",
     category: "earrings",
-    materials: "Gold-plated sterling silver",
+    materials: "Gold vermeil with crystal halo",
     price: 240,
-    shortDescription: "An airy hoop pair with a soft sculptural curve and warm sheen.",
+    shortDescription: "A round stud pair with a warm centre and bright crystal halo.",
     description:
-      "Aura Hoops use an elegant taper to keep the profile light and modern, making them easy to style with other pieces while still holding their own.",
+      "The Vintage Halo Stud Earrings balance a warm centre stone with a crisp surrounding halo, creating a compact statement that still feels elegant.",
     specs: [
-      ["Materials", "Gold-plated sterling silver"],
-      ["Size", "32 mm drop"],
-      ["Closure", "Hinged click clasp"],
+      ["Materials", "Gold vermeil, crystal halo"],
+      ["Size", "12 mm face"],
+      ["Closure", "Post backing"],
       ["Timeline", "Ready to ship in 3 to 5 business days"]
     ],
     care: "Remove before showering and store in a dry pouch between wears.",
     shipping: "Prepared in gift-ready packaging with care card included.",
-    heroImage: "assets/images/aura-hoops.svg",
+    heroImage: "assets/images/drive/img-9576.jpg",
     gallery: [
-      "assets/images/aura-hoops.svg",
-      "assets/images/detail-closeup.svg",
-      "assets/images/worn-detail.svg",
-      "assets/images/packaging-scale.svg"
+      "assets/images/drive/img-9576.jpg",
+      "assets/images/drive/img-4403.jpg",
+      "assets/images/drive/img-1784.jpg",
+      "assets/images/drive/img-2897.jpg"
     ]
   },
   {
-    slug: "celeste-chain-bracelet",
-    name: "Celeste Chain Bracelet",
+    slug: "gold-bezel-hand-chain",
+    name: "Gold Bezel Hand Chain",
     category: "bracelets",
-    materials: "Sterling silver chain links",
+    materials: "Gold vermeil with bezel-set crystals",
     price: 210,
-    shortDescription: "A cool silver bracelet with fluid links and a clean drape.",
+    shortDescription: "A delicate hand chain with bezel-set stones and a soft gold finish.",
     description:
-      "Celeste keeps the silhouette minimal, relying on proportion and finish rather than heavy styling to make an impression.",
+      "The Gold Bezel Hand Chain traces from wrist to finger with fine links and small bezel-set stones, adding a light custom-feeling accent to occasion styling.",
     specs: [
-      ["Materials", "Sterling silver chain links"],
-      ["Length", "6.75 inches"],
-      ["Finish", "Polished silver"],
+      ["Materials", "Gold vermeil, crystal stations"],
+      ["Length", "Adjustable bracelet and ring chain"],
+      ["Finish", "Polished gold tone"],
       ["Timeline", "Ready to ship in 3 to 5 business days"]
     ],
-    care: "Clean with a silver polishing cloth and avoid abrasive surfaces.",
+    care: "Store flat, avoid moisture, and fasten before placing in its pouch.",
     shipping: "Boxed presentation with optional gift message at checkout later.",
-    heroImage: "assets/images/celeste-bracelet.svg",
+    heroImage: "assets/images/drive/hand-chain-2.png",
     gallery: [
-      "assets/images/celeste-bracelet.svg",
-      "assets/images/detail-closeup.svg",
-      "assets/images/worn-detail.svg",
-      "assets/images/packaging-scale.svg"
+      "assets/images/drive/hand-chain-2.png",
+      "assets/images/drive/hand-chain-3.png",
+      "assets/images/drive/hand-chain-1.png",
+      "assets/images/drive/img-8503.jpg"
     ]
   },
   {
-    slug: "north-signet-ring",
-    name: "North Signet Ring",
+    slug: "cushion-diamond-ring",
+    name: "Cushion Diamond Ring",
     category: "rings",
-    materials: "Sterling silver with mirror face",
-    price: 320,
-    shortDescription: "A pared-back signet with sharp proportions and weighty simplicity.",
+    materials: "14k yellow gold with cushion-cut centre stone",
+    price: 920,
+    shortDescription: "A cushion-cut ring with a fine pavé band and quiet gold warmth.",
     description:
-      "North takes the signet form in a cleaner direction, with softened edges and a reflective top surface that feels modern instead of heavy.",
+      "The Cushion Diamond Ring is designed with a clean cushion-cut centre stone and a pavé band, giving the piece classic brightness with a modern profile.",
     specs: [
-      ["Materials", "Sterling silver"],
-      ["Sizing", "Available in sizes 6 to 11"],
-      ["Finish", "Mirror face, brushed interior"],
+      ["Materials", "14k yellow gold, cushion-cut stone"],
+      ["Sizing", "Available in sizes 5 to 9"],
+      ["Finish", "Polished gold with pavé band"],
       ["Timeline", "Ready to ship in 5 to 7 business days"]
     ],
-    care: "Best stored separately to preserve the top polished face.",
+    care: "Store separately and clean with a soft jewellery cloth after wear.",
     shipping: "Presented in a structured box with care instructions.",
-    heroImage: "assets/images/north-signet.svg",
+    heroImage: "assets/images/drive/img-4405-a.jpg",
     gallery: [
-      "assets/images/north-signet.svg",
-      "assets/images/detail-closeup.svg",
-      "assets/images/worn-detail.svg",
-      "assets/images/packaging-scale.svg"
+      "assets/images/drive/img-4405-a.jpg",
+      "assets/images/drive/img-1784.jpg",
+      "assets/images/drive/img-8503.jpg",
+      "assets/images/drive/img-4415-a.jpg"
     ]
   }
 ];
@@ -183,6 +183,7 @@ function renderProductCollection(container, items) {
   }
 
   container.innerHTML = items.map(productCardMarkup).join("");
+  applyRevealDelays(container);
 }
 
 function setupHeader() {
@@ -284,9 +285,24 @@ function renderProductPage() {
   const detailList = page.querySelector("[data-product-specs]");
   const related = page.querySelector("[data-related-products]");
 
-  const updateMainImage = (src) => {
-    mainImage.src = src;
-    mainImage.alt = product.name;
+  const updateMainImage = (src, animate = false) => {
+    if (!mainImage) {
+      return;
+    }
+
+    if (!animate) {
+      mainImage.src = src;
+      mainImage.alt = product.name;
+      return;
+    }
+
+    mainImage.classList.add("is-swapping");
+
+    window.setTimeout(() => {
+      mainImage.src = src;
+      mainImage.alt = product.name;
+      mainImage.classList.remove("is-swapping");
+    }, 140);
   };
 
   updateMainImage(product.gallery[0]);
@@ -316,7 +332,7 @@ function renderProductPage() {
     button.addEventListener("click", () => {
       thumbnailGrid.querySelectorAll("[data-gallery-thumb]").forEach((item) => item.classList.remove("is-active"));
       button.classList.add("is-active");
-      updateMainImage(product.gallery[index]);
+      updateMainImage(product.gallery[index], true);
     });
   });
 
@@ -493,6 +509,33 @@ function setYear() {
 
 let observer;
 
+function applyRevealDelays(scope = document) {
+  const groupSelector = ".product-grid, .custom-type-grid, .process-grid, .studio-grid, .value-strip, .custom-entry__steps, .luxury-grid";
+  const revealGroups = [];
+
+  if (scope.matches && scope.matches(groupSelector)) {
+    revealGroups.push(scope);
+  }
+
+  if (scope.querySelectorAll) {
+    revealGroups.push(...scope.querySelectorAll(groupSelector));
+  }
+
+  revealGroups.forEach((group) => {
+    group.querySelectorAll("[data-reveal], article, a").forEach((item, index) => {
+      item.style.setProperty("--reveal-delay", `${Math.min(index, 6) * 70}ms`);
+    });
+  });
+
+  if (scope === document) {
+    document.querySelectorAll("main > section").forEach((section, sectionIndex) => {
+      section.querySelectorAll(":scope > .container > [data-reveal], :scope > .content-width > [data-reveal]").forEach((item, index) => {
+        item.style.setProperty("--reveal-delay", `${Math.min(index + sectionIndex % 2, 4) * 60}ms`);
+      });
+    });
+  }
+}
+
 function revealVisible() {
   const targets = document.querySelectorAll("[data-reveal]");
 
@@ -524,7 +567,65 @@ function revealVisible() {
   });
 }
 
+function setupScrollProgress() {
+  const progress = document.createElement("div");
+  progress.className = "scroll-progress";
+  progress.setAttribute("aria-hidden", "true");
+  document.body.appendChild(progress);
+
+  let frame = null;
+
+  const update = () => {
+    const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+    const progressValue = maxScroll > 0 ? window.scrollY / maxScroll : 0;
+    document.documentElement.style.setProperty("--scroll-progress", progressValue.toFixed(4));
+    frame = null;
+  };
+
+  const requestUpdate = () => {
+    if (frame !== null) {
+      return;
+    }
+
+    frame = window.requestAnimationFrame(update);
+  };
+
+  update();
+  window.addEventListener("scroll", requestUpdate, { passive: true });
+  window.addEventListener("resize", requestUpdate);
+}
+
+function setupHeroMotion() {
+  const hero = document.querySelector(".hero");
+  const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+  if (!hero || mediaQuery.matches) {
+    return;
+  }
+
+  let frame = null;
+
+  const update = () => {
+    const progress = Math.min(Math.max(window.scrollY / Math.max(hero.offsetHeight, 1), 0), 1);
+    hero.style.setProperty("--hero-shift", String(Math.round(progress * -34)));
+    frame = null;
+  };
+
+  const requestUpdate = () => {
+    if (frame !== null) {
+      return;
+    }
+
+    frame = window.requestAnimationFrame(update);
+  };
+
+  update();
+  window.addEventListener("scroll", requestUpdate, { passive: true });
+  window.addEventListener("resize", requestUpdate);
+}
+
 document.addEventListener("DOMContentLoaded", () => {
+  setupScrollProgress();
   setupHeader();
   renderFeaturedProducts();
   setupShopFilters();
@@ -534,5 +635,7 @@ document.addEventListener("DOMContentLoaded", () => {
   setupAppointmentModal();
   setupCustomForm();
   setYear();
+  setupHeroMotion();
+  applyRevealDelays();
   revealVisible();
 });

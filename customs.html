@@ -29,14 +29,15 @@
           <nav class="primary-nav" aria-label="Primary navigation">
             <ul class="primary-nav__list">
               <li><a href="index.html" data-page="home">Home</a></li>
+              <li><a href="customs.html" data-page="customs">Customs</a></li>
               <li><a href="shop.html" data-page="shop">Shop</a></li>
               <li><a href="curated-luxuries.html" data-page="luxuries">Luxuries</a></li>
-              <li><a href="customs.html" data-page="customs">Customs</a></li>
               <li><a href="about.html" data-page="about">About</a></li>
               <li><a href="contact.html" data-page="contact">Contact</a></li>
             </ul>
           </nav>
           <div class="header-actions">
+            <a class="header-cta" href="customs.html">Start a Custom Order</a>
             <button class="icon-button" type="button" aria-label="Search catalogue">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                 <circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="1.6"/>
@@ -71,52 +72,19 @@
                 We will review your request and guide you through the next steps.
               </p>
               <div class="button-row">
-                <a class="button" href="#request-form">Begin Below</a>
+                <a class="button" href="#request-form">Start Your Custom Request</a>
               </div>
             </div>
 
             <div class="editorial-panel" data-reveal>
-              <img src="assets/images/custom-atelier.svg" alt="Custom jewellery request hero illustration">
-            </div>
-          </div>
-        </section>
-
-        <section class="section section--soft" id="process">
-          <div class="container">
-            <div class="section-heading section-heading--center" data-reveal>
-              <span class="eyebrow">How it works</span>
-              <div class="accent-rule" style="margin-inline:auto;"></div>
-              <h2>How the process works</h2>
-            </div>
-
-            <div class="process-grid">
-              <article class="process-card" data-reveal>
-                <div class="process-number">1</div>
-                <h3>Submit your request</h3>
-                <p>Tell us what you want to create and share the key details.</p>
-              </article>
-              <article class="process-card" data-reveal>
-                <div class="process-number">2</div>
-                <h3>We review your details</h3>
-                <p>We look at your inspiration, preferences, and budget direction.</p>
-              </article>
-              <article class="process-card" data-reveal>
-                <div class="process-number">3</div>
-                <h3>We contact you</h3>
-                <p>We discuss options, pricing, timeline, and the clearest next step.</p>
-              </article>
-              <article class="process-card" data-reveal>
-                <div class="process-number">4</div>
-                <h3>Your piece begins</h3>
-                <p>Once approved, the design and creation process moves forward.</p>
-              </article>
+              <img src="assets/images/drive/img-1784.jpg" alt="Custom diamond ring inspiration worn on hand">
             </div>
           </div>
         </section>
 
         <section class="section section--surface" id="request-form">
-          <div class="content-width form-shell" data-reveal>
-            <div class="form-header">
+          <div class="container form-shell custom-request-shell" data-reveal>
+            <div class="form-header custom-request-panel">
               <span class="eyebrow">Custom Request Form</span>
               <div class="accent-rule"></div>
               <h2>Tell us what you are imagining</h2>
@@ -124,10 +92,28 @@
                 Share your design direction, materials, budget, and inspiration.
                 We will review the request personally and reach out with next steps.
               </p>
+              <div class="request-mini-list" aria-label="Helpful request details">
+                <article>
+                  <span>01</span>
+                  <strong>Inspiration</strong>
+                  <p>Reference images, links, or a broad direction.</p>
+                </article>
+                <article>
+                  <span>02</span>
+                  <strong>Details</strong>
+                  <p>Piece type, metal, stones, size, and occasion.</p>
+                </article>
+                <article>
+                  <span>03</span>
+                  <strong>Timeline</strong>
+                  <p>Budget direction and any needed-by date.</p>
+                </article>
+              </div>
+              <img class="custom-request-panel__image" src="assets/images/drive/img-4405-b.jpg" alt="Diamond bracelet and ring detail for custom jewellery inspiration">
             </div>
 
             <form
-              class="form-grid"
+              class="form-grid custom-request-form"
               name="custom-request"
               method="POST"
               action="/customs.html"
@@ -187,7 +173,7 @@
                 <input id="dimensions" name="dimensions" type="text" placeholder="Size 7, bracelet length, pendant scale">
               </div>
 
-              <div class="form-field">
+              <div class="form-field form-field--wide">
                 <span class="fieldset-title">Budget</span>
                 <div class="option-grid">
                   <label class="option-chip"><input type="radio" name="budget" value="500 to 1000">$500 to $1,000</label>
@@ -207,7 +193,7 @@
                 <input id="needed-by" name="needed-by" type="date">
               </div>
 
-              <div class="form-field">
+              <div class="form-field form-field--wide">
                 <label for="inspiration-upload">Upload Inspiration</label>
                 <div class="file-picker" data-file-picker>
                   <input id="inspiration-upload" name="inspiration-upload" type="file" accept="image/*" data-file-input>
@@ -224,12 +210,12 @@
                 <input id="inspiration-link" name="inspiration-link" type="url" placeholder="https://">
               </div>
 
-              <div class="form-field">
+              <div class="form-field form-field--wide">
                 <label for="description">Description</label>
                 <textarea id="description" name="description" placeholder="Tell us what you are imagining, what you love, and any details we should know."></textarea>
               </div>
 
-              <div class="button-row">
+              <div class="button-row form-actions">
                 <button class="button" type="submit">Submit Custom Request</button>
               </div>
 
@@ -257,6 +243,39 @@
           <input name="inspiration-link">
           <textarea name="description"></textarea>
         </form>
+
+        <section class="section section--soft" id="process">
+          <div class="container">
+            <div class="section-heading section-heading--center" data-reveal>
+              <span class="eyebrow">How it works</span>
+              <div class="accent-rule" style="margin-inline:auto;"></div>
+              <h2>How the process works</h2>
+            </div>
+
+            <div class="process-grid">
+              <article class="process-card" data-reveal>
+                <div class="process-number">1</div>
+                <h3>Submit your request</h3>
+                <p>Tell us what you want to create and share the key details.</p>
+              </article>
+              <article class="process-card" data-reveal>
+                <div class="process-number">2</div>
+                <h3>We review your details</h3>
+                <p>We look at your inspiration, preferences, and budget direction.</p>
+              </article>
+              <article class="process-card" data-reveal>
+                <div class="process-number">3</div>
+                <h3>We contact you</h3>
+                <p>We discuss options, pricing, timeline, and the clearest next step.</p>
+              </article>
+              <article class="process-card" data-reveal>
+                <div class="process-number">4</div>
+                <h3>Your piece begins</h3>
+                <p>Once approved, the design and creation process moves forward.</p>
+              </article>
+            </div>
+          </div>
+        </section>
 
         <section class="section section--surface" id="faq">
           <div class="content-width">
