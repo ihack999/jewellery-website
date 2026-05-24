@@ -1797,6 +1797,14 @@ img[src*="img-4427"] {
   gap: 0.6rem;
 }
 
+.form-field.is-prefilled select {
+  border-color: rgba(12, 111, 125, 0.58);
+  background:
+    linear-gradient(135deg, rgba(12, 111, 125, 0.08), rgba(182, 63, 106, 0.06)),
+    #ffffff;
+  box-shadow: 0 0 0 4px rgba(12, 111, 125, 0.08);
+}
+
 .form-field label,
 .fieldset-title {
   color: var(--heading);

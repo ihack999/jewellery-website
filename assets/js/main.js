@@ -400,6 +400,42 @@ function setupFilePickers() {
   });
 }
 
+function setupPieceTypePrefill() {
+  const params = new URLSearchParams(window.location.search);
+  const rawPiece = params.get("piece") || params.get("piece-type");
+  const select = document.querySelector("#piece-type");
+
+  if (!rawPiece || !select) {
+    return;
+  }
+
+  const pieceMap = {
+    ring: "Ring",
+    rings: "Ring",
+    necklace: "Necklace",
+    necklaces: "Necklace",
+    bracelet: "Bracelet",
+    bracelets: "Bracelet",
+    earring: "Earrings",
+    earrings: "Earrings",
+    other: "Other"
+  };
+  const normalizedPiece = rawPiece.trim().toLowerCase().replace(/[^a-z]/g, "");
+  const selectedPiece = pieceMap[normalizedPiece];
+
+  if (!selectedPiece) {
+    return;
+  }
+
+  select.value = selectedPiece;
+  select.dispatchEvent(new Event("change", { bubbles: true }));
+
+  const field = select.closest(".form-field");
+  if (field) {
+    field.classList.add("is-prefilled");
+  }
+}
+
 function setupAppointmentModal() {
   const modal = document.querySelector("[data-appointment-modal]");
   if (!modal) {
@@ -754,6 +790,7 @@ document.addEventListener("DOMContentLoaded", () => {
   renderProductPage();
   setupFaq();
   setupFilePickers();
+  setupPieceTypePrefill();
   setupAppointmentModal();
   setupCustomForm();
   setYear();
