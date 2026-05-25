@@ -381,6 +381,51 @@ function syncSelectedPiece(form) {
   });
 }
 
+function getGeneratedDesignFile(form) {
+  const file = form?.__tjGeneratedDesignFile;
+
+  if (!file || typeof file.name !== "string" || typeof file.size !== "number") {
+    return null;
+  }
+
+  return file;
+}
+
+function filesMatch(firstFile, secondFile) {
+  return Boolean(
+    firstFile &&
+      secondFile &&
+      firstFile.name === secondFile.name &&
+      firstFile.size === secondFile.size &&
+      firstFile.type === secondFile.type &&
+      firstFile.lastModified === secondFile.lastModified
+  );
+}
+
+function clearGeneratedDesignUpload(form, picker, input) {
+  if (!getGeneratedDesignFile(form)) {
+    return;
+  }
+
+  delete form.__tjGeneratedDesignFile;
+  delete input.dataset.generatedDesignFile;
+  picker.classList.remove("has-generated-design");
+
+  const preview = picker.querySelector("[data-design-preview]");
+
+  if (preview) {
+    const previewUrl = preview.dataset.previewUrl;
+
+    if (previewUrl) {
+      URL.revokeObjectURL(previewUrl);
+    }
+
+    delete preview.dataset.previewUrl;
+    preview.hidden = true;
+    preview.replaceChildren();
+  }
+}
+
 function setupFilePickers() {
   document.querySelectorAll("[data-file-picker]").forEach((picker) => {
     const input = picker.querySelector("[data-file-input]");
@@ -391,11 +436,28 @@ function setupFilePickers() {
     }
 
     const updateFileName = () => {
-      const file = input.files && input.files[0];
+      const file = (input.files && input.files[0]) || getGeneratedDesignFile(input.form);
       fileName.textContent = file ? file.name : "No file selected yet";
     };
 
-    input.addEventListener("change", updateFileName);
+    input.addEventListener("change", (event) => {
+      const selectedFile = input.files && input.files[0];
+      const generatedFile = getGeneratedDesignFile(input.form);
+
+      if (event.isTrusted && generatedFile && !filesMatch(selectedFile, generatedFile)) {
+        clearGeneratedDesignUpload(input.form, picker, input);
+      }
+
+      updateFileName();
+    });
+
+    input.form?.addEventListener("reset", () => {
+      window.setTimeout(() => {
+        clearGeneratedDesignUpload(input.form, picker, input);
+        updateFileName();
+      }, 0);
+    });
+
     updateFileName();
   });
 }
@@ -493,6 +555,11 @@ function setupCustomForm() {
       event.preventDefault();
 
       const formData = new FormData(form);
+      const generatedDesignFile = getGeneratedDesignFile(form);
+
+      if (generatedDesignFile) {
+        formData.set("inspiration-upload", generatedDesignFile, generatedDesignFile.name);
+      }
 
       if (submitButton) {
         submitButton.disabled = true;

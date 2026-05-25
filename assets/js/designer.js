@@ -223,6 +223,132 @@ function fillRequestForm(state) {
   document.querySelector("#request-form")?.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
+function fileSafeName(value) {
+  return value.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "design";
+}
+
+function canvasToBlob(canvas) {
+  return new Promise((resolve, reject) => {
+    canvas.toBlob((blob) => {
+      if (blob) {
+        resolve(blob);
+      } else {
+        reject(new Error("Unable to capture design preview"));
+      }
+    }, "image/png", 0.96);
+  });
+}
+
+function attachFileToInput(input, file) {
+  if (typeof DataTransfer === "undefined") {
+    return false;
+  }
+
+  try {
+    const transfer = new DataTransfer();
+    transfer.items.add(file);
+    input.files = transfer.files;
+    return Boolean(input.files && input.files.length);
+  } catch (error) {
+    return false;
+  }
+}
+
+function updateDesignUploadPreview(input, file) {
+  const picker = input.closest("[data-file-picker]");
+  const field = input.closest(".form-field");
+  const fileName = picker?.querySelector("[data-file-name]");
+  const preview = picker?.querySelector("[data-design-preview]");
+
+  if (fileName) {
+    fileName.textContent = file.name;
+  }
+
+  if (preview && typeof URL !== "undefined") {
+    const existingUrl = preview.dataset.previewUrl;
+
+    if (existingUrl) {
+      URL.revokeObjectURL(existingUrl);
+    }
+
+    const previewUrl = URL.createObjectURL(file);
+    const image = document.createElement("img");
+
+    image.src = previewUrl;
+    image.alt = "Generated custom jewellery design";
+    preview.dataset.previewUrl = previewUrl;
+    preview.hidden = false;
+    preview.replaceChildren(image);
+  }
+
+  picker?.classList.add("has-generated-design");
+  field?.classList.add("is-prefilled");
+}
+
+function composeDesignScreenshot(sourceCanvas, state) {
+  const preview = document.createElement("canvas");
+  const context = preview.getContext("2d");
+  const width = 1400;
+  const height = 1000;
+
+  if (!context) {
+    return sourceCanvas;
+  }
+
+  preview.width = width;
+  preview.height = height;
+
+  const gradient = context.createLinearGradient(0, 0, width, height);
+  gradient.addColorStop(0, "#071012");
+  gradient.addColorStop(0.5, "#0d2723");
+  gradient.addColorStop(1, "#1a1115");
+  context.fillStyle = gradient;
+  context.fillRect(0, 0, width, height);
+
+  const sourceWidth = sourceCanvas.width || sourceCanvas.clientWidth;
+  const sourceHeight = sourceCanvas.height || sourceCanvas.clientHeight;
+  const scale = Math.max(width / sourceWidth, height / sourceHeight);
+  const drawWidth = sourceWidth * scale;
+  const drawHeight = sourceHeight * scale;
+  const drawX = (width - drawWidth) / 2;
+  const drawY = (height - drawHeight) / 2;
+
+  context.drawImage(sourceCanvas, drawX, drawY, drawWidth, drawHeight);
+
+  context.fillStyle = "rgba(255, 255, 255, 0.9)";
+  context.font = "600 34px Georgia, serif";
+  context.fillText("Toronto Jewels Cur", 56, 84);
+  context.font = "700 18px Arial, sans-serif";
+  context.letterSpacing = "2px";
+  context.fillText(`${state.piece} / ${state.stone} / ${state.metal}`.toUpperCase(), 58, 122);
+
+  return preview;
+}
+
+async function attachDesignScreenshot(sourceCanvas, state) {
+  const input = document.querySelector("#inspiration-upload");
+
+  if (!sourceCanvas || !input || typeof File === "undefined") {
+    return false;
+  }
+
+  const screenshot = composeDesignScreenshot(sourceCanvas, state);
+  const blob = await canvasToBlob(screenshot);
+  const fileName = `toronto-jewels-${fileSafeName(state.piece)}-${fileSafeName(state.stone)}-design.png`;
+  const file = new File([blob], fileName, { type: "image/png" });
+  const attachedToInput = attachFileToInput(input, file);
+
+  if (input.form) {
+    input.form.__tjGeneratedDesignFile = file;
+  }
+
+  input.dataset.generatedDesignFile = file.name;
+  input.dispatchEvent(new Event("change", { bubbles: true }));
+  updateDesignUploadPreview(input, file);
+
+  return attachedToInput || Boolean(input.form);
+}
+
 function drawFallback(canvas, state) {
   const context = canvas.getContext("2d");
   const rect = canvas.getBoundingClientRect();
@@ -1499,8 +1625,18 @@ async function setupDesigner() {
   controls?.addEventListener("input", update);
   controls?.addEventListener("change", update);
 
-  sendButton?.addEventListener("click", () => {
+  sendButton?.addEventListener("click", async () => {
     const state = getState(root);
+    const sourceCanvas = canvas.hidden ? fallback.querySelector("[data-designer-fallback-canvas]") : canvas;
+
+    sendButton.textContent = "Capturing Design...";
+
+    try {
+      await attachDesignScreenshot(sourceCanvas, state);
+    } catch (error) {
+      root.dataset.designerCaptureError = error instanceof Error ? error.message : "Unable to attach design preview";
+    }
+
     fillRequestForm(state);
     sendButton.textContent = "Design Sent";
     window.setTimeout(() => {
