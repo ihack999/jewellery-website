@@ -1869,9 +1869,9 @@ img[src*="img-4427"] {
   padding: clamp(1rem, 2.2vw, 1.45rem);
   border: 1px solid rgba(255, 255, 255, 0.16);
   border-radius: var(--radius-sm);
-  background: rgba(13, 25, 24, 0.9);
+  background: rgba(9, 18, 17, 0.97);
   box-shadow: 0 28px 90px rgba(0, 0, 0, 0.28);
-  backdrop-filter: blur(18px) saturate(1.12);
+  backdrop-filter: blur(8px) saturate(1.04);
 }
 
 .designer-panel__group {
@@ -2763,6 +2763,33 @@ body.modal-open {
 
   .swatch-row {
     grid-template-columns: 1fr;
+  }
+
+  .design-studio__overlay {
+    padding-top: 3rem;
+  }
+
+  .design-studio__intro h2 {
+    max-width: 8.5ch;
+    font-size: clamp(2.15rem, 10vw, 2.65rem);
+    line-height: 1;
+    overflow-wrap: break-word;
+    text-wrap: auto;
+  }
+
+  .design-studio__intro p {
+    max-width: 32ch;
+    font-size: 0.98rem;
+  }
+
+  .design-studio__stage {
+    height: 440px;
+    min-height: 440px;
+  }
+
+  .designer-panel {
+    gap: 0.8rem;
+    padding: 1rem;
   }
 
   .luxury-card__actions .button,

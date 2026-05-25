@@ -20,11 +20,69 @@ const FINISH_SETTINGS = {
   }
 };
 
-const STONE_COLORS = {
-  "Clear Diamond": "#f7fbff",
-  "Blush Sapphire": "#f3a7bb",
-  "Blue Sapphire": "#5b89d7",
-  "Emerald Green": "#4da77a"
+const STONE_PROFILES = {
+  "Clear Diamond": {
+    color: "#f8fcff",
+    absorption: "#edf8ff",
+    tint: "#ffffff",
+    table: "#ffffff",
+    opacity: 0.58,
+    transmission: 0.92,
+    roughness: 0.012,
+    ior: 2.42,
+    dispersion: 0.68,
+    attenuationDistance: 2.4,
+    fire: 0.72
+  },
+  "Blush Sapphire": {
+    color: "#d36f92",
+    absorption: "#b84676",
+    tint: "#ffc6d9",
+    table: "#ffe4ed",
+    opacity: 0.78,
+    transmission: 0.42,
+    roughness: 0.028,
+    ior: 1.77,
+    dispersion: 0.14,
+    attenuationDistance: 0.72,
+    fire: 0.34
+  },
+  "Blue Sapphire": {
+    color: "#1c4a9c",
+    absorption: "#0b225e",
+    tint: "#76a7ff",
+    table: "#bcd1ff",
+    opacity: 0.84,
+    transmission: 0.3,
+    roughness: 0.032,
+    ior: 1.77,
+    dispersion: 0.12,
+    attenuationDistance: 0.48,
+    fire: 0.26
+  },
+  "Emerald Green": {
+    color: "#16764f",
+    absorption: "#0c4f34",
+    tint: "#55c98d",
+    table: "#a7f0ca",
+    opacity: 0.82,
+    transmission: 0.36,
+    roughness: 0.036,
+    ior: 1.58,
+    dispersion: 0.08,
+    attenuationDistance: 0.54,
+    fire: 0.22
+  }
+};
+
+const STONE_COLORS = Object.fromEntries(
+  Object.entries(STONE_PROFILES).map(([name, profile]) => [name, profile.color])
+);
+
+const TEXTURE_URLS = {
+  studioHdr: "assets/textures/studio_small_08_1k.hdr",
+  metalNormal: "assets/textures/Metal002/Metal002_1K-JPG_NormalGL.jpg",
+  metalRoughness: "assets/textures/Metal002/Metal002_1K-JPG_Roughness.jpg"
 };
 
 const PIECE_MAP = {
@@ -68,8 +126,8 @@ function createSummary(state) {
     `${getWeightLabel(state.weight).toLowerCase()} proportion`,
     `${state.size} ct feel ${state.stone}`,
     `${state.shape} stone`,
-    state.halo ? "halo detail" : "no halo",
-    state.accent ? "accent stones" : "clean setting"
+    state.halo ? "diamond frame" : "unframed center stone",
+    state.accent ? "side stones" : "clean band"
   ];
 
   if (state.engraving) {
@@ -102,10 +160,32 @@ function setInitialPiece(root) {
   const params = new URLSearchParams(window.location.search);
   const selectedPiece = normalizePiece(params.get("piece") || params.get("piece-type"));
   const pieceField = root.querySelector('[data-designer-field="piece"]');
+  const setMatchingSelect = (fieldName, ...paramNames) => {
+    const field = root.querySelector(`[data-designer-field="${fieldName}"]`);
+    const selectedValue = paramNames.map((name) => params.get(name)).find(Boolean);
+
+    if (!field || !selectedValue) {
+      return;
+    }
+
+    const selectedOption = Array.from(field.options).find((option) => (
+      option.value.toLowerCase() === selectedValue.toLowerCase()
+      || option.textContent.trim().toLowerCase() === selectedValue.toLowerCase()
+    ));
+
+    if (selectedOption) {
+      field.value = selectedOption.value;
+    }
+  };
 
   if (selectedPiece && pieceField) {
     pieceField.value = selectedPiece;
   }
+
+  setMatchingSelect("shape", "shape", "stone-shape");
+  setMatchingSelect("stone", "stone", "stone-color");
+  setMatchingSelect("setting", "setting");
+  setMatchingSelect("finish", "finish");
 }
 
 function fillRequestForm(state) {
@@ -127,7 +207,7 @@ function fillRequestForm(state) {
   setValue("#piece-type", state.piece);
   setValue("#metal-preference", `${state.metal}, ${state.finish}`);
   setValue("#stone-preference", `${state.size} ct feel ${state.stone}, ${state.shape}`);
-  setValue("#finish-preference", `${state.setting} setting, ${state.halo ? "halo detail" : "no halo"}, ${state.accent ? "accent stones" : "clean setting"}`);
+  setValue("#finish-preference", `${state.setting} setting, ${state.halo ? "diamond frame" : "unframed center stone"}, ${state.accent ? "side stones" : "clean band"}`);
   setValue("#dimensions", `${state.piece} designer scale: ${state.size} ct feel, ${getWeightLabel(state.weight).toLowerCase()} proportion`);
 
   if (hiddenSummary) {
@@ -242,11 +322,14 @@ function setSummary(root, state) {
 
 async function createThreeStudio(root, canvas) {
   const THREE = await import("./three.module.js");
+  const { RGBELoader } = await import("./RGBELoader.js");
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, preserveDrawingBuffer: true });
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(33, 1, 0.1, 100);
   const model = new THREE.Group();
   const sparkle = new THREE.Group();
+  const runtimeTextures = {};
+  const disposableTextures = [];
   let environmentTexture = null;
   let currentState = getState(root);
   let frameId = null;
@@ -258,7 +341,7 @@ async function createThreeStudio(root, canvas) {
 
   renderer.setClearColor(0x000000, 0);
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.12;
+  renderer.toneMappingExposure = 1.26;
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
@@ -269,7 +352,221 @@ async function createThreeStudio(root, canvas) {
   camera.position.set(0, 0.62, 5.75);
   camera.lookAt(0, 0, 0);
 
-  function createEnvironmentTexture() {
+  function trackTexture(texture) {
+    if (texture) {
+      disposableTextures.push(texture);
+    }
+
+    return texture;
+  }
+
+  function configureTexture(texture, options = {}) {
+    const {
+      repeat = 1,
+      colorSpace = null,
+      minFilter = THREE.LinearMipmapLinearFilter,
+      magFilter = THREE.LinearFilter
+    } = options;
+
+    texture.wrapS = THREE.RepeatWrapping;
+    texture.wrapT = THREE.RepeatWrapping;
+    texture.repeat.set(repeat, repeat);
+    texture.minFilter = minFilter;
+    texture.magFilter = magFilter;
+    texture.anisotropy = Math.min(renderer.capabilities.getMaxAnisotropy(), 8);
+
+    if (colorSpace && "colorSpace" in texture) {
+      texture.colorSpace = colorSpace;
+    }
+
+    texture.needsUpdate = true;
+
+    return trackTexture(texture);
+  }
+
+  function createCanvasTexture(width, height, draw, options = {}) {
+    const textureCanvas = document.createElement("canvas");
+    const context = textureCanvas.getContext("2d");
+
+    textureCanvas.width = width;
+    textureCanvas.height = height;
+
+    if (context) {
+      draw(context, width, height);
+    }
+
+    return configureTexture(new THREE.CanvasTexture(textureCanvas), options);
+  }
+
+  function createBrushedAnisotropyTexture() {
+    return createCanvasTexture(512, 512, (context, width, height) => {
+      context.fillStyle = "rgb(128, 128, 255)";
+      context.fillRect(0, 0, width, height);
+
+      for (let y = 0; y < height; y += 1) {
+        const wave = Math.sin(y * 0.055) * 18 + Math.sin(y * 0.017) * 9;
+        const tone = 122 + (y % 11) * 2;
+        context.fillStyle = `rgb(${Math.round(tone + wave * 0.06)}, ${Math.round(130 - wave * 0.04)}, 250)`;
+        context.fillRect(0, y, width, 1);
+      }
+
+      context.globalAlpha = 0.28;
+      context.strokeStyle = "rgb(172, 172, 255)";
+
+      for (let index = 0; index < 120; index += 1) {
+        const y = Math.random() * height;
+        context.beginPath();
+        context.moveTo(Math.random() * width * 0.18, y);
+        context.lineTo(width - Math.random() * width * 0.18, y + Math.sin(index) * 5);
+        context.stroke();
+      }
+    }, { repeat: 7 });
+  }
+
+  function createStudioVelvetTexture() {
+    return createCanvasTexture(512, 512, (context, width, height) => {
+      const gradient = context.createRadialGradient(width * 0.48, height * 0.4, 20, width * 0.48, height * 0.4, width * 0.72);
+      gradient.addColorStop(0, "#233b36");
+      gradient.addColorStop(0.55, "#102724");
+      gradient.addColorStop(1, "#07100f");
+      context.fillStyle = gradient;
+      context.fillRect(0, 0, width, height);
+
+      context.globalAlpha = 0.2;
+
+      for (let y = 0; y < height; y += 3) {
+        context.fillStyle = y % 2 ? "#ffffff" : "#000000";
+        context.fillRect(0, y, width, 1);
+      }
+
+      context.globalAlpha = 0.16;
+
+      for (let index = 0; index < 2400; index += 1) {
+        const shade = 70 + Math.random() * 60;
+        context.fillStyle = `rgb(${shade}, ${shade + 18}, ${shade + 10})`;
+        context.fillRect(Math.random() * width, Math.random() * height, 1, 1);
+      }
+    }, { repeat: 2.4, colorSpace: THREE.SRGBColorSpace });
+  }
+
+  function createFineRoughnessTexture() {
+    return createCanvasTexture(512, 512, (context, width, height) => {
+      const image = context.createImageData(width, height);
+
+      for (let index = 0; index < image.data.length; index += 4) {
+        const grain = 120 + Math.random() * 70;
+        image.data[index] = grain;
+        image.data[index + 1] = grain;
+        image.data[index + 2] = grain;
+        image.data[index + 3] = 255;
+      }
+
+      context.putImageData(image, 0, 0);
+      context.globalAlpha = 0.32;
+
+      for (let y = 0; y < height; y += 6) {
+        context.fillStyle = y % 12 === 0 ? "#f2f2f2" : "#6e6e6e";
+        context.fillRect(0, y, width, 1);
+      }
+    }, { repeat: 5 });
+  }
+
+  function createGemMicroNormalTexture() {
+    return createCanvasTexture(512, 512, (context, width, height) => {
+      context.fillStyle = "rgb(128, 128, 255)";
+      context.fillRect(0, 0, width, height);
+      context.globalAlpha = 0.22;
+
+      for (let index = 0; index < 190; index += 1) {
+        const x = Math.random() * width;
+        const y = Math.random() * height;
+        const length = 14 + Math.random() * 72;
+        const angle = (Math.random() - 0.5) * Math.PI;
+        const dx = Math.cos(angle) * length;
+        const dy = Math.sin(angle) * length;
+        const tone = 122 + Math.random() * 34;
+
+        context.strokeStyle = `rgb(${tone}, ${tone}, 255)`;
+        context.beginPath();
+        context.moveTo(x, y);
+        context.lineTo(x + dx, y + dy);
+        context.stroke();
+      }
+
+      context.globalAlpha = 0.16;
+
+      for (let index = 0; index < 800; index += 1) {
+        const tone = 112 + Math.random() * 40;
+        context.fillStyle = `rgb(${tone}, ${tone}, 255)`;
+        context.fillRect(Math.random() * width, Math.random() * height, 1, 1);
+      }
+    }, { repeat: 4 });
+  }
+
+  function createGemInclusionTexture() {
+    return createCanvasTexture(512, 512, (context, width, height) => {
+      const gradient = context.createRadialGradient(width * 0.42, height * 0.36, 20, width * 0.5, height * 0.5, width * 0.68);
+      gradient.addColorStop(0, "rgba(255,255,255,0.95)");
+      gradient.addColorStop(0.56, "rgba(222,238,245,0.56)");
+      gradient.addColorStop(1, "rgba(120,140,155,0.18)");
+      context.fillStyle = gradient;
+      context.fillRect(0, 0, width, height);
+      context.globalAlpha = 0.2;
+
+      for (let index = 0; index < 72; index += 1) {
+        const x = Math.random() * width;
+        const y = Math.random() * height;
+        const radius = 0.5 + Math.random() * 2.4;
+
+        context.fillStyle = index % 3 ? "#ffffff" : "#9fb5bf";
+        context.beginPath();
+        context.arc(x, y, radius, 0, Math.PI * 2);
+        context.fill();
+      }
+
+      context.globalAlpha = 0.12;
+      context.strokeStyle = "#ffffff";
+
+      for (let index = 0; index < 36; index += 1) {
+        const y = Math.random() * height;
+        context.beginPath();
+        context.moveTo(Math.random() * width * 0.2, y);
+        context.bezierCurveTo(width * 0.35, y - 18, width * 0.68, y + 24, width - Math.random() * width * 0.2, y + Math.random() * 20);
+        context.stroke();
+      }
+    }, { repeat: 1.8, colorSpace: THREE.SRGBColorSpace });
+  }
+
+  async function loadTexture(url, options = {}) {
+    const loader = new THREE.TextureLoader();
+
+    return new Promise((resolve) => {
+      loader.load(
+        url,
+        (texture) => resolve(configureTexture(texture, options)),
+        undefined,
+        () => resolve(null)
+      );
+    });
+  }
+
+  async function loadStudioEnvironment() {
+    try {
+      const hdrTexture = await new RGBELoader().loadAsync(TEXTURE_URLS.studioHdr);
+      const pmrem = new THREE.PMREMGenerator(renderer);
+      const environment = pmrem.fromEquirectangular(hdrTexture).texture;
+
+      pmrem.dispose();
+      hdrTexture.dispose();
+
+      return trackTexture(environment);
+    } catch (error) {
+      root.dataset.designerTextureWarning = "studio-hdri-fallback";
+      return createProceduralEnvironmentTexture();
+    }
+  }
+
+  function createProceduralEnvironmentTexture() {
     const environmentCanvas = document.createElement("canvas");
     const context = environmentCanvas.getContext("2d");
 
@@ -301,10 +598,20 @@ async function createThreeStudio(root, canvas) {
       texture.colorSpace = THREE.SRGBColorSpace;
     }
 
-    return texture;
+    return trackTexture(texture);
   }
 
-  environmentTexture = createEnvironmentTexture();
+  runtimeTextures.brushNormal = createBrushedAnisotropyTexture();
+  runtimeTextures.microRoughness = createFineRoughnessTexture();
+  runtimeTextures.velvet = createStudioVelvetTexture();
+  runtimeTextures.gemNormal = createGemMicroNormalTexture();
+  runtimeTextures.gemInclusions = createGemInclusionTexture();
+  runtimeTextures.metalNormal = await loadTexture(TEXTURE_URLS.metalNormal, { repeat: 10 });
+  runtimeTextures.metalRoughness = await loadTexture(TEXTURE_URLS.metalRoughness, { repeat: 10 });
+  environmentTexture = await loadStudioEnvironment();
+  root.dataset.designerTextures = runtimeTextures.metalNormal && runtimeTextures.metalRoughness
+    ? "studio-hdri-metal-pbr"
+    : "studio-hdri-procedural-metal";
 
   if (environmentTexture) {
     scene.environment = environmentTexture;
@@ -334,15 +641,28 @@ async function createThreeStudio(root, canvas) {
   rim.position.set(3.1, 0.8, -1.2);
   scene.add(rim);
 
+  const gemPunch = new THREE.SpotLight(0xffffff, 7.8, 9, 0.42, 0.58, 0.9);
+  gemPunch.position.set(-1.7, 2.2, 3.6);
+  gemPunch.target.position.set(-0.32, 0.6, 0);
+  scene.add(gemPunch, gemPunch.target);
+
+  const tableFlash = new THREE.PointLight(0xdff6ff, 2.8, 4.5);
+  tableFlash.position.set(-0.55, 0.85, 1.6);
+  scene.add(tableFlash);
+
   const floor = new THREE.Mesh(
     new THREE.CircleGeometry(3.25, 96),
     new THREE.MeshPhysicalMaterial({
       color: 0xf1ebe1,
       roughness: 0.72,
       metalness: 0,
+      map: runtimeTextures.velvet,
       transparent: true,
-      opacity: 0.18,
-      clearcoat: 0.2
+      opacity: 0.28,
+      clearcoat: 0.16,
+      sheen: 0.45,
+      sheenColor: 0xcbded5,
+      sheenRoughness: 0.86
     })
   );
   floor.rotation.x = -Math.PI / 2;
@@ -381,34 +701,78 @@ async function createThreeStudio(root, canvas) {
 
   function materialForMetal() {
     const finish = FINISH_SETTINGS[currentState.finish] || FINISH_SETTINGS["High Polish"];
+    const normalScale = currentState.finish === "Soft Satin" ? 0.12 : currentState.finish === "Milgrain Edge" ? 0.08 : 0.045;
+    const metalNormal = runtimeTextures.metalNormal || runtimeTextures.brushNormal;
+    const metalRoughness = currentState.finish === "High Polish"
+      ? runtimeTextures.microRoughness
+      : runtimeTextures.metalRoughness || runtimeTextures.microRoughness;
 
     return new THREE.MeshPhysicalMaterial({
       color: METAL_COLORS[currentState.metal],
       metalness: currentState.finish === "Soft Satin" ? 0.82 : 0.95,
       roughness: finish.roughness,
+      roughnessMap: metalRoughness,
+      normalMap: metalNormal,
+      normalScale: new THREE.Vector2(normalScale, normalScale),
+      anisotropy: currentState.finish === "Soft Satin" ? 0.82 : 0.42,
+      anisotropyRotation: currentState.metal === "Rose Gold" ? 0.42 : -0.18,
+      anisotropyMap: runtimeTextures.brushNormal,
       clearcoat: finish.clearcoat,
       clearcoatRoughness: Math.min(0.4, finish.roughness * 0.62),
+      clearcoatNormalMap: runtimeTextures.brushNormal,
+      clearcoatNormalScale: new THREE.Vector2(0.018, 0.018),
       envMapIntensity: 1.2,
-      reflectivity: 0.82
+      reflectivity: 0.86
     });
   }
 
+  function stoneProfile() {
+    return STONE_PROFILES[currentState.stone] || STONE_PROFILES["Clear Diamond"];
+  }
+
+  function scintillatingMaterial(parameters, speed = 0.0014) {
+    const material = new THREE.MeshBasicMaterial(parameters);
+
+    material.userData.scintillation = {
+      baseOpacity: parameters.opacity ?? 1,
+      phase: Math.random() * Math.PI * 2,
+      speed
+    };
+
+    return material;
+  }
+
   function materialForStone() {
+    const profile = stoneProfile();
     const isDiamond = currentState.stone === "Clear Diamond";
+    const isEmerald = currentState.stone === "Emerald Green";
 
     return new THREE.MeshPhysicalMaterial({
-      color: STONE_COLORS[currentState.stone],
+      color: profile.color,
+      map: isDiamond ? runtimeTextures.gemInclusions : null,
       metalness: 0,
-      roughness: 0.04,
+      roughness: profile.roughness,
+      flatShading: true,
+      normalMap: runtimeTextures.gemNormal,
+      normalScale: new THREE.Vector2(isDiamond ? 0.018 : 0.032, isDiamond ? 0.018 : 0.032),
       transparent: true,
-      opacity: isDiamond ? 0.72 : 0.84,
-      transmission: isDiamond ? 0.72 : 0.34,
-      thickness: 0.82,
-      ior: isDiamond ? 2.35 : 1.76,
+      side: THREE.DoubleSide,
+      opacity: profile.opacity,
+      transmission: profile.transmission,
+      thickness: isEmerald ? 0.56 : 0.92,
+      ior: profile.ior,
+      dispersion: profile.dispersion,
+      attenuationColor: profile.absorption,
+      attenuationDistance: profile.attenuationDistance,
+      specularIntensity: 1,
+      specularColor: 0xffffff,
       reflectivity: 1,
       clearcoat: 1,
       clearcoatRoughness: 0.025,
-      envMapIntensity: 1.45
+      envMapIntensity: isDiamond ? 2.35 : 1.48,
+      iridescence: isDiamond ? 0.08 : 0.02,
+      iridescenceIOR: profile.ior,
+      premultipliedAlpha: true
     });
   }
 
@@ -449,46 +813,288 @@ async function createThreeStudio(root, canvas) {
     }
   }
 
+  function gemPoint(angle, radius, z, shape = currentState.shape) {
+    const cos = Math.cos(angle);
+    const sin = Math.sin(angle);
+    let x = cos * radius;
+    let y = sin * radius;
+
+    if (shape === "Oval") {
+      x *= 0.74;
+      y *= 1.18;
+    } else if (shape === "Pear") {
+      const taper = sin > 0 ? 1 - sin * 0.52 : 1 + Math.abs(sin) * 0.08;
+      x *= 0.78 * taper;
+      y *= sin > 0 ? 1.28 : 0.86;
+      y -= radius * 0.08;
+    } else if (shape === "Cushion") {
+      const cornerLift = 0.88 + Math.max(Math.abs(cos), Math.abs(sin)) * 0.2;
+      x *= cornerLift;
+      y *= cornerLift;
+    }
+
+    return new THREE.Vector3(x, y, z);
+  }
+
+  function gemRing(count, radius, z, shape = currentState.shape, offset = 0) {
+    return Array.from({ length: count }, (_, index) => {
+      const angle = offset + (Math.PI * 2 * index) / count;
+      return gemPoint(angle, radius, z, shape);
+    });
+  }
+
+  function pushGemVertex(positions, uvs, point, uvScale) {
+    positions.push(point.x, point.y, point.z);
+    uvs.push(0.5 + point.x / uvScale, 0.5 + point.y / uvScale);
+  }
+
+  function pushGemTriangle(positions, uvs, a, b, c, uvScale) {
+    pushGemVertex(positions, uvs, a, uvScale);
+    pushGemVertex(positions, uvs, b, uvScale);
+    pushGemVertex(positions, uvs, c, uvScale);
+  }
+
+  function pushGemQuad(positions, uvs, a, b, c, d, uvScale) {
+    pushGemTriangle(positions, uvs, a, b, d, uvScale);
+    pushGemTriangle(positions, uvs, b, c, d, uvScale);
+  }
+
+  function createCutStoneGeometry(size, shape = currentState.shape, segments = null) {
+    const count = segments || (shape === "Pear" ? 36 : shape === "Oval" ? 34 : 32);
+    const depth = shape === "Pear" ? size * 1.26 : shape === "Cushion" ? size * 0.98 : size * 1.08;
+    const tableRadius = size * (shape === "Pear" ? 0.31 : shape === "Cushion" ? 0.36 : 0.38);
+    const crownRadius = size * (shape === "Pear" ? 0.64 : 0.66);
+    const girdleRadius = size * (shape === "Cushion" ? 0.86 : 0.9);
+    const pavilionRadius = size * (shape === "Pear" ? 0.48 : 0.56);
+    const table = gemRing(count, tableRadius, depth * 0.45, shape, Math.PI / count);
+    const crown = gemRing(count, crownRadius, depth * 0.18, shape);
+    const girdle = gemRing(count, girdleRadius, 0, shape, Math.PI / count);
+    const pavilion = gemRing(count, pavilionRadius, -depth * 0.3, shape);
+    const tableCenter = new THREE.Vector3(0, shape === "Pear" ? -size * 0.04 : 0, depth * 0.52);
+    const culet = new THREE.Vector3(0, shape === "Pear" ? -size * 0.08 : 0, -depth * 0.58);
+    const positions = [];
+    const uvs = [];
+    const uvScale = size * 2.2;
+
+    for (let index = 0; index < count; index += 1) {
+      const next = (index + 1) % count;
+      pushGemTriangle(positions, uvs, tableCenter, table[index], table[next], uvScale);
+      pushGemQuad(positions, uvs, table[index], crown[index], crown[next], table[next], uvScale);
+      pushGemQuad(positions, uvs, crown[index], girdle[index], girdle[next], crown[next], uvScale);
+      pushGemQuad(positions, uvs, girdle[index], pavilion[index], pavilion[next], girdle[next], uvScale);
+      pushGemTriangle(positions, uvs, pavilion[next], pavilion[index], culet, uvScale);
+    }
+
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
+    geometry.setAttribute("uv", new THREE.Float32BufferAttribute(uvs, 2));
+    geometry.computeVertexNormals();
+
+    return geometry;
+  }
+
+  function makeGemLineGeometry(size, shape, count) {
+    const depth = shape === "Pear" ? size * 1.26 : shape === "Cushion" ? size * 0.98 : size * 1.08;
+    const tableRadius = size * (shape === "Pear" ? 0.31 : shape === "Cushion" ? 0.36 : 0.38);
+    const crownRadius = size * (shape === "Pear" ? 0.64 : 0.66);
+    const girdleRadius = size * (shape === "Cushion" ? 0.86 : 0.9);
+    const pavilionRadius = size * (shape === "Pear" ? 0.48 : 0.56);
+    const table = gemRing(count, tableRadius, depth * 0.535, shape, Math.PI / count);
+    const crown = gemRing(count, crownRadius, depth * 0.18, shape);
+    const girdle = gemRing(count, girdleRadius, 0.01, shape, Math.PI / count);
+    const pavilion = gemRing(count, pavilionRadius, -depth * 0.28, shape);
+    const positions = [];
+
+    function addLine(a, b) {
+      positions.push(a.x, a.y, a.z, b.x, b.y, b.z);
+    }
+
+    for (let index = 0; index < count; index += 1) {
+      const next = (index + 1) % count;
+      addLine(table[index], table[next]);
+      addLine(girdle[index], girdle[next]);
+
+      if (index % 2 === 0) {
+        addLine(table[index], crown[index]);
+        addLine(crown[index], girdle[index]);
+        addLine(girdle[index], pavilion[index]);
+      }
+    }
+
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
+
+    return geometry;
+  }
+
+  function addGemFacetOverlay(stone, size) {
+    const profile = stoneProfile();
+    const count = currentState.shape === "Pear" ? 36 : currentState.shape === "Oval" ? 34 : 32;
+    const lineMaterial = new THREE.LineBasicMaterial({
+      color: profile.table,
+      transparent: true,
+      opacity: currentState.stone === "Clear Diamond" ? 0.58 : 0.32,
+      depthWrite: false
+    });
+    const lines = new THREE.LineSegments(makeGemLineGeometry(size, currentState.shape, count), lineMaterial);
+    const fireColors = [0xffd0ef, 0xcbeeff, 0xffebb0, 0xded0ff, 0xc9fff0];
+
+    stone.add(lines);
+
+    function addHighlight(width, height, x, y, z, rotation, opacity, color = profile.table) {
+      const highlight = new THREE.Mesh(
+        new THREE.PlaneGeometry(width, height),
+        scintillatingMaterial({
+          color,
+          transparent: true,
+          opacity,
+          depthWrite: false,
+          side: THREE.DoubleSide,
+          blending: THREE.AdditiveBlending
+        }, 0.0022)
+      );
+
+      highlight.position.set(x, y, z);
+      highlight.rotation.z = rotation;
+      highlight.renderOrder = 4;
+      stone.add(highlight);
+    }
+
+    addHighlight(size * 0.5, size * 0.07, -size * 0.08, size * 0.08, size * 0.64, -0.24, currentState.stone === "Clear Diamond" ? 0.42 : 0.24);
+    addHighlight(size * 0.32, size * 0.045, size * 0.16, -size * 0.18, size * 0.63, 0.56, currentState.stone === "Clear Diamond" ? 0.34 : 0.2, 0xffffff);
+    addHighlight(size * 0.22, size * 0.035, -size * 0.24, -size * 0.14, size * 0.62, -0.74, currentState.stone === "Clear Diamond" ? 0.26 : 0.16, profile.tint);
+
+    for (let index = 0; index < 8; index += 1) {
+      const angle = (Math.PI * 2 * index) / 8 + 0.1;
+      const next = angle + Math.PI / 10;
+      const near = gemPoint(angle, size * 0.18, size * 0.625, currentState.shape);
+      const farA = gemPoint(angle, size * 0.58, size * 0.47, currentState.shape);
+      const farB = gemPoint(next, size * 0.52, size * 0.49, currentState.shape);
+      const panelGeometry = new THREE.BufferGeometry();
+      const flashColor = index % 3 === 0 ? profile.tint : index % 3 === 1 ? profile.table : 0xffffff;
+
+      panelGeometry.setAttribute("position", new THREE.Float32BufferAttribute([
+        near.x, near.y, near.z,
+        farA.x, farA.y, farA.z,
+        farB.x, farB.y, farB.z
+      ], 3));
+      panelGeometry.computeVertexNormals();
+
+      stone.add(new THREE.Mesh(
+        panelGeometry,
+        scintillatingMaterial({
+          color: flashColor,
+          transparent: true,
+          opacity: currentState.stone === "Clear Diamond" ? 0.2 : 0.12,
+          depthWrite: false,
+          side: THREE.DoubleSide,
+          blending: THREE.AdditiveBlending
+        }, 0.0017)
+      ));
+    }
+
+    for (let index = 0; index < 6; index += 1) {
+      const angle = (Math.PI * 2 * index) / 6 + 0.32;
+      const next = angle + Math.PI / 8;
+      const near = gemPoint(angle, size * 0.24, size * 0.32, currentState.shape);
+      const farA = gemPoint(angle, size * 0.76, size * 0.08, currentState.shape);
+      const farB = gemPoint(next, size * 0.68, size * 0.1, currentState.shape);
+      const shadowGeometry = new THREE.BufferGeometry();
+
+      shadowGeometry.setAttribute("position", new THREE.Float32BufferAttribute([
+        near.x, near.y, near.z,
+        farA.x, farA.y, farA.z,
+        farB.x, farB.y, farB.z
+      ], 3));
+
+      stone.add(new THREE.Mesh(
+        shadowGeometry,
+        new THREE.MeshBasicMaterial({
+          color: currentState.stone === "Clear Diamond" ? 0x5c6f76 : profile.absorption,
+          transparent: true,
+          opacity: currentState.stone === "Clear Diamond" ? 0.12 : 0.22,
+          depthWrite: false,
+          side: THREE.DoubleSide
+        })
+      ));
+    }
+
+    for (let index = 0; index < 10; index += 1) {
+      const angle = (Math.PI * 2 * index) / 10 + 0.18;
+      const point = gemPoint(angle, size * 0.44, size * 0.58, currentState.shape);
+      const glint = new THREE.Mesh(
+        new THREE.TetrahedronGeometry(size * (0.022 + (index % 3) * 0.006), 0),
+        scintillatingMaterial({
+          color: fireColors[index % fireColors.length],
+          transparent: true,
+          opacity: profile.fire,
+          depthWrite: false,
+          blending: THREE.AdditiveBlending
+        }, 0.0028)
+      );
+
+      glint.position.copy(point);
+      glint.rotation.set(angle * 0.2, angle * 0.7, angle);
+      stone.add(glint);
+    }
+  }
+
   function makeStone(scale = 1) {
     const size = Number(currentState.size) * 0.24 * scale;
     const material = materialForStone();
+    const profile = stoneProfile();
     const stone = new THREE.Group();
-    let mesh;
-
-    if (currentState.shape === "Pear") {
-      mesh = new THREE.Group();
-      const cone = new THREE.Mesh(new THREE.ConeGeometry(size * 0.78, size * 1.35, 38), material);
-      const round = new THREE.Mesh(new THREE.SphereGeometry(size * 0.58, 32, 18), material);
-      cone.position.y = -size * 0.18;
-      round.position.y = size * 0.26;
-      mesh.add(cone, round);
-    } else if (currentState.shape === "Oval") {
-      mesh = new THREE.Mesh(new THREE.SphereGeometry(size, 42, 24), material);
-      mesh.scale.set(0.74, 1.15, 0.58);
-    } else if (currentState.shape === "Cushion") {
-      mesh = new THREE.Mesh(new THREE.OctahedronGeometry(size * 1.04, 2), material);
-      mesh.scale.set(1.02, 1.02, 0.48);
-      mesh.rotation.z = Math.PI / 4;
-    } else {
-      mesh = new THREE.Mesh(new THREE.OctahedronGeometry(size, 2), material);
-      mesh.scale.z = 0.66;
-    }
+    const mesh = new THREE.Mesh(createCutStoneGeometry(size, currentState.shape), material);
+    const core = new THREE.Mesh(
+      createCutStoneGeometry(size * 0.76, currentState.shape, currentState.shape === "Pear" ? 24 : 22),
+      new THREE.MeshBasicMaterial({
+        color: profile.absorption,
+        transparent: true,
+        opacity: currentState.stone === "Clear Diamond" ? 0.08 : 0.2,
+        depthWrite: false,
+        blending: THREE.AdditiveBlending
+      })
+    );
 
     const table = new THREE.Mesh(
-      new THREE.CircleGeometry(size * 0.38, 36),
+      new THREE.CircleGeometry(size * (currentState.shape === "Pear" ? 0.31 : currentState.shape === "Cushion" ? 0.36 : 0.38), 48),
       new THREE.MeshBasicMaterial({
-        color: 0xffffff,
+        color: profile.table,
         transparent: true,
-        opacity: currentState.stone === "Clear Diamond" ? 0.34 : 0.18,
+        opacity: currentState.stone === "Clear Diamond" ? 0.36 : 0.18,
+        depthWrite: false,
         side: THREE.DoubleSide
       })
     );
-    table.position.z = size * 0.5;
-    table.scale.y = currentState.shape === "Oval" ? 1.28 : currentState.shape === "Pear" ? 1.08 : 0.88;
+    table.position.z = size * 0.59;
+    table.scale.y = currentState.shape === "Oval" ? 1.22 : currentState.shape === "Pear" ? 1.08 : 0.9;
+    core.scale.z = 0.82;
 
-    stone.add(mesh, table);
+    stone.add(core, mesh, table);
+    addGemFacetOverlay(stone, size);
 
     return enableShadows(stone);
+  }
+
+  function makeMeleeStone(size, material) {
+    const profile = stoneProfile();
+    const group = new THREE.Group();
+    const mesh = new THREE.Mesh(createCutStoneGeometry(size, "Round", 14), material);
+    const table = new THREE.Mesh(
+      new THREE.CircleGeometry(size * 0.36, 18),
+      new THREE.MeshBasicMaterial({
+        color: profile.table,
+        transparent: true,
+        opacity: currentState.stone === "Clear Diamond" ? 0.34 : 0.18,
+        depthWrite: false,
+        side: THREE.DoubleSide
+      })
+    );
+
+    table.position.z = size * 0.56;
+    group.add(mesh, table);
+
+    return enableShadows(group);
   }
 
   function addHalo(parent, centerX, centerY, radius, count, z, scaleY = 1) {
@@ -500,7 +1106,7 @@ async function createThreeStudio(root, canvas) {
 
     for (let index = 0; index < count; index += 1) {
       const angle = (Math.PI * 2 * index) / count;
-      const gem = new THREE.Mesh(new THREE.OctahedronGeometry(0.05 + Number(currentState.size) * 0.006, 1), material);
+      const gem = makeMeleeStone(0.048 + Number(currentState.size) * 0.006, material);
       gem.position.set(centerX + Math.cos(angle) * radius, centerY + Math.sin(angle) * radius * scaleY, z);
       gem.rotation.set(angle * 0.3, angle, 0);
       parent.add(gem);
@@ -526,8 +1132,9 @@ async function createThreeStudio(root, canvas) {
     for (let index = 0; index < count; index += 1) {
       const progress = count === 1 ? 0.5 : index / (count - 1);
       const angle = start + (end - start) * progress;
-      const gem = new THREE.Mesh(new THREE.OctahedronGeometry(size, 1), material);
+      const gem = makeMeleeStone(size, material);
       gem.position.set(x + Math.cos(angle) * radius, y + Math.sin(angle) * radius * scaleY, z);
+      gem.rotation.set(angle * 0.2, angle * 0.9, 0);
       parent.add(gem);
     }
   }
@@ -570,6 +1177,33 @@ async function createThreeStudio(root, canvas) {
     parent.add(bezel);
   }
 
+  function addGalleryBasket(parent, centerX, centerY, centerZ, radius, scaleY = 1) {
+    const metal = materialForMetal();
+    const railRadius = 0.014 * weightValue();
+    const lowerZ = centerZ - 0.12;
+    const upperZ = centerZ + 0.05;
+    const basket = new THREE.Group();
+    const lowerRail = new THREE.Mesh(new THREE.TorusGeometry(radius * 0.72, railRadius, 10, 72), metal);
+
+    lowerRail.position.set(centerX, centerY, lowerZ);
+    lowerRail.scale.y = scaleY;
+    basket.add(lowerRail);
+
+    for (let index = 0; index < 6; index += 1) {
+      const angle = (Math.PI * 2 * index) / 6;
+      const x = centerX + Math.cos(angle) * radius * 0.68;
+      const y = centerY + Math.sin(angle) * radius * scaleY * 0.68;
+      basket.add(makeCylinderBetween(
+        new THREE.Vector3(x, y, lowerZ),
+        new THREE.Vector3(centerX + Math.cos(angle) * radius * 0.9, centerY + Math.sin(angle) * radius * scaleY * 0.9, upperZ),
+        railRadius * 0.74,
+        metal
+      ));
+    }
+
+    parent.add(basket);
+  }
+
   function addMilgrain(parent, centerX, centerY, radius, count, z, scaleY = 1, size = 0.018) {
     if (currentState.finish !== "Milgrain Edge") {
       return;
@@ -593,6 +1227,8 @@ async function createThreeStudio(root, canvas) {
     } else {
       addProngs(parent, centerX, centerY, centerZ, radius, prongs, scaleY);
     }
+
+    addGalleryBasket(parent, centerX, centerY, centerZ, radius, scaleY);
 
     if (currentState.setting === "Cathedral" && shoulders) {
       const metal = materialForMetal();
@@ -712,9 +1348,22 @@ async function createThreeStudio(root, canvas) {
     };
 
     model.add((builders[currentState.piece] || buildRing)());
-    model.scale.setScalar(currentState.piece === "Earrings" ? 0.9 : 0.82);
-    model.position.set(currentState.piece === "Necklace" ? -0.12 : -0.18, currentState.piece === "Necklace" ? 0.08 : 0, 0);
+    model.scale.setScalar(currentState.piece === "Ring" ? 0.64 : currentState.piece === "Earrings" ? 0.84 : 0.76);
+    model.position.set(currentState.piece === "Necklace" ? -0.28 : currentState.piece === "Earrings" ? -0.2 : -0.58, currentState.piece === "Necklace" ? 0.08 : 0, 0);
     resize();
+  }
+
+  function animateScintillation(time) {
+    model.traverse((child) => {
+      const material = child.material;
+
+      if (!material || !material.userData?.scintillation) {
+        return;
+      }
+
+      const { baseOpacity, phase, speed } = material.userData.scintillation;
+      material.opacity = baseOpacity * (0.72 + Math.sin(time * speed + phase) * 0.28);
+    });
   }
 
   function animate(time = 0) {
@@ -727,6 +1376,7 @@ async function createThreeStudio(root, canvas) {
     model.rotation.x += (targetRotationX + idleLift - model.rotation.x) * 0.08;
     sparkle.rotation.y += 0.0018;
     sparkle.rotation.x = Math.sin(time * 0.00018) * 0.08;
+    animateScintillation(time);
     renderer.render(scene, camera);
     frameId = window.requestAnimationFrame(animate);
   }
@@ -784,7 +1434,7 @@ async function createThreeStudio(root, canvas) {
       canvas.removeEventListener("pointercancel", onPointerUp);
       canvas.removeEventListener("pointerleave", onPointerUp);
       window.removeEventListener("resize", resize);
-      environmentTexture?.dispose();
+      disposableTextures.forEach((texture) => texture.dispose());
       renderer.dispose();
     }
   };
