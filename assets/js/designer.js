@@ -2990,6 +2990,13 @@ async function createThreeStudio(root, canvas) {
     const rtOpts = { type: THREE.UnsignedByteType, depthBuffer: true, stencilBuffer: false };
     const bloomRtOpts = { type: THREE.HalfFloatType, depthBuffer: false, stencilBuffer: false };
     const sceneRT = new THREE.WebGLRenderTarget(2, 2, rtOpts);
+    // Phase 4 DOF: attach a DepthTexture so the composite pass can sample
+    // per-pixel scene depth and compute a circle-of-confusion for bokeh.
+    // UnsignedShortType is enough precision at our scene scale (~12 units
+    // total camera-to-backdrop depth) and avoids the WEBGL_depth_texture
+    // float-depth extension cost.
+    sceneRT.depthTexture = new THREE.DepthTexture(2, 2);
+    sceneRT.depthTexture.type = THREE.UnsignedShortType;
     // NOTE: UnsignedByteType is required here. HalfFloatType (which we tried
     // first for HDR bloom precision) caused the entire jewelry model to
     // render as solid black inside the RT — a three.js r164 quirk likely
@@ -3078,10 +3085,21 @@ async function createThreeStudio(root, canvas) {
         tBloom0:       { value: null },
         tBloom1:       { value: null },
         tBloom2:       { value: null },
+        tDepth:        { value: null },
         bloomStrength: { value: 0.32 },
         chromatic:     { value: 0.0022 },
         vignette:      { value: 0.5 },
         grain:         { value: 0.012 },
+        // Phase 4 DOF — focal plane sits on the gem. cameraNear/Far feed
+        // the linearizer so CoC scales correctly across the actual scene
+        // depth range. focusDist/Range are tuned for the 33° telephoto
+        // jewelry framing (camera at z=5.75 → gem at z=0 → eye-depth 5.75).
+        cameraNear:    { value: 0.1 },
+        cameraFar:     { value: 100 },
+        focusDist:     { value: 5.75 },
+        focusRange:    { value: 0.55 },
+        bokehScale:    { value: 0.0018 },
+        texelSize:     { value: new THREE.Vector2(1 / 1024, 1 / 1024) },
         time:          { value: 0 }
       },
       vertexShader: vs,
@@ -3091,21 +3109,67 @@ async function createThreeStudio(root, canvas) {
         "uniform sampler2D tBloom0;",
         "uniform sampler2D tBloom1;",
         "uniform sampler2D tBloom2;",
+        "uniform sampler2D tDepth;",
         "uniform float bloomStrength;",
         "uniform float chromatic;",
         "uniform float vignette;",
         "uniform float grain;",
+        "uniform float cameraNear;",
+        "uniform float cameraFar;",
+        "uniform float focusDist;",
+        "uniform float focusRange;",
+        "uniform float bokehScale;",
+        "uniform vec2  texelSize;",
         "uniform float time;",
         "float rand(vec2 co){ return fract(sin(dot(co, vec2(12.9898, 78.233))) * 43758.5453); }",
+        // Convert non-linear depth-buffer value (NDC z in [0,1]) back to
+        // view-space distance (positive, in scene units). Standard
+        // formula for a perspective projection.
+        "float linearizeDepth(float d) {",
+        "  float z = d * 2.0 - 1.0;",
+        "  return (2.0 * cameraNear * cameraFar) / (cameraFar + cameraNear - z * (cameraFar - cameraNear));",
+        "}",
+        // 7-tap hexagonal bokeh sample pattern — visually softer than a
+        // box blur, cheap (only 7 taps), and gives a slight 'gem facet'
+        // sparkle to defocused highlights. Offsets are pre-baked unit
+        // vectors on a hex; the shader scales them by CoC * bokehScale.
+        "const vec2 BOKEH[6] = vec2[6](",
+        "  vec2( 1.000,  0.000),",
+        "  vec2( 0.500,  0.866),",
+        "  vec2(-0.500,  0.866),",
+        "  vec2(-1.000,  0.000),",
+        "  vec2(-0.500, -0.866),",
+        "  vec2( 0.500, -0.866)",
+        ");",
         "void main() {",
         "  vec2 d = vUv - 0.5;",
         "  float r2 = dot(d, d);",
         "  float ca = chromatic * (1.0 + r2 * 2.5);",
+        // CoC: 0 within focus range, ramps to 1.0 over a 2× falloff zone.
+        // Sign of (depth - focusDist) intentionally ignored — symmetric
+        // blur in front of and behind focal plane.
+        "  float depth01 = texture2D(tDepth, vUv).r;",
+        "  float dist = linearizeDepth(depth01);",
+        "  float coc = clamp((abs(dist - focusDist) - focusRange) / (focusRange * 2.0), 0.0, 1.0);",
+        // Hexagonal bokeh sample — sample center + 6 ring taps offset by
+        // CoC * bokehScale. When CoC = 0 (in focus), all taps converge at
+        // center → pin-sharp. Each tap also gets the chromatic split so
+        // bokeh discs retain the rim CA fringe.
+        "  vec2 radius = texelSize * (coc * bokehScale * 600.0);",
         "  vec4 sceneSample = texture2D(tScene, vUv);",
         "  vec3 col;",
         "  col.r = texture2D(tScene, vUv - d * ca).r;",
         "  col.g = sceneSample.g;",
         "  col.b = texture2D(tScene, vUv + d * ca).b;",
+        // Mix in hexagonal blur when out of focus.
+        "  if (coc > 0.01) {",
+        "    vec3 blurred = sceneSample.rgb;",
+        "    for (int i = 0; i < 6; i++) {",
+        "      blurred += texture2D(tScene, vUv + BOKEH[i] * radius).rgb;",
+        "    }",
+        "    blurred *= (1.0 / 7.0);",
+        "    col = mix(col, blurred, coc);",
+        "  }",
         "  vec3 b = texture2D(tBloom0, vUv).rgb;",
         "  b += texture2D(tBloom1, vUv).rgb * 1.25;",
         "  b += texture2D(tBloom2, vUv).rgb * 1.55;",
@@ -3131,6 +3195,9 @@ async function createThreeStudio(root, canvas) {
       curW = w;
       curH = h;
       sceneRT.setSize(w, h);
+      // Keep the DOF composite's texel size in sync with the actual RT
+      // resolution so the bokeh radius is resolution-independent.
+      compositeMat.uniforms.texelSize.value.set(1 / Math.max(1, w), 1 / Math.max(1, h));
       for (let i = 0; i < 3; i += 1) {
         const mw = Math.max(1, w >> (i + 1));
         const mh = Math.max(1, h >> (i + 1));
@@ -3190,6 +3257,12 @@ async function createThreeStudio(root, canvas) {
       //    already AgX tonemapped from the scene-render pass).
       fsQuad.material = compositeMat;
       compositeMat.uniforms.tScene.value = sceneRT.texture;
+      compositeMat.uniforms.tDepth.value = sceneRT.depthTexture;
+      compositeMat.uniforms.cameraNear.value = camera.near;
+      compositeMat.uniforms.cameraFar.value = camera.far;
+      // Focus distance tracks the camera→origin distance so any view
+      // preset (Macro, Top-Down, …) keeps the gem in sharp focus.
+      compositeMat.uniforms.focusDist.value = camera.position.length();
       compositeMat.uniforms.tBloom0.value = bloomMips[0][0].texture;
       compositeMat.uniforms.tBloom1.value = bloomMips[1][0].texture;
       compositeMat.uniforms.tBloom2.value = bloomMips[2][0].texture;
