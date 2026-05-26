@@ -3540,10 +3540,9 @@ async function createThreeStudio(root, canvas) {
     const halfY = size * (isSquare ? 0.78 : 1.16);
     const corner = size * 0.18; // chamfer
     const tableInset = size * 0.18;
-    const tableZ = size * 0.5;
+    const tableZ = size * 0.42;   // shallower crown (real emeralds: ~15% of total depth)
     const girdleZ = 0;
-    const pavZ = -size * 0.72;
-    const stepRatio = [0.0, 0.35, 0.7]; // outline shrink along step rings going down crown
+    const pavZ = -size * 0.86;    // deeper pavilion (Tolkowsky-ish for step cuts)
 
     // 8-vertex outline (rectangle with chamfered corners).
     function outlineRect(scaleXY, z) {
@@ -3563,21 +3562,32 @@ async function createThreeStudio(root, canvas) {
       ];
     }
     const positions = [];
-    // Three rings on the crown (table edge + 2 steps down to girdle).
+    // Real emerald/asscher cuts have THREE concentric crown steps (table
+    // edge → step 1 → step 2 → girdle). The old geometry only had two
+    // steps, which read as a chunky bevel rather than the signature
+    // stair-step crown that gives these cuts their hall-of-mirrors
+    // optical effect. Adding the third tier brings the crown count up
+    // to the canonical 1 + 8 + 8 + 8 = 25 facets.
+    const tableScale = 1 - tableInset / size;        // ~0.82
     const rings = [
-      outlineRect(1 - tableInset / size, tableZ),                 // table edge
-      outlineRect(1 - tableInset / size + 0.06, tableZ - size * 0.07), // first step
-      outlineRect(1, girdleZ)                                      // girdle
+      outlineRect(tableScale,                tableZ),                    // table edge
+      outlineRect(tableScale + 0.05,         tableZ - size * 0.05),      // crown step 1
+      outlineRect(tableScale + 0.10,         tableZ - size * 0.10),      // crown step 2
+      outlineRect(1,                         girdleZ)                    // girdle
     ];
-    // Pavilion: two step rings then converge to a keel line (or culet point for square).
+    // Pavilion: THREE step rings then converge to a keel line / culet.
+    // Real emerald-cut pavilions are deeper than the crown and stepped
+    // in 3 rings — the same hall-of-mirrors effect, but inverted, that
+    // returns light up through the table.
     const pavRings = [
-      outlineRect(0.84, -size * 0.18),
-      outlineRect(0.5, -size * 0.42)
+      outlineRect(0.88, -size * 0.20),
+      outlineRect(0.66, -size * 0.45),
+      outlineRect(0.36, -size * 0.70)
     ];
     // Sub-percent vertex jitter so the step facets don't sit at
     // mathematically perfect right angles — real lapidary work is
     // never that clean.
-    jitterStoneVerts([rings[0], rings[1], rings[2], pavRings[0], pavRings[1]], size * 0.0022);
+    jitterStoneVerts([...rings, ...pavRings], size * 0.0022);
     // Table fan from center.
     const tc = vec(0, 0, tableZ);
     for (let i = 0; i < 8; i += 1) pushTri(positions, tc, rings[0][i], rings[0][(i + 1) % 8]);
@@ -3624,13 +3634,19 @@ async function createThreeStudio(root, canvas) {
     return finishGeometry(positions);
   }
 
-  // Princess: square modified-brilliant - inverted pyramid with chevron pavilion.
+  // Princess: square modified-brilliant. Real french-cut princess has a
+  // TWO-TIER chevron pavilion (the signature "X" you see on the bottom of
+  // a princess diamond when held to light). The old single-tier pavilion
+  // was a 21-facet approximation; the new layout uses two chevron rings
+  // bringing the count to ~37 facets — closer to the 49-facet french-cut
+  // reference and producing the broken-light pattern that distinguishes
+  // a real princess from a CGI inverted pyramid.
   function createPrincessGeometry(size) {
     const half = size * 0.78;
     const tableHalf = size * 0.6;
-    const tableZ = size * 0.48;
+    const tableZ = size * 0.32;     // Tolkowsky-ish low crown
     const girdleZ = 0;
-    const culetZ = -size * 0.84;
+    const culetZ = -size * 0.86;    // deeper pavilion
     const T = [
       vec( tableHalf,  tableHalf, tableZ),
       vec(-tableHalf,  tableHalf, tableZ),
@@ -3643,7 +3659,7 @@ async function createThreeStudio(root, canvas) {
       vec(-half, -half, girdleZ),
       vec( half, -half, girdleZ)
     ];
-    // Mid-edge girdle helpers (for chevron pavilion).
+    // Mid-edge girdle helpers (chevron upper tier joint).
     const Gm = [
       vec(0, half, girdleZ),
       vec(-half, 0, girdleZ),
@@ -3651,18 +3667,33 @@ async function createThreeStudio(root, canvas) {
       vec(half, 0, girdleZ)
     ];
     const culet = vec(0, 0, culetZ);
-    // Mid-pavilion chevron verts (between corners and culet).
+
+    // Chevron tier 1: corner-line helpers ~40% down the pavilion.
     const Pm = [
-      vec( half * 0.4,  half * 0.4, culetZ * 0.45),
-      vec(-half * 0.4,  half * 0.4, culetZ * 0.45),
-      vec(-half * 0.4, -half * 0.4, culetZ * 0.45),
-      vec( half * 0.4, -half * 0.4, culetZ * 0.45)
+      vec( half * 0.42,  half * 0.42, culetZ * 0.40),
+      vec(-half * 0.42,  half * 0.42, culetZ * 0.40),
+      vec(-half * 0.42, -half * 0.42, culetZ * 0.40),
+      vec( half * 0.42, -half * 0.42, culetZ * 0.40)
+    ];
+    // Mid-side helpers between tier 1 and tier 2 (the chevron "elbow").
+    const Gm2 = [
+      vec(0,  half * 0.46, culetZ * 0.55),
+      vec(-half * 0.46, 0, culetZ * 0.55),
+      vec(0, -half * 0.46, culetZ * 0.55),
+      vec( half * 0.46, 0, culetZ * 0.55)
+    ];
+    // Chevron tier 2: corner-line helpers ~75% down the pavilion.
+    const Pm2 = [
+      vec( half * 0.18,  half * 0.18, culetZ * 0.75),
+      vec(-half * 0.18,  half * 0.18, culetZ * 0.75),
+      vec(-half * 0.18, -half * 0.18, culetZ * 0.75),
+      vec( half * 0.18, -half * 0.18, culetZ * 0.75)
     ];
 
     // Sub-percent jitter on every conceptual vertex so the four-fold
     // princess symmetry isn't mathematically perfect — real princess
     // cuts have ~0.3–0.5° facet-angle variance from the cutter.
-    jitterStoneVerts([T, G, Gm, Pm, [culet]], size * 0.0025);
+    jitterStoneVerts([T, G, Gm, Pm, Gm2, Pm2, [culet]], size * 0.0025);
 
     const positions = [];
     // Table - 2 triangles.
@@ -3671,14 +3702,27 @@ async function createThreeStudio(root, canvas) {
     for (let i = 0; i < 4; i += 1) {
       pushQuad(positions, T[i], T[(i + 1) % 4], G[(i + 1) % 4], G[i]);
     }
-    // Pavilion chevrons - 2 chevron facets per side.
+    // Pavilion — tier 1 chevron (between girdle line and Pm/Gm2 line).
+    // Each side contributes 4 triangular facets that form the upper half
+    // of the chevron "V" pattern.
     for (let i = 0; i < 4; i += 1) {
-      const a = G[i], b = Gm[i], c = G[(i + 1) % 4];
-      const pa = Pm[i], pc = Pm[(i + 1) % 4];
-      pushTri(positions, a, pa, b);
-      pushTri(positions, b, pa, culet);
-      pushTri(positions, b, culet, pc);
-      pushTri(positions, b, pc, c);
+      const iNext = (i + 1) % 4;
+      // Tier 1 upper-left and upper-right (girdle corner → Pm → mid-edge)
+      pushTri(positions, G[i],   Pm[i],     Gm[i]);
+      pushTri(positions, Gm[i],  Pm[iNext], G[iNext]);
+      // Tier 1 lower-left and lower-right (Pm → Gm2 → mid-edge)
+      pushTri(positions, Pm[i],  Gm2[i],    Gm[i]);
+      pushTri(positions, Gm[i],  Gm2[i],    Pm[iNext]);
+    }
+    // Pavilion — tier 2 chevron (Pm/Gm2 line → Pm2/culet).
+    for (let i = 0; i < 4; i += 1) {
+      const iNext = (i + 1) % 4;
+      // Tier 2 upper-left and upper-right
+      pushTri(positions, Pm[i],  Pm2[i],    Gm2[i]);
+      pushTri(positions, Gm2[i], Pm2[iNext], Pm[iNext]);
+      // Tier 2 lower-left and lower-right (terminate at culet point)
+      pushTri(positions, Pm2[i],  culet,    Gm2[i]);
+      pushTri(positions, Gm2[i],  culet,    Pm2[iNext]);
     }
     return finishGeometry(positions);
   }
