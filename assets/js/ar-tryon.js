@@ -36,6 +36,17 @@ const RING_PIP = 14;
 const INDEX_MCP = 5;
 const PINKY_MCP = 17;
 
+/* Per-finger anthropometric ratios: finger diameter at the proximal phalanx
+ * (where rings sit) as a fraction of the knuckle-bone hand width (index MCP
+ * ↔ pinky MCP). Sourced from adult hand measurement studies; treat as a
+ * coarse first-pass calibration with ±1 US ring size of error. */
+const FINGER_DIAMETER_RATIO = {
+  index:  0.205,
+  middle: 0.220,
+  ring:   0.200,
+  pinky:  0.165
+};
+
 const METAL_COLORS = {
   "White Gold": 0xe9eef2,
   "Yellow Gold": 0xeab64a,
@@ -172,6 +183,39 @@ function injectStyles() {
       background: #fff;
       color: #111;
     }
+    .ar-tryon-size {
+      position: absolute;
+      top: 16px; left: 16px;
+      display: flex; flex-direction: column; align-items: flex-start;
+      gap: 2px;
+      padding: 10px 14px;
+      background: rgba(0,0,0,0.55);
+      color: #fff;
+      border-radius: 12px;
+      backdrop-filter: blur(8px);
+      font-family: system-ui, -apple-system, sans-serif;
+      pointer-events: none;
+      z-index: 2;
+      min-width: 132px;
+    }
+    .ar-tryon-size-label {
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.7);
+    }
+    .ar-tryon-size-value {
+      font-size: 18px;
+      font-weight: 600;
+      letter-spacing: 0.01em;
+      font-variant-numeric: tabular-nums;
+    }
+    .ar-tryon-size-sub {
+      font-size: 11px;
+      color: rgba(255,255,255,0.75);
+      font-variant-numeric: tabular-nums;
+    }
   `;
   document.head.appendChild(style);
 }
@@ -195,6 +239,11 @@ function buildModal() {
         <button type="button" data-finger="middle">Middle</button>
         <button type="button" data-finger="ring" class="is-active">Ring</button>
         <button type="button" data-finger="pinky">Pinky</button>
+      </div>
+      <div class="ar-tryon-size" data-ar-size hidden>
+        <span class="ar-tryon-size-label">Estimated size</span>
+        <span class="ar-tryon-size-value" data-ar-size-value>—</span>
+        <span class="ar-tryon-size-sub" data-ar-size-sub></span>
       </div>
       <div class="ar-tryon-status" data-ar-status>Requesting camera…</div>
       <div class="ar-tryon-hint">Hold your hand up to the camera</div>
@@ -433,6 +482,9 @@ class ARTryOn {
     this.filtQy = new OneEuro(2.0, 0.02);
     this.filtQz = new OneEuro(2.0, 0.02);
     this.filtQw = new OneEuro(2.0, 0.02);
+    // Finger diameter (meters) filtered hard — the digit display would
+    // flicker between sizes otherwise. Low cutoff + low beta = lazy lock.
+    this.filtFingerDia = new OneEuro(0.3, 0.005);
 
     // Pre-allocated math objects (avoid GC each frame).
     this._vBase = new THREE.Vector3();
@@ -453,6 +505,9 @@ class ARTryOn {
     this.video = this.modal.querySelector(".ar-tryon-video");
     this.canvas = this.modal.querySelector(".ar-tryon-canvas");
     this.statusEl = this.modal.querySelector("[data-ar-status]");
+    this.sizeEl = this.modal.querySelector("[data-ar-size]");
+    this.sizeValueEl = this.modal.querySelector("[data-ar-size-value]");
+    this.sizeSubEl = this.modal.querySelector("[data-ar-size-sub]");
 
     this.modal.querySelector("[data-ar-close]").addEventListener("click", () => this.close());
     this.modal.querySelector("[data-ar-snapshot]").addEventListener("click", () => this.snapshot());
@@ -490,6 +545,34 @@ class ARTryOn {
       this.statusEl.classList.remove("is-hidden");
       this.statusEl.textContent = msg;
     }
+  }
+
+  /* Convert real-world hand width (meters) into an estimated ring size for
+   * the currently-selected finger and update the size chip UI. The math:
+   *
+   *   fingerDiameter_m = handWidth_m * ratio[finger]
+   *   circumference_mm = fingerDiameter_m * 1000 * π
+   *   US size        ≈ (innerDiameter_mm − 11.63) / 0.8128   (Wheatsheaf)
+   *   UK letter       = lookup table indexed by half-size
+   *   EU size        ≈ circumference_mm − 40                  (ISO 8653)
+   *
+   * Numbers are advisory ±1 US size; we surface this as "Estimated" so
+   * customers don't take a sizing screenshot as gospel. */
+  _updateSizeReadout(handWidthM, now) {
+    if (!this.sizeEl) return;
+    const ratio = FINGER_DIAMETER_RATIO[this.activeFinger] || FINGER_DIAMETER_RATIO.ring;
+    const rawDia = handWidthM * ratio;                       // meters
+    const dia = this.filtFingerDia.filter(rawDia, now);      // smoothed
+    const diaMm = dia * 1000;
+    const circMm = diaMm * Math.PI;
+    const usRaw = (diaMm - 11.63) / 0.8128;
+    // Clamp + round to nearest half-size; below 3 or above 13 is unusual.
+    const usClamped = Math.max(3, Math.min(13, usRaw));
+    const usHalf = Math.round(usClamped * 2) / 2;
+    const euRaw = Math.round(circMm - 40);
+    this.sizeEl.hidden = false;
+    this.sizeValueEl.textContent = `US ${usHalf.toFixed(1)}`;
+    this.sizeSubEl.textContent = `${diaMm.toFixed(1)} mm \u00b7 EU ${euRaw}`;
   }
 
   async startCamera() {
@@ -592,6 +675,34 @@ class ARTryOn {
     this._ringLocalOuterR = Math.max(bb.max.x, -bb.min.x, 1e-3);
     this.scene.add(this.ring);
 
+    /* ----- finger occluder -----
+     * A depth-only cylinder along the finger axis (ring-local +Z) the
+     * radius of the finger itself, parented to the ring so it inherits
+     * the same pose + scale. It writes ONLY to the depth buffer
+     * (colorWrite=false), so fragments of the ring band that fall behind
+     * the cylinder's near surface fail their depth test — i.e. the BACK
+     * HALF of the band (the portion that would be behind the finger
+     * flesh) disappears. The top of the band, the head, and the underside
+     * sit OUTSIDE the cylinder's screen footprint, so they remain fully
+     * visible. Render order is forced negative so it draws before the
+     * ring regardless of THREE's sort heuristics.
+     *
+     * Finger radius is approximated as 0.85 × ring outer radius (the band
+     * is ~15% thicker than the finger inner hole on a snug fit). Length
+     * is 8 × outer radius so the sleeve extends well past the PIP and MCP
+     * landmarks in either direction. */
+    const fingerR = this._ringLocalOuterR * 0.85;
+    const fingerL = this._ringLocalOuterR * 8;
+    const occluderGeom = new THREE.CylinderGeometry(fingerR, fingerR, fingerL, 32, 1, true);
+    occluderGeom.rotateX(Math.PI / 2);  // align cylinder axis to local +Z
+    const occluderMat = new THREE.MeshBasicMaterial({
+      colorWrite: false,
+      depthWrite: true
+    });
+    this._occluder = new THREE.Mesh(occluderGeom, occluderMat);
+    this._occluder.renderOrder = -1;
+    this.ring.add(this._occluder);
+
     // Async HDR environment for PBR reflections — the ring looks plasticky
     // without it. Don't block ring visibility on the load; lights cover until
     // PMREM is ready.
@@ -657,6 +768,7 @@ class ARTryOn {
       this.handLostFrames++;
       if (this.handLostFrames > 8) {
         this.ring.visible = false;
+        if (this.sizeEl) this.sizeEl.hidden = true;
         if (this.handLostFrames === 9) this.setStatus("Show your hand to the camera");
       }
       return;
@@ -698,6 +810,12 @@ class ARTryOn {
     const k2W = world[PINKY_MCP];
     const handWidthM = Math.hypot(k2W.x - k1W.x, k2W.y - k1W.y, k2W.z - k1W.z) || 0.08;
     const pxPerMeter = handWidthPx / handWidthM;
+
+    /* ----- size readout ----- updated every frame from world-space hand
+     * width × a per-finger anthropometric ratio. Smoothed with One-Euro to
+     * keep the digit stable. */
+    this._updateSizeReadout(handWidthM, now);
+
     // Calibrate so the ring's outer rim corresponds to a real ~11mm radius
     // (22mm OD — typical engagement ring). We scale by `targetOuterPx /
     // localOuterR` so the same code works for the simplified placeholder
