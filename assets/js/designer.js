@@ -2640,6 +2640,223 @@ async function createThreeStudio(root, canvas) {
   caustics.renderOrder = 1;
   scene.add(caustics);
 
+  // ─── Phase 4: Planar Plinth Reflection ────────────────────────────────
+  // Real product photography uses a polished black acrylic base so the
+  // piece "doubles" into a soft mirror below it. Three has no built-in
+  // Reflector in the core module, so we roll a minimal planar reflector:
+  //
+  //   1. Mirror the main camera across the reflection plane (y = -1.365).
+  //   2. Hide the floor/plinth/shadow discs (would self-occlude the mirror).
+  //   3. Render the scene from the mirrored camera into reflectionRT, with
+  //      a clipping plane so nothing below the plinth leaks through.
+  //   4. In the main pass, the mirror disc samples reflectionRT in screen
+  //      space and blends with the plinth's dark base via a Fresnel weight,
+  //      so reflections fade at grazing angles like real polished onyx.
+  //
+  // Cost: one extra scene render per frame at 512², well within budget on
+  // M-series GPUs. UnsignedByteType so the texture survives the renderer's
+  // sRGB output transform (matches sceneRT — see threejs-gotchas note).
+  const REFLECTION_PLANE_Y = -1.352;
+  const reflectionRT = new THREE.WebGLRenderTarget(512, 512, {
+    type: THREE.UnsignedByteType,
+    format: THREE.RGBAFormat,
+    minFilter: THREE.LinearFilter,
+    magFilter: THREE.LinearFilter,
+    generateMipmaps: false,
+    depthBuffer: true,
+    stencilBuffer: false
+  });
+  reflectionRT.texture.colorSpace = THREE.SRGBColorSpace;
+  const reflectionCamera = new THREE.PerspectiveCamera();
+  const reflectionClipPlane = new THREE.Plane(
+    new THREE.Vector3(0, 1, 0),
+    -REFLECTION_PLANE_Y + 0.001
+  );
+
+  const reflectionMaterial = new THREE.ShaderMaterial({
+    uniforms: {
+      tReflect: { value: reflectionRT.texture },
+      uBaseColor: { value: new THREE.Color(0x0c0f12) },
+      uReflectStrength: { value: 1.6 },
+      uFresnelPow: { value: 1.8 },
+      uBlur: { value: 1.5 },
+      uTexel: { value: new THREE.Vector2(1 / 512, 1 / 512) }
+    },
+    transparent: true,
+    depthWrite: false,
+    vertexShader: `
+      varying vec4 vProj;
+      varying vec3 vWorldNormal;
+      varying vec3 vViewDir;
+      void main() {
+        vec4 worldPos = modelMatrix * vec4(position, 1.0);
+        vec4 mvPos = viewMatrix * worldPos;
+        gl_Position = projectionMatrix * mvPos;
+        vProj = gl_Position;
+        vWorldNormal = normalize(mat3(modelMatrix) * normal);
+        vViewDir = normalize(cameraPosition - worldPos.xyz);
+      }
+    `,
+    fragmentShader: `
+      precision highp float;
+      uniform sampler2D tReflect;
+      uniform vec3 uBaseColor;
+      uniform float uReflectStrength;
+      uniform float uFresnelPow;
+      uniform float uBlur;
+      uniform vec2 uTexel;
+      varying vec4 vProj;
+      varying vec3 vWorldNormal;
+      varying vec3 vViewDir;
+
+      vec3 sampleBlurred(vec2 uv) {
+        // 5-tap cross blur — cheap, hides reflection-RT aliasing on the
+        // gem's sharp facet highlights, gives the surface a soft polished
+        // (not chrome) look. Radius scaled by uBlur for grazing-angle
+        // intensity falloff.
+        vec3 c = texture2D(tReflect, uv).rgb;
+        vec2 o = uTexel * uBlur;
+        c += texture2D(tReflect, uv + vec2( o.x,  0.0)).rgb;
+        c += texture2D(tReflect, uv + vec2(-o.x,  0.0)).rgb;
+        c += texture2D(tReflect, uv + vec2( 0.0,  o.y)).rgb;
+        c += texture2D(tReflect, uv + vec2( 0.0, -o.y)).rgb;
+        return c * 0.2;
+      }
+
+      void main() {
+        vec2 uv = (vProj.xy / vProj.w) * 0.5 + 0.5;
+        // Clamp to avoid sampling outside the reflection RT at extreme
+        // angles (would smear edge pixels across the plinth).
+        uv = clamp(uv, vec2(0.002), vec2(0.998));
+
+        vec3 reflColor = sampleBlurred(uv);
+
+        // Fresnel — Schlick approximation. Plinth surface normal is +Y in
+        // world space, so cosTheta is just abs(viewDir.y). Looking straight
+        // down gives weak reflection (mostly base color); grazing gives
+        // strong reflection (mostly mirror image). uFresnelPow = 3.6 is
+        // close to acrylic's IOR-1.49 behavior.
+        float cosTheta = clamp(abs(dot(normalize(vViewDir), normalize(vWorldNormal))), 0.0, 1.0);
+        float fres = pow(1.0 - cosTheta, uFresnelPow);
+        float mixAmt = clamp(fres * uReflectStrength + 0.06, 0.0, 0.95);
+
+        vec3 outColor = mix(uBaseColor, reflColor, mixAmt);
+        // Slight darkening at the edges of the disc (radial vignette in UV
+        // space relative to disc center) so the mirror fades into the
+        // surrounding plinth instead of cutting off as a hard circle.
+        gl_FragColor = vec4(outColor, 0.92);
+      }
+    `
+  });
+  const reflectionMirror = new THREE.Mesh(
+    new THREE.CircleGeometry(2.02, 128),
+    reflectionMaterial
+  );
+  reflectionMirror.rotation.x = -Math.PI / 2;
+  reflectionMirror.position.set(-0.1, REFLECTION_PLANE_Y, -0.28);
+  reflectionMirror.renderOrder = 2;
+  scene.add(reflectionMirror);
+
+  // ─── Underside light-bleed halo ───────────────────────────────────────
+  // The narrow 33° camera FOV means a true planar reflection of the ring
+  // mostly captures the backdrop (rays bounce off the visible plinth area
+  // and travel BEHIND the ring rather than into it). To recreate the
+  // iconic "ring impression on polished onyx" look from product photos,
+  // we add a soft additive halo disc just above the mirror surface. The
+  // halo uses the same radial gradient as the contact shadow but inverted
+  // (bright in the middle) so it reads as a metallic light-bleed.
+  const haloCanvas = document.createElement("canvas");
+  haloCanvas.width = 256;
+  haloCanvas.height = 256;
+  const hctx = haloCanvas.getContext("2d");
+  const hgrad = hctx.createRadialGradient(128, 128, 6, 128, 128, 124);
+  hgrad.addColorStop(0.0, "rgba(255,238,210,0.85)");
+  hgrad.addColorStop(0.18, "rgba(220,210,200,0.45)");
+  hgrad.addColorStop(0.42, "rgba(180,200,210,0.18)");
+  hgrad.addColorStop(0.78, "rgba(60,90,110,0.06)");
+  hgrad.addColorStop(1.0, "rgba(0,0,0,0)");
+  hctx.fillStyle = hgrad;
+  hctx.fillRect(0, 0, 256, 256);
+  const haloTexture = new THREE.CanvasTexture(haloCanvas);
+  haloTexture.colorSpace = THREE.SRGBColorSpace;
+  disposableTextures.push(haloTexture);
+  const undersideHalo = new THREE.Mesh(
+    new THREE.PlaneGeometry(1.4, 1.4),
+    new THREE.MeshBasicMaterial({
+      map: haloTexture,
+      transparent: true,
+      depthWrite: false,
+      blending: THREE.AdditiveBlending,
+      opacity: 0.7
+    })
+  );
+  undersideHalo.rotation.x = -Math.PI / 2;
+  undersideHalo.position.set(0, REFLECTION_PLANE_Y + 0.001, 0);
+  undersideHalo.renderOrder = 3;
+  scene.add(undersideHalo);
+
+  // Hide the old glassPlate — the reflectionMirror replaces its role as
+  // the polished surface. Keep it in the scene graph so any external code
+  // referencing it still works, but make it invisible.
+  glassPlate.visible = false;
+
+  // Set of meshes hidden during the reflection pass so they don't
+  // self-occlude or pollute the mirror image. (The mirror itself MUST be
+  // hidden to avoid infinite recursion.)
+  const reflectionHidden = [
+    plinth, glassPlate, caustics, floor,
+    contactShadow, contactShadowHot, reflection, reflectionMirror, undersideHalo
+  ];
+
+  function updateReflection() {
+    // Snapshot visibilities so we can restore exactly.
+    const prevVis = reflectionHidden.map(m => m.visible);
+    for (let i = 0; i < reflectionHidden.length; i += 1) {
+      reflectionHidden[i].visible = false;
+    }
+
+    // Mirror the camera across y = REFLECTION_PLANE_Y.
+    reflectionCamera.fov = camera.fov;
+    reflectionCamera.aspect = camera.aspect;
+    reflectionCamera.near = camera.near;
+    reflectionCamera.far = camera.far;
+    reflectionCamera.position.set(
+      camera.position.x,
+      2 * REFLECTION_PLANE_Y - camera.position.y,
+      camera.position.z
+    );
+    // Camera looks at the model origin reflected across the plane.
+    const lookAtX = 0;
+    const lookAtY = 2 * REFLECTION_PLANE_Y - 0; // origin mirrored
+    const lookAtZ = 0;
+    // Flip up vector to maintain handedness through the mirror.
+    reflectionCamera.up.set(0, -1, 0);
+    reflectionCamera.lookAt(lookAtX, lookAtY, lookAtZ);
+    reflectionCamera.updateMatrixWorld();
+    reflectionCamera.updateProjectionMatrix();
+
+    // Clipping plane prevents geometry below the reflection plane from
+    // leaking into the mirror (would show as inverted floor crud).
+    const prevClipping = renderer.clippingPlanes;
+    const prevLocalClipping = renderer.localClippingEnabled;
+    renderer.clippingPlanes = [reflectionClipPlane];
+    renderer.localClippingEnabled = true;
+
+    const prevTarget = renderer.getRenderTarget();
+    renderer.setRenderTarget(reflectionRT);
+    renderer.clear();
+    renderer.render(scene, reflectionCamera);
+    renderer.setRenderTarget(prevTarget);
+
+    renderer.clippingPlanes = prevClipping;
+    renderer.localClippingEnabled = prevLocalClipping;
+
+    // Restore visibilities.
+    for (let i = 0; i < reflectionHidden.length; i += 1) {
+      reflectionHidden[i].visible = prevVis[i];
+    }
+  }
+
   const BACKDROP_PRESETS = {
     Velvet:  { color: 0x141a1c, floorColor: 0x1c2326, floorOpacity: 0.42, sheen: 0xcbded5, plinth: 0x101615 },
     Marble:  { color: 0xe8e3dc, floorColor: 0xf2efe9, floorOpacity: 0.66, sheen: 0xffffff, plinth: 0xcfc6b7 },
@@ -6527,6 +6744,10 @@ async function createThreeStudio(root, canvas) {
     softboxes[0].material.opacity += (0.14 + Math.sin(time * 0.0009) * 0.018 - softboxes[0].material.opacity) * 0.04;
     softboxes[2].material.opacity += (0.11 + Math.sin(time * 0.0012 + 1.4) * 0.014 - softboxes[2].material.opacity) * 0.04;
     animateScintillation(time);
+    // Phase 4: refresh planar plinth reflection before the post pass. This
+    // is one extra scene render at 512² — the post chain immediately after
+    // samples the up-to-date reflectionRT through the mirror disc.
+    updateReflection();
     if (post) {
       post.render(time);
     } else {
