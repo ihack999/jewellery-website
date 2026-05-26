@@ -18,6 +18,9 @@
  */
 
 import * as THREE from "./three.module.js";
+import { RGBELoader } from "./RGBELoader.js";
+
+const HDR_URL = "assets/textures/studio_small_08_1k.hdr";
 
 const TRIGGER_SELECTOR = "[data-ar-tryon]";
 const STATE_KEY = "tj-custom-design-state";
@@ -547,22 +550,28 @@ class ARTryOn {
     );
     this.camera.position.z = 100;
 
-    // Three-point-ish rig appropriate for catalog-style metal pop on top of video.
-    const hemi = new THREE.HemisphereLight(0xffffff, 0x404a55, 1.1);
+    // Three-point rig — acts as a fallback before the HDR env loads, and
+    // adds shaped specular punch on top of the env's diffuse contribution.
+    const hemi = new THREE.HemisphereLight(0xffffff, 0x404a55, 0.45);
     this.scene.add(hemi);
-    const key = new THREE.DirectionalLight(0xffffff, 1.6);
+    const key = new THREE.DirectionalLight(0xffffff, 0.9);
     key.position.set(0.8, 1, 0.6);
     this.scene.add(key);
-    const fill = new THREE.DirectionalLight(0xc7d6ff, 0.9);
+    const fill = new THREE.DirectionalLight(0xc7d6ff, 0.4);
     fill.position.set(-0.7, 0.4, 0.5);
     this.scene.add(fill);
-    const rim = new THREE.DirectionalLight(0xfff1d8, 0.8);
+    const rim = new THREE.DirectionalLight(0xfff1d8, 0.55);
     rim.position.set(0, 0.5, -1);
     this.scene.add(rim);
 
     const state = readDesignState();
     this.ring = buildRing(state);
     this.scene.add(this.ring);
+
+    // Async HDR environment for PBR reflections — the ring looks plasticky
+    // without it. Don't block ring visibility on the load; lights cover until
+    // PMREM is ready.
+    this._loadEnvironment().catch(err => console.warn("[AR] env load failed:", err));
 
     this._onResize = () => {
       const r = stage.getBoundingClientRect();
@@ -574,6 +583,22 @@ class ARTryOn {
       this.camera.updateProjectionMatrix();
     };
     window.addEventListener("resize", this._onResize);
+  }
+
+  async _loadEnvironment() {
+    return new Promise((resolve, reject) => {
+      new RGBELoader().load(HDR_URL, (tex) => {
+        if (!this.renderer) return resolve();   // closed before load finished
+        const pmrem = new THREE.PMREMGenerator(this.renderer);
+        pmrem.compileEquirectangularShader();
+        const envRT = pmrem.fromEquirectangular(tex);
+        this.scene.environment = envRT.texture;
+        this._envRT = envRT;
+        tex.dispose();
+        pmrem.dispose();
+        resolve();
+      }, undefined, reject);
+    });
   }
 
   fingerLandmarks() {
@@ -768,6 +793,10 @@ class ARTryOn {
       this.renderer.dispose();
       this.renderer.forceContextLoss?.();
       this.renderer = null;
+    }
+    if (this._envRT) {
+      this._envRT.dispose();
+      this._envRT = null;
     }
     if (this.modal && this.modal.parentNode) {
       this.modal.parentNode.removeChild(this.modal);
