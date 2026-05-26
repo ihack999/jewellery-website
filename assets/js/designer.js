@@ -1811,6 +1811,104 @@ function drawFallbackStone(context, x, y, size, shape, color) {
   context.stroke();
 }
 
+// ---------------------------------------------------------------------------
+// Reality Score (Realism Engine §14)
+//
+// S_real = exp(−E_real),  E_real = Σ_k w_k · e_k(state)
+//
+// Each penalty term e_k is in roughly [0, 1] and captures one realism
+// leak of the current design state. We keep the terms transparent so the
+// readout actually reflects user choices — fire stone, sensible band
+// thickness for the stone size, prong count matching the shape, finish
+// matching the stone style. A perfect classic-engagement design lands
+// near 0.95; a wildly mismatched one (e.g. razor-thin band carrying a
+// 3 ct stone with the wrong prong count) drops toward 0.5.
+// ---------------------------------------------------------------------------
+function computeRealityEnergy(state) {
+  const stone = state.stone || "Clear Diamond";
+  const shape = state.shape || "Round";
+  const piece = state.piece || "Ring";
+  const finish = state.finish || "High Polish";
+  const size = Number(state.size) || 1;        // carat weight feel
+  const weight = Number(state.weight) || 1;    // metal weight knob
+  const prongCount = Number(state.prongCount) || (shape === "Pear" ? 5 : 6);
+  const isOpaque = stone === "Black Onyx";
+
+  // Fire from STONE_PROFILES proxy — same numbers used in materialForStone.
+  const fireByStone = {
+    "Clear Diamond": 0.82,
+    "Salt and Pepper Diamond": 0.55,
+    "Champagne Diamond": 0.62,
+    "Ruby": 0.40,
+    "Sapphire": 0.36,
+    "Tanzanite": 0.42,
+    "Emerald": 0.30,
+    "Aquamarine": 0.28,
+    "Morganite": 0.24,
+    "Citrine": 0.26,
+    "Amethyst": 0.22,
+    "Fire Opal": 0.20,
+    "Moonstone": 0.18,
+    "Black Onyx": 0.00
+  };
+  const fire = fireByStone[stone] ?? 0.3;
+
+  // §2 — band thickness adequacy. For a ring carrying a heavy stone, a
+  // very low weight knob produces a paper-thin band that can't support
+  // the head. Penalty rises when (size / weight) gap is large.
+  let e_thickness = 0;
+  if (piece === "Ring") {
+    const loadRatio = size / Math.max(weight, 0.6);
+    e_thickness = Math.max(0, loadRatio - 1.4) * 0.18;       // 0 until 1.4×, then linear
+  }
+
+  // §11 — sparkle headroom. Opaque stones cost a fixed budget; dull
+  // stones cost proportionally to (1 − fire). Honest reflection of how
+  // much "life" the gem contributes.
+  const e_sparkle = isOpaque ? 0.08 : (1 - fire) * 0.18;
+
+  // §13 — manufacturability: prong count outside [4, 6] for round shapes,
+  // [5, 5] for pointed shapes (pear/marquise/heart) costs forging realism.
+  const idealProngs = (shape === "Pear" || shape === "Marquise" || shape === "Heart") ? [5]
+    : (shape === "Princess" || shape === "Asscher" || shape === "Emerald") ? [4]
+    : [4, 6];
+  const prongMiss = Math.min(...idealProngs.map(n => Math.abs(prongCount - n)));
+  const e_prong = Math.min(0.20, prongMiss * 0.06);
+
+  // §3 — finish/stone coherence: a hammered/sandblast finish under a
+  // diamond is unusual; a high-polish under onyx is overkill. Tiny
+  // penalty so the user is nudged toward the natural pairing.
+  let e_finish = 0;
+  if (stone === "Clear Diamond" && (finish === "Hammered" || finish === "Sandblast")) e_finish = 0.07;
+  if (isOpaque && finish === "Milgrain Edge") e_finish = 0.04;
+
+  // §2 — extreme carat with a non-ring piece (earrings carrying >2.5 ct
+  // each is unrealistic). Small nudge.
+  const e_scale = (piece === "Earrings" && size > 2.4) ? 0.06 : 0;
+
+  const terms = { e_thickness, e_sparkle, e_prong, e_finish, e_scale };
+  const total = e_thickness + e_sparkle + e_prong + e_finish + e_scale;
+  return { total, terms };
+}
+
+function updateRealityScore(root, state) {
+  const host = root.querySelector("[data-reality-score]");
+  if (!host) return;
+  const valueEl = host.querySelector("[data-reality-score-value]");
+  const fillEl  = host.querySelector("[data-reality-score-fill]");
+  const energy  = computeRealityEnergy(state);
+  const score   = Math.exp(-energy.total);          // (0, 1]
+  const pct     = Math.round(score * 100);
+  if (valueEl) valueEl.textContent = `${pct}%`;
+  if (fillEl)  fillEl.style.width = `${pct}%`;
+  host.dataset.grade = pct >= 88 ? "high" : pct >= 70 ? "mid" : "low";
+  const lines = Object.entries(energy.terms)
+    .filter(([, v]) => v > 0.001)
+    .map(([k, v]) => `${k.replace(/^e_/, "")} −${v.toFixed(2)}`);
+  host.title = `Reality Engine §14 — S = exp(−E_real) = ${score.toFixed(3)}`
+    + (lines.length ? `\nPenalties: ${lines.join(", ")}` : "\nNo realism penalties detected.");
+}
+
 function setSummary(root, state) {
   const summary = root.querySelector("[data-designer-summary]");
   const sizeLabel = root.querySelector("[data-designer-size-label]");
@@ -1831,6 +1929,8 @@ function setSummary(root, state) {
   if (weightLabel) {
     weightLabel.textContent = getWeightLabel(state.weight);
   }
+
+  updateRealityScore(root, state);
 
   // Fine-tune live labels (Setting rotation, Stone tilt, Band width).
   // Each <span data-designer-output-for="FIELD"> reads the matching state
@@ -1860,6 +1960,16 @@ async function createThreeStudio(root, canvas) {
   const camera = new THREE.PerspectiveCamera(33, 1, 0.1, 100);
   const model = new THREE.Group();
   const sparkle = new THREE.Group();
+  // Realism Engine §11 — phase-coherent micro-sparkle.
+  //   Three tiny point lights orbit the stone on Lissajous paths at
+  //   irrationally-related frequencies. As they sweep across crown / star
+  //   facet normals they produce transient bright specular hits — the
+  //   "scintillation" that distinguishes a real diamond from a glass blob.
+  //   Phases are coherent (deterministic per gem) so the sparkle pattern
+  //   is reproducible, not random noise.
+  const microSparkleGroup = new THREE.Group();
+  const microSparkles = [];
+  model.add(microSparkleGroup);
   const runtimeTextures = {};
   const disposableTextures = [];
   const cameraHomeZ = 5.75;
@@ -2559,6 +2669,35 @@ async function createThreeStudio(root, canvas) {
   const underlight = new THREE.PointLight(0xffeac8, 1.6, 2.4, 1.6);
   underlight.position.set(0, -0.55, 0.15);
   scene.add(underlight);
+
+  // ─── §11 phase-coherent micro-sparkle lights ─────────────────────────
+  // Three tiny short-range PointLights orbit the stone on Lissajous paths
+  // at irrationally-related frequencies. They are attached to `model` (via
+  // microSparkleGroup) so they ride with the user's rotation — when a
+  // facet normal swings past one of these lights it catches a transient
+  // specular hit and the gem "winks". Distance is tight so they only
+  // affect the stone & nearest metal, not the backdrop.
+  {
+    const tints = [0xffe9c8, 0xdfeeff, 0xfff4d6];   // warm, cool, neutral
+    for (let i = 0; i < 3; i += 1) {
+      const light = new THREE.PointLight(tints[i], 0.85, 0.55, 2.0);
+      light.userData.sparkleSeed = {
+        ax: 0.16 + 0.04 * i,     // ellipse half-width (above stone)
+        ay: 0.13 + 0.03 * i,     // ellipse half-height
+        az: 0.08 + 0.02 * i,     // vertical wobble
+        fx: 0.00081 + i * 0.00017,  // angular freq, irrationally related
+        fy: 0.00103 + i * 0.00019,
+        fz: 0.00057 + i * 0.00013,
+        phx: i * 2.094,           // 120° phase offset
+        phy: i * 1.732,
+        phz: i * 0.913,
+        baseIntensity: 0.85
+      };
+      microSparkleGroup.add(light);
+      microSparkles.push(light);
+    }
+  }
+
 
   const studioSet = new THREE.Group();
   scene.add(studioSet);
@@ -3507,11 +3646,15 @@ async function createThreeStudio(root, canvas) {
       : isSandblast ? 0.78
       :               0.58;
 
-    // Brushed grain direction — visible only when normal map is meaningful
-    // (satin/milgrain). On polish we keep micro-bumps off.
-    const anisoRotation = metal === "Rose Gold"   ?  0.55
-      :                   metal === "Yellow Gold" ?  0.25
-      :                                             -0.18;
+    // Brushed grain direction (Realism §3): with the band & prong tubes now
+    // carrying UVs whose U axis follows the surface flow (band circumference
+    // / prong axis), anisotropyRotation = 0 means highlights streak ALONG
+    // that flow — the diagnostic mark of a polishing wheel. Small per-metal
+    // offsets simulate the slightly different grain angles different alloys
+    // hold under polishing.
+    const anisoRotation = metal === "Rose Gold"   ?  0.18
+      :                   metal === "Yellow Gold" ?  0.08
+      :                                             -0.06;
 
     // Pick a per-finish normal map. Hammered and Sandblast each have their own
     // procedural normal so the surface relief is physically distinct, not just
@@ -3548,9 +3691,10 @@ async function createThreeStudio(root, canvas) {
       normalMap: finishNormalMap,
       normalScale: new THREE.Vector2(normalAmount, normalAmount),
       // A trace of anisotropy on polished metal mimics the directional
-      // sweep of a jeweller's polishing wheel — not visible as streaks but
-      // it elongates highlights subtly the way real polished gold does.
-      anisotropy: isSatin ? 0.85 : isMilgrain ? 0.4 : isPolish ? 0.12 : 0,
+      // sweep of a jeweller's polishing wheel — with proper UVs now in
+      // place on the band & prong tubes this is no longer noise: the
+      // highlight elongates along the band's length / prong's axis.
+      anisotropy: isSatin ? 0.85 : isMilgrain ? 0.4 : isPolish ? 0.28 : isHammered ? 0.10 : 0,
       anisotropyRotation: anisoRotation,
       // Clearcoat OFF for polished metal — this was the killer washing out
       // every gold tone with a white mirror layer. Milgrain/satin get just a
@@ -4685,6 +4829,22 @@ async function createThreeStudio(root, canvas) {
     const geometry = new THREE.BufferGeometry();
     geometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
     geometry.setIndex(new THREE.BufferAttribute(indices, 1));
+
+    // UVs (Realism §3): U follows the band's circumference, V wraps the
+    // profile cross-section. With these UVs in place, three.js builds
+    // tangent space such that the anisotropic specular direction set by
+    // anisotropyRotation = 0 streaks ALONG the band length — exactly the
+    // direction a real polishing wheel leaves marks. Without UVs the
+    // tangent frame is per-face arbitrary and anisotropy looks like noise.
+    const uvs = new Float32Array(cols * rows * 2);
+    for (let i = 0; i < cols; i += 1) {
+      for (let j = 0; j < rows; j += 1) {
+        const uvIdx = (i * rows + j) * 2;
+        uvs[uvIdx + 0] = i / cols;   // u: 0..1 around the finger
+        uvs[uvIdx + 1] = j / rows;   // v: 0..1 around the profile
+      }
+    }
+    geometry.setAttribute("uv", new THREE.BufferAttribute(uvs, 2));
     // Sub-percent organic micro-displacement: real cast → polished gold is
     // never mathematically perfect. Adding a tiny pseudo-random perturbation
     // breaks the dead symmetry that screams "computer" without producing
@@ -4961,6 +5121,20 @@ async function createThreeStudio(root, canvas) {
     const geom = new THREE.BufferGeometry();
     geom.setAttribute("position", new THREE.BufferAttribute(positions, 3));
     geom.setIndex(new THREE.BufferAttribute(indices, 1));
+    // UVs (Realism §3): U along the prong axis, V around the tube. With
+    // anisotropyRotation = 0 this makes the polish-wheel highlight streak
+    // ALONG the prong post — the way real forged claws read under light.
+    const uvs = new Float32Array(cols * radial * 2);
+    for (let i = 0; i < cols; i += 1) {
+      for (let j = 0; j < radial; j += 1) {
+        const u = i / axial;       // 0..1 base -> tip
+        const v = j / radial;      // 0..1 around the tube
+        const uvIdx = (i * radial + j) * 2;
+        uvs[uvIdx + 0] = u;
+        uvs[uvIdx + 1] = v;
+      }
+    }
+    geom.setAttribute("uv", new THREE.BufferAttribute(uvs, 2));
     geom.computeVertexNormals();
     return new THREE.Mesh(geom, material);
   }
@@ -6966,6 +7140,41 @@ async function createThreeStudio(root, canvas) {
     });
   }
 
+  // §11 — animate the three micro-sparkle PointLights along Lissajous
+  // paths over the stone, gated by the stone's fire profile so onyx /
+  // opaques don't glow from within.
+  function animateMicroSparkles(time) {
+    const stone = currentState?.stone || "Clear Diamond";
+    // Mirror of fireByStone in computeRealityEnergy / STONE_PROFILES.
+    const FIRE = {
+      "Clear Diamond": 0.82, "Salt and Pepper Diamond": 0.55,
+      "Champagne Diamond": 0.62, "Ruby": 0.40, "Sapphire": 0.36,
+      "Tanzanite": 0.42, "Emerald": 0.30, "Aquamarine": 0.28,
+      "Morganite": 0.24, "Citrine": 0.26, "Amethyst": 0.22,
+      "Fire Opal": 0.20, "Moonstone": 0.18, "Black Onyx": 0.00
+    };
+    const fire = FIRE[stone] ?? 0.3;
+    const burst = currentState?.sparkleBurst ? 1.45 : 1.0;
+    // Stone center ≈ piece up-axis at gemZ (model is rotated, group is
+    // local to model so we use local coords; the head sits near origin
+    // with the stone slightly above for rings).
+    const cz = currentState?.piece === "Ring" ? 0.42 : 0.18;
+    for (let i = 0; i < microSparkles.length; i += 1) {
+      const L = microSparkles[i];
+      const s = L.userData.sparkleSeed;
+      L.position.set(
+        Math.cos(time * s.fx + s.phx) * s.ax,
+        Math.sin(time * s.fy + s.phy) * s.ay,
+        cz + Math.sin(time * s.fz + s.phz) * s.az
+      );
+      // Intensity pulses on the same phase that drives position so a
+      // sparkle "wink" is a coherent burst, not a steady glow.
+      const pulse = 0.55 + 0.45 * Math.sin(time * (s.fx + s.fy) * 0.7 + s.phx);
+      L.intensity = s.baseIntensity * fire * burst * pulse;
+      L.visible = fire > 0.05;
+    }
+  }
+
   function clamp(value, min, max) {
     return Math.max(min, Math.min(max, value));
   }
@@ -7124,6 +7333,7 @@ async function createThreeStudio(root, canvas) {
     softboxes[0].material.opacity += (0.14 + Math.sin(time * 0.0009) * 0.018 - softboxes[0].material.opacity) * 0.04;
     softboxes[2].material.opacity += (0.11 + Math.sin(time * 0.0012 + 1.4) * 0.014 - softboxes[2].material.opacity) * 0.04;
     animateScintillation(time);
+    animateMicroSparkles(time);
     // Phase 4: refresh planar plinth reflection before the post pass. This
     // is one extra scene render at 512² — the post chain immediately after
     // samples the up-to-date reflectionRT through the mirror disc.
