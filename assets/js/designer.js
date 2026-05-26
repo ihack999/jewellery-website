@@ -4918,34 +4918,96 @@ async function createThreeStudio(root, canvas) {
     };
   }
 
-  // Curved prong: a tapered cylinder from (baseR, baseZ) on the prong circle
-  // up to a tip inset radially toward the gem at (tipR, tipZ). The post
-  // physically holds the gem against the basket — not a vertical pillar.
+  // Tapered-tube sweep along a 3-point quadratic Bezier. Radius interpolates
+  // linearly from baseRadius at t=0 to tipRadius at t=1 so prongs forge
+  // thicker at the solder joint and thinner at the claw — matching how a
+  // jeweller files a hand-forged claw arm.
+  // (Realism Engine §2: curvature + thickness penalties on the band/prong
+  // skeleton. A straight cylinder is the dead-flat zero-curvature solution,
+  // a clear "CGI" tell.)
+  function makeTaperedTube(p0, p1, p2, baseRadius, tipRadius, material, axial = 18, radial = 12) {
+    const curve = new THREE.QuadraticBezierCurve3(p0, p1, p2);
+    const frames = curve.computeFrenetFrames(axial, false);
+    const cols = axial + 1;
+    const positions = new Float32Array(cols * radial * 3);
+    for (let i = 0; i < cols; i += 1) {
+      const t = i / axial;
+      const p = curve.getPoint(t);
+      const N = frames.normals[i];
+      const B = frames.binormals[i];
+      const r = baseRadius * (1 - t) + tipRadius * t;
+      for (let j = 0; j < radial; j += 1) {
+        const a = (j / radial) * Math.PI * 2;
+        const ca = Math.cos(a), sa = Math.sin(a);
+        const idx = (i * radial + j) * 3;
+        positions[idx + 0] = p.x + r * (ca * N.x + sa * B.x);
+        positions[idx + 1] = p.y + r * (ca * N.y + sa * B.y);
+        positions[idx + 2] = p.z + r * (ca * N.z + sa * B.z);
+      }
+    }
+    const indices = new Uint32Array(axial * radial * 6);
+    let k = 0;
+    for (let i = 0; i < axial; i += 1) {
+      for (let j = 0; j < radial; j += 1) {
+        const jn = (j + 1) % radial;
+        const a =  i      * radial + j;
+        const b = (i + 1) * radial + j;
+        const c = (i + 1) * radial + jn;
+        const d =  i      * radial + jn;
+        indices[k++] = a; indices[k++] = b; indices[k++] = c;
+        indices[k++] = a; indices[k++] = c; indices[k++] = d;
+      }
+    }
+    const geom = new THREE.BufferGeometry();
+    geom.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+    geom.setIndex(new THREE.BufferAttribute(indices, 1));
+    geom.computeVertexNormals();
+    return new THREE.Mesh(geom, material);
+  }
+
+  // Curved prong: a tapered tube from (baseR, baseZ) on the prong circle up
+  // to a tip inset radially toward the gem at (tipR, tipZ). The arm bows
+  // slightly OUTWARD at mid-height (the natural shape of a forged claw
+  // springing from a gallery rail before it curls back over the crown),
+  // and tapers from thicker at the solder joint to thinner at the claw.
   function addCurvedProng(group, centerX, centerY, ang, baseR, tipR, baseZ, tipZ, radius, scaleY, material) {
+    const cosA = Math.cos(ang);
+    const sinA = Math.sin(ang);
     const base = new THREE.Vector3(
-      centerX + Math.cos(ang) * baseR,
-      centerY + Math.sin(ang) * baseR * scaleY,
+      centerX + cosA * baseR,
+      centerY + sinA * baseR * scaleY,
       baseZ
     );
     const tip = new THREE.Vector3(
-      centerX + Math.cos(ang) * tipR,
-      centerY + Math.sin(ang) * tipR * scaleY,
+      centerX + cosA * tipR,
+      centerY + sinA * tipR * scaleY,
       tipZ
     );
-    const post = makeCylinderBetween(base, tip, radius, material);
+    // Bezier control point: midpoint pulled radially OUTWARD by ~7% of the
+    // base radius. This gives the arm a subtle outward bow before the
+    // claw curls in — the diagnostic detail of a real forged prong.
+    const midR = baseR * 1.07;
+    const ctrl = new THREE.Vector3(
+      centerX + cosA * midR,
+      centerY + sinA * midR * scaleY,
+      (baseZ + tipZ) * 0.5
+    );
+    const post = makeTaperedTube(base, ctrl, tip, radius * 1.18, radius * 0.82, material);
     group.add(post);
 
     // Solder joint: a tiny torus where the prong springs from the gallery
-    // rail, hiding the seam between cylinder and basket. ~1.4× the post
-    // radius, tucked just under the base point.
+    // rail, hiding the seam between tube and basket. Slightly larger than
+    // the (now thicker) prong base so it reads as a proper fillet.
     const solder = new THREE.Mesh(
-      new THREE.TorusGeometry(radius * 1.35, radius * 0.45, 8, 18),
+      new THREE.TorusGeometry(radius * 1.45, radius * 0.50, 8, 20),
       material
     );
     solder.position.copy(base);
-    // Lay the torus flat so its ring axis matches the prong post direction.
+    // Lay the torus flat so its ring axis matches the local prong direction
+    // at the base (= tangent to the curve at t=0 ≈ ctrl − base).
     const dir = new THREE.Vector3().subVectors(tip, base).normalize();
-    solder.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), dir);
+    const baseDir = new THREE.Vector3().subVectors(ctrl, base).normalize();
+    solder.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), baseDir);
     group.add(solder);
 
     // Claw: a slightly flattened bead bent INWARD toward the gem axis so
