@@ -2977,6 +2977,33 @@ body:has(.design-studio:not([hidden])) .customs-rail {
   text-align: right;
 }
 
+/* §9 Gate-C minimal correction button. */
+.reality-score__fix {
+  margin-left: 4px;
+  padding: 2px 8px;
+  font: inherit;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.78);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: color 180ms ease, background 180ms ease, border-color 180ms ease;
+}
+.reality-score__fix:hover,
+.reality-score__fix:focus-visible {
+  color: rgba(255, 255, 255, 1);
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(241, 217, 151, 0.58);
+  outline: none;
+}
+.reality-score__fix:active {
+  transform: scale(0.96);
+}
+
 .design-studio__canvas,
 .design-studio__fallback canvas {
   display: block;

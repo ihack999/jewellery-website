@@ -1993,6 +1993,66 @@ function formatUSD(n) {
   return `$${Math.round(n).toLocaleString()}`;
 }
 
+// ---------------------------------------------------------------------------
+// Gate-C minimal correction operator (Realism Engine §9)
+//
+//   x* = argmin_y [ ‖y − ̃x‖²_W  +  λ_N E_NoDrop(y)  +  Σ λ_i [C_i(y)]₊² + ... ]
+//
+// We approximate the operator with a single-step, single-variable nudge:
+// pick the dominant penalty term, identify the control variable that
+// drives it, and snap that variable to its viable target. The user gets
+// the *minimal* edit that reduces E_real the most — the Gate-C spirit.
+// ---------------------------------------------------------------------------
+function proposeGateCCorrection(state) {
+  const energy = computeRealityEnergy(state);
+  const entries = Object.entries(energy.terms).filter(([, v]) => v > 0.01);
+  if (!entries.length) return null;
+  entries.sort((a, b) => b[1] - a[1]);
+  const [worstKey] = entries[0];
+  const shape = state.shape || "Round";
+
+  switch (worstKey) {
+    case "e_thickness": {
+      const cur = Number(state.weight) || 1;
+      const next = Math.min(2, cur + 0.4);
+      return {
+        field: "weight",
+        value: next.toFixed(2),
+        message: `Gate-C §9: band thickened (weight ${cur.toFixed(2)} → ${next.toFixed(2)}).`
+      };
+    }
+    case "e_prong": {
+      // UI exposes ["Auto","4","6","8"]; pointed shapes prefer 4, round prefers 6.
+      const choice = (shape === "Princess" || shape === "Asscher" || shape === "Emerald"
+                     || shape === "Pear" || shape === "Marquise" || shape === "Heart") ? "4" : "6";
+      return {
+        field: "prongCount",
+        value: choice,
+        message: `Gate-C §9: prong count set to ${choice} for ${shape}.`
+      };
+    }
+    case "e_finish":
+      return {
+        field: "finish",
+        value: "High Polish",
+        message: `Gate-C §9: finish set to High Polish to match the stone.`
+      };
+    case "e_sparkle":
+      return {
+        field: "stone",
+        value: "Clear Diamond",
+        message: `Gate-C §9: swapped to Clear Diamond for sparkle headroom.`
+      };
+    case "e_scale":
+      return {
+        field: "size",
+        value: "1.8",
+        message: `Gate-C §9: stone size reduced to 1.8 ct for earring scale.`
+      };
+  }
+  return null;
+}
+
 function updateRealityScore(root, state) {
   const host = root.querySelector("[data-reality-score]");
   if (!host) return;
@@ -7815,6 +7875,33 @@ async function setupDesigner(root = document.querySelector("[data-design-studio]
 
   controls?.addEventListener("input", update);
   controls?.addEventListener("change", update);
+
+  // §9 Gate-C minimal correction — one-click viability snap.
+  const gateCButton = root.querySelector("[data-reality-fix]");
+  if (gateCButton) {
+    gateCButton.addEventListener("click", () => {
+      const state = getState(root);
+      const correction = proposeGateCCorrection(state);
+      if (!correction) {
+        setDesignerStatus(status, "No realism corrections needed.");
+        return;
+      }
+      const fields = root.querySelectorAll(`[data-designer-field="${correction.field}"]`);
+      if (!fields.length) return;
+      if (fields.length > 1) {
+        // Radio group: select the matching value and fire change on it.
+        fields.forEach((r) => { r.checked = (r.value === correction.value); });
+        const picked = Array.from(fields).find((r) => r.checked);
+        picked?.dispatchEvent(new Event("change", { bubbles: true }));
+      } else {
+        const f = fields[0];
+        f.value = correction.value;
+        f.dispatchEvent(new Event("input",  { bubbles: true }));
+        f.dispatchEvent(new Event("change", { bubbles: true }));
+      }
+      setDesignerStatus(status, correction.message);
+    });
+  }
 
   presetButtons.forEach((button) => {
     button.addEventListener("click", () => {
