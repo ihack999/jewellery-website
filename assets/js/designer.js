@@ -1834,22 +1834,22 @@ function computeRealityEnergy(state) {
   const prongCount = Number(state.prongCount) || (shape === "Pear" ? 5 : 6);
   const isOpaque = stone === "Black Onyx";
 
-  // Fire from STONE_PROFILES proxy — same numbers used in materialForStone.
+  // Fire from STONE_PROFILES — must mirror the exact keys used elsewhere
+  // in this file (Blue Sapphire, Ruby Red, Emerald Green, etc.) so the
+  // penalty actually reflects the chosen stone instead of falling through.
   const fireByStone = {
     "Clear Diamond": 0.82,
-    "Salt and Pepper Diamond": 0.55,
-    "Champagne Diamond": 0.62,
-    "Ruby": 0.40,
-    "Sapphire": 0.36,
-    "Tanzanite": 0.42,
-    "Emerald": 0.30,
+    "Blush Sapphire": 0.42,
+    "Blue Sapphire": 0.38,
+    "Emerald Green": 0.30,
+    "Ruby Red": 0.42,
+    "Amethyst Purple": 0.24,
     "Aquamarine": 0.28,
-    "Morganite": 0.24,
-    "Citrine": 0.26,
-    "Amethyst": 0.22,
-    "Fire Opal": 0.20,
-    "Moonstone": 0.18,
-    "Black Onyx": 0.00
+    "Black Onyx": 0.00,
+    "Fire Opal": 0.34,
+    "Citrine Yellow": 0.26,
+    "Morganite Peach": 0.24,
+    "Tanzanite Violet": 0.42
   };
   const fire = fireByStone[stone] ?? 0.3;
 
@@ -1891,6 +1891,108 @@ function computeRealityEnergy(state) {
   return { total, terms };
 }
 
+// ---------------------------------------------------------------------------
+// Manufacturability cost surface (Realism Engine §13)
+//
+//   C_cost = p_m · ρ_m · V_m  +  Σ_s p_s · q_s  +  p_f · A_f  +  p_c · K_c
+//
+// We surface a transparent USD estimate built from state alone — metal
+// grams × $/g for the chosen karat, stone carats × $/ct for the chosen
+// gem, finishing labour for the chosen finish, and a per-prong setting
+// labour. This is not a quote; it is a *realism anchor* so the designer
+// can feel the weight of their choices the way a real piece would price.
+// ---------------------------------------------------------------------------
+const METAL_PHYSICS = {
+  // density g/cm³ (informational), pricePerG = market USD/g for the alloy
+  "Yellow Gold":    { density: 15.6,  pricePerG: 62, label: "18k yellow" },
+  "White Gold":     { density: 14.7,  pricePerG: 64, label: "18k white" },
+  "Rose Gold":      { density: 15.4,  pricePerG: 62, label: "18k rose" },
+  "Champagne Gold": { density: 15.5,  pricePerG: 62, label: "18k champagne" },
+  "Black Gold":     { density: 15.2,  pricePerG: 68, label: "black-rhodium 18k" },
+  "Platinum":       { density: 21.45, pricePerG: 38, label: "Pt950" },
+  "Mirror Silver":  { density: 10.49, pricePerG: 1.2, label: "sterling 925" },
+  "Bronze Patina":  { density:  8.8,  pricePerG: 0.6, label: "bronze" }
+};
+
+const STONE_PRICE_PER_CT = {
+  "Clear Diamond":      5800,
+  "Blush Sapphire":     2400,
+  "Blue Sapphire":      1600,
+  "Emerald Green":      2600,
+  "Ruby Red":           2800,
+  "Amethyst Purple":      90,
+  "Aquamarine":          280,
+  "Black Onyx":           40,
+  "Fire Opal":           480,
+  "Citrine Yellow":       60,
+  "Morganite Peach":     220,
+  "Tanzanite Violet":    520
+};
+
+function computeManufacturability(state) {
+  const piece  = state.piece  || "Ring";
+  const metal  = state.metal  || "Yellow Gold";
+  const finish = state.finish || "High Polish";
+  const stone  = state.stone  || "Clear Diamond";
+  const size   = Number(state.size)   || 1;      // ct
+  const weight = Number(state.weight) || 1;      // band weight knob
+  const prongs = Number(state.prongCount) || 4;
+
+  const phys = METAL_PHYSICS[metal] || METAL_PHYSICS["Yellow Gold"];
+
+  // Body weight by piece — these are real-world ballparks for an everyday
+  // commercial piece; the weight knob scales linearly around 1.0.
+  const bodyG = piece === "Necklace" ? 4.6
+    : piece === "Bracelet" ? 6.8
+    : piece === "Earrings" ? 1.8     // per pair: doubled below
+    : 2.6;                            // Ring
+  // Head + prongs (ring) or pair multiplier (earrings).
+  const headG = piece === "Ring"     ? (0.28 * prongs + 0.55)
+              : piece === "Earrings" ? bodyG   // bodyG already per piece; pair below
+              : 0;
+  const pairFactor = (piece === "Earrings") ? 2 : 1;
+  const grams = (bodyG * weight + headG) * pairFactor;
+  const metalCost = grams * phys.pricePerG;
+
+  // Stone — pair for earrings.
+  const stonePrice = STONE_PRICE_PER_CT[stone] ?? 200;
+  const stoneCount = (piece === "Earrings") ? 2 : 1;
+  // Per-ct price scales nonlinearly above 1ct (rarity premium) — capped.
+  const sizePremium = Math.min(2.4, Math.pow(Math.max(size, 0.1), 1.25));
+  const stoneCost = sizePremium * stonePrice * stoneCount;
+
+  // Finishing labour
+  const finishCost = finish === "Hammered"     ? 95
+                   : finish === "Milgrain Edge" ? 120
+                   : finish === "Sandblast"    ? 70
+                   : finish === "Soft Satin"   ? 55
+                   : finish === "Brushed"      ? 60
+                   : finish === "Stardust"     ? 140
+                   : 45;                                                // High Polish
+
+  // Setting labour — proportional to prong count + base.
+  const settingLabour = (piece === "Ring") ? 65 + prongs * 12
+                       : (piece === "Earrings") ? 55 * 2
+                       : 40;
+
+  const total = metalCost + stoneCost + finishCost + settingLabour;
+  return {
+    grams,
+    metalCost,
+    stoneCost,
+    finishCost,
+    settingLabour,
+    total,
+    metalLabel: phys.label
+  };
+}
+
+function formatUSD(n) {
+  if (n >= 10000) return `$${Math.round(n / 100) / 10}k`;
+  if (n >= 1000)  return `$${(n / 1000).toFixed(1)}k`;
+  return `$${Math.round(n).toLocaleString()}`;
+}
+
 function updateRealityScore(root, state) {
   const host = root.querySelector("[data-reality-score]");
   if (!host) return;
@@ -1905,8 +2007,20 @@ function updateRealityScore(root, state) {
   const lines = Object.entries(energy.terms)
     .filter(([, v]) => v > 0.001)
     .map(([k, v]) => `${k.replace(/^e_/, "")} −${v.toFixed(2)}`);
+
+  // §13 — manufacturability cost surface
+  const mfg = computeManufacturability(state);
+  const costEl = host.querySelector("[data-reality-cost]");
+  if (costEl) costEl.textContent = formatUSD(mfg.total);
+
   host.title = `Reality Engine §14 — S = exp(−E_real) = ${score.toFixed(3)}`
-    + (lines.length ? `\nPenalties: ${lines.join(", ")}` : "\nNo realism penalties detected.");
+    + (lines.length ? `\nPenalties: ${lines.join(", ")}` : "\nNo realism penalties detected.")
+    + `\n\n§13 Cost breakdown (${mfg.metalLabel}, ${mfg.grams.toFixed(1)} g):`
+    + `\n  metal      ${formatUSD(mfg.metalCost)}`
+    + `\n  stone      ${formatUSD(mfg.stoneCost)}`
+    + `\n  finishing  ${formatUSD(mfg.finishCost)}`
+    + `\n  setting    ${formatUSD(mfg.settingLabour)}`
+    + `\n  total      ${formatUSD(mfg.total)}`;
 }
 
 function setSummary(root, state) {
