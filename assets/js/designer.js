@@ -978,20 +978,20 @@ const LIGHTING_MODES = {
   },
   // Even, diffuse studio softbox — catalogue / e-commerce look
   Softbox: {
-    exposure: 0.96,
-    hemi: 1.05,
-    key: 2.0,
-    fill: 2.1,
-    rim: 1.15,
-    punch: 3.0,
-    table: 2.0,
+    exposure: 1.04,
+    hemi: 1.15,
+    key: 2.3,
+    fill: 2.35,
+    rim: 1.3,
+    punch: 3.2,
+    table: 2.25,
     keyColor: "#ffffff",
     fillColor: "#eef3ff",
     rimColor: "#fff6e8",
     punchColor: "#ffffff",
-    floorOpacity: 0.55,
-    sparkleOpacity: 0.32,
-    envMul: 0.85
+    floorOpacity: 0.6,
+    sparkleOpacity: 0.36,
+    envMul: 1.1
   }
 };
 
