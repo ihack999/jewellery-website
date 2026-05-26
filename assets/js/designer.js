@@ -277,14 +277,14 @@ const SAVED_DESIGN_KEY = "tj-saved-design-state";
 
 const DESIGN_DEFAULTS = {
   piece: "Ring",
-  metal: "White Gold",
+  metal: "Yellow Gold",
   karat: "18K",
   setting: "Prong",
   finish: "High Polish",
   shape: "Round",
   stone: "Clear Diamond",
   band: "Solitaire",
-  backdrop: "Velvet",
+  backdrop: "Studio White",
   view: "Three-Quarter",
   size: "1.2",
   weight: "1",
@@ -295,7 +295,7 @@ const DESIGN_DEFAULTS = {
   prongCount: "Auto",
   silhouette: "Classic Round",
   engraving: "",
-  lighting: "Daylight",
+  lighting: "Softbox",
   // Wild-mode toggles - unconventional looks without breaking geometry.
   // emissiveGlow: stone self-illuminates with its absorption hue.
   // twoTone:      band reads with a contrasting sheen tint.
@@ -335,7 +335,7 @@ const DESIGN_OPTIONS = {
   band: ["Solitaire", "Pavé", "Channel", "Three-Stone", "Tapered Baguette", "Twist", "Knife-Edge", "Eternity", "Bypass"],
   prongCount: ["Auto", "4", "6", "8"],
   silhouette: Array.from(new Set(Object.values(SILHOUETTES).flat())),
-  backdrop: ["Velvet", "Marble", "Onyx", "Linen", "Sweep", "Concrete", "Driftwood", "Holographic", "Smoke", "Ivory"],
+  backdrop: ["Studio White", "Velvet", "Marble", "Onyx", "Linen", "Sweep", "Concrete", "Driftwood", "Holographic", "Smoke", "Ivory"],
   view: ["Three-Quarter", "Macro", "Top-Down", "Profile"],
   lighting: ["Daylight", "Candlelight", "Showroom", "Flash", "Sunset", "Moonlight", "Neon", "Softbox"]
 };
@@ -978,20 +978,20 @@ const LIGHTING_MODES = {
   },
   // Even, diffuse studio softbox — catalogue / e-commerce look
   Softbox: {
-    exposure: 1.18,
-    hemi: 1.35,
-    key: 2.4,
-    fill: 2.8,
-    rim: 1.4,
-    punch: 3.6,
-    table: 2.4,
+    exposure: 0.96,
+    hemi: 1.05,
+    key: 2.0,
+    fill: 2.1,
+    rim: 1.15,
+    punch: 3.0,
+    table: 2.0,
     keyColor: "#ffffff",
     fillColor: "#eef3ff",
     rimColor: "#fff6e8",
     punchColor: "#ffffff",
-    floorOpacity: 0.62,
-    sparkleOpacity: 0.38,
-    envMul: 1.05
+    floorOpacity: 0.55,
+    sparkleOpacity: 0.32,
+    envMul: 0.85
   }
 };
 
@@ -2569,7 +2569,11 @@ async function createThreeStudio(root, canvas) {
       color: 0x071012,
       transparent: true,
       opacity: 0.74,
-      depthWrite: false
+      depthWrite: false,
+      // toneMapped:false so a pure-white Studio White backdrop (0xffffff)
+      // doesn't get crushed to mid-gray by AgX. Dark backdrops still render
+      // correctly because their hex values are already low enough.
+      toneMapped: false
     })
   );
   backdrop.position.set(0.3, 0.55, -3.2);
@@ -2915,19 +2919,50 @@ async function createThreeStudio(root, canvas) {
     Driftwood: { color: 0x6e553a, floorColor: 0x8a6d4c, floorOpacity: 0.56, sheen: 0xd9b889, plinth: 0x4d3b27 },
     Holographic: { color: 0x1a0a2e, floorColor: 0x2a1450, floorOpacity: 0.7, sheen: 0xff7af0, plinth: 0x12082a },
     Smoke:   { color: 0x16161a, floorColor: 0x202028, floorOpacity: 0.52, sheen: 0x8c7fa6, plinth: 0x0d0d10 },
-    Ivory:   { color: 0xf2ead9, floorColor: 0xf8f1e3, floorOpacity: 0.7, sheen: 0xffffff, plinth: 0xc9bda3 }
+    Ivory:   { color: 0xf2ead9, floorColor: 0xf8f1e3, floorOpacity: 0.7, sheen: 0xffffff, plinth: 0xc9bda3 },
+    // Catalog-grade pure-white seamless cyc — inspired by Richter & Phillips
+    // designer. Bright neutral white backdrop + soft mirror floor so the
+    // ring and gem read like a studio product shot.
+    "Studio White": { color: 0xffffff, floorColor: 0xffffff, floorOpacity: 0.85, sheen: 0xffffff, plinth: 0xe5e7ea }
   };
 
   function applyBackdrop(name) {
     const preset = BACKDROP_PRESETS[name] || BACKDROP_PRESETS.Velvet;
+    const isStudioWhite = name === "Studio White";
     backdrop.material.color.setHex(preset.color);
-    backdrop.material.opacity = name === "Sweep" || name === "Marble" ? 0.94 : 0.82;
+    backdrop.material.opacity = isStudioWhite ? 1.0 : name === "Sweep" || name === "Marble" ? 0.94 : 0.82;
     floor.material.color.setHex(preset.floorColor);
     floor.material.opacity = preset.floorOpacity;
     floor.material.sheenColor.setHex(preset.sheen);
+    // The velvet base map darkens the floor; strip it in Studio White so
+    // the catalog cyc reads as a flat seamless white sweep.
+    floor.material.map = isStudioWhite ? null : runtimeTextures.velvet;
     floor.material.needsUpdate = true;
     plinth.material.color.setHex(preset.plinth);
     plinth.material.needsUpdate = true;
+    // Catalog look: hide the dark display props so the ring floats on
+    // pure white with only its contact shadow + planar reflection visible.
+    plinth.visible = !isStudioWhite;
+    glassPlate.visible = !isStudioWhite;
+    caustics.visible = !isStudioWhite;
+    // Solid white scene.background fills the void around the floor disc
+    // and the cyclorama edges so the canvas reads as a clean seamless
+    // sweep edge-to-edge. Cleared back to null for other backdrops so the
+    // post chain's tonemap + canvas alpha keep working as before.
+    scene.background = isStudioWhite ? new THREE.Color(0xffffff) : null;
+    // Expand the backdrop plane wide enough to fill the whole framing in
+    // Studio White (acts as a true infinity cyc); keep the smaller size
+    // for the lit display modes so the backdrop tones don't dominate.
+    backdrop.scale.set(isStudioWhite ? 4 : 1, isStudioWhite ? 4 : 1, 1);
+    backdrop.position.z = isStudioWhite ? -2.6 : -3.2;
+    if (isStudioWhite) {
+      floor.material.color.setHex(0xf5f6f8);
+      floor.material.opacity = 0.98;
+      floor.material.needsUpdate = true;
+    }
+    if (typeof reflection !== "undefined") {
+      reflection.material.opacity = isStudioWhite ? 0.12 : 0.04;
+    }
   }
 
   const VIEW_PRESETS = {
