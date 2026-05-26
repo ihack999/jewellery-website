@@ -7328,7 +7328,19 @@ async function createThreeStudio(root, canvas) {
       "Fire Opal": 0.20, "Moonstone": 0.18, "Black Onyx": 0.00
     };
     const fire = FIRE[stone] ?? 0.3;
-    const burst = currentState?.sparkleBurst ? 1.45 : 1.0;
+    const burstOn = !!currentState?.sparkleBurst;
+    const burst = burstOn ? 1.45 : 1.0;
+    // §11 sparkle coherence target:
+    //   C_sparkle = |Σ a_j e^{i φ_j}| / Σ a_j  ∈  [0, 1].
+    // burst ON  → drive all three lights from one shared phase →
+    //             C → 1 (a coherent "wink", what diamonds do under
+    //             a directional torch).
+    // burst OFF → leave each light on its own phase → C ≈ 1/√N
+    //             (scintillation, what diamonds do under diffuse sky).
+    // We interpolate position phase too (a fraction) so the dots
+    // still move but tend toward the same orbit on burst.
+    const coh = burstOn ? 0.85 : 0.0;
+    const sharedPhase = time * 4.8;
     // Stone center ≈ piece up-axis at gemZ (model is rotated, group is
     // local to model so we use local coords; the head sits near origin
     // with the stone slightly above for rings).
@@ -7341,9 +7353,11 @@ async function createThreeStudio(root, canvas) {
         Math.sin(time * s.fy + s.phy) * s.ay,
         cz + Math.sin(time * s.fz + s.phz) * s.az
       );
-      // Intensity pulses on the same phase that drives position so a
-      // sparkle "wink" is a coherent burst, not a steady glow.
-      const pulse = 0.55 + 0.45 * Math.sin(time * (s.fx + s.fy) * 0.7 + s.phx);
+      // Intensity phase = (1-coh)·own phase  +  coh·shared phase.
+      // burst ON locks all three to sharedPhase → coherent wink.
+      const ownPhase = time * (s.fx + s.fy) * 0.7 + s.phx;
+      const phase = (1 - coh) * ownPhase + coh * sharedPhase;
+      const pulse = 0.55 + 0.45 * Math.sin(phase);
       L.intensity = s.baseIntensity * fire * burst * pulse;
       L.visible = fire > 0.05;
     }
