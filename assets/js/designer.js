@@ -1892,9 +1892,15 @@ function computeRealityEnergy(state) {
   const nd = computeNoDropDefects(state);
   const e_nodrop = nd.total;
 
-  const terms = { e_thickness, e_sparkle, e_prong, e_finish, e_scale, e_nodrop };
-  const total = e_thickness + e_sparkle + e_prong + e_finish + e_scale + e_nodrop;
-  return { total, terms, defects: nd.defects };
+  // §10 — brand memory (HDWA-FSE). e_brand = 0.10 · (1 − S_brand) keeps
+  // the house style as a soft prior — never dominates physical realism,
+  // but pulls the design toward the Toronto Jewels canon.
+  const brand = computeBrandAlignment(state);
+  const e_brand = 0.10 * (1 - brand.coherence);
+
+  const terms = { e_thickness, e_sparkle, e_prong, e_finish, e_scale, e_nodrop, e_brand };
+  const total = e_thickness + e_sparkle + e_prong + e_finish + e_scale + e_nodrop + e_brand;
+  return { total, terms, defects: nd.defects, brand };
 }
 
 // ---------------------------------------------------------------------------
@@ -2028,6 +2034,146 @@ function computeNoDropDefects(state) {
 }
 
 // ---------------------------------------------------------------------------
+// Brand memory — HDWA-FSE coherence (Realism Engine §10)
+//
+//   z_i = a_i e^{i φ_i},  z ∈ ℂⁿ design,  b ∈ ℂⁿ brand vector.
+//
+//   S_brand(z, b) = |⟨z, b⟩| / (‖z‖ ‖b‖)        E_brand = 1 − S_brand
+//
+// Each design axis is encoded as a complex number whose phase says
+// "aligned with house style" (φ = 0) or "departing from house style"
+// (φ = π), and whose amplitude says how strongly this axis matters.
+// The brand vector b is the all-ones / all-aligned canonical pole, so
+// the inner product reduces to:
+//
+//   ⟨z, b⟩ = Σ a_i · e^{i φ_i}                  ‖b‖ = √n
+//
+// Toronto Jewels Curation house style (the canonical pole):
+//   metal       — warm karats (yellow/rose/champagne) over cool
+//   finish      — high polish over textured
+//   stone       — diamond / sapphire / ruby (the four-Cs canon)
+//   setting     — prong or bezel (heritage settings)
+//   shape       — round / oval / cushion (timeless silhouettes)
+//   prongCount  — 4 or 6 (workshop standard)
+//   scale       — restrained 1.0–1.8 ct
+// ---------------------------------------------------------------------------
+function computeBrandAlignment(state) {
+  const metal   = state.metal   || "Yellow Gold";
+  const finish  = state.finish  || "High Polish";
+  const stone   = state.stone   || "Clear Diamond";
+  const setting = state.setting || "Prong";
+  const shape   = state.shape   || "Round";
+  const piece   = state.piece   || "Ring";
+  const size    = Number(state.size) || 1;
+  const prongCount = Number(state.prongCount) || 6;
+
+  const PI = Math.PI;
+
+  // Axis encodings: amp = how much this axis weighs in the house style,
+  //                 phase = 0 aligned, π opposed, fractions in between.
+  const warmMetals = ["Yellow Gold", "Rose Gold", "Champagne Gold"];
+  const coolMetals = ["White Gold", "Platinum", "Mirror Silver"];
+  const offCanonMetals = ["Black Gold", "Bronze Patina", "Two-Tone Mix"];
+  const metalPhase = warmMetals.includes(metal) ? 0
+    : coolMetals.includes(metal) ? PI * 0.35   // cool but still classic
+    : offCanonMetals.includes(metal) ? PI : PI * 0.6;
+
+  const finishPhase = finish === "High Polish" ? 0
+    : finish === "Brushed" ? PI * 0.35
+    : finish === "Milgrain Edge" ? PI * 0.25
+    : finish === "Sandblast" ? PI * 0.75
+    : finish === "Hammered" ? PI * 0.9
+    : PI * 0.5;
+
+  const canonStones = ["Clear Diamond", "Blue Sapphire", "Blush Sapphire", "Ruby Red", "Emerald Green"];
+  const stonePhase = canonStones.includes(stone) ? 0
+    : (stone === "Black Onyx") ? PI
+    : PI * 0.5;
+
+  const settingPhase = (setting === "Prong" || setting === "Bezel") ? 0
+    : (setting === "Cathedral") ? PI * 0.3
+    : PI * 0.7;
+
+  const classicShapes = ["Round", "Oval", "Cushion"];
+  const shapePhase = classicShapes.includes(shape) ? 0
+    : (shape === "Princess" || shape === "Emerald" || shape === "Asscher") ? PI * 0.4
+    : PI * 0.7;
+
+  const prongPhase = (prongCount === 4 || prongCount === 6) ? 0
+    : (prongCount === 5) ? PI * 0.3
+    : PI;
+
+  // Scale phase: sweet spot 1.0–1.8 ct (centered 1.4). Drift quadratically.
+  const scaleDrift = Math.min(1, Math.abs(size - 1.4) / 1.0);
+  const scalePhase = PI * scaleDrift * 0.7;
+
+  // Per-axis amplitudes (importance weights). Sum chosen so n=7, ‖b‖=√7.
+  const axes = [
+    { name: "metal",       amp: 1.0, phase: metalPhase },
+    { name: "finish",      amp: 1.0, phase: finishPhase },
+    { name: "stone",       amp: 1.1, phase: stonePhase },     // stone matters most
+    { name: "setting",     amp: 1.0, phase: settingPhase },
+    { name: "shape",       amp: 1.0, phase: shapePhase },
+    { name: "prongCount",  amp: 0.7, phase: prongPhase },     // earrings: irrelevant; keep low
+    { name: "scale",       amp: 0.8, phase: scalePhase }
+  ];
+
+  // Earring/Necklace pieces don't care about prongCount — collapse its amp.
+  if (piece !== "Ring") {
+    const i = axes.findIndex(a => a.name === "prongCount");
+    if (i >= 0) axes[i].amp = 0;
+  }
+
+  // Inner product ⟨z, b⟩ = Σ aᵢ · e^{iφᵢ}.
+  let re = 0, im = 0, ampSq = 0, bSq = 0;
+  for (const a of axes) {
+    re += a.amp * Math.cos(a.phase);
+    im += a.amp * Math.sin(a.phase);
+    ampSq += a.amp * a.amp;
+    bSq   += (a.amp > 0 ? 1 : 0);   // brand pole: amp=1 on every active axis
+  }
+  const inner = Math.sqrt(re * re + im * im);
+  const zNorm = Math.sqrt(ampSq);
+  const bNorm = Math.sqrt(bSq);
+  const coherence = (zNorm > 0 && bNorm > 0) ? Math.min(1, inner / (zNorm * bNorm)) : 1;
+
+  // Rank axes by their misalignment contribution: the axis that hurts
+  // coherence the most is the one with largest (amp · (1 − cos φ)).
+  // Each axis carries its own Gate-C correction target.
+  const HOUSE_TARGET = {
+    metal:      "Yellow Gold",
+    finish:     "High Polish",
+    stone:      "Clear Diamond",
+    setting:    "Prong",
+    shape:      "Round",
+    prongCount: "6",
+    scale:      "1.4"
+  };
+  const HOUSE_FIELD = {
+    metal: "metal", finish: "finish", stone: "stone", setting: "setting",
+    shape: "shape", prongCount: "prongCount", scale: "size"
+  };
+  const ranked = axes
+    .filter(a => a.amp > 0)
+    .map(a => ({
+      ...a,
+      misalignment: a.amp * (1 - Math.cos(a.phase))
+    }))
+    .sort((a, b) => b.misalignment - a.misalignment);
+
+  const worst = ranked.find(r => r.misalignment > 0.05);
+  const correction = worst ? {
+    axis:  worst.name,
+    field: HOUSE_FIELD[worst.name],
+    value: HOUSE_TARGET[worst.name],
+    misalignment: worst.misalignment,
+    hint: `Brand axis "${worst.name}" drifts from house style.`
+  } : null;
+
+  return { coherence, axes: ranked, correction };
+}
+
+// ---------------------------------------------------------------------------
 // Manufacturability cost surface (Realism Engine §13)
 //
 //   C_cost = p_m · ρ_m · V_m  +  Σ_s p_s · q_s  +  p_f · A_f  +  p_c · K_c
@@ -2158,6 +2304,17 @@ function proposeGateCCorrection(state) {
     };
   }
 
+  // §10 brand drift dominates: snap the worst-misaligned axis back to
+  // the house pole using its precomputed {field, value}.
+  if (worstKey === "e_brand" && energy.brand && energy.brand.correction) {
+    const c = energy.brand.correction;
+    return {
+      field: c.field,
+      value: c.value,
+      message: `Gate-C §10 [brand/${c.axis}]: nudged to house style → ${c.value}.`
+    };
+  }
+
   switch (worstKey) {
     case "e_thickness": {
       const cur = Number(state.weight) || 1;
@@ -2222,6 +2379,10 @@ function updateRealityScore(root, state) {
 
   host.title = `Reality Engine §14 — S = exp(−E_real) = ${score.toFixed(3)}`
     + (lines.length ? `\nPenalties: ${lines.join(", ")}` : "\nNo realism penalties detected.")
+    + (energy.brand
+        ? `\n\n§10 Brand alignment: ${Math.round(energy.brand.coherence * 100)}% `
+          + `(${energy.brand.correction ? `drift axis: ${energy.brand.correction.axis}` : "on house style"})`
+        : "")
     + (energy.defects && energy.defects.length
         ? `\n\n§8 NoDrop defects:\n  ` + energy.defects
             .map(d => `[${d.scale}] ${d.name} −0.${Math.round(d.severity * 100).toString().padStart(2,"0")} — ${d.hint}`)
