@@ -3413,25 +3413,47 @@ async function createThreeStudio(root, canvas) {
   // Used for Round, Oval, Cushion, Pear, Marquise, Heart.
   function createBrilliantGeometry(size, shape) {
     const N = shape === "Cushion" || shape === "Marquise" || shape === "Heart" ? 8 : 8; // 8-fold
-    const tableScale = shape === "Marquise" ? 0.42 : shape === "Pear" ? 0.4 : shape === "Heart" ? 0.5 : 0.5;
-    const starScale  = shape === "Marquise" ? 0.66 : 0.72;
-    const ugScale    = 0.96; // girdle radius
+    // -----------------------------------------------------------------
+    // TOLKOWSKY IDEAL-CUT PROPORTIONS
+    //   (`size` is the gem's half-diameter, so full girdle diameter
+    //    = 2 * size. Reference proportions are taken as fractions of the
+    //    full girdle diameter and then doubled below because everything
+    //    in this geometry is expressed in half-diameter units.)
+    //
+    //   Table diameter ............. 53.0% of girdle (→ tableScale 0.53)
+    //   Star length ................ 50.0% of crown radius (starScale 0.50)
+    //   Crown height ............... 16.2% of girdle (→ tableZ +0.324·size)
+    //   Pavilion depth ............. 43.1% of girdle (→ culetZ −0.862·size)
+    //   Lower-girdle length ........ 77% of pavilion main (pmScale 0.46)
+    //   Girdle thickness (medium) .. 3.5% of girdle (→ girdleH 0.035·size)
+    //
+    // The OLD geometry used crownH 0.38 + pavZ −0.32 — squat and lens-
+    // shaped, with a crown taller than the pavilion. Real brilliants are
+    // the opposite: a tall steep pavilion and a relatively short crown.
+    // Tolkowsky proportions are why ideal-cut rounds have the legendary
+    // "hearts and arrows" optical pattern. Wide-field IBL with our HDR
+    // probe will now bounce light through the gem the way a cutter
+    // designed it to.
+    // -----------------------------------------------------------------
+    const tableScale = shape === "Marquise" ? 0.45 : shape === "Pear" ? 0.43 : shape === "Heart" ? 0.52 : 0.53;
+    const starScale  = shape === "Marquise" ? 0.56 : 0.62; // 50% of crown radius from centre
+    const ugScale    = 0.96; // girdle radius (just inside the silhouette)
     const gmScale    = 0.96;
-    const pmScale    = shape === "Marquise" ? 0.52 : 0.58;
+    const pmScale    = shape === "Marquise" ? 0.50 : 0.46;
     const culetOffset = shape === "Pear" ? -size * 0.06 : 0;
 
-    const crownH  = size * 0.38;
-    const tableZ  = size * 0.52;
-    const starZ   = size * 0.44;
-    // Real diamonds have a faceted girdle band (~1.5–3% of total depth)
+    const crownH  = size * 0.324;
+    const tableZ  = size * 0.324;
+    const starZ   = size * 0.27;
+    // Real diamonds have a faceted girdle band (~3% of total depth)
     // between the upper-girdle facets and the lower-girdle facets. Without
     // it the stone shows a knife-edge silhouette — a dead CGI giveaway.
-    const girdleH = size * 0.022;
-    const girdleUpperZ =  girdleH;   // UG meets girdle here
-    const girdleLowerZ = -girdleH;   // GM meets girdle here
-    const girdleZ = 0;               // (kept for back-compat below)
-    const pavZ    = -size * 0.32;
-    const culetZ  = -size * 0.72;
+    const girdleH = size * 0.035;
+    const girdleUpperZ =  girdleH;
+    const girdleLowerZ = -girdleH;
+    const girdleZ = 0;
+    const pavZ    = -size * 0.55;  // pavilion mid (between girdle and culet)
+    const culetZ  = -size * 0.862; // Tolkowsky pavilion depth
 
     const T = [], UG = [], S = [], GM = [], PM = [];
     for (let i = 0; i < N; i += 1) {
