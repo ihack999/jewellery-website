@@ -72,6 +72,41 @@ const STONE_COLORS = {
   "Onyx": 0x111111
 };
 
+/* Build the soft-shadow texture once and cache it. A 256² radial gradient
+ * with the alpha falling off cubically — gives a believable contact-shadow
+ * penumbra rather than the linear halo that a default radial gradient
+ * produces. Cached at module scope so multiple sessions reuse one upload. */
+let _shadowTexCache = null;
+function makeShadowTexture() {
+  if (_shadowTexCache) return _shadowTexCache;
+  const size = 256;
+  const c = document.createElement("canvas");
+  c.width = c.height = size;
+  const ctx = c.getContext("2d");
+  const img = ctx.createImageData(size, size);
+  const cx = size / 2, cy = size / 2, rMax = size / 2;
+  for (let y = 0; y < size; y++) {
+    for (let x = 0; x < size; x++) {
+      const dx = (x - cx) / rMax;
+      const dy = (y - cy) / rMax;
+      const d = Math.min(1, Math.hypot(dx, dy));
+      // Cubic falloff: alpha ≈ (1−d)³ — soft core, gentle penumbra, hard 0 at edge.
+      const a = Math.pow(1 - d, 3);
+      const i = (y * size + x) * 4;
+      img.data[i] = 0;
+      img.data[i + 1] = 0;
+      img.data[i + 2] = 0;
+      img.data[i + 3] = Math.round(a * 255);
+    }
+  }
+  ctx.putImageData(img, 0, 0);
+  const tex = new THREE.CanvasTexture(c);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.needsUpdate = true;
+  _shadowTexCache = tex;
+  return tex;
+}
+
 function readDesignState() {
   try {
     const raw = localStorage.getItem(STATE_KEY);
@@ -751,6 +786,39 @@ class ARTryOn {
     this._occluder.renderOrder = -100;
     this._occluder.frustumCulled = false;
     this.ring.add(this._occluder);
+
+    /* ----- soft contact shadow -----
+     * A radial-gradient plane oriented in the ring's local XZ plane
+     * (normal = +Y = stone direction). It draws between the occluder
+     * (renderOrder -100) and the ring band (renderOrder 0) with
+     * depthTest off, so it appears as a soft dark halo on the finger
+     * surface AROUND the band's outline — the visual cue that the ring
+     * is sitting on the finger rather than floating in front of it.
+     *
+     * The plane is elongated along the finger axis (Z) so the shadow
+     * reads as a contact shadow on a cylindrical finger, not a generic
+     * blob. It rotates with the ring (so the long axis always tracks
+     * the finger) and tilts with pitch (so the shadow foreshortens
+     * naturally when the finger points toward camera).
+     *
+     * Texture is a 256² radial gradient baked once into a CanvasTexture
+     * — no runtime cost beyond a single tex sample per shadow fragment. */
+    const shadowTex = makeShadowTexture();
+    const shadowGeom = new THREE.PlaneGeometry(this._ringLocalOuterR * 2.6, this._ringLocalOuterR * 4.8);
+    shadowGeom.rotateX(-Math.PI / 2);  // lay flat in local XZ
+    const shadowMat = new THREE.MeshBasicMaterial({
+      map: shadowTex,
+      transparent: true,
+      depthWrite: false,
+      depthTest: false,
+      opacity: 0.85,
+      side: THREE.DoubleSide,
+      color: 0x000000   // shadow texture is grey-alpha; multiply to pure black
+    });
+    this._shadow = new THREE.Mesh(shadowGeom, shadowMat);
+    this._shadow.renderOrder = -50;
+    this._shadow.frustumCulled = false;
+    this.ring.add(this._shadow);
 
     // Async HDR environment for PBR reflections — the ring looks plasticky
     // without it. Don't block ring visibility on the load; lights cover until
