@@ -1875,6 +1875,29 @@ async function createThreeStudio(root, canvas) {
   let lastPointerY = 0;
   let lastPinchDistance = 0;
   let targetCameraZ = cameraHomeZ;
+
+  // ─── Phase 6: Adaptive quality ────────────────────────────────────
+  // Default to ULTRA. On sustained heavy frames (rolling avg > 26 ms ≈
+  // sub-38 fps) step down to HIGH, then MEDIUM. On sustained recovery
+  // (rolling avg < 16 ms ≈ 60 fps with headroom) step back up. Hysteresis
+  // via a min-dwell timer prevents oscillation when the GPU sits near a
+  // tier boundary. Only the cheap knobs are adjusted — pixel ratio cap
+  // and planar-reflection RT resolution. Bloom, DOF and CA stay on at
+  // every tier so the *look* of the renderer doesn't visibly degrade;
+  // only the *resolution* drops, which on M-series is invisible until
+  // tier 2 on a high-DPI display.
+  const QUALITY_TIERS = [
+    { name: "ultra",  pixelRatioCap: 2,   reflectionSize: 512 },
+    { name: "high",   pixelRatioCap: 1.5, reflectionSize: 384 },
+    { name: "medium", pixelRatioCap: 1,   reflectionSize: 256 }
+  ];
+  let qualityTier = 0;
+  const frameTimeRing = new Float32Array(60);
+  let frameTimeIndex = 0;
+  let frameTimeFilled = 0;
+  let lastFrameTimestamp = 0;
+  let qualityDwellUntil = 0;
+
   // Present-pose rotation: tilt the model forward so the centre stone's
   // table (which faces +Y in model space) tips toward the camera. Without
   // this, the default view is a strict elevation — stone seen in profile,
@@ -3282,7 +3305,8 @@ async function createThreeStudio(root, canvas) {
     const rect = canvas.getBoundingClientRect();
     const width = Math.max(1, Math.round(rect.width));
     const height = Math.max(1, Math.round(rect.height));
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    const cap = QUALITY_TIERS[qualityTier].pixelRatioCap;
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, cap));
     renderer.setSize(width, height, false);
     camera.aspect = width / height;
     camera.updateProjectionMatrix();
@@ -3290,6 +3314,15 @@ async function createThreeStudio(root, canvas) {
       const dpr = renderer.getPixelRatio();
       post.resize(Math.max(2, Math.round(width * dpr)), Math.max(2, Math.round(height * dpr)));
     }
+  }
+
+  function applyQualityTier(nextTier) {
+    if (nextTier === qualityTier) return;
+    qualityTier = nextTier;
+    const tier = QUALITY_TIERS[qualityTier];
+    reflectionRT.setSize(tier.reflectionSize, tier.reflectionSize);
+    resize();
+    root.dataset.designerQuality = tier.name;
   }
 
   // Instantiate the post chain now that scene/camera/renderer/lights exist.
@@ -6830,6 +6863,34 @@ async function createThreeStudio(root, canvas) {
   }
 
   function animate(time = 0) {
+    // ── Phase 6: adaptive quality sampling ──
+    // Sample the wall-clock delta between rAF callbacks. After the ring
+    // buffer fills, compare the rolling average against tier thresholds
+    // with a 2-second minimum dwell time to prevent flapping.
+    if (lastFrameTimestamp > 0) {
+      const dt = time - lastFrameTimestamp;
+      if (dt > 0 && dt < 200) {
+        frameTimeRing[frameTimeIndex] = dt;
+        frameTimeIndex = (frameTimeIndex + 1) % frameTimeRing.length;
+        if (frameTimeFilled < frameTimeRing.length) frameTimeFilled += 1;
+      }
+      if (frameTimeFilled >= frameTimeRing.length && time > qualityDwellUntil) {
+        let sum = 0;
+        for (let i = 0; i < frameTimeRing.length; i += 1) sum += frameTimeRing[i];
+        const avg = sum / frameTimeRing.length;
+        if (avg > 26 && qualityTier < QUALITY_TIERS.length - 1) {
+          applyQualityTier(qualityTier + 1);
+          qualityDwellUntil = time + 2000;
+          frameTimeFilled = 0; // reset window after change
+        } else if (avg < 16 && qualityTier > 0) {
+          applyQualityTier(qualityTier - 1);
+          qualityDwellUntil = time + 3000;
+          frameTimeFilled = 0;
+        }
+      }
+    }
+    lastFrameTimestamp = time;
+
     if (!isDragging && (!isInspecting || isAutoOrbiting)) {
       // Faster orbit while inspect+auto, gentle drift otherwise.
       targetRotationY += isAutoOrbiting ? 0.006 : (isInspecting ? 0 : 0.0016);
