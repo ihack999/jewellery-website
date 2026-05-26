@@ -912,17 +912,18 @@ class ARTryOn {
      *
      * Place at pitch=0:
      *   +Z → (fxN, fyN, 0)
-     *   +Y → (-fyN, fxN, 0)  [90° CCW in image plane]
-     *   +X → +Y × +Z = (0, 0, -1)  [points into the screen]
+     * At pitch=0 the stone faces the CAMERA, so:
+     *   +Y (stone)  = (0, 0, 1)        [out of screen toward viewer]
+     *   +Z (finger) = (fxN, fyN, 0)
+     *   +X (right)  = +Y × +Z = (-fyN, fxN, 0)
      *
-     * Rotate +X and +Y around the finger axis (+Z) by `pitch` so the head
-     * tilts toward/away from the camera as the finger pitches up. Closed
-     * form via Rodrigues with axis k=(fxN,fyN,0):
-     *   +X' = (-fyN·sin, fxN·sin, -cos)
-     *   +Y' = (-fyN·cos, fxN·cos,  sin)
+     * Rotate +X and +Y around the finger axis +Z by `pitch` so the head
+     * tilts away from the camera as the finger pitches forward:
+     *   +Y' = (-fyN·sin, fxN·sin,  cos)
+     *   +X' = (-fyN·cos, fxN·cos, -sin)
      *   +Z  = (fxN, fyN, 0)                              (unchanged) */
-    this._vRight.set(-fyN * sinP, fxN * sinP, -cosP);
-    this._vUp.set(-fyN * cosP, fxN * cosP, sinP);
+    this._vRight.set(-fyN * cosP, fxN * cosP, -sinP);
+    this._vUp.set(-fyN * sinP, fxN * sinP, cosP);
     this._vFwd.set(fxN, fyN, 0);
     this._mat.makeBasis(this._vRight, this._vUp, this._vFwd);
     this.ring.quaternion.setFromRotationMatrix(this._mat);
