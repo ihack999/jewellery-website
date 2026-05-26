@@ -91,8 +91,11 @@ function injectStyles() {
       position: absolute; inset: 0;
       width: 100%; height: 100%;
       object-fit: cover;
-      transform: scaleX(-1);  /* mirror selfie */
     }
+    /* Mirror the video for a selfie experience. The three.js overlay is NOT
+       css-mirrored — we mirror landmark X in JS, which keeps the 3D ring's
+       rotation/depth math consistent with what the user sees. */
+    .ar-tryon-video { transform: scaleX(-1); }
     .ar-tryon-canvas { pointer-events: none; }
     .ar-tryon-status {
       position: absolute;
@@ -197,72 +200,206 @@ function buildModal() {
   return modal;
 }
 
-// Build a lightweight ring matching the designed metal + stone.
+// Build a lightweight ring matching the designed metal + stone + halo + side stones.
 function buildRing(state) {
   const group = new THREE.Group();
+
   const metalName = state?.metal || "Yellow Gold";
   const stoneName = state?.stone || "Clear Diamond";
+  const cut = state?.cut || "Round";
+  const halo = state?.halo && state.halo !== "None" ? state.halo : null;
+  const sideStones = !!state?.sideStones;
   const metalColor = METAL_COLORS[metalName] ?? METAL_COLORS["Yellow Gold"];
   const stoneColor = STONE_COLORS[stoneName] ?? STONE_COLORS["Clear Diamond"];
 
-  // Band — TorusGeometry along XY, axis = Z
+  const metalMat = new THREE.MeshPhysicalMaterial({
+    color: metalColor,
+    metalness: 1.0,
+    roughness: 0.16,
+    clearcoat: 0.55,
+    clearcoatRoughness: 0.18
+  });
+
+  // Band — TorusGeometry; local +Y is "up" (toward setting), torus axis = Z (the finger).
   const band = new THREE.Mesh(
-    new THREE.TorusGeometry(1.0, 0.14, 24, 96),
-    new THREE.MeshPhysicalMaterial({
-      color: metalColor,
-      metalness: 1.0,
-      roughness: 0.18,
-      clearcoat: 0.6,
-      clearcoatRoughness: 0.2
-    })
+    new THREE.TorusGeometry(1.0, 0.13, 24, 128),
+    metalMat
   );
   group.add(band);
 
-  // Setting head — six prong claw + center stone
+  // Setting head sits at the top of the band.
   const headGroup = new THREE.Group();
-  headGroup.position.set(0, 1.0, 0);  // sits at top of band
+  headGroup.position.set(0, 1.0, 0);
   group.add(headGroup);
 
+  // Collet (basket under the stone)
   const collet = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.32, 0.22, 0.18, 24),
-    new THREE.MeshPhysicalMaterial({ color: metalColor, metalness: 1, roughness: 0.22 })
+    new THREE.CylinderGeometry(0.30, 0.20, 0.16, 24),
+    metalMat
   );
-  collet.position.y = 0.08;
+  collet.position.y = 0.07;
   headGroup.add(collet);
 
-  const prongMat = new THREE.MeshPhysicalMaterial({ color: metalColor, metalness: 1, roughness: 0.2 });
-  const prongCount = 4;
+  // Prongs — 4 for Round/Princess/Oval, 4 corner for emerald-cut
+  const prongCount = (cut === "Emerald") ? 4 : 4;
+  const prongOffset = (cut === "Emerald" || cut === "Princess") ? Math.PI / 4 : Math.PI / 4;
   for (let i = 0; i < prongCount; i++) {
-    const ang = (i / prongCount) * Math.PI * 2 + Math.PI / 4;
+    const ang = (i / prongCount) * Math.PI * 2 + prongOffset;
     const prong = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.04, 0.05, 0.34, 12),
-      prongMat
+      new THREE.CylinderGeometry(0.035, 0.05, 0.32, 12),
+      metalMat
     );
-    prong.position.set(Math.cos(ang) * 0.28, 0.24, Math.sin(ang) * 0.28);
+    prong.position.set(Math.cos(ang) * 0.27, 0.22, Math.sin(ang) * 0.27);
+    // tip bead
+    const bead = new THREE.Mesh(new THREE.SphereGeometry(0.05, 12, 10), metalMat);
+    bead.position.y = 0.16;
+    bead.scale.set(1, 0.7, 1);
+    prong.add(bead);
     headGroup.add(prong);
   }
 
-  // Center stone
+  // Center stone — geometry varies by cut.
+  let stoneGeo;
+  let stoneScale = [1, 0.85, 1];
+  switch (cut) {
+    case "Princess":
+      stoneGeo = new THREE.BoxGeometry(0.5, 0.42, 0.5);
+      stoneScale = [1, 1, 1];
+      break;
+    case "Emerald":
+      stoneGeo = new THREE.BoxGeometry(0.55, 0.32, 0.42);
+      stoneScale = [1, 1, 1];
+      break;
+    case "Oval":
+      stoneGeo = new THREE.SphereGeometry(0.30, 32, 24);
+      stoneScale = [1.4, 0.78, 1];
+      break;
+    case "Pear":
+      stoneGeo = new THREE.ConeGeometry(0.34, 0.7, 32);
+      stoneScale = [1, 0.62, 1];
+      break;
+    case "Cushion":
+      stoneGeo = new THREE.BoxGeometry(0.48, 0.4, 0.48);
+      stoneScale = [1, 1, 1];
+      break;
+    case "Marquise":
+      stoneGeo = new THREE.SphereGeometry(0.32, 32, 24);
+      stoneScale = [1.6, 0.65, 0.85];
+      break;
+    case "Round":
+    default:
+      stoneGeo = new THREE.OctahedronGeometry(0.34, 2);
+      stoneScale = [1, 0.85, 1];
+  }
+  const isClear = stoneName === "Clear Diamond";
   const stone = new THREE.Mesh(
-    new THREE.OctahedronGeometry(0.34, 1),
+    stoneGeo,
     new THREE.MeshPhysicalMaterial({
       color: stoneColor,
       metalness: 0.0,
       roughness: 0.02,
-      transmission: stoneName === "Clear Diamond" ? 0.85 : 0.5,
-      ior: stoneName === "Clear Diamond" ? 2.4 : 1.7,
-      thickness: 0.4,
-      clearcoat: 1,
+      transmission: isClear ? 0.9 : 0.55,
+      ior: isClear ? 2.4 : 1.74,
+      thickness: 0.5,
+      clearcoat: 1.0,
       clearcoatRoughness: 0.02,
-      attenuationDistance: 1.5,
-      reflectivity: 0.9
+      attenuationDistance: 1.4,
+      attenuationColor: new THREE.Color(stoneColor).lerp(new THREE.Color(0xffffff), 0.5),
+      reflectivity: 0.95,
+      dispersion: isClear ? 0.06 : 0.02
     })
   );
-  stone.position.y = 0.34;
-  stone.scale.set(1, 0.85, 1);
+  stone.position.y = 0.32;
+  stone.scale.set(...stoneScale);
+  if (cut === "Princess" || cut === "Cushion") stone.rotation.y = Math.PI / 4;
   headGroup.add(stone);
 
+  // Halo — small ring of diamonds around the center stone.
+  if (halo) {
+    const haloRadius = Math.max(stoneScale[0], stoneScale[2]) * 0.32 + 0.12;
+    const haloMat = new THREE.MeshPhysicalMaterial({
+      color: 0xffffff,
+      metalness: 0,
+      roughness: 0.02,
+      transmission: 0.85,
+      ior: 2.4,
+      thickness: 0.18,
+      clearcoat: 1.0,
+      dispersion: 0.05
+    });
+    const haloCount = 16;
+    for (let i = 0; i < haloCount; i++) {
+      const a = (i / haloCount) * Math.PI * 2;
+      const tiny = new THREE.Mesh(new THREE.OctahedronGeometry(0.075, 1), haloMat);
+      tiny.position.set(Math.cos(a) * haloRadius, 0.30, Math.sin(a) * haloRadius);
+      tiny.scale.setScalar(1);
+      headGroup.add(tiny);
+    }
+  }
+
+  // Side stones — tiny diamonds set along the band's shoulders.
+  if (sideStones) {
+    const sideMat = new THREE.MeshPhysicalMaterial({
+      color: 0xffffff,
+      metalness: 0,
+      roughness: 0.04,
+      transmission: 0.8,
+      ior: 2.4,
+      thickness: 0.15,
+      clearcoat: 1.0
+    });
+    const positions = [-0.6, -0.45, -0.3, 0.3, 0.45, 0.6];
+    for (const a of positions) {
+      const angle = (Math.PI / 2) - a;  // span from top toward sides
+      const r = 1.0;
+      const stoneSide = new THREE.Mesh(new THREE.OctahedronGeometry(0.07, 1), sideMat);
+      stoneSide.position.set(Math.cos(angle) * r, Math.sin(angle) * r, 0);
+      // tip toward outside
+      stoneSide.lookAt(stoneSide.position.clone().multiplyScalar(2));
+      headGroup.add(stoneSide);
+    }
+  }
+
+  // Cache a reference to swap finger/scale base later.
+  group.userData.metalColor = metalColor;
+  group.userData.stoneColor = stoneColor;
   return group;
+}
+
+/* --- One-Euro filter ----------------------------------------------------
+   Smooth noisy signals while staying responsive. Cleaner than EMA for
+   tracking data because cutoff adapts to the signal's velocity. */
+class OneEuro {
+  constructor(minCutoff = 1.0, beta = 0.02, dCutoff = 1.0) {
+    this.minCutoff = minCutoff;
+    this.beta = beta;
+    this.dCutoff = dCutoff;
+    this.xPrev = null;
+    this.dxPrev = 0;
+    this.tPrev = null;
+  }
+  _alpha(cutoff, dt) {
+    const r = 2 * Math.PI * cutoff * dt;
+    return r / (r + 1);
+  }
+  filter(x, t) {
+    if (this.xPrev == null) {
+      this.xPrev = x;
+      this.tPrev = t;
+      return x;
+    }
+    const dt = Math.max(1e-3, (t - this.tPrev) / 1000);
+    const dx = (x - this.xPrev) / dt;
+    const aD = this._alpha(this.dCutoff, dt);
+    const dxHat = aD * dx + (1 - aD) * this.dxPrev;
+    const cutoff = this.minCutoff + this.beta * Math.abs(dxHat);
+    const a = this._alpha(cutoff, dt);
+    const xHat = a * x + (1 - a) * this.xPrev;
+    this.xPrev = xHat;
+    this.dxPrev = dxHat;
+    this.tPrev = t;
+    return xHat;
+  }
 }
 
 class ARTryOn {
@@ -278,9 +415,30 @@ class ARTryOn {
     this.stream = null;
     this.rafId = null;
     this.lastVideoTime = -1;
-    this.smoothed = null;  // smoothed pose data
     this.activeFinger = "ring";
     this.statusEl = null;
+    this.handLostFrames = 0;
+
+    // One-Euro filters per channel — much cleaner than EMA for tracking jitter.
+    // Position: low cutoff, low beta (slow corrections, very smooth).
+    // Scale:    even lower cutoff (depth wobble is annoying).
+    // Quat:     channel-per-component (we re-normalize each frame).
+    this.filtPx = new OneEuro(1.2, 0.015);
+    this.filtPy = new OneEuro(1.2, 0.015);
+    this.filtScale = new OneEuro(0.6, 0.01);
+    this.filtQx = new OneEuro(2.0, 0.02);
+    this.filtQy = new OneEuro(2.0, 0.02);
+    this.filtQz = new OneEuro(2.0, 0.02);
+    this.filtQw = new OneEuro(2.0, 0.02);
+
+    // Pre-allocated math objects (avoid GC each frame).
+    this._vBase = new THREE.Vector3();
+    this._vTip = new THREE.Vector3();
+    this._vUp = new THREE.Vector3();
+    this._vRight = new THREE.Vector3();
+    this._vFwd = new THREE.Vector3();
+    this._mat = new THREE.Matrix4();
+    this._quat = new THREE.Quaternion();
   }
 
   async open() {
@@ -443,98 +601,141 @@ class ARTryOn {
 
   applyResult(result) {
     const landmarks = result?.landmarks?.[0];
-    if (!landmarks) {
-      this.ring.visible = false;
+    const world = result?.worldLandmarks?.[0];
+    const handedness = result?.handedness?.[0]?.[0]?.categoryName;  // 'Left'/'Right' in raw image
+
+    if (!landmarks || !world) {
+      this.handLostFrames++;
+      if (this.handLostFrames > 8) {
+        this.ring.visible = false;
+        if (this.handLostFrames === 9) this.setStatus("Show your hand to the camera");
+      }
       return;
     }
+    if (this.handLostFrames > 0) this.setStatus("");
+    this.handLostFrames = 0;
     this.ring.visible = true;
 
     const w = this.canvas.clientWidth;
     const h = this.canvas.clientHeight;
+    const now = performance.now();
 
     const [baseIdx, tipIdx] = this.fingerLandmarks();
     const base = landmarks[baseIdx];
     const tip = landmarks[tipIdx];
-    // Hand width reference: distance index_MCP → pinky_MCP, used for scale.
-    const knuckle1 = landmarks[INDEX_MCP];
-    const knuckle2 = landmarks[PINKY_MCP];
 
-    // Convert MediaPipe normalized coords. The video is mirrored via CSS scaleX(-1),
-    // so we mirror X here too (1 - x) to match what the user sees.
+    /* ----- 2D POSITION (mirrored, in three.js pixel space) -----
+       The video is css-mirrored; the overlay canvas is NOT, so we mirror X
+       here (1 - x) to land the ring on the visually correct hand. Y is
+       flipped because three.js is Y-up while image is Y-down. */
     const baseX = (1 - base.x) * w - w / 2;
-    const baseY = -(base.y * h - h / 2);   // flip Y for three.js (Y up)
+    const baseY = -(base.y * h - h / 2);
     const tipX = (1 - tip.x) * w - w / 2;
     const tipY = -(tip.y * h - h / 2);
 
-    // Position: ~30% from base → tip (the ring sits on the proximal phalanx).
-    const t = 0.30;
-    const px = baseX + (tipX - baseX) * t;
-    const py = baseY + (tipY - baseY) * t;
+    // Ring sits ~30% up the proximal phalanx (base → PIP segment).
+    const tParam = 0.30;
+    const rawPx = baseX + (tipX - baseX) * tParam;
+    const rawPy = baseY + (tipY - baseY) * tParam;
 
-    // Scale from knuckle-to-knuckle distance (≈ hand width).
-    const kdx = (knuckle2.x - knuckle1.x) * w;
-    const kdy = (knuckle2.y - knuckle1.y) * h;
-    const handWidthPx = Math.hypot(kdx, kdy);
-    // A ring spans roughly 0.22× the hand width.
-    const ringScale = handWidthPx * 0.22;
+    /* ----- SCALE — use 3D finger length so out-of-plane rotation does not
+       shrink the ring.  We measure the WORLD-space distance between adjacent
+       knuckles and multiply by a pixels-per-meter factor derived from the
+       image-space hand width (index MCP ↔ pinky MCP). */
+    const k1Img = landmarks[INDEX_MCP];
+    const k2Img = landmarks[PINKY_MCP];
+    const handWidthPx = Math.hypot((k2Img.x - k1Img.x) * w, (k2Img.y - k1Img.y) * h);
+    const k1W = world[INDEX_MCP];
+    const k2W = world[PINKY_MCP];
+    const handWidthM = Math.hypot(k2W.x - k1W.x, k2W.y - k1W.y, k2W.z - k1W.z) || 0.08;
+    const pxPerMeter = handWidthPx / handWidthM;
+    // Real-world ring outer diameter ≈ 22mm → radius 11mm.
+    // Our torus has outer radius 1.0 in local units, so 1 unit = 11mm = 0.011m.
+    const rawScale = pxPerMeter * 0.011;
 
-    // Orientation: the ring's local axis is Z (band lies in XY).
-    // Aim it along the finger direction in 2D (base → tip in image), which means
-    // we rotate the ring so its plane is perpendicular to the finger segment.
-    const angle = Math.atan2(tipY - baseY, tipX - baseX);
+    /* ----- 3D ORIENTATION via worldLandmarks -----
+       Build an orthonormal basis from the hand:
+         fwd   = finger base → tip      (becomes ring's local +Y, toward setting)
+         right = index_MCP → pinky_MCP  (across the palm)
+         up    = right × fwd            (palm normal; setting points along this)
+       Then re-orthogonalize.  Mirror X to match the css-mirrored video. */
+    this._vFwd.set(
+      -(world[tipIdx].x - world[baseIdx].x),
+      -(world[tipIdx].y - world[baseIdx].y),   // mediapipe Y is down
+      -(world[tipIdx].z - world[baseIdx].z)
+    ).normalize();
+    this._vRight.set(
+      -(k2W.x - k1W.x),
+      -(k2W.y - k1W.y),
+      -(k2W.z - k1W.z)
+    ).normalize();
+    // Up = right × fwd (right-hand rule).  For a palm-down (back of hand to
+    // camera) gesture this points toward camera, which is what we want for
+    // the stone to sit on top of the finger.
+    this._vUp.crossVectors(this._vRight, this._vFwd).normalize();
+    // Re-orthogonalize right so the basis is square.
+    this._vRight.crossVectors(this._vFwd, this._vUp).normalize();
 
-    // Smoothing — EMA on position/scale/rotation to kill jitter.
-    if (!this.smoothed) {
-      this.smoothed = { x: px, y: py, s: ringScale, a: angle };
-    } else {
-      const k = 0.35;  // higher = snappier; lower = smoother
-      this.smoothed.x += (px - this.smoothed.x) * k;
-      this.smoothed.y += (py - this.smoothed.y) * k;
-      this.smoothed.s += (ringScale - this.smoothed.s) * k;
-      // unwrap rotation to avoid 2π jumps
-      let da = angle - this.smoothed.a;
-      while (da > Math.PI) da -= Math.PI * 2;
-      while (da < -Math.PI) da += Math.PI * 2;
-      this.smoothed.a += da * k;
+    // Flip up if the user is showing the palm (stone should still face camera).
+    if (this._vUp.z < 0) {
+      this._vUp.multiplyScalar(-1);
+      this._vRight.multiplyScalar(-1);
     }
 
-    this.ring.position.set(this.smoothed.x, this.smoothed.y, 0);
-    this.ring.scale.setScalar(this.smoothed.s);
+    /* Ring local axes: +Y up toward setting, +Z is the torus axis (finger),
+       +X is sideways.  We need a basis where:
+         local +Y = world up   (palm normal pointing away from palm)
+         local +Z = world fwd  (finger direction)
+         local +X = world right
+       Matrix4.makeBasis(x, y, z) builds exactly this. */
+    this._mat.makeBasis(this._vRight, this._vUp, this._vFwd);
+    this._quat.setFromRotationMatrix(this._mat);
 
-    // Rotate the ring so its band axis aligns with the finger.
-    // Default ring (torus on XY) has its hole pointing along Z.
-    // We want the hole to point along the finger direction in screen space.
-    // Step 1: rotate ring 90° around X so the torus opening faces along Y → align with finger.
-    // Step 2: rotate around Z by the finger's screen angle.
-    this.ring.rotation.set(Math.PI / 2, 0, angle + Math.PI / 2);
+    /* ----- Smoothing (One-Euro on each component) ----- */
+    const px = this.filtPx.filter(rawPx, now);
+    const py = this.filtPy.filter(rawPy, now);
+    const s = this.filtScale.filter(rawScale, now);
 
-    // Tilt the head forward a bit so the stone faces camera at ~70°.
-    // Implemented by adding a child-level tilt:
-    // (Cheap approach — rotate the whole ring slightly toward camera.)
-    this.ring.rotation.x = Math.PI / 2 - 0.35;
+    // For quaternions, filter each component then normalize.  Guard against
+    // hemisphere flips by aligning with the previous quaternion.
+    if (this._prevQuat && this._quat.dot(this._prevQuat) < 0) {
+      this._quat.x = -this._quat.x;
+      this._quat.y = -this._quat.y;
+      this._quat.z = -this._quat.z;
+      this._quat.w = -this._quat.w;
+    }
+    const qx = this.filtQx.filter(this._quat.x, now);
+    const qy = this.filtQy.filter(this._quat.y, now);
+    const qz = this.filtQz.filter(this._quat.z, now);
+    const qw = this.filtQw.filter(this._quat.w, now);
+    const qLen = Math.hypot(qx, qy, qz, qw) || 1;
+    this.ring.quaternion.set(qx / qLen, qy / qLen, qz / qLen, qw / qLen);
+    if (!this._prevQuat) this._prevQuat = new THREE.Quaternion();
+    this._prevQuat.copy(this.ring.quaternion);
+
+    this.ring.position.set(px, py, 0);
+    this.ring.scale.setScalar(s);
   }
 
   snapshot() {
     try {
-      // Composite: draw mirrored video + overlay canvas into a single canvas.
+      // Composite: mirrored video + un-mirrored overlay into one PNG.
+      // The overlay canvas already has the ring drawn at mirrored coordinates
+      // (we flipped X in landmark math), so it should be drawn straight.
       const w = this.video.videoWidth;
       const h = this.video.videoHeight;
       if (!w || !h) return;
       const out = document.createElement("canvas");
       out.width = w; out.height = h;
       const ctx = out.getContext("2d");
+      // Mirrored video
       ctx.save();
       ctx.translate(w, 0);
       ctx.scale(-1, 1);
       ctx.drawImage(this.video, 0, 0, w, h);
       ctx.restore();
-      // Draw three canvas, which is already mirrored visually. We need the
-      // CSS-mirrored appearance baked into the output, so draw flipped too.
-      ctx.save();
-      ctx.translate(w, 0);
-      ctx.scale(-1, 1);
+      // Overlay (no flip)
       ctx.drawImage(this.canvas, 0, 0, w, h);
-      ctx.restore();
       out.toBlob((blob) => {
         if (!blob) return;
         const url = URL.createObjectURL(blob);
