@@ -7218,6 +7218,34 @@ async function createThreeStudio(root, canvas) {
     setReadoutListener,
     isAutoOrbiting: () => isAutoOrbiting,
     isInspecting: () => isInspecting,
+    /**
+     * Build a fresh piece Group from an arbitrary design state without
+     * mutating the visible designer scene. Used by the AR try-on module
+     * to render a fully-featured ring (halo, prongs, milgrain, hallmark,
+     * pavé, channel, three-stone, baguette flanks, etc.) over the user's
+     * hand instead of a simplified placeholder.
+     *
+     * The returned group reuses the designer's textures (env-independent
+     * normal/roughness/inclusion maps) so it composites correctly inside
+     * the AR scene's own HDR environment. Caller is responsible for
+     * adding the group to its scene and disposing of geometries when no
+     * longer needed; materials are fresh per build so dispose is safe.
+     */
+    buildPiece(state) {
+      const prev = currentState;
+      try {
+        currentState = sanitizeDesignState(state || prev);
+        const builders = {
+          Ring: buildRing,
+          Necklace: buildNecklace,
+          Bracelet: buildBracelet,
+          Earrings: buildEarrings
+        };
+        return (builders[currentState.piece] || buildRing)();
+      } finally {
+        currentState = prev;
+      }
+    },
     destroy() {
       window.cancelAnimationFrame(frameId);
       canvas.removeEventListener("pointerdown", onPointerDown);
@@ -7300,6 +7328,14 @@ async function setupDesigner(root = document.querySelector("[data-design-studio]
   } catch (error) {
     root.dataset.designerError = error instanceof Error ? error.message : "3D preview unavailable";
     studio = createFallbackStudio(root, fallback, canvas);
+  }
+
+  // Expose a piece builder so the AR try-on module can render the full
+  // high-fidelity ring instead of its simplified placeholder. Guarded
+  // against the fallback studio which lacks Three.js.
+  if (typeof studio.buildPiece === "function") {
+    window.__tjcDesigner = window.__tjcDesigner || {};
+    window.__tjcDesigner.buildPiece = studio.buildPiece;
   }
 
   const update = () => {

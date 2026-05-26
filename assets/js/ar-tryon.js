@@ -565,7 +565,31 @@ class ARTryOn {
     this.scene.add(rim);
 
     const state = readDesignState();
-    this.ring = buildRing(state);
+    // Prefer the designer's full ring builder (halo, prongs, milgrain,
+    // hallmark, pavé, channel, baguette flanks, etc.) when available.
+    // Falls back to the simplified buildRing() if the designer module
+    // hasn't initialised yet or the page didn't load it.
+    const factory = (typeof window !== "undefined" && window.__tjcDesigner && window.__tjcDesigner.buildPiece) || null;
+    if (factory) {
+      try {
+        this.ring = factory(state);
+      } catch (err) {
+        console.warn("[AR] designer buildPiece failed, falling back to simple ring:", err);
+        this.ring = buildRing(state);
+      }
+    } else {
+      this.ring = buildRing(state);
+    }
+    // Lock the band's plane perpendicular to the camera by default (the
+    // applyResult() basis will then rotate it to track the finger). The
+    // designer ring is built with the band axis on local +Z, head pointing
+    // local +Y — which is exactly what our AR basis expects.
+    // Cache the band's outer radius in LOCAL units so scale calibration
+    // converts physical mm → px correctly regardless of which ring style
+    // is loaded. We take half the X-extent because the head/stone push
+    // +Y but not +X, so max.x ≈ band outer radius.
+    const bb = new THREE.Box3().setFromObject(this.ring);
+    this._ringLocalOuterR = Math.max(bb.max.x, -bb.min.x, 1e-3);
     this.scene.add(this.ring);
 
     // Async HDR environment for PBR reflections — the ring looks plasticky
@@ -674,9 +698,14 @@ class ARTryOn {
     const k2W = world[PINKY_MCP];
     const handWidthM = Math.hypot(k2W.x - k1W.x, k2W.y - k1W.y, k2W.z - k1W.z) || 0.08;
     const pxPerMeter = handWidthPx / handWidthM;
-    // Real-world ring outer diameter ≈ 22mm → radius 11mm.
-    // Our torus has outer radius 1.0 in local units, so 1 unit = 11mm = 0.011m.
-    const rawScale = pxPerMeter * 0.011;
+    // Calibrate so the ring's outer rim corresponds to a real ~11mm radius
+    // (22mm OD — typical engagement ring). We scale by `targetOuterPx /
+    // localOuterR` so the same code works for the simplified placeholder
+    // (local outer R = 1.0) AND the designer's full ring (local outer R
+    // ≈ bandMajorR + bandWidth/2, usually 1.1–1.5).
+    const targetOuterMeters = 0.011;
+    const localOuterR = this._ringLocalOuterR || 1.0;
+    const rawScale = (pxPerMeter * targetOuterMeters) / localOuterR;
 
     /* ----- 3D ORIENTATION via worldLandmarks -----
        Build an orthonormal basis from the hand:
