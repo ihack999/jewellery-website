@@ -1992,6 +1992,31 @@ async function createThreeStudio(root, canvas) {
     return configureTexture(new THREE.CanvasTexture(textureCanvas), options);
   }
 
+  // Phase 2 — Hallmark engraving texture.
+  // Real jewelry always carries a karat/maker stamp on the inside of the
+  // band. We bake the stamp string into a 2048×128 canvas as dark text on
+  // a mid-gray background, then sample it as a bumpMap on a thin cylinder
+  // mounted just inside the band's inner surface. Mid-gray = no bump
+  // displacement, dark = depressed (when bumpScale is negative), so the
+  // text reads as engraved. Repeating the text 4× across the canvas width
+  // gives a continuous engraving around the full circumference without
+  // letter-stretching, since the cylinder UVs span [0,1] once around.
+  function createHallmarkTexture(text) {
+    return createCanvasTexture(2048, 128, (ctx, w, h) => {
+      ctx.fillStyle = "#808080";
+      ctx.fillRect(0, 0, w, h);
+      ctx.fillStyle = "#1a1a1a";
+      ctx.font = "bold 60px 'Helvetica Neue', Arial, sans-serif";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      const repeat = 4;
+      const segW = w / repeat;
+      for (let i = 0; i < repeat; i += 1) {
+        ctx.fillText(text, segW * (i + 0.5), h * 0.5);
+      }
+    }, { repeat: 1 });
+  }
+
   function createBrushedAnisotropyTexture() {
     return createCanvasTexture(512, 512, (context, width, height) => {
       context.fillStyle = "rgb(128, 128, 255)";
@@ -5603,6 +5628,48 @@ async function createThreeStudio(root, canvas) {
       const bandGeometry = makeBandGeometry(G.bandMajorR, bandW, bandH, style);
       const band = new THREE.Mesh(bandGeometry, metal);
       group.add(band);
+    }
+
+    // ---- Phase 2: hallmark engraving on inside of band ----
+    // Real fine jewelry always carries a karat / maker stamp inside the
+    // band. We mount a thin cylindrical patch at the band's inner radius
+    // and drive the text via bumpMap on a fresh material instance (sharing
+    // the band's metalness/colour so it reads as the same piece of gold).
+    // Negative bumpScale makes dark canvas pixels read as recessed — i.e.
+    // engraved into the surface. Skipped for silhouettes without a
+    // continuous inside surface (split shank / stacked) where it would
+    // poke through the metal at z ≠ 0.
+    if (silhouette !== "Split Shank" && silhouette !== "Stacked Double") {
+      const karat = currentState.karat || "";
+      const metalName = currentState.metal || "";
+      const stamp = metalName === "Platinum"
+        ? `PT ${karat} \u00b7 TJC`
+        : `${karat} \u00b7 TJC \u00b7 AU`;
+      const hallmarkTex = createHallmarkTexture(stamp);
+      const hallmarkMat = materialForMetal();
+      hallmarkMat.bumpMap = hallmarkTex;
+      hallmarkMat.bumpScale = -0.004;
+      // Strip the band's brushed/hammered normal map on the hallmark patch
+      // so the engraved text reads cleanly, not muddied by the surrounding
+      // finish texture.
+      hallmarkMat.normalMap = null;
+      hallmarkMat.normalScale = new THREE.Vector2(0, 0);
+      hallmarkMat.roughnessMap = null;
+      hallmarkMat.roughness = Math.max(0.45, hallmarkMat.roughness);
+
+      // Cylinder axis defaults to Y; rotateX(π/2) aligns it to the band
+      // axis (Z). Radius slightly less than bandMajorR so it sits just
+      // inside the elliptical inner surface (band geometry occludes it
+      // from the outside; visible only when looking through the ring).
+      const hallmarkH = G.bandHeight * 0.55;
+      const hallmarkGeo = new THREE.CylinderGeometry(
+        G.bandMajorR - 0.001, G.bandMajorR - 0.001,
+        hallmarkH, 240, 1, true
+      );
+      hallmarkGeo.rotateX(Math.PI * 0.5);
+      const hallmark = new THREE.Mesh(hallmarkGeo, hallmarkMat);
+      hallmark.userData.isHallmark = true;
+      group.add(hallmark);
     }
 
     // ---- milgrain edge: tiny beaded rails along the band's top edges
