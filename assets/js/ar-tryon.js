@@ -24,6 +24,9 @@ const HDR_URL = "assets/textures/studio_small_08_1k.hdr";
 
 const TRIGGER_SELECTOR = "[data-ar-tryon]";
 const STATE_KEY = "tj-custom-design-state";
+const CALIBRATION_KEY = "tj-ar-tryon-calibration";
+const TARGET_DETECTION_FPS = 30;
+const MAX_PIXEL_RATIO = 2;
 
 const MEDIAPIPE_BASE = "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14";
 const WASM_BASE = `${MEDIAPIPE_BASE}/wasm`;
@@ -71,6 +74,44 @@ const STONE_COLORS = {
   "Tanzanite": 0x4a3aa6,
   "Onyx": 0x111111
 };
+
+function clamp(value, min, max) {
+  return Math.max(min, Math.min(max, value));
+}
+
+function readCalibration() {
+  try {
+    const raw = JSON.parse(localStorage.getItem(CALIBRATION_KEY) || "{}");
+    return {
+      fit: clamp(Number(raw.fit) || 1, 0.78, 1.26),
+      lift: clamp(Number(raw.lift) || 0, -48, 48),
+      side: clamp(Number(raw.side) || 0, -48, 48),
+      facingMode: raw.facingMode === "environment" ? "environment" : "user"
+    };
+  } catch {
+    return { fit: 1, lift: 0, side: 0, facingMode: "user" };
+  }
+}
+
+function writeCalibration(calibration) {
+  try {
+    localStorage.setItem(CALIBRATION_KEY, JSON.stringify(calibration));
+  } catch {
+    // Calibration is a convenience. AR should still work if storage is blocked.
+  }
+}
+
+function disposeObjectTree(object) {
+  object?.traverse?.((node) => {
+    node.geometry?.dispose?.();
+
+    if (Array.isArray(node.material)) {
+      node.material.forEach(material => material.dispose?.());
+    } else {
+      node.material?.dispose?.();
+    }
+  });
+}
 
 /* Build the soft-shadow texture once and cache it. A 256² radial gradient
  * with the alpha falling off cubically — gives a believable contact-shadow
@@ -145,6 +186,7 @@ function injectStyles() {
        css-mirrored — we mirror landmark X in JS, which keeps the 3D ring's
        rotation/depth math consistent with what the user sees. */
     .ar-tryon-video { transform: scaleX(-1); }
+    .ar-tryon-modal.is-world-camera .ar-tryon-video { transform: none; }
     .ar-tryon-canvas { pointer-events: none; }
     .ar-tryon-status {
       position: absolute;
@@ -177,8 +219,9 @@ function injectStyles() {
     .ar-tryon-toolbar {
       position: absolute;
       top: 16px; right: 16px;
-      display: flex; gap: 8px;
+      display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px;
       z-index: 2;
+      max-width: min(520px, calc(100vw - 32px));
     }
     .ar-tryon-btn {
       appearance: none;
@@ -193,6 +236,50 @@ function injectStyles() {
       transition: background 120ms, border-color 120ms;
     }
     .ar-tryon-btn:hover { background: rgba(255,255,255,0.15); border-color: rgba(255,255,255,0.45); }
+    .ar-tryon-calibration {
+      position: absolute;
+      left: 50%;
+      bottom: 112px;
+      z-index: 2;
+      transform: translateX(-50%);
+      display: grid;
+      grid-template-columns: repeat(3, minmax(112px, 1fr)) auto;
+      gap: 8px;
+      width: min(720px, calc(100vw - 28px));
+      padding: 8px;
+      border: 1px solid rgba(255,255,255,0.16);
+      border-radius: 16px;
+      background: rgba(0,0,0,0.48);
+      color: #fff;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 18px 60px rgba(0,0,0,0.24);
+    }
+    .ar-tryon-calibration label {
+      display: grid;
+      gap: 4px;
+      min-width: 0;
+      font: 600 10px/1.1 system-ui, -apple-system, sans-serif;
+      letter-spacing: 0.11em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.72);
+    }
+    .ar-tryon-calibration output {
+      color: #fff;
+      font-size: 11px;
+      letter-spacing: 0;
+      text-transform: none;
+      font-variant-numeric: tabular-nums;
+    }
+    .ar-tryon-calibration input[type="range"] {
+      width: 100%;
+      accent-color: #fff;
+    }
+    .ar-tryon-reset {
+      align-self: end;
+      min-height: 34px;
+      padding-inline: 12px;
+      font-size: 11px;
+    }
     .ar-tryon-finger-select {
       position: absolute;
       bottom: 64px; left: 50%;
@@ -251,6 +338,31 @@ function injectStyles() {
       color: rgba(255,255,255,0.75);
       font-variant-numeric: tabular-nums;
     }
+    @media (max-width: 620px) {
+      .ar-tryon-toolbar {
+        top: 10px;
+        right: 10px;
+        left: 10px;
+        max-width: none;
+      }
+      .ar-tryon-btn {
+        padding: 9px 12px;
+      }
+      .ar-tryon-calibration {
+        bottom: 110px;
+        grid-template-columns: 1fr;
+        width: min(340px, calc(100vw - 20px));
+      }
+      .ar-tryon-reset {
+        justify-self: stretch;
+      }
+      .ar-tryon-finger-select {
+        bottom: 58px;
+      }
+      .ar-tryon-hint {
+        display: none;
+      }
+    }
   `;
   document.head.appendChild(style);
 }
@@ -266,8 +378,15 @@ function buildModal() {
       <video class="ar-tryon-video" playsinline muted autoplay></video>
       <canvas class="ar-tryon-canvas"></canvas>
       <div class="ar-tryon-toolbar">
+        <button type="button" class="ar-tryon-btn" data-ar-flip>Flip Camera</button>
         <button type="button" class="ar-tryon-btn" data-ar-snapshot>Save Snapshot</button>
         <button type="button" class="ar-tryon-btn" data-ar-close aria-label="Close AR try-on">Close ✕</button>
+      </div>
+      <div class="ar-tryon-calibration" aria-label="Adjust AR ring fit">
+        <label>Fit <output data-ar-fit-value>100%</output><input type="range" min="78" max="126" step="1" value="100" data-ar-fit></label>
+        <label>Lift <output data-ar-lift-value>0px</output><input type="range" min="-48" max="48" step="1" value="0" data-ar-lift></label>
+        <label>Side <output data-ar-side-value>0px</output><input type="range" min="-48" max="48" step="1" value="0" data-ar-side></label>
+        <button type="button" class="ar-tryon-btn ar-tryon-reset" data-ar-reset-fit>Reset</button>
       </div>
       <div class="ar-tryon-finger-select" role="group" aria-label="Choose finger">
         <button type="button" data-finger="index">Index</button>
@@ -487,6 +606,11 @@ class OneEuro {
     this.tPrev = t;
     return xHat;
   }
+  reset() {
+    this.xPrev = null;
+    this.dxPrev = 0;
+    this.tPrev = null;
+  }
 }
 
 class ARTryOn {
@@ -502,9 +626,16 @@ class ARTryOn {
     this.stream = null;
     this.rafId = null;
     this.lastVideoTime = -1;
+    this.lastDetectMs = 0;
     this.activeFinger = "ring";
     this.statusEl = null;
     this.handLostFrames = 0;
+    this.calibration = readCalibration();
+    this.facingMode = this.calibration.facingMode;
+    this.detectInterval = 1000 / TARGET_DETECTION_FPS;
+    this._lastLightSample = 0;
+    this._lightProbe = null;
+    this._isRestartingCamera = false;
 
     // One-Euro filters per channel — much cleaner than EMA for tracking jitter.
     // Position: low cutoff, low beta (slow corrections, very smooth).
@@ -561,14 +692,42 @@ class ARTryOn {
     this.sizeEl = this.modal.querySelector("[data-ar-size]");
     this.sizeValueEl = this.modal.querySelector("[data-ar-size-value]");
     this.sizeSubEl = this.modal.querySelector("[data-ar-size-sub]");
+    this.fitInput = this.modal.querySelector("[data-ar-fit]");
+    this.liftInput = this.modal.querySelector("[data-ar-lift]");
+    this.sideInput = this.modal.querySelector("[data-ar-side]");
+    this.fitValueEl = this.modal.querySelector("[data-ar-fit-value]");
+    this.liftValueEl = this.modal.querySelector("[data-ar-lift-value]");
+    this.sideValueEl = this.modal.querySelector("[data-ar-side-value]");
+
+    this.applyCameraClass();
+    this.syncCalibrationControls();
 
     this.modal.querySelector("[data-ar-close]").addEventListener("click", () => this.close());
     this.modal.querySelector("[data-ar-snapshot]").addEventListener("click", () => this.snapshot());
+    this.modal.querySelector("[data-ar-flip]").addEventListener("click", () => this.flipCamera());
+    this.modal.querySelector("[data-ar-reset-fit]").addEventListener("click", () => {
+      this.calibration.fit = 1;
+      this.calibration.lift = 0;
+      this.calibration.side = 0;
+      this.persistCalibration();
+      this.syncCalibrationControls();
+    });
+    [this.fitInput, this.liftInput, this.sideInput].forEach((input) => {
+      input?.addEventListener("input", () => {
+        this.calibration.fit = Number(this.fitInput?.value || 100) / 100;
+        this.calibration.lift = Number(this.liftInput?.value || 0);
+        this.calibration.side = Number(this.sideInput?.value || 0);
+        this.persistCalibration();
+        this.syncCalibrationLabels();
+      });
+    });
     this.modal.querySelectorAll(".ar-tryon-finger-select button").forEach(btn => {
       btn.addEventListener("click", () => {
         this.modal.querySelectorAll(".ar-tryon-finger-select button").forEach(b => b.classList.remove("is-active"));
         btn.classList.add("is-active");
         this.activeFinger = btn.dataset.finger;
+        this.resetTrackingFilters();
+        if (this.ring) this.ring.visible = false;
       });
     });
     document.addEventListener("keydown", this._onKey = (e) => {
@@ -598,6 +757,115 @@ class ARTryOn {
       this.statusEl.classList.remove("is-hidden");
       this.statusEl.textContent = msg;
     }
+  }
+
+  applyCameraClass() {
+    this.modal?.classList.toggle("is-world-camera", this.facingMode === "environment");
+  }
+
+  get isMirrored() {
+    return this.facingMode !== "environment";
+  }
+
+  persistCalibration() {
+    this.calibration.facingMode = this.facingMode;
+    writeCalibration(this.calibration);
+  }
+
+  syncCalibrationLabels() {
+    if (this.fitValueEl) this.fitValueEl.textContent = `${Math.round(this.calibration.fit * 100)}%`;
+    if (this.liftValueEl) this.liftValueEl.textContent = `${Math.round(this.calibration.lift)}px`;
+    if (this.sideValueEl) this.sideValueEl.textContent = `${Math.round(this.calibration.side)}px`;
+  }
+
+  syncCalibrationControls() {
+    if (this.fitInput) this.fitInput.value = String(Math.round(this.calibration.fit * 100));
+    if (this.liftInput) this.liftInput.value = String(Math.round(this.calibration.lift));
+    if (this.sideInput) this.sideInput.value = String(Math.round(this.calibration.side));
+    this.syncCalibrationLabels();
+  }
+
+  resetTrackingFilters() {
+    [
+      this.filtPx,
+      this.filtPy,
+      this.filtScale,
+      this.filtAngleSin,
+      this.filtAngleCos,
+      this.filtPitch,
+      this.filtFingerDia
+    ].forEach(filter => filter.reset());
+    this._hasTarget = false;
+  }
+
+  videoMetrics() {
+    const width = Math.max(this.canvas?.clientWidth || 1, 1);
+    const height = Math.max(this.canvas?.clientHeight || 1, 1);
+    const videoWidth = this.video?.videoWidth || width;
+    const videoHeight = this.video?.videoHeight || height;
+    const coverScale = Math.max(width / videoWidth, height / videoHeight);
+    const drawWidth = videoWidth * coverScale;
+    const drawHeight = videoHeight * coverScale;
+
+    return {
+      width,
+      height,
+      drawWidth,
+      drawHeight,
+      offsetX: (width - drawWidth) / 2,
+      offsetY: (height - drawHeight) / 2
+    };
+  }
+
+  landmarkToStage(point, metrics) {
+    let x = metrics.offsetX + point.x * metrics.drawWidth;
+    const y = metrics.offsetY + point.y * metrics.drawHeight;
+
+    if (this.isMirrored) {
+      x = metrics.width - x;
+    }
+
+    return {
+      x: x - metrics.width / 2,
+      y: -(y - metrics.height / 2)
+    };
+  }
+
+  landmarkDistance(a, b, metrics) {
+    const pa = this.landmarkToStage(a, metrics);
+    const pb = this.landmarkToStage(b, metrics);
+    return Math.hypot(pa.x - pb.x, pa.y - pb.y);
+  }
+
+  selectHand(result, metrics, baseIdx, tipIdx) {
+    const hands = result?.landmarks || [];
+    const worlds = result?.worldLandmarks || [];
+    let best = null;
+
+    hands.forEach((landmarks, index) => {
+      const world = worlds[index];
+
+      if (!landmarks?.[baseIdx] || !landmarks?.[tipIdx] || !world?.[baseIdx] || !world?.[tipIdx]) {
+        return;
+      }
+
+      const base = this.landmarkToStage(landmarks[baseIdx], metrics);
+      const tip = this.landmarkToStage(landmarks[tipIdx], metrics);
+      const wrist = this.landmarkToStage(landmarks[0], metrics);
+      const fingerLength = Math.hypot(tip.x - base.x, tip.y - base.y);
+      const handWidth = landmarks[INDEX_MCP] && landmarks[PINKY_MCP]
+        ? this.landmarkDistance(landmarks[INDEX_MCP], landmarks[PINKY_MCP], metrics)
+        : fingerLength * 2.4;
+      const centerDistance = Math.hypot((base.x + tip.x) * 0.5, (base.y + tip.y) * 0.5);
+      const wristPenalty = Math.max(0, Math.hypot(wrist.x, wrist.y) - Math.max(metrics.width, metrics.height) * 0.18);
+      const score = fingerLength * 1.4 + handWidth * 0.34 - centerDistance * 0.16 - wristPenalty * 0.08;
+
+      if (!best || score > best.score) {
+        best = { landmarks, world, index, score };
+      }
+    });
+
+    return best;
   }
 
   /* Convert real-world hand width (meters) into an estimated ring size for
@@ -632,8 +900,20 @@ class ARTryOn {
     if (!navigator.mediaDevices?.getUserMedia) {
       throw new Error("Camera API not supported in this browser.");
     }
+    if (this.stream) {
+      this.stream.getTracks().forEach(t => t.stop());
+      this.stream = null;
+    }
+    if (this.video) {
+      this.video.srcObject = null;
+    }
     this.stream = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode: "user", width: { ideal: 1280 }, height: { ideal: 720 } },
+      video: {
+        facingMode: { ideal: this.facingMode },
+        width: { ideal: 1280 },
+        height: { ideal: 720 },
+        frameRate: { ideal: 30, max: 60 }
+      },
       audio: false
     });
     this.video.srcObject = this.stream;
@@ -642,6 +922,32 @@ class ARTryOn {
       else this.video.addEventListener("loadeddata", () => resolve(), { once: true });
     });
     await this.video.play();
+    this.lastVideoTime = -1;
+    this.lastDetectMs = 0;
+    this.handLostFrames = 0;
+    this.applyCameraClass();
+    this.persistCalibration();
+  }
+
+  async flipCamera() {
+    if (this._isRestartingCamera) return;
+    this._isRestartingCamera = true;
+    this.setStatus("Switching camera...");
+    this.facingMode = this.facingMode === "user" ? "environment" : "user";
+    this.applyCameraClass();
+    try {
+      await this.startCamera();
+      this.resetTrackingFilters();
+      if (this.ring) this.ring.visible = false;
+      this.setStatus("");
+    } catch (error) {
+      this.facingMode = this.facingMode === "user" ? "environment" : "user";
+      this.applyCameraClass();
+      this.persistCalibration();
+      this.setStatus("Could not switch camera.");
+    } finally {
+      this._isRestartingCamera = false;
+    }
   }
 
   async startMediaPipe() {
@@ -651,15 +957,15 @@ class ARTryOn {
     this.handLandmarker = await vision.HandLandmarker.createFromOptions(fileset, {
       baseOptions: { modelAssetPath: MODEL_URL, delegate: "GPU" },
       runningMode: "VIDEO",
-      numHands: 1,
-      minHandDetectionConfidence: 0.5,
-      minHandPresenceConfidence: 0.5,
-      minTrackingConfidence: 0.5
+      numHands: 2,
+      minHandDetectionConfidence: 0.58,
+      minHandPresenceConfidence: 0.58,
+      minTrackingConfidence: 0.58
     });
   }
 
   startThree() {
-    const dpr = Math.min(window.devicePixelRatio, 2);
+    const dpr = Math.min(window.devicePixelRatio || 1, MAX_PIXEL_RATIO);
     const stage = this.modal.querySelector(".ar-tryon-stage");
     const rect = stage.getBoundingClientRect();
 
@@ -689,23 +995,27 @@ class ARTryOn {
     // Lighting rig — acts as a fallback before the HDR env loads, and
     // adds shaped specular punch on top of the env's diffuse contribution.
     // The sparkle light is animated each frame to make the gem scintillate.
-    const hemi = new THREE.HemisphereLight(0xffffff, 0x404a55, 0.55);
-    this.scene.add(hemi);
-    const key = new THREE.DirectionalLight(0xffffff, 1.4);
-    key.position.set(0.8, 1.0, 0.6);
-    this.scene.add(key);
-    const fill = new THREE.DirectionalLight(0xc7d6ff, 0.55);
-    fill.position.set(-0.7, 0.4, 0.5);
-    this.scene.add(fill);
-    const rim = new THREE.DirectionalLight(0xfff1d8, 0.7);
-    rim.position.set(-0.2, 0.6, -1);
-    this.scene.add(rim);
+    this._hemi = new THREE.HemisphereLight(0xffffff, 0x404a55, 0.55);
+    this.scene.add(this._hemi);
+    this._key = new THREE.DirectionalLight(0xffffff, 1.4);
+    this._key.position.set(0.8, 1.0, 0.6);
+    this.scene.add(this._key);
+    this._fill = new THREE.DirectionalLight(0xc7d6ff, 0.55);
+    this._fill.position.set(-0.7, 0.4, 0.5);
+    this.scene.add(this._fill);
+    this._rim = new THREE.DirectionalLight(0xfff1d8, 0.7);
+    this._rim.position.set(-0.2, 0.6, -1);
+    this.scene.add(this._rim);
     // Scintillation light — small, fast-moving point light positioned just
     // off-axis from the camera; its intensity is modulated in the loop so
     // the stone gets a wandering specular flash even when the hand is still.
     this._sparkleLight = new THREE.PointLight(0xffffff, 1.2, 0, 2);
     this._sparkleLight.position.set(0, 0, 200);
     this.scene.add(this._sparkleLight);
+    this._lightProbe = document.createElement("canvas");
+    this._lightProbe.width = 28;
+    this._lightProbe.height = 18;
+    this._lightProbeCtx = this._lightProbe.getContext("2d", { willReadFrequently: true });
 
     const state = readDesignState();
     // Prefer the designer's full ring builder (halo, prongs, milgrain,
@@ -751,6 +1061,7 @@ class ARTryOn {
     });
 
     this.scene.add(this.ring);
+    this.ring.visible = false;
 
     /* ----- finger occluder -----
      * A depth-only cylinder along the finger axis (ring-local +Z) the
@@ -827,6 +1138,7 @@ class ARTryOn {
 
     this._onResize = () => {
       const r = stage.getBoundingClientRect();
+      this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, MAX_PIXEL_RATIO));
       this.renderer.setSize(r.width, r.height, false);
       this.camera.left = -r.width / 2;
       this.camera.right = r.width / 2;
@@ -853,6 +1165,55 @@ class ARTryOn {
     });
   }
 
+  sampleVideoLighting(now) {
+    if (!this.video || !this._lightProbeCtx || !this.renderer || now - this._lastLightSample < 260) {
+      return;
+    }
+
+    const { width, height } = this._lightProbe;
+
+    try {
+      this._lightProbeCtx.drawImage(this.video, 0, 0, width, height);
+      const pixels = this._lightProbeCtx.getImageData(0, 0, width, height).data;
+      let red = 0;
+      let green = 0;
+      let blue = 0;
+      let count = 0;
+
+      for (let index = 0; index < pixels.length; index += 4) {
+        red += pixels[index];
+        green += pixels[index + 1];
+        blue += pixels[index + 2];
+        count += 1;
+      }
+
+      red /= count * 255;
+      green /= count * 255;
+      blue /= count * 255;
+
+      const brightness = clamp((red + green + blue) / 3, 0.08, 0.92);
+      const warmth = clamp(red - blue, -0.28, 0.28);
+      const targetExposure = clamp(1.24 - brightness * 0.42, 0.82, 1.28);
+      const lightColor = new THREE.Color(
+        clamp(1 + warmth * 0.34, 0.82, 1.16),
+        clamp(0.94 + warmth * 0.08, 0.82, 1.08),
+        clamp(1 - warmth * 0.28, 0.78, 1.16)
+      );
+
+      this.renderer.toneMappingExposure += (targetExposure - this.renderer.toneMappingExposure) * 0.2;
+      this._hemi.intensity += (clamp(0.42 + brightness * 0.48, 0.42, 0.84) - this._hemi.intensity) * 0.16;
+      this._key.intensity += (clamp(1.05 + (1 - brightness) * 0.72, 1.05, 1.9) - this._key.intensity) * 0.16;
+      this._fill.intensity += (clamp(0.34 + brightness * 0.38, 0.34, 0.78) - this._fill.intensity) * 0.16;
+      this._rim.intensity += (clamp(0.56 + (1 - brightness) * 0.52, 0.56, 1.1) - this._rim.intensity) * 0.16;
+      this._key.color.lerp(lightColor, 0.18);
+      this._fill.color.lerp(lightColor.clone().lerp(new THREE.Color(0xd9e6ff), 0.42), 0.14);
+      this._rim.color.lerp(lightColor.clone().lerp(new THREE.Color(0xfff1d8), 0.52), 0.14);
+      this._lastLightSample = now;
+    } catch {
+      this._lastLightSample = now;
+    }
+  }
+
   fingerLandmarks() {
     switch (this.activeFinger) {
       case "index": return [5, 6];
@@ -868,10 +1229,18 @@ class ARTryOn {
     if (!this.handLandmarker || !this.video || this.video.readyState < 2) return;
 
     const now = performance.now();
-    if (this.video.currentTime !== this.lastVideoTime) {
+    if (this.video.currentTime !== this.lastVideoTime && now - this.lastDetectMs >= this.detectInterval) {
       this.lastVideoTime = this.video.currentTime;
+      this.lastDetectMs = now;
+      const detectStart = performance.now();
       const result = this.handLandmarker.detectForVideo(this.video, now);
       this.applyResult(result);
+      const detectCost = performance.now() - detectStart;
+      this.detectInterval = clamp(
+        this.detectInterval + (detectCost > 24 ? 2.4 : -0.5),
+        1000 / 38,
+        1000 / 18
+      );
     }
 
     /* Per-rAF pose interpolation toward the latest target. Exponential
@@ -901,12 +1270,17 @@ class ARTryOn {
       );
       this._sparkleLight.intensity = 1.0 + 0.6 * Math.sin(t * 3.7) + 0.4 * Math.cos(t * 5.3);
     }
+    this.sampleVideoLighting(now);
     this.renderer.render(this.scene, this.camera);
   };
 
   applyResult(result) {
-    const landmarks = result?.landmarks?.[0];
-    const world = result?.worldLandmarks?.[0];
+    const now = performance.now();
+    const [baseIdx, tipIdx] = this.fingerLandmarks();
+    const metrics = this.videoMetrics();
+    const selected = this.selectHand(result, metrics, baseIdx, tipIdx);
+    const landmarks = selected?.landmarks;
+    const world = selected?.world;
 
     if (!landmarks || !world) {
       this.handLostFrames++;
@@ -921,11 +1295,6 @@ class ARTryOn {
     if (this.handLostFrames > 0) this.setStatus("");
     this.handLostFrames = 0;
     this.ring.visible = true;
-
-    const w = this.canvas.clientWidth;
-    const h = this.canvas.clientHeight;
-    const now = performance.now();
-    const [baseIdx, tipIdx] = this.fingerLandmarks();
 
     /* ============================================================
      * POSE STRATEGY (rewrite)
@@ -949,7 +1318,7 @@ class ARTryOn {
     /* --- pixels-per-meter calibration (knuckle line) --- */
     const idxImg = landmarks[INDEX_MCP];
     const pkyImg = landmarks[PINKY_MCP];
-    const handWidthPx = Math.hypot((pkyImg.x - idxImg.x) * w, (pkyImg.y - idxImg.y) * h);
+    const handWidthPx = this.landmarkDistance(idxImg, pkyImg, metrics);
     const idxW = world[INDEX_MCP];
     const pkyW = world[PINKY_MCP];
     const handWidthM = Math.hypot(pkyW.x - idxW.x, pkyW.y - idxW.y, pkyW.z - idxW.z) || 0.08;
@@ -959,15 +1328,17 @@ class ARTryOn {
     /* --- 2D position (mirrored: video is CSS-flipped, overlay is not) --- */
     const baseImg = landmarks[baseIdx];
     const tipImg = landmarks[tipIdx];
-    const baseX = (1 - baseImg.x) * w - w / 2;
-    const baseY = -(baseImg.y * h - h / 2);
-    const tipX = (1 - tipImg.x) * w - w / 2;
-    const tipY = -(tipImg.y * h - h / 2);
+    const basePoint = this.landmarkToStage(baseImg, metrics);
+    const tipPoint = this.landmarkToStage(tipImg, metrics);
+    const baseX = basePoint.x;
+    const baseY = basePoint.y;
+    const tipX = tipPoint.x;
+    const tipY = tipPoint.y;
     // Ring sits at ~50% of the proximal phalanx (visually centered between
     // the knuckle and PIP joint — that's where rings actually sit).
     const tParam = 0.50;
-    const rawPx = baseX + (tipX - baseX) * tParam;
-    const rawPy = baseY + (tipY - baseY) * tParam;
+    let rawPx = baseX + (tipX - baseX) * tParam;
+    let rawPy = baseY + (tipY - baseY) * tParam;
 
     /* --- in-plane finger angle (image space) --- */
     const dx = tipX - baseX;
@@ -977,6 +1348,8 @@ class ARTryOn {
     const fy = dy / imgLen;
     // We mirror the X axis of the source (selfie view), so the in-plane
     // sense is already correct.
+    rawPx += -fy * this.calibration.side;
+    rawPy += fx * this.calibration.side + this.calibration.lift;
 
     /* --- out-of-plane pitch from foreshortening ---
      * If finger were exactly in the image plane: imgLen ≈ worldLen × pxPerMeter
@@ -1003,7 +1376,7 @@ class ARTryOn {
      * local outer R varies (1.1–1.5) so divide it out. */
     const targetOuterMeters = 0.0095;
     const localOuterR = this._ringLocalOuterR || 1.0;
-    const rawScale = (pxPerMeter * targetOuterMeters) / localOuterR;
+    const rawScale = ((pxPerMeter * targetOuterMeters) / localOuterR) * this.calibration.fit;
 
     /* --- smooth each scalar independently --- */
     const px = this.filtPx.filter(rawPx, now);
@@ -1068,12 +1441,15 @@ class ARTryOn {
       const out = document.createElement("canvas");
       out.width = w; out.height = h;
       const ctx = out.getContext("2d");
-      // Mirrored video
-      ctx.save();
-      ctx.translate(w, 0);
-      ctx.scale(-1, 1);
-      ctx.drawImage(this.video, 0, 0, w, h);
-      ctx.restore();
+      if (this.isMirrored) {
+        ctx.save();
+        ctx.translate(w, 0);
+        ctx.scale(-1, 1);
+        ctx.drawImage(this.video, 0, 0, w, h);
+        ctx.restore();
+      } else {
+        ctx.drawImage(this.video, 0, 0, w, h);
+      }
       // Overlay (no flip)
       ctx.drawImage(this.canvas, 0, 0, w, h);
       out.toBlob((blob) => {
@@ -1100,11 +1476,15 @@ class ARTryOn {
       this.stream.getTracks().forEach(t => t.stop());
       this.stream = null;
     }
+    if (this.video) {
+      this.video.srcObject = null;
+    }
     if (this.handLandmarker) {
       try { this.handLandmarker.close(); } catch {}
       this.handLandmarker = null;
     }
     if (this.renderer) {
+      disposeObjectTree(this.ring);
       this.renderer.dispose();
       this.renderer.forceContextLoss?.();
       this.renderer = null;
@@ -1116,6 +1496,11 @@ class ARTryOn {
     if (this.modal && this.modal.parentNode) {
       this.modal.parentNode.removeChild(this.modal);
     }
+    this.ring = null;
+    this.scene = null;
+    this.camera = null;
+    this._lightProbe = null;
+    this._lightProbeCtx = null;
     document.body.style.overflow = "";
   }
 }
@@ -1126,6 +1511,13 @@ function init() {
   triggers.forEach(btn => {
     btn.addEventListener("click", async () => {
       if (window.__arTryOn) return;
+      const state = readDesignState();
+
+      if (state?.piece && state.piece !== "Ring") {
+        btn.hidden = true;
+        return;
+      }
+
       const app = new ARTryOn();
       window.__arTryOn = app;
       try {

@@ -3604,12 +3604,36 @@ async function createThreeStudio(root, canvas) {
     const isOpal = currentState.stone === "Fire Opal";
     const glow = !!(currentState && currentState.emissiveGlow);
 
-    // A real gemstone has no surface body texture - all the visible
-    // structure comes from refraction, dispersion and the env map. We rely
-    // on the non-indexed faceted geometry (computeVertexNormals → per-face
-    // normals) for crisp facet-edge shading; flatShading is therefore not
-    // needed and is actually counterproductive with transmission because it
-    // disables proper per-fragment normal sampling for the refraction pass.
+    /* Dispersion (Realism §3 / §11):
+     * Profile stores PHYSICAL Abbe-equivalent values (diamond 0.044, etc).
+     * three.js MeshPhysicalMaterial.dispersion is a perceptual 0..~2
+     * strength knob — at 0.044 the chromatic split is invisible. Scale
+     * the physical value through the `fire` knob: stones cut for
+     * brilliance (high fire) get more visual dispersion than the raw
+     * Abbe number alone would give. Capped at 2.0 to stay artist-friendly.
+     *
+     *   dispersion_three = clamp( physical * fireGain , 0, 2 )
+     *   fireGain = 18 + 14·fire    →   diamond 0.044·(18+14·0.82) ≈ 1.3
+     *                                  emerald 0.018·(18+14·0.30) ≈ 0.40
+     *                                  onyx                       = 0     */
+    const fire = profile.fire || 0;
+    const fireGain = 18 + 14 * fire;
+    const dispersionThree = Math.min(2.0, (profile.dispersion || 0) * fireGain);
+
+    /* Iridescence is now `fire`-driven too. Diamond fire = facet rainbow
+     * play, modeled here as low-magnitude thin-film iridescence. Colored
+     * stones with high fire (e.g. salt&pepper diamond) get a touch; flat
+     * lifeless gems (onyx) get none. Opal stays at its high baseline. */
+    const iridescenceFromFire = isOpal ? 0.85
+      : isDiamond ? 0.18 + 0.20 * fire        // 0.18..0.34
+      : 0.02 + 0.10 * fire;                   // up to ~0.12 for fiery colored
+
+    /* envMapIntensity also rides `fire` — a brilliant cut throws more
+     * environment than a dull cabochon-style stone. */
+    const envIntensity = isDiamond
+      ? 2.6 + 0.7 * fire                       // 2.6..3.2
+      : 1.9 + 0.7 * fire;                      // 1.9..2.6
+
     return new THREE.MeshPhysicalMaterial({
       color: profile.color,
       metalness: isOpaque ? 0.15 : 0,
@@ -3620,7 +3644,7 @@ async function createThreeStudio(root, canvas) {
       transmission: profile.transmission,
       thickness: profile.thickness || 1,
       ior: profile.ior,
-      dispersion: profile.dispersion,
+      dispersion: dispersionThree,
       attenuationColor: profile.absorption,
       attenuationDistance: profile.attenuationDistance,
       // Emissive glow: stone self-illuminates with its absorption hue.
@@ -3632,11 +3656,8 @@ async function createThreeStudio(root, canvas) {
       reflectivity: 1,
       clearcoat: 1,
       clearcoatRoughness: 0.003,
-      envMapIntensity: isDiamond ? 2.95 : 2.25,
-      // Iridescence enriches diamond fire but desaturates colored hues, so
-      // colored stones get only a whisper to keep the body color brilliant.
-      // Fire opal gets a strong play-of-color shift.
-      iridescence: isOpal ? 0.85 : isDiamond ? 0.28 : 0.025,
+      envMapIntensity: envIntensity,
+      iridescence: iridescenceFromFire,
       iridescenceIOR: isOpal ? 1.45 : 1.32,
       ...(isOpal ? { iridescenceThicknessRange: [200, 800] } : {}),
       sheen: isDiamond ? 0.08 : 0,
