@@ -253,14 +253,14 @@ Track concrete code locations against the spec. Update as upgrades land.
 | 4 | AR pose           | [assets/js/ar-tryon.js](../assets/js/ar-tryon.js)   | live — One-Euro + scalar decomposition |
 | 4 | AR jitter         | [assets/js/ar-tryon.js](../assets/js/ar-tryon.js)   | live — rAF lerp/slerp toward target |
 | 5 | contact (shadow)  | [assets/js/ar-tryon.js](../assets/js/ar-tryon.js)   | live — soft shadow disc + finger occluder |
+| 8 | NoDrop            | [assets/js/designer.js](../assets/js/designer.js) `computeNoDropDefects` | live — 3-scale defect scan (coarse/mid/fine), fed into E_real + Gate-C |
 | 9 | Gate-C correction | [assets/js/designer.js](../assets/js/designer.js) `proposeGateCCorrection` | live — Fix button on score badge |
+| 10| brand memory (HDWA-FSE) | [assets/js/designer.js](../assets/js/designer.js) `computeBrandAlignment` | live — complex inner-product alignment, drift-axis Gate-C |
 | 11| dispersion        | [assets/js/designer.js](../assets/js/designer.js) `materialForStone` | live — fire-driven dispersion + iridescence + env intensity |
-| 11| micro-sparkle lights | [assets/js/designer.js](../assets/js/designer.js) `animateMicroSparkles` | live — 3 PointLights on Lissajous orbits |
+| 11| micro-sparkle lights | [assets/js/designer.js](../assets/js/designer.js) `animateMicroSparkles` | live — 3 PointLights, phase-locked on burst (§11 coherence) |
 | 11| sparkle (AR)      | [assets/js/ar-tryon.js](../assets/js/ar-tryon.js)   | partial — wandering point light only |
 | 13| manufacturability | [assets/js/designer.js](../assets/js/designer.js) `computeManufacturability` | live — USD cost readout on badge |
 | 14| reality score     | [assets/js/designer.js](../assets/js/designer.js) `computeRealityEnergy` / `updateRealityScore` | live — badge + tooltip + grade colours |
-| 8 | NoDrop            | —                                                   | TODO — multi-scale defect scan |
-| 10| brand memory (HDWA-FSE) | —                                             | TODO — collection coherence vector |
 | 12| delta-tile compute | [assets/js/ar-tryon.js](../assets/js/ar-tryon.js)  | TODO — region-of-interest update budget |
 
 Upgrade order agreed with project owner:
