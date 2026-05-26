@@ -476,14 +476,17 @@ class ARTryOn {
     // Scale:    even lower cutoff (depth wobble is annoying).
     // Angle/pitch: per-scalar, then we build the quaternion AFTER smoothing
     //   (avoids 4-channel hemisphere headaches and is way more stable).
-    this.filtPx = new OneEuro(1.4, 0.012);
-    this.filtPy = new OneEuro(1.4, 0.012);
-    this.filtScale = new OneEuro(0.5, 0.008);
+    // Lower minCutoff → more aggressive smoothing at low hand speeds
+    // (rigidity when held still). Beta governs how fast we let go when the
+    // hand actually moves quickly.
+    this.filtPx = new OneEuro(1.0, 0.015);
+    this.filtPy = new OneEuro(1.0, 0.015);
+    this.filtScale = new OneEuro(0.3, 0.006);
     // Angle: filter sin/cos separately so the wrap at ±π doesn't cause jumps.
-    this.filtAngleSin = new OneEuro(1.5, 0.02);
-    this.filtAngleCos = new OneEuro(1.5, 0.02);
+    this.filtAngleSin = new OneEuro(1.0, 0.02);
+    this.filtAngleCos = new OneEuro(1.0, 0.02);
     // Pitch: extra-slow filter — finger pitch from foreshortening is noisy.
-    this.filtPitch = new OneEuro(0.6, 0.01);
+    this.filtPitch = new OneEuro(0.4, 0.008);
     // Finger diameter (meters) filtered hard — the digit display would
     // flicker between sizes otherwise. Low cutoff + low beta = lazy lock.
     this.filtFingerDia = new OneEuro(0.3, 0.005);
@@ -496,6 +499,19 @@ class ARTryOn {
     this._vFwd = new THREE.Vector3();
     this._mat = new THREE.Matrix4();
     this._quat = new THREE.Quaternion();
+
+    /* Target-pose state for per-rAF interpolation.
+     * MediaPipe emits at ~video fps (≈30); rAF runs at ≈60. Updating the
+     * ring once per detection causes a stepped "two-frame held" look.
+     * Instead we write each detection into a target pose and lerp the
+     * displayed pose toward it every rAF — gives continuous, silky motion
+     * without compromising responsiveness (the underlying One-Euro filters
+     * still do the heavy lifting on noise). */
+    this._tgtPos = new THREE.Vector3();
+    this._tgtQuat = new THREE.Quaternion();
+    this._tgtScale = 1;
+    this._hasTarget = false;
+    this._lastRafTime = 0;
   }
 
   async open() {
@@ -682,6 +698,23 @@ class ARTryOn {
     // +Y but not +X, so max.x ≈ band outer radius.
     const bb = new THREE.Box3().setFromObject(this.ring);
     this._ringLocalOuterR = Math.max(bb.max.x, -bb.min.x, 1e-3);
+
+    /* Realism boost — crank env reflections on every PBR material under
+     * the ring. The HDR studio probe gives crisp highlights that read as
+     * "polished metal" / "faceted gem" once envMapIntensity is pushed
+     * past 1. Also nudge stone roughness down + clearcoat-ish look. */
+    this.ring.traverse((node) => {
+      if (!node.isMesh || !node.material) return;
+      const mats = Array.isArray(node.material) ? node.material : [node.material];
+      for (const m of mats) {
+        if ("envMapIntensity" in m) m.envMapIntensity = 1.6;
+        // Stones — sharpen the faceted look.
+        const isStone = m.transparent || (m.transmission !== undefined && m.transmission > 0) ||
+          /stone|gem|diamond|emerald|sapphire|ruby/i.test(m.name || "");
+        if (isStone && "roughness" in m) m.roughness = Math.min(m.roughness ?? 0.1, 0.05);
+      }
+    });
+
     this.scene.add(this.ring);
 
     /* ----- finger occluder -----
@@ -772,6 +805,20 @@ class ARTryOn {
       const result = this.handLandmarker.detectForVideo(this.video, now);
       this.applyResult(result);
     }
+
+    /* Per-rAF pose interpolation toward the latest target. Exponential
+     * follow with τ ≈ 55ms → catches up to ~95% in ~165ms, which feels
+     * locked but never twitchy. Critically dt-aware so it stays correct
+     * if rAF drops to 30fps. */
+    if (this._hasTarget && this.ring && this.ring.visible) {
+      const dt = this._lastRafTime ? Math.min(0.1, (now - this._lastRafTime) / 1000) : 0.016;
+      const alpha = 1 - Math.exp(-dt / 0.055);
+      this.ring.position.lerp(this._tgtPos, alpha);
+      this.ring.quaternion.slerp(this._tgtQuat, alpha);
+      const cs = this.ring.scale.x;
+      this.ring.scale.setScalar(cs + (this._tgtScale - cs) * alpha);
+    }
+    this._lastRafTime = now;
     /* Scintillation — wander the sparkle light around the ring on a Lissajous
      * path so the stone gets a continuous, asymmetric specular flash even
      * when the hand is held still. Two incommensurate frequencies keep the
@@ -797,6 +844,7 @@ class ARTryOn {
       this.handLostFrames++;
       if (this.handLostFrames > 8) {
         this.ring.visible = false;
+        this._hasTarget = false;  // snap on re-acquire, don't lerp from stale
         if (this.sizeEl) this.sizeEl.hidden = true;
         if (this.handLostFrames === 9) this.setStatus("Show your hand to the camera");
       }
@@ -926,10 +974,19 @@ class ARTryOn {
     this._vUp.set(-fyN * sinP, fxN * sinP, cosP);
     this._vFwd.set(fxN, fyN, 0);
     this._mat.makeBasis(this._vRight, this._vUp, this._vFwd);
-    this.ring.quaternion.setFromRotationMatrix(this._mat);
 
-    this.ring.position.set(px, py, 0);
-    this.ring.scale.setScalar(s);
+    /* Stash as TARGET pose. The render loop lerps ring → target every
+     * rAF for smooth motion between detection frames. On first lock (or
+     * after hand-lost) snap directly to avoid an intro lerp from origin. */
+    this._tgtPos.set(px, py, 0);
+    this._tgtQuat.setFromRotationMatrix(this._mat);
+    this._tgtScale = s;
+    if (!this._hasTarget) {
+      this.ring.position.copy(this._tgtPos);
+      this.ring.quaternion.copy(this._tgtQuat);
+      this.ring.scale.setScalar(s);
+      this._hasTarget = true;
+    }
   }
 
   snapshot() {
