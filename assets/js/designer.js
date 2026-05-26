@@ -1886,9 +1886,145 @@ function computeRealityEnergy(state) {
   // each is unrealistic). Small nudge.
   const e_scale = (piece === "Earrings" && size > 2.4) ? 0.06 : 0;
 
-  const terms = { e_thickness, e_sparkle, e_prong, e_finish, e_scale };
-  const total = e_thickness + e_sparkle + e_prong + e_finish + e_scale;
-  return { total, terms };
+  // §8 — NoDrop multi-scale defect scan. Sums coarse/mid/fine defects
+  // surfaced by computeNoDropDefects (proportion, setting integrity,
+  // surface). Folded into E_real so Gate-C and the score both see them.
+  const nd = computeNoDropDefects(state);
+  const e_nodrop = nd.total;
+
+  const terms = { e_thickness, e_sparkle, e_prong, e_finish, e_scale, e_nodrop };
+  const total = e_thickness + e_sparkle + e_prong + e_finish + e_scale + e_nodrop;
+  return { total, terms, defects: nd.defects };
+}
+
+// ---------------------------------------------------------------------------
+// NoDrop multi-scale defect scan (Realism Engine §8)
+//
+//   E_NoDrop(x) = Σ_σ Σ_d w_{σ,d} · severity_{σ,d}(x)
+//
+// where σ ∈ {coarse, mid, fine} are the three perceptual scales:
+//
+//   coarse — overall proportion you would notice from across a room
+//            (e.g., a 3 ct stone on a 0.7 g band looks structurally
+//            impossible).
+//   mid    — setting integrity you would notice at arm's length
+//            (e.g., a bezel rounding off the sharp tip of a pear cut,
+//            or a tension setting trusting a brittle stone).
+//   fine   — surface defects you would notice up close
+//            (e.g., a hammered finish on platinum — too springy to
+//            hold a crisp peen mark).
+//
+// Each defect carries a {field, value} pair so Gate-C can resolve it
+// with the same minimal-correction operator that handles the smooth
+// penalty terms. Severity is in the same units as the other E_real
+// terms so the badge tooltip can rank them apples-to-apples.
+// ---------------------------------------------------------------------------
+function computeNoDropDefects(state) {
+  const piece   = state.piece   || "Ring";
+  const shape   = state.shape   || "Round";
+  const setting = state.setting || "Prong";
+  const finish  = state.finish  || "High Polish";
+  const metal   = state.metal   || "Yellow Gold";
+  const stone   = state.stone   || "Clear Diamond";
+  const size    = Number(state.size)   || 1;
+  const weight  = Number(state.weight) || 1;
+
+  const defects = [];
+
+  // ── Coarse scale ────────────────────────────────────────────────────
+  // Support deficit: heavy stone on a paper-thin ring shank. The head
+  // would torque the band when worn. severity scales with how far the
+  // ratio (size/weight) is past the comfort line of 2.2.
+  if (piece === "Ring") {
+    const ratio = size / Math.max(weight, 0.6);
+    if (ratio > 2.2) {
+      defects.push({
+        scale: "coarse",
+        name: "support-deficit",
+        severity: Math.min(0.18, (ratio - 2.2) * 0.10),
+        hint: "Band is too thin to carry this stone — thicken the shank.",
+        field: "weight",
+        value: Math.min(2, weight + 0.5).toFixed(2)
+      });
+    }
+  }
+
+  // Oversized pendant: a 4 ct pendant on a delicate chain feels off.
+  if (piece === "Necklace" && size > 3.5) {
+    defects.push({
+      scale: "coarse",
+      name: "oversized-pendant",
+      severity: Math.min(0.16, (size - 3.5) * 0.10),
+      hint: "Pendant is oversized for the chain.",
+      field: "size",
+      value: "3.0"
+    });
+  }
+
+  // ── Mid scale ───────────────────────────────────────────────────────
+  // Bezel + sharp-tip shape: a bezel rim rounds off the points of pear,
+  // marquise, heart and princess cuts — those silhouettes are the whole
+  // point of the cut, so this is a real defect, not a taste call.
+  if (setting === "Bezel"
+      && (shape === "Pear" || shape === "Marquise" || shape === "Heart" || shape === "Princess")) {
+    defects.push({
+      scale: "mid",
+      name: "bezel-corners-clipped",
+      severity: 0.12,
+      hint: `A bezel rim will round off the points of a ${shape} cut.`,
+      field: "setting",
+      value: "Prong"
+    });
+  }
+
+  // Tension on a non-tough stone: tension settings rely on compressive
+  // strength; only diamond, sapphire and ruby (Mohs ≥ 9) are safe.
+  if (setting === "Tension"
+      && stone !== "Clear Diamond"
+      && stone !== "Blue Sapphire"
+      && stone !== "Blush Sapphire"
+      && stone !== "Ruby Red") {
+    defects.push({
+      scale: "mid",
+      name: "tension-fragile-stone",
+      severity: 0.14,
+      hint: `Tension settings need a Mohs ≥ 9 stone; ${stone} can fracture.`,
+      field: "setting",
+      value: "Prong"
+    });
+  }
+
+  // ── Fine scale ──────────────────────────────────────────────────────
+  // Hammered marks on platinum: platinum is too springy for crisp peen
+  // marks — they recover and the texture goes soft.
+  if (finish === "Hammered" && metal === "Platinum") {
+    defects.push({
+      scale: "fine",
+      name: "hammered-on-platinum",
+      severity: 0.06,
+      hint: "Platinum is too springy to hold crisp hammer marks.",
+      field: "finish",
+      value: "High Polish"
+    });
+  }
+
+  // Brushed finish on rose gold: the copper alloy goes muddy under a
+  // unidirectional brush — the salmon glow only reads clean under polish.
+  if (finish === "Brushed" && metal === "Rose Gold") {
+    defects.push({
+      scale: "fine",
+      name: "brushed-rose-mud",
+      severity: 0.05,
+      hint: "Brushed rose gold reads muddy; high polish keeps the salmon glow.",
+      field: "finish",
+      value: "High Polish"
+    });
+  }
+
+  // Sort by severity so the tooltip and Gate-C both see the worst first.
+  defects.sort((a, b) => b.severity - a.severity);
+  const total = defects.reduce((s, d) => s + d.severity, 0);
+  return { total, defects };
 }
 
 // ---------------------------------------------------------------------------
@@ -2011,6 +2147,17 @@ function proposeGateCCorrection(state) {
   const [worstKey] = entries[0];
   const shape = state.shape || "Round";
 
+  // §8 NoDrop dominates: every defect already carries its own
+  // {field, value, hint}, so we delegate to the worst entry.
+  if (worstKey === "e_nodrop" && energy.defects && energy.defects.length) {
+    const d = energy.defects[0];
+    return {
+      field: d.field,
+      value: d.value,
+      message: `Gate-C §8 [${d.scale}/${d.name}]: ${d.hint}`
+    };
+  }
+
   switch (worstKey) {
     case "e_thickness": {
       const cur = Number(state.weight) || 1;
@@ -2075,6 +2222,11 @@ function updateRealityScore(root, state) {
 
   host.title = `Reality Engine §14 — S = exp(−E_real) = ${score.toFixed(3)}`
     + (lines.length ? `\nPenalties: ${lines.join(", ")}` : "\nNo realism penalties detected.")
+    + (energy.defects && energy.defects.length
+        ? `\n\n§8 NoDrop defects:\n  ` + energy.defects
+            .map(d => `[${d.scale}] ${d.name} −0.${Math.round(d.severity * 100).toString().padStart(2,"0")} — ${d.hint}`)
+            .join("\n  ")
+        : "")
     + `\n\n§13 Cost breakdown (${mfg.metalLabel}, ${mfg.grams.toFixed(1)} g):`
     + `\n  metal      ${formatUSD(mfg.metalCost)}`
     + `\n  stone      ${formatUSD(mfg.stoneCost)}`
