@@ -2,7 +2,12 @@ const METAL_COLORS = {
   "White Gold": "#e8eef1",
   Platinum: "#d9e1e5",
   "Yellow Gold": "#d5a647",
-  "Rose Gold": "#c98778"
+  "Rose Gold": "#c98778",
+  "Champagne Gold": "#d4b574",
+  "Black Gold": "#3a3438",
+  "Mirror Silver": "#f4f6f8",
+  "Bronze Patina": "#7a5a3a",
+  "Two-Tone Mix": "#d6c2a2"
 };
 
 const FINISH_SETTINGS = {
@@ -17,61 +22,221 @@ const FINISH_SETTINGS = {
   "Milgrain Edge": {
     roughness: 0.2,
     clearcoat: 0.58
+  },
+  "Hammered": {
+    roughness: 0.62,
+    clearcoat: 0.18
+  },
+  "Sandblast": {
+    roughness: 0.78,
+    clearcoat: 0.08
+  },
+  "Brushed": {
+    roughness: 0.38,
+    clearcoat: 0.32
+  },
+  "Stardust": {
+    roughness: 0.55,
+    clearcoat: 0.45
   }
 };
 
 const STONE_PROFILES = {
   "Clear Diamond": {
-    color: "#f8fcff",
-    absorption: "#edf8ff",
+    color: "#ffffff",
+    absorption: "#ffffff",   // transmits unchanged - pure water white
     tint: "#ffffff",
     table: "#ffffff",
-    opacity: 0.58,
-    transmission: 0.92,
-    roughness: 0.012,
-    ior: 2.42,
-    dispersion: 0.68,
-    attenuationDistance: 2.4,
-    fire: 0.72
+    opacity: 1,
+    transmission: 1,
+    roughness: 0.01,
+    ior: 2.417,              // diamond reference
+    dispersion: 0.044,       // physically-accurate Cauchy dispersion
+    attenuationDistance: 6,
+    thickness: 1.4,
+    fire: 0.82
   },
+  // Colored gemstones — body color is driven by Beer-Lambert volumetric
+  // absorption (attenuationColor * exp(-d / attenuationDistance)). The
+  // `color` is the diffuse/specular surface tint that you see on facet
+  // edges + table reflections; the `absorption` is the deep hue that the
+  // light picks up as it traverses the stone. Together they read as the
+  // saturated body color of a top-grade cut stone.
   "Blush Sapphire": {
-    color: "#d36f92",
-    absorption: "#b84676",
+    color: "#ff5d8a",        // hot pink facet pickup
+    absorption: "#c41a55",   // padparadscha-pink Beer-Lambert tint
     tint: "#ffc6d9",
     table: "#ffe4ed",
-    opacity: 0.78,
-    transmission: 0.42,
-    roughness: 0.028,
+    opacity: 1,
+    transmission: 0.92,
+    roughness: 0.018,
     ior: 1.77,
-    dispersion: 0.14,
-    attenuationDistance: 0.72,
-    fire: 0.34
+    dispersion: 0.022,
+    attenuationDistance: 0.32,
+    thickness: 1.05,
+    fire: 0.42
   },
   "Blue Sapphire": {
-    color: "#1c4a9c",
-    absorption: "#0b225e",
-    tint: "#76a7ff",
+    color: "#2a64f5",        // royal blue facet color
+    absorption: "#0a2db4",   // Kashmir cornflower volumetric tint
+    tint: "#5a8aff",
     table: "#bcd1ff",
-    opacity: 0.84,
-    transmission: 0.3,
-    roughness: 0.032,
+    opacity: 1,
+    transmission: 0.9,
+    roughness: 0.018,
     ior: 1.77,
-    dispersion: 0.12,
-    attenuationDistance: 0.48,
-    fire: 0.26
+    dispersion: 0.022,
+    attenuationDistance: 0.22,
+    thickness: 1.05,
+    fire: 0.38
   },
   "Emerald Green": {
-    color: "#16764f",
-    absorption: "#0c4f34",
-    tint: "#55c98d",
+    color: "#1ec07b",        // saturated green tint
+    absorption: "#0a7a3a",   // Colombian Muzo green
+    tint: "#39d693",
     table: "#a7f0ca",
-    opacity: 0.82,
-    transmission: 0.36,
-    roughness: 0.036,
-    ior: 1.58,
-    dispersion: 0.08,
-    attenuationDistance: 0.54,
-    fire: 0.22
+    opacity: 1,
+    transmission: 0.86,
+    roughness: 0.035,        // emerald typically has a "garden" of inclusions
+    ior: 1.582,
+    dispersion: 0.018,
+    attenuationDistance: 0.2,
+    thickness: 0.95,
+    fire: 0.3
+  },
+  "Ruby Red": {
+    color: "#ff1d3e",        // pigeon-blood ruby surface
+    absorption: "#9b0d2a",   // deep Burmese ruby volumetric color
+    tint: "#ff5876",
+    table: "#ffc0cf",
+    opacity: 1,
+    transmission: 0.88,
+    roughness: 0.02,
+    ior: 1.77,
+    dispersion: 0.022,
+    attenuationDistance: 0.22,
+    thickness: 1.05,
+    fire: 0.42
+  },
+  "Amethyst Purple": {
+    color: "#9b3df0",        // vivid Siberian amethyst
+    absorption: "#4a0e8e",   // deep regal purple Beer-Lambert
+    tint: "#b486e6",
+    table: "#d9c0f4",
+    opacity: 1,
+    transmission: 0.9,
+    roughness: 0.022,
+    ior: 1.55,
+    dispersion: 0.017,
+    attenuationDistance: 0.32,
+    thickness: 1,
+    fire: 0.34
+  },
+  "Aquamarine": {
+    color: "#34c6e8",        // Santa Maria sea-blue
+    absorption: "#0a86b4",   // saturated aquamarine body
+    tint: "#7ee0f0",
+    table: "#dff4f8",
+    opacity: 1,
+    transmission: 0.94,
+    roughness: 0.018,
+    ior: 1.577,
+    dispersion: 0.018,
+    attenuationDistance: 0.42,
+    thickness: 0.95,
+    fire: 0.36
+  },
+  // Black Onyx - opaque, mirror-black with cool sheen. transmission ~0
+  // means light bounces off the surface rather than passing through.
+  "Black Onyx": {
+    color: "#0a0a0c",
+    absorption: "#000000",
+    tint: "#1d1d22",
+    table: "#2a2a30",
+    opacity: 1,
+    transmission: 0.02,
+    roughness: 0.04,
+    ior: 1.49,
+    dispersion: 0,
+    attenuationDistance: 0.02,
+    thickness: 1.2,
+    fire: 0
+  },
+  // Fire Opal - milky semi-translucent with play-of-color rainbow shift.
+  // Driven by extra iridescence in materialForStone.
+  "Fire Opal": {
+    color: "#ffb070",
+    absorption: "#ff7a2a",
+    tint: "#ffd1a3",
+    table: "#fff0e0",
+    opacity: 1,
+    transmission: 0.55,
+    roughness: 0.18,
+    ior: 1.45,
+    dispersion: 0.026,
+    attenuationDistance: 0.6,
+    thickness: 1.1,
+    fire: 0.55
+  },
+  // Imperial Citrine - sun-yellow gold tone
+  "Citrine Yellow": {
+    color: "#ffc733",
+    absorption: "#c98a0a",
+    tint: "#ffe08a",
+    table: "#fff5d1",
+    opacity: 1,
+    transmission: 0.92,
+    roughness: 0.02,
+    ior: 1.553,
+    dispersion: 0.013,
+    attenuationDistance: 0.45,
+    thickness: 0.95,
+    fire: 0.32
+  },
+  // Morganite - peachy soft pink, romantic warmth
+  "Morganite Peach": {
+    color: "#ffb0a2",
+    absorption: "#ff7a6a",
+    tint: "#ffd2c6",
+    table: "#fff0eb",
+    opacity: 1,
+    transmission: 0.93,
+    roughness: 0.02,
+    ior: 1.585,
+    dispersion: 0.014,
+    attenuationDistance: 0.55,
+    thickness: 0.95,
+    fire: 0.3
+  },
+  // Tanzanite - vivid violet-blue
+  "Tanzanite Violet": {
+    color: "#5d4cef",
+    absorption: "#2a18a8",
+    tint: "#8a7af0",
+    table: "#c8c0f4",
+    opacity: 1,
+    transmission: 0.88,
+    roughness: 0.02,
+    ior: 1.69,
+    dispersion: 0.019,
+    attenuationDistance: 0.28,
+    thickness: 1,
+    fire: 0.36
+  },
+  // Salt & Pepper Diamond - smoky transparent with grey inclusions feel
+  "Salt & Pepper": {
+    color: "#bfc1c4",
+    absorption: "#3a3a40",
+    tint: "#dadbdd",
+    table: "#eaebed",
+    opacity: 1,
+    transmission: 0.74,
+    roughness: 0.08,
+    ior: 2.417,
+    dispersion: 0.032,
+    attenuationDistance: 0.65,
+    thickness: 1.3,
+    fire: 0.55
   }
 };
 
@@ -79,11 +244,22 @@ const STONE_COLORS = Object.fromEntries(
   Object.entries(STONE_PROFILES).map(([name, profile]) => [name, profile.color])
 );
 
+const STONE_IMAGE_URLS = {
+  "Clear Diamond": "assets/images/gemstones/clear-diamond.jpg",
+  "Blush Sapphire": "assets/images/gemstones/blush-sapphire.jpg",
+  "Blue Sapphire": "assets/images/gemstones/blue-sapphire.jpg",
+  "Emerald Green": "assets/images/gemstones/emerald-green.jpg"
+};
+
 const TEXTURE_URLS = {
   studioHdr: "assets/textures/studio_small_08_1k.hdr",
   metalNormal: "assets/textures/Metal002/Metal002_1K-JPG_NormalGL.jpg",
   metalRoughness: "assets/textures/Metal002/Metal002_1K-JPG_Roughness.jpg"
 };
+
+const DESIGN_STUDIO_HASH = "#design-studio";
+const designerUpdates = new WeakMap();
+let designerSetupPromise = null;
 
 const PIECE_MAP = {
   ring: "Ring",
@@ -96,12 +272,1140 @@ const PIECE_MAP = {
   earrings: "Earrings"
 };
 
+const DESIGN_STORAGE_KEY = "tj-custom-design-state";
+const SAVED_DESIGN_KEY = "tj-saved-design-state";
+
+const DESIGN_DEFAULTS = {
+  piece: "Ring",
+  metal: "White Gold",
+  karat: "18K",
+  setting: "Prong",
+  finish: "High Polish",
+  shape: "Round",
+  stone: "Clear Diamond",
+  band: "Solitaire",
+  backdrop: "Velvet",
+  view: "Three-Quarter",
+  size: "1.2",
+  weight: "1",
+  halo: true,
+  accent: true,
+  hiddenHalo: false,
+  milgrain: false,
+  prongCount: "Auto",
+  silhouette: "Classic Round",
+  engraving: "",
+  lighting: "Daylight",
+  // Wild-mode toggles - unconventional looks without breaking geometry.
+  // emissiveGlow: stone self-illuminates with its absorption hue.
+  // twoTone:      band reads with a contrasting sheen tint.
+  // sparkleBurst: pumps the scene sparkle particles for a hero look.
+  emissiveGlow: false,
+  twoTone: false,
+  sparkleBurst: false,
+  // Fine-tune: per-design transforms that adjust geometry without
+  // changing materials or composition. Defaults keep visuals identical.
+  setRotation: "0",   // degrees, spins head (stone + prongs + halo) around vertical
+  stoneTilt: "0",     // degrees, tilts just the center stone within its setting
+  accentDensity: "Auto", // Auto | Sparse | Dense for shoulder side stones
+  haloGap: "0",       // mm-ish offset between stone girdle and halo (negative = tighter)
+  haloCount: "Auto",  // Auto | 8 | 12 | 16 | 20
+  prongHeight: "1"    // multiplier on prong rise above the girdle
+};
+
+// Per-piece sub-type catalogue. Each silhouette physically changes the
+// geometry the builder produces — not just a label. Keep the first entry
+// per piece as the "classic" fall-through so legacy state always matches
+// something visually familiar.
+const SILHOUETTES = {
+  Ring: ["Classic Round", "Cigar Band", "Split Shank", "Tapered Shank", "Stacked Double"],
+  Necklace: ["Pendant", "Y-Drop", "Lariat", "Station", "Choker"],
+  Bracelet: ["Bangle", "Tennis", "Cuff", "Station"],
+  Earrings: ["Stud", "Drop", "Huggie", "Chandelier"]
+};
+
+const DESIGN_OPTIONS = {
+  piece: ["Ring", "Necklace", "Bracelet", "Earrings"],
+  metal: Object.keys(METAL_COLORS),
+  karat: ["10K", "14K", "18K", "22K", "950"],
+  setting: ["Prong", "Bezel", "Cathedral", "Trellis", "Tension"],
+  finish: Object.keys(FINISH_SETTINGS),
+  shape: ["Round", "Princess", "Cushion", "Oval", "Emerald", "Asscher", "Marquise", "Pear", "Heart", "Trillion", "Baguette", "Hexagon", "Kite"],
+  stone: Object.keys(STONE_PROFILES),
+  band: ["Solitaire", "Pavé", "Channel", "Three-Stone", "Tapered Baguette", "Twist", "Knife-Edge", "Eternity", "Bypass"],
+  prongCount: ["Auto", "4", "6", "8"],
+  silhouette: Array.from(new Set(Object.values(SILHOUETTES).flat())),
+  backdrop: ["Velvet", "Marble", "Onyx", "Linen", "Sweep", "Concrete", "Driftwood", "Holographic", "Smoke", "Ivory"],
+  view: ["Three-Quarter", "Macro", "Top-Down", "Profile"],
+  lighting: ["Daylight", "Candlelight", "Showroom", "Flash", "Sunset", "Moonlight", "Neon", "Softbox"]
+};
+
+const DESIGN_PRESETS = {
+  classic: {
+    piece: "Ring",
+    metal: "Platinum",
+    setting: "Prong",
+    finish: "High Polish",
+    shape: "Oval",
+    stone: "Clear Diamond",
+    size: "1.4",
+    weight: "1.05",
+    halo: true,
+    accent: true,
+    engraving: "",
+    lighting: "Showroom"
+  },
+  cocktail: {
+    piece: "Ring",
+    metal: "Rose Gold",
+    setting: "Prong",
+    finish: "High Polish",
+    shape: "Cushion",
+    stone: "Blue Sapphire",
+    size: "2",
+    weight: "1.28",
+    halo: true,
+    accent: true,
+    engraving: "",
+    lighting: "Flash"
+  },
+  pendant: {
+    piece: "Necklace",
+    metal: "White Gold",
+    setting: "Bezel",
+    finish: "Soft Satin",
+    shape: "Round",
+    stone: "Clear Diamond",
+    size: "1",
+    weight: "0.9",
+    halo: false,
+    accent: false,
+    engraving: "",
+    lighting: "Daylight"
+  },
+  vintage: {
+    piece: "Ring",
+    metal: "Yellow Gold",
+    setting: "Cathedral",
+    finish: "Milgrain Edge",
+    shape: "Pear",
+    stone: "Clear Diamond",
+    size: "1.5",
+    weight: "1.16",
+    halo: true,
+    accent: true,
+    engraving: "",
+    lighting: "Candlelight"
+  },
+  estate: {
+    piece: "Ring",
+    metal: "Platinum",
+    karat: "950",
+    setting: "Bezel",
+    finish: "High Polish",
+    shape: "Emerald",
+    stone: "Clear Diamond",
+    band: "Three-Stone",
+    backdrop: "Onyx",
+    view: "Macro",
+    size: "1.8",
+    weight: "1.18",
+    halo: false,
+    accent: true,
+    engraving: "",
+    lighting: "Showroom"
+  },
+  princessPave: {
+    piece: "Ring",
+    metal: "White Gold",
+    karat: "18K",
+    setting: "Prong",
+    finish: "High Polish",
+    shape: "Princess",
+    stone: "Clear Diamond",
+    band: "Pavé",
+    backdrop: "Marble",
+    view: "Three-Quarter",
+    size: "1.4",
+    weight: "1.08",
+    halo: false,
+    accent: true,
+    engraving: "",
+    lighting: "Daylight"
+  },
+  trinity: {
+    piece: "Ring",
+    metal: "Rose Gold",
+    karat: "22K",
+    setting: "Prong",
+    finish: "Soft Satin",
+    shape: "Round",
+    stone: "Clear Diamond",
+    band: "Twist",
+    backdrop: "Linen",
+    view: "Three-Quarter",
+    size: "1.3",
+    weight: "1.1",
+    halo: false,
+    accent: false,
+    engraving: "",
+    lighting: "Candlelight"
+  },
+  // ---- Unconventional / statement presets ----
+  celestial: {
+    piece: "Necklace",
+    metal: "Mirror Silver",
+    karat: "950",
+    setting: "Bezel",
+    finish: "Stardust",
+    shape: "Marquise",
+    stone: "Tanzanite Violet",
+    band: "Solitaire",
+    backdrop: "Onyx",
+    view: "Macro",
+    size: "1.6",
+    weight: "0.95",
+    halo: true,
+    accent: true,
+    engraving: "",
+    lighting: "Moonlight",
+    emissiveGlow: true,
+    sparkleBurst: true
+  },
+  brutalist: {
+    piece: "Ring",
+    metal: "Black Gold",
+    karat: "18K",
+    setting: "Tension",
+    finish: "Sandblast",
+    shape: "Hexagon",
+    stone: "Salt & Pepper",
+    band: "Knife-Edge",
+    backdrop: "Concrete",
+    view: "Macro",
+    size: "1.6",
+    weight: "1.25",
+    halo: false,
+    accent: false,
+    engraving: "",
+    lighting: "Showroom"
+  },
+  neonCyber: {
+    piece: "Ring",
+    metal: "Mirror Silver",
+    karat: "18K",
+    setting: "Tension",
+    finish: "High Polish",
+    shape: "Kite",
+    stone: "Emerald Green",
+    band: "Knife-Edge",
+    backdrop: "Holographic",
+    view: "Three-Quarter",
+    size: "1.5",
+    weight: "1",
+    halo: false,
+    accent: false,
+    engraving: "",
+    lighting: "Neon",
+    emissiveGlow: true,
+    sparkleBurst: true
+  },
+  punkSpike: {
+    piece: "Ring",
+    metal: "Black Gold",
+    karat: "18K",
+    setting: "Prong",
+    finish: "Brushed",
+    shape: "Trillion",
+    stone: "Black Onyx",
+    band: "Knife-Edge",
+    backdrop: "Onyx",
+    view: "Three-Quarter",
+    size: "1.8",
+    weight: "1.3",
+    halo: false,
+    accent: false,
+    engraving: "",
+    lighting: "Flash",
+    twoTone: true
+  },
+  sunsetGlow: {
+    piece: "Ring",
+    metal: "Bronze Patina",
+    karat: "14K",
+    setting: "Cathedral",
+    finish: "Brushed",
+    shape: "Pear",
+    stone: "Fire Opal",
+    band: "Twist",
+    backdrop: "Driftwood",
+    view: "Macro",
+    size: "1.4",
+    weight: "1.1",
+    halo: true,
+    accent: true,
+    engraving: "",
+    lighting: "Sunset",
+    emissiveGlow: true
+  },
+
+  // ===========================================================================
+  // REFERENCE CATALOGUE PRESETS  (R1–R5, B1–B5, N1–N5, E1–E5)
+  //
+  // 20 internet-sourced reference pieces, mapped to the closest combination of
+  // studio state that the procedural renderer can actually produce.
+  //
+  // Each entry includes a `catalogue` block with:
+  //   id            – R1/B2/N3/E4 reference code from the source brief
+  //   name          – product brief title
+  //   achievable    – "full" | "partial" | "skin-only"
+  //                   • full       – studio output is a faithful reproduction
+  //                   • partial    – proportions/stones match but ornament
+  //                                  details (milgrain density, openwork
+  //                                  panels) are approximated
+  //                   • skin-only  – only the silhouette / metal / stone
+  //                                  reads; signature feature (enamel,
+  //                                  filigree, granulation, animal head,
+  //                                  rope-link chain, multi-strand pearls)
+  //                                  is NOT yet a renderer feature
+  //   needsFeature  – ordered list of new geometry generators that would be
+  //                   required to bridge the gap to a true reproduction
+  //
+  // INDEX of new generators required to lift every "skin-only"/"partial"
+  // entry to "full":
+  //   makeChampleveEnamelPanel(curve, palette)   – B5, N2 (enamel inlay)
+  //   makeFiligreeCone(height, motif)            – E3       (wire scroll cone)
+  //   makeGranulationOrb(R, beadR, pattern)      – E4       (decorated bell)
+  //   makeRopeLinkChain(curve, twistFreq)        – N3       (twisted rope chain)
+  //   makeMultiStrandPearl(strands, lengths)     – N2, N4   (parallel pearl rows)
+  //   makeOpenworkScrollPanel(panel, motif)      – N1, N5   (pierced lace plates)
+  //   makeAnimalHeadTerminal(species, scale)     – E5       (lion / ram head)
+  //   makeCharm(motif)                           – B2       (heart/key/disc/etc)
+  //   makeEnamelDrop(...)                        – E1       (snap-on covers)
+  //   makeCaboBezel(stoneR, depth)               – B5       (cabochon mount)
+  // Once any of these lands, flip the matching catalogue entry's
+  // `needsFeature` to [] and bump `achievable` to "full".
+  // ===========================================================================
+
+  // ---- R1 · Smoky Halo Statement Ring ---------------------------------------
+  ref_R1_smokyHalo: {
+    catalogue: { id: "R1", name: "Smoky Halo Statement Ring", achievable: "full", needsFeature: [] },
+    piece: "Ring", metal: "White Gold", karat: "14K",
+    setting: "Cathedral", finish: "High Polish",
+    shape: "Round", stone: "Citrine Yellow",   // smoky stand-in; closest warm body
+    band: "Solitaire",
+    size: "2", weight: "1.18",
+    halo: true, accent: false, hiddenHalo: false,
+    backdrop: "Velvet", view: "Three-Quarter", lighting: "Showroom",
+    engraving: ""
+  },
+
+  // ---- R2 · Vintage Platinum Three-Stone -----------------------------------
+  ref_R2_vintage3Stone: {
+    catalogue: { id: "R2", name: "Vintage Platinum Three-Stone Diamond Ring", achievable: "full", needsFeature: [] },
+    piece: "Ring", metal: "Platinum", karat: "950",
+    setting: "Prong", finish: "Milgrain Edge",
+    shape: "Round", stone: "Clear Diamond",
+    band: "Three-Stone",
+    size: "1.1", weight: "1.05",
+    halo: false, accent: true,
+    backdrop: "Linen", view: "Three-Quarter", lighting: "Candlelight",
+    engraving: ""
+  },
+
+  // ---- R3 · Citrine & Diamond Bypass ---------------------------------------
+  ref_R3_citrineBypass: {
+    catalogue: { id: "R3", name: "Citrine & Diamond Modern Bypass Ring", achievable: "full", needsFeature: [] },
+    piece: "Ring", metal: "White Gold", karat: "14K",
+    setting: "Prong", finish: "High Polish",
+    shape: "Oval", stone: "Citrine Yellow",
+    band: "Bypass",
+    size: "1.4", weight: "1.12",
+    halo: false, accent: true,
+    backdrop: "Marble", view: "Three-Quarter", lighting: "Daylight",
+    engraving: ""
+  },
+
+  // ---- R4 · Classic Bridal Solitaire + Matching Band -----------------------
+  ref_R4_classicBridal: {
+    catalogue: { id: "R4", name: "Classic Bridal Solitaire + Matching Band", achievable: "full", needsFeature: ["matched wedding band as second piece"] },
+    piece: "Ring", metal: "White Gold", karat: "18K",
+    setting: "Prong", finish: "High Polish",
+    shape: "Round", stone: "Clear Diamond",
+    band: "Pavé",
+    size: "1", weight: "1.0",
+    halo: false, accent: true,
+    backdrop: "Ivory", view: "Three-Quarter", lighting: "Showroom",
+    engraving: ""
+  },
+
+  // ---- R5 · Milgrain Halo Diamond Ring -------------------------------------
+  ref_R5_milgrainHalo: {
+    catalogue: { id: "R5", name: "Milgrain Halo Diamond Ring", achievable: "full", needsFeature: [] },
+    piece: "Ring", metal: "Platinum", karat: "950",
+    setting: "Prong", finish: "Milgrain Edge",
+    shape: "Round", stone: "Clear Diamond",
+    band: "Pavé",
+    size: "1", weight: "1.0",
+    halo: true, accent: true,
+    backdrop: "Velvet", view: "Macro", lighting: "Showroom",
+    engraving: ""
+  },
+
+  // ---- B1 · Two-Tone Silver Bangle with Gold Drop --------------------------
+  ref_B1_twoToneDrop: {
+    catalogue: { id: "B1", name: "Two-Tone Silver Bangle with Gold Drop", achievable: "partial",
+      needsFeature: ["two-tone material zones on a single mesh", "pendant drop on bangle"] },
+    piece: "Bracelet", metal: "Mirror Silver", karat: "950",
+    setting: "Bezel", finish: "High Polish",
+    shape: "Pear", stone: "Citrine Yellow",       // gold-look drop substitute
+    band: "Solitaire",
+    size: "1", weight: "0.7",
+    halo: false, accent: false,
+    backdrop: "Linen", view: "Macro", lighting: "Daylight",
+    engraving: "", twoTone: true
+  },
+
+  // ---- B2 · Gold Charm Story Bracelet --------------------------------------
+  ref_B2_charmStory: {
+    catalogue: { id: "B2", name: "Gold Charm Story Bracelet", achievable: "skin-only",
+      needsFeature: ["makeCharm(motif)", "jump-ring attachment along chain", "charm motif library (heart/key/disc/initial/birthstone)"] },
+    piece: "Bracelet", metal: "Yellow Gold", karat: "14K",
+    setting: "Bezel", finish: "High Polish",
+    shape: "Round", stone: "Clear Diamond",
+    band: "Solitaire",
+    size: "0.8", weight: "0.6",
+    halo: false, accent: false,
+    backdrop: "Velvet", view: "Three-Quarter", lighting: "Candlelight",
+    engraving: ""
+  },
+
+  // ---- B3 · Emerald & Diamond Cuff Bracelet --------------------------------
+  ref_B3_emeraldCuff: {
+    catalogue: { id: "B3", name: "Emerald & Diamond Cuff Bracelet", achievable: "full", needsFeature: [] },
+    piece: "Bracelet", metal: "White Gold", karat: "14K",
+    setting: "Bezel", finish: "High Polish",
+    shape: "Emerald", stone: "Emerald Green",
+    band: "Pavé",
+    size: "1.6", weight: "1.2",
+    halo: false, accent: true,
+    backdrop: "Velvet", view: "Macro", lighting: "Showroom",
+    engraving: ""
+  },
+
+  // ---- B4 · Ruby & Diamond Band Bracelet -----------------------------------
+  ref_B4_rubyBand: {
+    catalogue: { id: "B4", name: "Ruby & Diamond Band Bracelet", achievable: "full", needsFeature: [] },
+    piece: "Bracelet", metal: "Yellow Gold", karat: "18K",
+    setting: "Bezel", finish: "High Polish",
+    shape: "Round", stone: "Ruby Red",
+    band: "Channel",
+    size: "1.2", weight: "1.05",
+    halo: false, accent: true,
+    backdrop: "Onyx", view: "Macro", lighting: "Flash",
+    engraving: ""
+  },
+
+  // ---- B5 · Garnet Enamel Heritage Bangle ----------------------------------
+  ref_B5_heritageEnamel: {
+    catalogue: { id: "B5", name: "Garnet Enamel Heritage Bangle", achievable: "skin-only",
+      needsFeature: ["makeChampleveEnamelPanel (recessed enamel cells)", "makeCaboBezel for cabochon stones", "open-cuff terminal caps"] },
+    piece: "Bracelet", metal: "Yellow Gold", karat: "22K",
+    setting: "Bezel", finish: "High Polish",
+    shape: "Pear", stone: "Ruby Red",
+    band: "Solitaire",
+    size: "1.4", weight: "1.4",
+    halo: false, accent: false,
+    backdrop: "Linen", view: "Three-Quarter", lighting: "Daylight",
+    engraving: ""
+  },
+
+  // ---- N1 · Edwardian Diamond & Pearl Collar -------------------------------
+  ref_N1_edwardianCollar: {
+    catalogue: { id: "N1", name: "Edwardian Diamond & Pearl Collar Necklace", achievable: "skin-only",
+      needsFeature: ["makeOpenworkScrollPanel (pierced lace plates)", "pearl drop stations on articulated links"] },
+    piece: "Necklace", metal: "Platinum", karat: "950",
+    setting: "Prong", finish: "Milgrain Edge",
+    shape: "Round", stone: "Clear Diamond",
+    band: "Solitaire",
+    size: "1.4", weight: "1.05",
+    halo: true, accent: true,
+    backdrop: "Velvet", view: "Macro", lighting: "Showroom",
+    engraving: ""
+  },
+
+  // ---- N2 · Four-Strand Pearl & Enamel Necklace ----------------------------
+  ref_N2_fourStrandPearl: {
+    catalogue: { id: "N2", name: "Four-Strand Pearl & Enamel Necklace", achievable: "skin-only",
+      needsFeature: ["makeMultiStrandPearl (parallel pearl rows on silk)", "makeChampleveEnamelPanel for floral clasp"] },
+    piece: "Necklace", metal: "Yellow Gold", karat: "14K",
+    setting: "Bezel", finish: "High Polish",
+    shape: "Round", stone: "Clear Diamond",
+    band: "Solitaire",
+    size: "0.8", weight: "0.5",
+    halo: false, accent: false,
+    backdrop: "Linen", view: "Three-Quarter", lighting: "Daylight",
+    engraving: ""
+  },
+
+  // ---- N3 · Amethyst, Ruby & Diamond Rope Necklace -------------------------
+  ref_N3_amethystRope: {
+    catalogue: { id: "N3", name: "Amethyst, Ruby & Diamond Rope Necklace", achievable: "partial",
+      needsFeature: ["makeRopeLinkChain (twisted-rope chain texture)"] },
+    piece: "Necklace", metal: "Yellow Gold", karat: "18K",
+    setting: "Prong", finish: "High Polish",
+    shape: "Oval", stone: "Amethyst Purple",
+    band: "Solitaire",
+    size: "2", weight: "1.3",
+    halo: false, accent: true,
+    backdrop: "Onyx", view: "Macro", lighting: "Candlelight",
+    engraving: ""
+  },
+
+  // ---- N4 · Freshwater Pearl Lace Necklace ---------------------------------
+  ref_N4_pearlLace: {
+    catalogue: { id: "N4", name: "Freshwater Pearl Lace Necklace", achievable: "skin-only",
+      needsFeature: ["makeMultiStrandPearl (mixed sizes, lace pattern with draped loops)", "iridescent pearl material"] },
+    piece: "Necklace", metal: "Mirror Silver", karat: "950",
+    setting: "Bezel", finish: "High Polish",
+    shape: "Round", stone: "Clear Diamond",
+    band: "Solitaire",
+    size: "0.7", weight: "0.45",
+    halo: false, accent: false,
+    backdrop: "Ivory", view: "Three-Quarter", lighting: "Softbox",
+    engraving: ""
+  },
+
+  // ---- N5 · Malaya Garnet & Diamond Statement Necklace ---------------------
+  ref_N5_garnetFire: {
+    catalogue: { id: "N5", name: "Malaya Garnet & Diamond Statement Necklace", achievable: "partial",
+      needsFeature: ["makeOpenworkScrollPanel for scroll-link front structure"] },
+    piece: "Necklace", metal: "Yellow Gold", karat: "22K",
+    setting: "Prong", finish: "High Polish",
+    shape: "Cushion", stone: "Ruby Red",        // garnet stand-in (warmer red)
+    band: "Solitaire",
+    size: "2.5", weight: "1.5",
+    halo: true, accent: true,
+    backdrop: "Onyx", view: "Macro", lighting: "Flash",
+    engraving: ""
+  },
+
+  // ---- E1 · Diamond Drop Earrings with Snap-On Covers ----------------------
+  ref_E1_diamondDrop: {
+    catalogue: { id: "E1", name: "Diamond Drop Earrings with Snap-On Covers", achievable: "partial",
+      needsFeature: ["makeEnamelDrop (interchangeable snap-on cover variants)"] },
+    piece: "Earrings", metal: "Yellow Gold", karat: "14K",
+    setting: "Prong", finish: "High Polish",
+    shape: "Round", stone: "Clear Diamond",
+    band: "Solitaire",
+    size: "1", weight: "0.65",
+    halo: false, accent: false,
+    backdrop: "Velvet", view: "Three-Quarter", lighting: "Showroom",
+    engraving: ""
+  },
+
+  // ---- E2 · Aquamarine Pear Drop Pavé Earrings -----------------------------
+  ref_E2_aquaPearDrop: {
+    catalogue: { id: "E2", name: "Aquamarine Pear Drop Pavé Earrings", achievable: "full", needsFeature: [] },
+    piece: "Earrings", metal: "White Gold", karat: "14K",
+    setting: "Prong", finish: "High Polish",
+    shape: "Pear", stone: "Aquamarine",
+    band: "Pavé",
+    size: "1.5", weight: "0.9",
+    halo: true, accent: true,
+    backdrop: "Marble", view: "Macro", lighting: "Daylight",
+    engraving: ""
+  },
+
+  // ---- E3 · Gilt Filigree Cone Drop Earrings -------------------------------
+  ref_E3_filigreeCone: {
+    catalogue: { id: "E3", name: "Gilt Filigree Cone Drop Earrings", achievable: "skin-only",
+      needsFeature: ["makeFiligreeCone (wire scroll cone)", "bottom bead cluster cap"] },
+    piece: "Earrings", metal: "Yellow Gold", karat: "14K",
+    setting: "Bezel", finish: "Brushed",
+    shape: "Round", stone: "Clear Diamond",
+    band: "Solitaire",
+    size: "0.8", weight: "0.5",
+    halo: false, accent: false,
+    backdrop: "Linen", view: "Three-Quarter", lighting: "Candlelight",
+    engraving: ""
+  },
+
+  // ---- E4 · Ancient-Inspired Gold Orb Hoop Earrings ------------------------
+  ref_E4_ancientOrb: {
+    catalogue: { id: "E4", name: "Ancient-Inspired Gold Orb Hoop Earrings", achievable: "skin-only",
+      needsFeature: ["makeGranulationOrb (decorated hollow bell with bead borders)"] },
+    piece: "Earrings", metal: "Yellow Gold", karat: "22K",
+    setting: "Bezel", finish: "Brushed",
+    shape: "Round", stone: "Clear Diamond",
+    band: "Solitaire",
+    size: "1.6", weight: "1.0",
+    halo: false, accent: false,
+    backdrop: "Velvet", view: "Three-Quarter", lighting: "Showroom",
+    engraving: ""
+  },
+
+  // ---- E5 · Lion-Head Twisted Hoop Earrings --------------------------------
+  ref_E5_lionHoop: {
+    catalogue: { id: "E5", name: "Lion-Head Twisted Hoop Earrings", achievable: "skin-only",
+      needsFeature: ["makeAnimalHeadTerminal('lion')", "twisted rope hoop body (already partly available via Twist band)"] },
+    piece: "Earrings", metal: "Mirror Silver", karat: "950",
+    setting: "Bezel", finish: "Brushed",
+    shape: "Round", stone: "Clear Diamond",
+    band: "Twist",
+    size: "0.8", weight: "0.6",
+    halo: false, accent: false,
+    backdrop: "Concrete", view: "Macro", lighting: "Showroom",
+    engraving: ""
+  }
+};
+
+const LIGHTING_MODES = {
+  Daylight: {
+    exposure: 1.05,
+    hemi: 1.32,
+    key: 2.4,
+    fill: 1.55,
+    rim: 2.0,
+    punch: 4.8,
+    table: 2.0,
+    keyColor: "#ffffff",
+    fillColor: "#eaf8ff",
+    rimColor: "#cfe3f2",
+    punchColor: "#ffffff",
+    floorOpacity: 0.24,
+    sparkleOpacity: 0.46,
+    envMul: 0.95
+  },
+  Candlelight: {
+    exposure: 1.02,
+    hemi: 0.88,
+    key: 1.85,
+    fill: 2.25,
+    rim: 2.6,
+    punch: 4.2,
+    table: 1.55,
+    keyColor: "#ffd79f",
+    fillColor: "#ffb46c",
+    rimColor: "#ff8aa8",
+    punchColor: "#ffe2b3",
+    floorOpacity: 0.32,
+    sparkleOpacity: 0.4,
+    envMul: 1.0
+  },
+  Showroom: {
+    exposure: 1.08,
+    hemi: 1.18,
+    key: 2.6,
+    fill: 1.95,
+    rim: 2.4,
+    punch: 6.8,
+    table: 2.6,
+    keyColor: "#fff4dc",
+    fillColor: "#fff3df",
+    rimColor: "#ffd9c4",
+    punchColor: "#ffffff",
+    floorOpacity: 0.3,
+    sparkleOpacity: 0.55,
+    envMul: 0.78
+  },
+  Flash: {
+    exposure: 1.16,
+    hemi: 0.82,
+    key: 3.2,
+    fill: 1.05,
+    rim: 3.1,
+    punch: 9.4,
+    table: 4.4,
+    keyColor: "#f0f4f8",
+    fillColor: "#cfe7f2",
+    rimColor: "#d9e6f0",
+    punchColor: "#ffffff",
+    floorOpacity: 0.2,
+    sparkleOpacity: 0.68,
+    envMul: 0.6
+  },
+  // Golden-hour wash with long warm rim
+  Sunset: {
+    exposure: 1.1,
+    hemi: 1.0,
+    key: 2.3,
+    fill: 1.6,
+    rim: 3.0,
+    punch: 5.4,
+    table: 2.4,
+    keyColor: "#ffb070",
+    fillColor: "#ff8a6a",
+    rimColor: "#ffd29c",
+    punchColor: "#ffe0b4",
+    floorOpacity: 0.3,
+    sparkleOpacity: 0.5,
+    envMul: 0.85
+  },
+  // Cool, low-key moonlit blue rim with deep shadow
+  Moonlight: {
+    exposure: 0.95,
+    hemi: 0.7,
+    key: 1.6,
+    fill: 1.1,
+    rim: 2.8,
+    punch: 4.2,
+    table: 1.8,
+    keyColor: "#c9d8ff",
+    fillColor: "#7a8cb8",
+    rimColor: "#9ec0ff",
+    punchColor: "#dfe9ff",
+    floorOpacity: 0.36,
+    sparkleOpacity: 0.42,
+    envMul: 0.7
+  },
+  // High-saturation magenta + cyan gels
+  Neon: {
+    exposure: 1.18,
+    hemi: 0.6,
+    key: 2.8,
+    fill: 2.2,
+    rim: 3.4,
+    punch: 7.2,
+    table: 3.2,
+    keyColor: "#ff3df0",
+    fillColor: "#22e0ff",
+    rimColor: "#7a52ff",
+    punchColor: "#ffffff",
+    floorOpacity: 0.24,
+    sparkleOpacity: 0.7,
+    envMul: 0.6
+  },
+  // Even, diffuse studio softbox — catalogue / e-commerce look
+  Softbox: {
+    exposure: 1.18,
+    hemi: 1.35,
+    key: 2.4,
+    fill: 2.8,
+    rim: 1.4,
+    punch: 3.6,
+    table: 2.4,
+    keyColor: "#ffffff",
+    fillColor: "#eef3ff",
+    rimColor: "#fff6e8",
+    punchColor: "#ffffff",
+    floorOpacity: 0.62,
+    sparkleOpacity: 0.38,
+    envMul: 1.05
+  }
+};
+
 function normalizePiece(value) {
   if (!value) {
     return "";
   }
 
   return PIECE_MAP[value.trim().toLowerCase().replace(/[^a-z]/g, "")] || "";
+}
+
+function matchOption(value, options, fallback) {
+  if (!value) {
+    return fallback;
+  }
+
+  const normalizedValue = String(value).trim().toLowerCase();
+
+  return options.find((option) => option.toLowerCase() === normalizedValue) || fallback;
+}
+
+function normalizeRangeValue(value, min, max, fallback, decimals = 1) {
+  const number = Number(value);
+
+  if (!Number.isFinite(number)) {
+    return fallback;
+  }
+
+  const clamped = Math.min(max, Math.max(min, number));
+
+  // Format with the requested decimal precision, then drop trailing zeros
+  // ONLY in the fractional part (so "90" stays "90", "1.20" becomes "1.2").
+  return parseFloat(clamped.toFixed(decimals)).toString();
+}
+
+function normalizeDesignBoolean(value, fallback) {
+  if (typeof value === "boolean") {
+    return value;
+  }
+
+  if (value === undefined || value === null || value === "") {
+    return fallback;
+  }
+
+  return ["1", "true", "yes", "on"].includes(String(value).trim().toLowerCase());
+}
+
+function silhouetteFor(piece, value) {
+  const list = SILHOUETTES[piece] || SILHOUETTES.Ring;
+  if (typeof value === "string") {
+    const hit = list.find((item) => item.toLowerCase() === value.toLowerCase());
+    if (hit) return hit;
+  }
+  return list[0];
+}
+
+function sanitizeDesignState(input = {}) {
+  const engraving = typeof input.engraving === "string"
+    ? input.engraving.trim().slice(0, 32)
+    : DESIGN_DEFAULTS.engraving;
+
+  const piece = matchOption(normalizePiece(input.piece) || input.piece, DESIGN_OPTIONS.piece, DESIGN_DEFAULTS.piece);
+
+  return {
+    piece,
+    silhouette: silhouetteFor(piece, input.silhouette),
+    metal: matchOption(input.metal, DESIGN_OPTIONS.metal, DESIGN_DEFAULTS.metal),
+    karat: matchOption(input.karat, DESIGN_OPTIONS.karat, DESIGN_DEFAULTS.karat),
+    setting: matchOption(input.setting, DESIGN_OPTIONS.setting, DESIGN_DEFAULTS.setting),
+    finish: matchOption(input.finish, DESIGN_OPTIONS.finish, DESIGN_DEFAULTS.finish),
+    shape: matchOption(input.shape, DESIGN_OPTIONS.shape, DESIGN_DEFAULTS.shape),
+    stone: matchOption(input.stone, DESIGN_OPTIONS.stone, DESIGN_DEFAULTS.stone),
+    band: matchOption(input.band, DESIGN_OPTIONS.band, DESIGN_DEFAULTS.band),
+    backdrop: matchOption(input.backdrop, DESIGN_OPTIONS.backdrop, DESIGN_DEFAULTS.backdrop),
+    view: matchOption(input.view, DESIGN_OPTIONS.view, DESIGN_DEFAULTS.view),
+    size: normalizeRangeValue(input.size, 0.8, 2.4, DESIGN_DEFAULTS.size, 1),
+    weight: normalizeRangeValue(input.weight, 0.85, 1.35, DESIGN_DEFAULTS.weight, 2),
+    halo: normalizeDesignBoolean(input.halo, DESIGN_DEFAULTS.halo),
+    accent: normalizeDesignBoolean(input.accent, DESIGN_DEFAULTS.accent),
+    hiddenHalo: normalizeDesignBoolean(input.hiddenHalo, DESIGN_DEFAULTS.hiddenHalo),
+    milgrain: normalizeDesignBoolean(input.milgrain, DESIGN_DEFAULTS.milgrain),
+    emissiveGlow: normalizeDesignBoolean(input.emissiveGlow, DESIGN_DEFAULTS.emissiveGlow),
+    twoTone: normalizeDesignBoolean(input.twoTone, DESIGN_DEFAULTS.twoTone),
+    sparkleBurst: normalizeDesignBoolean(input.sparkleBurst, DESIGN_DEFAULTS.sparkleBurst),
+    prongCount: matchOption(input.prongCount, DESIGN_OPTIONS.prongCount, DESIGN_DEFAULTS.prongCount),
+    setRotation: normalizeRangeValue(input.setRotation, 0, 180, DESIGN_DEFAULTS.setRotation, 0),
+    stoneTilt: normalizeRangeValue(input.stoneTilt, -15, 15, DESIGN_DEFAULTS.stoneTilt, 0),
+    accentDensity: ["Auto", "Sparse", "Dense"].includes(input.accentDensity) ? input.accentDensity : DESIGN_DEFAULTS.accentDensity,
+    haloGap: normalizeRangeValue(input.haloGap, -0.5, 1.5, DESIGN_DEFAULTS.haloGap, 2),
+    haloCount: ["Auto", "8", "12", "16", "20"].includes(input.haloCount) ? input.haloCount : DESIGN_DEFAULTS.haloCount,
+    prongHeight: normalizeRangeValue(input.prongHeight, 0.7, 1.3, DESIGN_DEFAULTS.prongHeight, 2),
+    engraving,
+    lighting: matchOption(input.lighting, DESIGN_OPTIONS.lighting, DESIGN_DEFAULTS.lighting)
+  };
+}
+
+function readStoredDesignState(key) {
+  try {
+    const value = window.localStorage.getItem(key);
+
+    return value ? sanitizeDesignState(JSON.parse(value)) : null;
+  } catch (error) {
+    return null;
+  }
+}
+
+function writeStoredDesignState(key, state) {
+  try {
+    window.localStorage.setItem(key, JSON.stringify(sanitizeDesignState(state)));
+  } catch (error) {
+    // Browsers can deny storage in private modes; the designer should still work.
+  }
+}
+
+function readDesignStateFromParams(params) {
+  const raw = {};
+  let hasDesignParam = false;
+  const aliases = {
+    piece: ["piece", "piece-type"],
+    shape: ["shape", "stone-shape"],
+    stone: ["stone", "stone-color"]
+  };
+
+  Object.keys(DESIGN_DEFAULTS).forEach((fieldName) => {
+    const names = aliases[fieldName] || [fieldName];
+    const value = names.map((name) => params.get(name)).find((item) => item !== null);
+
+    if (value !== undefined) {
+      hasDesignParam = true;
+      raw[fieldName] = value;
+    }
+  });
+
+  return hasDesignParam ? sanitizeDesignState(raw) : null;
+}
+
+function createDesignUrl(state) {
+  const url = new URL(window.location.href);
+  const cleanState = sanitizeDesignState(state);
+
+  Object.entries(cleanState).forEach(([key, value]) => {
+    url.searchParams.set(key, typeof value === "boolean" ? (value ? "1" : "0") : value);
+  });
+
+  url.hash = "design-studio";
+
+  return url.toString();
+}
+
+function setDesignerStatus(target, message) {
+  if (!target) {
+    return;
+  }
+
+  window.clearTimeout(Number(target.dataset.statusTimer || 0));
+  target.textContent = message;
+
+  const timer = window.setTimeout(() => {
+    target.textContent = "";
+  }, 2600);
+
+  target.dataset.statusTimer = String(timer);
+}
+
+function applyDesignState(root, state) {
+  const cleanState = sanitizeDesignState(state);
+  const setField = (name, value) => {
+    const field = root.querySelector(`[data-designer-field="${name}"]`);
+
+    if (field) {
+      field.value = value;
+    }
+  };
+
+  setField("piece", cleanState.piece);
+  setField("silhouette", cleanState.silhouette);
+  setField("setting", cleanState.setting);
+  setField("finish", cleanState.finish);
+  setField("shape", cleanState.shape);
+  setField("stone", cleanState.stone);
+  setField("karat", cleanState.karat);
+  setField("band", cleanState.band);
+  setField("size", cleanState.size);
+  setField("weight", cleanState.weight);
+  setField("engraving", cleanState.engraving);
+  setField("prongCount", cleanState.prongCount);
+  setField("setRotation", cleanState.setRotation);
+  setField("stoneTilt", cleanState.stoneTilt);
+  setField("accentDensity", cleanState.accentDensity);
+  setField("haloGap", cleanState.haloGap);
+  setField("haloCount", cleanState.haloCount);
+  setField("prongHeight", cleanState.prongHeight);
+
+  root.querySelectorAll('[data-designer-field="metal"]').forEach((field) => {
+    field.checked = field.value === cleanState.metal;
+  });
+
+  root.querySelectorAll('[data-designer-field="lighting"]').forEach((field) => {
+    field.checked = field.value === cleanState.lighting;
+  });
+  root.querySelectorAll('[data-designer-field="backdrop"]').forEach((field) => {
+    field.checked = field.value === cleanState.backdrop;
+  });
+  root.querySelectorAll('[data-designer-field="view"]').forEach((field) => {
+    field.checked = field.value === cleanState.view;
+  });
+
+  const haloField = root.querySelector('[data-designer-field="halo"]');
+  const accentField = root.querySelector('[data-designer-field="accent"]');
+  const hiddenHaloField = root.querySelector('[data-designer-field="hiddenHalo"]');
+  const milgrainField = root.querySelector('[data-designer-field="milgrain"]');
+  const emissiveGlowField = root.querySelector('[data-designer-field="emissiveGlow"]');
+  const twoToneField = root.querySelector('[data-designer-field="twoTone"]');
+  const sparkleBurstField = root.querySelector('[data-designer-field="sparkleBurst"]');
+
+  if (haloField) {
+    haloField.checked = cleanState.halo;
+  }
+
+  if (accentField) {
+    accentField.checked = cleanState.accent;
+  }
+
+  if (hiddenHaloField) {
+    hiddenHaloField.checked = cleanState.hiddenHalo;
+  }
+
+  if (milgrainField) {
+    milgrainField.checked = cleanState.milgrain;
+  }
+
+  if (emissiveGlowField) {
+    emissiveGlowField.checked = cleanState.emissiveGlow;
+  }
+  if (twoToneField) {
+    twoToneField.checked = cleanState.twoTone;
+  }
+  if (sparkleBurstField) {
+    sparkleBurstField.checked = cleanState.sparkleBurst;
+  }
+}
+
+function setInitialDesignState(root) {
+  const params = new URLSearchParams(window.location.search);
+  const stateFromUrl = readDesignStateFromParams(params);
+  const storedState = readStoredDesignState(DESIGN_STORAGE_KEY);
+
+  if (stateFromUrl || storedState) {
+    applyDesignState(root, stateFromUrl || storedState);
+    return;
+  }
+
+  setInitialPiece(root);
+}
+
+function createCompactDesignLabel(state) {
+  return `${state.piece} - ${state.metal}, ${state.shape} ${state.stone}, ${state.size} ct feel, ${state.lighting} sparkle`;
+}
+
+function estimateDesignComplexity(state) {
+  const score = (state.halo ? 1 : 0)
+    + (state.accent ? 1 : 0)
+    + (state.finish === "Milgrain Edge" ? 1 : 0)
+    + (Number(state.size) > 1.7 ? 1 : 0)
+    + (Number(state.weight) > 1.18 ? 1 : 0);
+
+  if (score >= 4) {
+    return "Statement";
+  }
+
+  if (score >= 2) {
+    return "Premium detailed";
+  }
+
+  return "Clean custom";
+}
+
+// ---------------------------------------------------------------------------
+// Price + weight estimator REMOVED
+//
+// A prior version computed an order-of-magnitude price range + metal weight
+// from the design state. Those numbers were not accurate enough to stand
+// behind in front of a client, so the entire investment card was removed
+// from the studio and the constants / helpers were deleted. Scope is still
+// inferred qualitatively via estimateDesignComplexity above for the
+// request-form brief card.
+// ---------------------------------------------------------------------------
+
+function createDesignBriefDetails(state) {
+  return [
+    ["Piece", `${state.piece} — ${state.silhouette}`],
+    ["Metal", `${state.metal}, ${state.finish}`],
+    ["Stone", `${state.size} ct feel ${state.shape} ${state.stone}`],
+    ["Setting", `${state.setting}, ${state.halo ? "diamond frame" : "open center"}, ${state.accent ? "side stones" : "clean profile"}${state.hiddenHalo ? ", hidden halo" : ""}`],
+    ["Sparkle", state.lighting],
+    ["Scope", estimateDesignComplexity(state)]
+  ];
+}
+
+function updateDesignBriefCard(state, imageUrl = "") {
+  const card = document.querySelector("[data-design-brief-card]");
+
+  if (!card) {
+    return;
+  }
+
+  const title = card.querySelector("[data-design-brief-title]");
+  const copy = card.querySelector("[data-design-brief-copy]");
+  const specs = card.querySelector("[data-design-brief-specs]");
+  const image = card.querySelector("[data-design-brief-image]");
+  const placeholder = card.querySelector("[data-design-brief-placeholder]");
+  const steps = card.querySelector("[data-design-brief-steps]");
+
+  card.hidden = false;
+
+  if (title) {
+    title.textContent = `${state.shape} ${state.stone} ${state.piece.toLowerCase()}`;
+  }
+
+  if (copy) {
+    copy.textContent = `${estimateDesignComplexity(state)} direction with ${state.metal.toLowerCase()} and ${state.lighting.toLowerCase()} sparkle.`;
+  }
+
+  if (specs) {
+    specs.replaceChildren();
+    createDesignBriefDetails(state).forEach(([label, value]) => {
+      const wrapper = document.createElement("div");
+      const term = document.createElement("dt");
+      const detail = document.createElement("dd");
+
+      term.textContent = label;
+      detail.textContent = value;
+      wrapper.append(term, detail);
+      specs.appendChild(wrapper);
+    });
+  }
+
+  if (image && imageUrl) {
+    const existingUrl = image.dataset.previewUrl;
+
+    if (existingUrl) {
+      URL.revokeObjectURL(existingUrl);
+    }
+
+    image.src = imageUrl;
+    image.dataset.previewUrl = imageUrl;
+    image.hidden = false;
+    if (placeholder) {
+      placeholder.hidden = true;
+    }
+  } else if (placeholder) {
+    const stoneImage = STONE_IMAGE_URLS[state.stone] || STONE_IMAGE_URLS["Clear Diamond"];
+    placeholder.style.setProperty("--design-stone-image", `url("${stoneImage}")`);
+    placeholder.querySelector("span").textContent = `${state.piece} Preview`;
+  }
+
+  if (steps) {
+    steps.replaceChildren();
+    [
+      "Request review",
+      "Consultation",
+      `${state.piece} quote and design direction`,
+      `${estimateDesignComplexity(state)} production window`
+    ].forEach((step) => {
+      const item = document.createElement("li");
+      item.textContent = step;
+      steps.appendChild(item);
+    });
+  }
+}
+
+function updateDesignerSmartDetails(root, state) {
+  const piece = root.querySelector("[data-designer-smart-piece]");
+  const metal = root.querySelector("[data-designer-smart-metal]");
+  const stone = root.querySelector("[data-designer-smart-stone]");
+  const savedCard = root.querySelector("[data-designer-saved-card]");
+  const savedSummary = root.querySelector("[data-designer-saved-summary]");
+  const savedState = readStoredDesignState(SAVED_DESIGN_KEY);
+
+  if (piece) {
+    piece.textContent = state.piece;
+  }
+
+  if (metal) {
+    metal.textContent = state.metal;
+  }
+
+  if (stone) {
+    stone.textContent = `${state.shape} ${state.stone}`;
+  }
+
+  if (savedCard && savedSummary) {
+    savedCard.hidden = !savedState;
+    savedSummary.textContent = savedState ? createCompactDesignLabel(savedState) : "";
+  }
+}
+
+function createRandomDesignState(currentState) {
+  const pick = (items) => items[Math.floor(Math.random() * items.length)];
+
+  return sanitizeDesignState({
+    piece: currentState.piece || pick(DESIGN_OPTIONS.piece),
+    metal: pick(DESIGN_OPTIONS.metal),
+    setting: pick(DESIGN_OPTIONS.setting),
+    finish: pick(DESIGN_OPTIONS.finish),
+    shape: pick(DESIGN_OPTIONS.shape),
+    stone: pick(DESIGN_OPTIONS.stone),
+    lighting: pick(DESIGN_OPTIONS.lighting),
+    size: String((0.9 + Math.random() * 1.3).toFixed(1)),
+    weight: String((0.9 + Math.random() * 0.4).toFixed(2)),
+    halo: Math.random() > 0.28,
+    accent: Math.random() > 0.22,
+    engraving: currentState.engraving || ""
+  });
 }
 
 function getWeightLabel(value) {
@@ -126,6 +1430,7 @@ function createSummary(state) {
     `${getWeightLabel(state.weight).toLowerCase()} proportion`,
     `${state.size} ct feel ${state.stone}`,
     `${state.shape} stone`,
+    `${state.lighting} sparkle`,
     state.halo ? "diamond frame" : "unframed center stone",
     state.accent ? "side stones" : "clean band"
   ];
@@ -137,23 +1442,78 @@ function createSummary(state) {
   return details.join(" | ");
 }
 
+function formatGuideLabel(value) {
+  return (value || "")
+    .replace(/[-_]+/gu, " ")
+    .replace(/\b\w/gu, (letter) => letter.toUpperCase());
+}
+
+function readGuideContextFromUrl() {
+  const params = new URLSearchParams(window.location.search);
+
+  if (!params.has("guide-occasion") && !params.has("guide-wear") && !params.has("guide-budget")) {
+    return null;
+  }
+
+  const budget = params.get("guide-budget") || "detailed";
+
+  return {
+    occasion: params.get("guide-occasion") || "engagement",
+    wear: params.get("guide-wear") || "daily",
+    budget,
+    occasionLabel: formatGuideLabel(params.get("guide-occasion") || "engagement"),
+    wearLabel: formatGuideLabel(params.get("guide-wear") || "daily"),
+    budgetLabel: formatGuideLabel(budget),
+    budgetFormValue: params.get("form-budget") || {
+      simple: "500 to 1000",
+      detailed: "1000 to 5000",
+      premium: "5000 to 10000",
+      statement: "10000 plus"
+    }[budget] || "1000 to 5000"
+  };
+}
+
+function createGuideContextLine(context) {
+  return context
+    ? `Guided direction: ${context.occasionLabel}, ${context.wearLabel.toLowerCase()} wear, ${context.budgetLabel.toLowerCase()} budget`
+    : "";
+}
+
 function getState(root) {
   const field = (name) => root.querySelector(`[data-designer-field="${name}"]`);
   const checked = (name) => root.querySelector(`[data-designer-field="${name}"]:checked`);
 
-  return {
-    piece: field("piece")?.value || "Ring",
-    metal: checked("metal")?.value || "White Gold",
-    setting: field("setting")?.value || "Prong",
-    finish: field("finish")?.value || "High Polish",
-    shape: field("shape")?.value || "Round",
-    stone: field("stone")?.value || "Clear Diamond",
-    size: field("size")?.value || "1.2",
-    weight: field("weight")?.value || "1",
-    halo: Boolean(field("halo")?.checked),
-    accent: Boolean(field("accent")?.checked),
-    engraving: field("engraving")?.value.trim() || ""
-  };
+  return sanitizeDesignState({
+    piece: field("piece")?.value,
+    silhouette: field("silhouette")?.value,
+    metal: checked("metal")?.value,
+    karat: field("karat")?.value,
+    setting: field("setting")?.value,
+    finish: field("finish")?.value,
+    shape: field("shape")?.value,
+    stone: field("stone")?.value,
+    band: field("band")?.value,
+    backdrop: checked("backdrop")?.value || field("backdrop")?.value,
+    view: checked("view")?.value || field("view")?.value,
+    size: field("size")?.value,
+    weight: field("weight")?.value,
+    halo: field("halo")?.checked,
+    accent: field("accent")?.checked,
+    hiddenHalo: field("hiddenHalo")?.checked,
+    milgrain: field("milgrain")?.checked,
+    emissiveGlow: field("emissiveGlow")?.checked,
+    twoTone: field("twoTone")?.checked,
+    sparkleBurst: field("sparkleBurst")?.checked,
+    prongCount: field("prongCount")?.value,
+    setRotation: field("setRotation")?.value,
+    stoneTilt: field("stoneTilt")?.value,
+    accentDensity: field("accentDensity")?.value,
+    haloGap: field("haloGap")?.value,
+    haloCount: field("haloCount")?.value,
+    prongHeight: field("prongHeight")?.value,
+    engraving: field("engraving")?.value,
+    lighting: checked("lighting")?.value
+  });
 }
 
 function setInitialPiece(root) {
@@ -203,20 +1563,38 @@ function fillRequestForm(state) {
   const summary = createSummary(state);
   const description = document.querySelector("#description");
   const hiddenSummary = document.querySelector("[data-design-summary-field]");
+  const guideContext = readGuideContextFromUrl();
 
-  setValue("#piece-type", state.piece);
+  setValue("#piece-type", `${state.piece} (${state.silhouette})`);
   setValue("#metal-preference", `${state.metal}, ${state.finish}`);
   setValue("#stone-preference", `${state.size} ct feel ${state.stone}, ${state.shape}`);
-  setValue("#finish-preference", `${state.setting} setting, ${state.halo ? "diamond frame" : "unframed center stone"}, ${state.accent ? "side stones" : "clean band"}`);
+  setValue("#finish-preference", `${state.setting} setting, ${state.halo ? "diamond frame" : "unframed center stone"}, ${state.accent ? "side stones" : "clean band"}${state.hiddenHalo ? ", hidden halo" : ""}`);
   setValue("#dimensions", `${state.piece} designer scale: ${state.size} ct feel, ${getWeightLabel(state.weight).toLowerCase()} proportion`);
 
+  if (guideContext) {
+    const budgetField = document.querySelector(`input[name="budget"][value="${guideContext.budgetFormValue}"]`);
+
+    setValue("#occasion", `${guideContext.occasionLabel} / ${guideContext.wearLabel} wear`);
+
+    if (budgetField) {
+      budgetField.checked = true;
+      budgetField.dispatchEvent(new Event("change", { bubbles: true }));
+      budgetField.closest(".form-field")?.classList.add("is-prefilled");
+    }
+  }
+
   if (hiddenSummary) {
-    hiddenSummary.value = summary;
+    hiddenSummary.value = guideContext ? `${summary} | ${createGuideContextLine(guideContext)}` : summary;
   }
 
   if (description) {
     const existing = description.value.replace(/\n*\[Design Studio\][\s\S]*$/u, "").trim();
-    description.value = `${existing ? `${existing}\n\n` : ""}[Design Studio]\n${summary}`;
+    const guidedBlock = guideContext && !existing.includes("[Guided Direction]")
+      ? `[Guided Direction]\n${createGuideContextLine(guideContext)}`
+      : "";
+    const intro = [existing, guidedBlock].filter(Boolean).join("\n\n");
+    description.value = `${intro ? `${intro}\n\n` : ""}[Design Studio]\n${summary}`;
+    description.dispatchEvent(new Event("input", { bubbles: true }));
     description.closest(".form-field")?.classList.add("is-prefilled");
   }
 
@@ -317,7 +1695,7 @@ function composeDesignScreenshot(sourceCanvas, state) {
 
   context.fillStyle = "rgba(255, 255, 255, 0.9)";
   context.font = "600 34px Georgia, serif";
-  context.fillText("Toronto Jewels Cur", 56, 84);
+  context.fillText("Toronto Jewels Curation", 56, 84);
   context.font = "700 18px Arial, sans-serif";
   context.letterSpacing = "2px";
   context.fillText(`${state.piece} / ${state.stone} / ${state.metal}`.toUpperCase(), 58, 122);
@@ -346,6 +1724,10 @@ async function attachDesignScreenshot(sourceCanvas, state) {
   input.dispatchEvent(new Event("change", { bubbles: true }));
   updateDesignUploadPreview(input, file);
 
+  if (typeof URL !== "undefined") {
+    updateDesignBriefCard(state, URL.createObjectURL(file));
+  }
+
   return attachedToInput || Boolean(input.form);
 }
 
@@ -362,11 +1744,12 @@ function drawFallback(canvas, state) {
 
   const metal = METAL_COLORS[state.metal];
   const stone = STONE_COLORS[state.stone];
+  const lighting = LIGHTING_MODES[state.lighting] || LIGHTING_MODES.Daylight;
   const weight = Number(state.weight) || 1;
   const cx = width / 2;
   const cy = height / 2;
   const glow = context.createRadialGradient(cx, cy, 20, cx, cy, Math.min(width, height) * 0.5);
-  glow.addColorStop(0, "rgba(255,255,255,0.24)");
+  glow.addColorStop(0, state.lighting === "Candlelight" ? "rgba(255,214,160,0.3)" : "rgba(255,255,255,0.24)");
   glow.addColorStop(1, "rgba(255,255,255,0)");
   context.fillStyle = glow;
   context.fillRect(0, 0, width, height);
@@ -375,8 +1758,8 @@ function drawFallback(canvas, state) {
   context.lineJoin = "round";
   context.strokeStyle = metal;
   context.fillStyle = stone;
-  context.shadowColor = "rgba(255,255,255,0.5)";
-  context.shadowBlur = 22;
+  context.shadowColor = lighting.punchColor;
+  context.shadowBlur = state.lighting === "Flash" ? 34 : 22;
 
   if (state.piece === "Ring") {
     context.lineWidth = 22 * weight;
@@ -434,7 +1817,11 @@ function setSummary(root, state) {
   const weightLabel = root.querySelector("[data-designer-weight-label]");
 
   if (summary) {
-    summary.textContent = createSummary(state);
+    const guideLine = createGuideContextLine(readGuideContextFromUrl());
+    const text = createSummary(state);
+    summary.innerHTML = `
+      <p class="designer-summary__text">${text}${guideLine ? ` <span class="designer-summary__guide">· ${guideLine}</span>` : ""}</p>
+    `;
   }
 
   if (sizeLabel) {
@@ -444,6 +1831,25 @@ function setSummary(root, state) {
   if (weightLabel) {
     weightLabel.textContent = getWeightLabel(state.weight);
   }
+
+  // Fine-tune live labels (Setting rotation, Stone tilt, Band width).
+  // Each <span data-designer-output-for="FIELD"> reads the matching state
+  // value and appends the suffix declared on the slider's data attribute.
+  root.querySelectorAll("[data-designer-output-for]").forEach((output) => {
+    const fieldName = output.dataset.designerOutputFor;
+    const value = state[fieldName];
+    if (value === undefined || value === null) return;
+    const slider = root.querySelector(`[data-designer-field="${fieldName}"]`);
+    const suffix = slider?.dataset.designerOutputSuffix || "";
+    const num = Number(value);
+    if (suffix === "×") {
+      output.textContent = `${num.toFixed(2)}×`;
+    } else if (suffix === "°") {
+      output.textContent = `${Math.round(num)}°`;
+    } else {
+      output.textContent = `${value}${suffix}`;
+    }
+  });
 }
 
 async function createThreeStudio(root, canvas) {
@@ -456,26 +1862,58 @@ async function createThreeStudio(root, canvas) {
   const sparkle = new THREE.Group();
   const runtimeTextures = {};
   const disposableTextures = [];
+  const cameraHomeZ = 5.75;
+  const cameraMinZ = 3.05;
+  const cameraMaxZ = 7.4;
   let environmentTexture = null;
   let currentState = getState(root);
   let frameId = null;
   let isDragging = false;
+  let isInspecting = false;
+  let isAutoOrbiting = false;
   let lastPointerX = 0;
   let lastPointerY = 0;
+  let lastPinchDistance = 0;
+  let targetCameraZ = cameraHomeZ;
   let targetRotationX = 0.03;
   let targetRotationY = -0.18;
+  // Inspect-mode pan offsets (world units). Shift-drag or two-finger drag
+  // adds to these so the user can look at the top of a band, the back of
+  // a halo, etc. Reset when exiting inspect mode.
+  let inspectPanX = 0;
+  let inspectPanY = 0;
+  let onReadoutChange = null;
+  let lastReadoutKey = "";
+  const activePointers = new Map();
 
   renderer.setClearColor(0x000000, 0);
-  renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.26;
+  // AgX gives more natural highlight roll-off than ACES for jewelry; fall back
+  // gracefully on older builds of three.js.
+  renderer.toneMapping = (typeof THREE.AgXToneMapping !== "undefined")
+    ? THREE.AgXToneMapping
+    : THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.12;
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  // Auto-update env map intensities + use highp where supported for crisper
+  // specular highlights on the curved surfaces of small jewellery.
+  if ("precision" in renderer.capabilities) {
+    // best-effort hint; renderer already picks highp when available
+  }
+  // Modern physical lighting + sRGB output - critical for getting metal
+  // colors to read as the goldsmith intends.
+  if ("useLegacyLights" in renderer) {
+    renderer.useLegacyLights = false;
+  }
+  if ("physicallyCorrectLights" in renderer) {
+    renderer.physicallyCorrectLights = true;
+  }
 
   if ("outputColorSpace" in renderer) {
     renderer.outputColorSpace = THREE.SRGBColorSpace;
   }
 
-  camera.position.set(0, 0.62, 5.75);
+  camera.position.set(0, 0.62, cameraHomeZ);
   camera.lookAt(0, 0, 0);
 
   function trackTexture(texture) {
@@ -547,6 +1985,55 @@ async function createThreeStudio(root, canvas) {
         context.stroke();
       }
     }, { repeat: 7 });
+  }
+
+  function createHammeredNormalTexture() {
+    // Procedural hammered-metal normal: many overlapping circular dimples.
+    // Normals encode dimple curvature so light catches the rims of each peen mark.
+    return createCanvasTexture(512, 512, (context, width, height) => {
+      context.fillStyle = "rgb(128, 128, 255)";
+      context.fillRect(0, 0, width, height);
+      const dimples = 110;
+      for (let i = 0; i < dimples; i += 1) {
+        const cx = Math.random() * width;
+        const cy = Math.random() * height;
+        const r  = 18 + Math.random() * 48;
+        // Each dimple: bright rim (high Z) -> dark center (low Z) gradient.
+        const grad = context.createRadialGradient(cx, cy, r * 0.05, cx, cy, r);
+        grad.addColorStop(0,    "rgba( 96, 96,255,0.55)");
+        grad.addColorStop(0.55, "rgba(128,128,255,0.0)");
+        grad.addColorStop(0.78, "rgba(168,168,255,0.45)");
+        grad.addColorStop(1,    "rgba(128,128,255,0)");
+        context.fillStyle = grad;
+        context.beginPath();
+        context.arc(cx, cy, r, 0, Math.PI * 2);
+        context.fill();
+      }
+      // Light micro-noise for tooled surface grit.
+      context.globalAlpha = 0.08;
+      for (let i = 0; i < 1200; i += 1) {
+        const tone = 118 + Math.random() * 24;
+        context.fillStyle = `rgb(${tone},${tone},255)`;
+        context.fillRect(Math.random() * width, Math.random() * height, 1, 1);
+      }
+    }, { repeat: 3 });
+  }
+
+  function createSandblastNormalTexture() {
+    // High-frequency pitted noise normal map for matte sandblasted metal.
+    return createCanvasTexture(256, 256, (context, width, height) => {
+      const image = context.createImageData(width, height);
+      for (let index = 0; index < image.data.length; index += 4) {
+        // Random direction perturbation, weighted toward flat (B=255).
+        const ang  = Math.random() * Math.PI * 2;
+        const mag  = (Math.random() ** 2) * 0.55; // bias to small bumps
+        image.data[index]     = Math.round(128 + Math.cos(ang) * mag * 60);
+        image.data[index + 1] = Math.round(128 + Math.sin(ang) * mag * 60);
+        image.data[index + 2] = 255;
+        image.data[index + 3] = 255;
+      }
+      context.putImageData(image, 0, 0);
+    }, { repeat: 24 });
   }
 
   function createStudioVelvetTexture() {
@@ -663,6 +2150,171 @@ async function createThreeStudio(root, canvas) {
     }, { repeat: 1.8, colorSpace: THREE.SRGBColorSpace });
   }
 
+  function createGemBodyTexture(profile, stoneName) {
+    return createCanvasTexture(768, 768, (context, width, height) => {
+      const centerX = width * 0.5;
+      const centerY = height * 0.48;
+      const body = context.createRadialGradient(centerX * 0.82, centerY * 0.74, width * 0.02, centerX, centerY, width * 0.62);
+
+      body.addColorStop(0, profile.table);
+      body.addColorStop(0.22, profile.tint);
+      body.addColorStop(0.58, profile.color);
+      body.addColorStop(1, profile.absorption);
+      context.fillStyle = body;
+      context.fillRect(0, 0, width, height);
+
+      context.globalCompositeOperation = "screen";
+      context.globalAlpha = stoneName === "Clear Diamond" ? 0.42 : 0.22;
+
+      for (let index = 0; index < 24; index += 1) {
+        const angle = (Math.PI * 2 * index) / 24;
+        const x = centerX + Math.cos(angle) * width * 0.18;
+        const y = centerY + Math.sin(angle) * height * 0.14;
+        const gradient = context.createLinearGradient(x - 90, y - 20, x + 90, y + 20);
+
+        gradient.addColorStop(0, "rgba(255,255,255,0)");
+        gradient.addColorStop(0.5, index % 4 === 0 ? "rgba(255,230,178,0.75)" : "rgba(210,245,255,0.62)");
+        gradient.addColorStop(1, "rgba(255,255,255,0)");
+        context.save();
+        context.translate(x, y);
+        context.rotate(angle);
+        context.fillStyle = gradient;
+        context.fillRect(-120, -2, 240, 4);
+        context.restore();
+      }
+
+      context.globalCompositeOperation = "source-over";
+      context.globalAlpha = stoneName === "Emerald Green" ? 0.28 : stoneName === "Clear Diamond" ? 0.08 : 0.18;
+      context.strokeStyle = stoneName === "Clear Diamond" ? "rgba(130,150,160,0.42)" : "rgba(255,255,255,0.42)";
+      context.lineWidth = 1;
+
+      for (let index = 0; index < 70; index += 1) {
+        const x = Math.random() * width;
+        const y = Math.random() * height;
+        const length = 14 + Math.random() * (stoneName === "Emerald Green" ? 120 : 62);
+        const angle = stoneName === "Emerald Green" ? -0.2 + Math.random() * 0.4 : Math.random() * Math.PI;
+
+        context.beginPath();
+        context.moveTo(x, y);
+        context.lineTo(x + Math.cos(angle) * length, y + Math.sin(angle) * length);
+        context.stroke();
+      }
+
+      context.globalAlpha = stoneName === "Clear Diamond" ? 0.12 : 0.2;
+
+      for (let index = 0; index < 140; index += 1) {
+        const radius = 0.35 + Math.random() * (stoneName === "Clear Diamond" ? 1.1 : 1.8);
+        context.fillStyle = index % 4 === 0 ? "rgba(255,255,255,0.65)" : "rgba(0,0,0,0.16)";
+        context.beginPath();
+        context.arc(Math.random() * width, Math.random() * height, radius, 0, Math.PI * 2);
+        context.fill();
+      }
+    }, { repeat: 1, colorSpace: THREE.SRGBColorSpace });
+  }
+
+  function createCausticTexture() {
+    return createCanvasTexture(768, 768, (context, width, height) => {
+      context.clearRect(0, 0, width, height);
+
+      const centerX = width * 0.5;
+      const centerY = height * 0.5;
+      const glow = context.createRadialGradient(centerX, centerY, 12, centerX, centerY, width * 0.46);
+      glow.addColorStop(0, "rgba(255,255,255,0.72)");
+      glow.addColorStop(0.2, "rgba(205,244,255,0.36)");
+      glow.addColorStop(0.52, "rgba(244,234,214,0.18)");
+      glow.addColorStop(1, "rgba(255,255,255,0)");
+      context.fillStyle = glow;
+      context.fillRect(0, 0, width, height);
+
+      context.globalCompositeOperation = "lighter";
+
+      for (let index = 0; index < 34; index += 1) {
+        const angle = (Math.PI * 2 * index) / 34;
+        const radius = width * (0.08 + Math.random() * 0.34);
+        const x = centerX + Math.cos(angle) * radius * 0.9;
+        const y = centerY + Math.sin(angle) * radius * 0.54;
+        const length = 70 + Math.random() * 160;
+
+        context.save();
+        context.translate(x, y);
+        context.rotate(angle + Math.PI / 2 + (Math.random() - 0.5) * 0.8);
+        context.globalAlpha = 0.12 + Math.random() * 0.2;
+        context.strokeStyle = index % 3 === 0 ? "#c9f4ff" : index % 3 === 1 ? "#ffe7b0" : "#ffffff";
+        context.lineWidth = 1 + Math.random() * 2.4;
+        context.beginPath();
+        context.moveTo(-length * 0.48, 0);
+        context.bezierCurveTo(-length * 0.2, -18, length * 0.18, 18, length * 0.48, 0);
+        context.stroke();
+        context.restore();
+      }
+    }, { repeat: 1, colorSpace: THREE.SRGBColorSpace });
+  }
+
+  function createPrismaticSparkTexture() {
+    return createCanvasTexture(512, 512, (context, width, height) => {
+      const centerX = width * 0.5;
+      const centerY = height * 0.5;
+      const glow = context.createRadialGradient(centerX, centerY, 2, centerX, centerY, width * 0.45);
+
+      context.clearRect(0, 0, width, height);
+      glow.addColorStop(0, "rgba(255,255,255,1)");
+      glow.addColorStop(0.12, "rgba(255,255,255,0.82)");
+      glow.addColorStop(0.36, "rgba(190,236,255,0.28)");
+      glow.addColorStop(1, "rgba(255,255,255,0)");
+      context.fillStyle = glow;
+      context.fillRect(0, 0, width, height);
+      context.globalCompositeOperation = "lighter";
+
+      [
+        ["#ffffff", 0, 1],
+        ["#bcefff", Math.PI * 0.06, 0.72],
+        ["#ffd6ea", Math.PI * 0.28, 0.54],
+        ["#fff0b8", Math.PI * 0.5, 0.44],
+        ["#d7d0ff", Math.PI * 0.72, 0.36]
+      ].forEach(([color, rotation, alpha]) => {
+        context.save();
+        context.translate(centerX, centerY);
+        context.rotate(rotation);
+        context.globalAlpha = alpha;
+        context.strokeStyle = color;
+        context.lineWidth = 4;
+        context.beginPath();
+        context.moveTo(-width * 0.4, 0);
+        context.lineTo(width * 0.4, 0);
+        context.stroke();
+        context.lineWidth = 1.4;
+        context.beginPath();
+        context.moveTo(0, -height * 0.26);
+        context.lineTo(0, height * 0.26);
+        context.stroke();
+        context.restore();
+      });
+    }, { repeat: 1, colorSpace: THREE.SRGBColorSpace });
+  }
+
+  function createShowcaseNormalTexture() {
+    return createCanvasTexture(512, 512, (context, width, height) => {
+      context.fillStyle = "rgb(128,128,255)";
+      context.fillRect(0, 0, width, height);
+      context.globalAlpha = 0.2;
+
+      for (let index = 0; index < 1600; index += 1) {
+        const tone = 116 + Math.random() * 24;
+        context.fillStyle = `rgb(${tone}, ${tone}, 255)`;
+        context.fillRect(Math.random() * width, Math.random() * height, 1, 1);
+      }
+
+      context.globalAlpha = 0.16;
+      context.strokeStyle = "rgb(170,170,255)";
+
+      for (let ring = 0; ring < 18; ring += 1) {
+        context.beginPath();
+        context.ellipse(width * 0.5, height * 0.5, 40 + ring * 15, 18 + ring * 8, 0, 0, Math.PI * 2);
+        context.stroke();
+      }
+    }, { repeat: 2.2 });
+  }
+
   async function loadTexture(url, options = {}) {
     const loader = new THREE.TextureLoader();
 
@@ -728,10 +2380,18 @@ async function createThreeStudio(root, canvas) {
   }
 
   runtimeTextures.brushNormal = createBrushedAnisotropyTexture();
+  runtimeTextures.hammeredNormal = createHammeredNormalTexture();
+  runtimeTextures.sandblastNormal = createSandblastNormalTexture();
   runtimeTextures.microRoughness = createFineRoughnessTexture();
   runtimeTextures.velvet = createStudioVelvetTexture();
   runtimeTextures.gemNormal = createGemMicroNormalTexture();
   runtimeTextures.gemInclusions = createGemInclusionTexture();
+  runtimeTextures.gemBodyMaps = Object.fromEntries(
+    Object.entries(STONE_PROFILES).map(([name, profile]) => [name, createGemBodyTexture(profile, name)])
+  );
+  runtimeTextures.caustics = createCausticTexture();
+  runtimeTextures.prismSpark = createPrismaticSparkTexture();
+  runtimeTextures.showcaseNormal = createShowcaseNormalTexture();
   runtimeTextures.metalNormal = await loadTexture(TEXTURE_URLS.metalNormal, { repeat: 10 });
   runtimeTextures.metalRoughness = await loadTexture(TEXTURE_URLS.metalRoughness, { repeat: 10 });
   environmentTexture = await loadStudioEnvironment();
@@ -744,9 +2404,56 @@ async function createThreeStudio(root, canvas) {
   }
 
   scene.add(model, sparkle);
-  scene.add(new THREE.HemisphereLight(0xf8fbff, 0x281c1a, 1.35));
 
-  const key = new THREE.DirectionalLight(0xffffff, 2.8);
+  // Soft radial contact shadow disc directly under the model. Procedurally
+  // drawn so it never depends on shadow-map resolution and reads clean on any
+  // backdrop / lighting mode.
+  const contactShadowCanvas = document.createElement("canvas");
+  contactShadowCanvas.width = 256;
+  contactShadowCanvas.height = 256;
+  const csCtx = contactShadowCanvas.getContext("2d");
+  const csGrad = csCtx.createRadialGradient(128, 128, 8, 128, 128, 120);
+  csGrad.addColorStop(0.0, "rgba(0,0,0,0.55)");
+  csGrad.addColorStop(0.4, "rgba(0,0,0,0.32)");
+  csGrad.addColorStop(0.75, "rgba(0,0,0,0.12)");
+  csGrad.addColorStop(1.0, "rgba(0,0,0,0.0)");
+  csCtx.fillStyle = csGrad;
+  csCtx.fillRect(0, 0, 256, 256);
+  const contactShadowTexture = new THREE.CanvasTexture(contactShadowCanvas);
+  contactShadowTexture.colorSpace = THREE.SRGBColorSpace;
+  disposableTextures.push(contactShadowTexture);
+  const contactShadow = new THREE.Mesh(
+    new THREE.PlaneGeometry(1.85, 1.85),
+    new THREE.MeshBasicMaterial({
+      map: contactShadowTexture,
+      transparent: true,
+      depthWrite: false,
+      opacity: 0.7
+    })
+  );
+  contactShadow.rotation.x = -Math.PI / 2;
+  contactShadow.position.set(0, -1.1, 0);
+  contactShadow.renderOrder = -1;
+  scene.add(contactShadow);
+  // Tighter hot-spot shadow disc directly under the piece — gives the
+  // illusion of an AO contact dot that grounds the model to the plinth.
+  const contactShadowHot = new THREE.Mesh(
+    new THREE.PlaneGeometry(0.95, 0.95),
+    new THREE.MeshBasicMaterial({
+      map: contactShadowTexture,
+      transparent: true,
+      depthWrite: false,
+      opacity: 0.55
+    })
+  );
+  contactShadowHot.rotation.x = -Math.PI / 2;
+  contactShadowHot.position.set(0, -1.095, 0);
+  contactShadowHot.renderOrder = -1;
+  scene.add(contactShadowHot);
+  const hemi = new THREE.HemisphereLight(0xf8fbff, 0x281c1a, 1.35);
+  scene.add(hemi);
+
+  const key = new THREE.DirectionalLight(0xffffff, 3.0);
   key.position.set(3.8, 4.6, 3.4);
   key.castShadow = true;
   key.shadow.mapSize.set(2048, 2048);
@@ -756,6 +2463,11 @@ async function createThreeStudio(root, canvas) {
   key.shadow.camera.right = 4;
   key.shadow.camera.top = 4;
   key.shadow.camera.bottom = -4;
+  // Tighter bias + larger PCF kernel = softer contact, no shadow acne on
+  // tiny prong tips and pavé claws.
+  key.shadow.bias = -0.00035;
+  key.shadow.normalBias = 0.02;
+  key.shadow.radius = 5;
   key.target.position.set(0, 0.05, 0);
   scene.add(key, key.target);
 
@@ -763,9 +2475,17 @@ async function createThreeStudio(root, canvas) {
   fill.position.set(-2.7, 1.8, 3.6);
   scene.add(fill);
 
-  const rim = new THREE.PointLight(0xffabc2, 3.4, 10);
+  // Cooler rim (back-right) — classic jewel-photography counter light, kicks
+  // a crisp cyan edge along the silhouette without warming the metal.
+  const rim = new THREE.PointLight(0xb6d4ff, 3.6, 10);
   rim.position.set(3.1, 0.8, -1.2);
   scene.add(rim);
+
+  // Back kicker — far behind the piece, soft white-blue, lifts the rear
+  // contour off the dark backdrop in inspect mode.
+  const kicker = new THREE.PointLight(0xe8f1ff, 2.4, 8);
+  kicker.position.set(-2.4, 1.6, -2.6);
+  scene.add(kicker);
 
   const gemPunch = new THREE.SpotLight(0xffffff, 7.8, 9, 0.42, 0.58, 0.9);
   gemPunch.position.set(-1.7, 2.2, 3.6);
@@ -775,6 +2495,47 @@ async function createThreeStudio(root, canvas) {
   const tableFlash = new THREE.PointLight(0xdff6ff, 2.8, 4.5);
   tableFlash.position.set(-0.55, 0.85, 1.6);
   scene.add(tableFlash);
+
+  const studioSet = new THREE.Group();
+  scene.add(studioSet);
+
+  const backdrop = new THREE.Mesh(
+    new THREE.PlaneGeometry(8.4, 5.2, 1, 1),
+    new THREE.MeshBasicMaterial({
+      color: 0x071012,
+      transparent: true,
+      opacity: 0.74,
+      depthWrite: false
+    })
+  );
+  backdrop.position.set(0.3, 0.55, -3.2);
+  studioSet.add(backdrop);
+
+  function addSoftbox(width, height, x, y, z, color, opacity, rotationZ = 0) {
+    const panel = new THREE.Mesh(
+      new THREE.PlaneGeometry(width, height),
+      new THREE.MeshBasicMaterial({
+        color,
+        transparent: true,
+        opacity,
+        depthWrite: false,
+        blending: THREE.AdditiveBlending,
+        side: THREE.DoubleSide
+      })
+    );
+
+    panel.position.set(x, y, z);
+    panel.lookAt(0, 0, 0.4);
+    panel.rotation.z += rotationZ;
+    studioSet.add(panel);
+    return panel;
+  }
+
+  const softboxes = [
+    addSoftbox(1.2, 3.2, -3.15, 1.1, -1.15, 0xeaf8ff, 0.16, -0.08),
+    addSoftbox(0.9, 2.4, 2.75, 1.35, -1.65, 0xffe0b8, 0.13, 0.12),
+    addSoftbox(2.2, 0.28, -0.1, 2.35, -1.4, 0xffffff, 0.12, 0)
+  ];
 
   const floor = new THREE.Mesh(
     new THREE.CircleGeometry(3.25, 96),
@@ -796,6 +2557,48 @@ async function createThreeStudio(root, canvas) {
   floor.receiveShadow = true;
   scene.add(floor);
 
+  const plinth = new THREE.Mesh(
+    new THREE.CylinderGeometry(1.88, 2.18, 0.2, 128),
+    new THREE.MeshPhysicalMaterial({
+      color: 0x101615,
+      roughness: 0.34,
+      metalness: 0,
+      map: runtimeTextures.velvet,
+      normalMap: runtimeTextures.showcaseNormal,
+      normalScale: new THREE.Vector2(0.035, 0.035),
+      clearcoat: 0.52,
+      clearcoatRoughness: 0.2,
+      sheen: 0.74,
+      sheenColor: 0x9bb8af,
+      sheenRoughness: 0.68,
+      envMapIntensity: 0.9
+    })
+  );
+  plinth.position.set(-0.1, -1.5, -0.28);
+  plinth.receiveShadow = true;
+  plinth.castShadow = true;
+  scene.add(plinth);
+
+  const glassPlate = new THREE.Mesh(
+    new THREE.CircleGeometry(2.05, 128),
+    new THREE.MeshPhysicalMaterial({
+      color: 0xdff8ff,
+      roughness: 0.05,
+      metalness: 0,
+      transparent: true,
+      opacity: 0.18,
+      transmission: 0.7,
+      thickness: 0.1,
+      clearcoat: 1,
+      clearcoatRoughness: 0.02,
+      envMapIntensity: 1.8
+    })
+  );
+  glassPlate.rotation.x = -Math.PI / 2;
+  glassPlate.position.set(-0.1, -1.365, -0.28);
+  glassPlate.receiveShadow = true;
+  scene.add(glassPlate);
+
   const reflection = new THREE.Mesh(
     new THREE.RingGeometry(1.05, 3.05, 96),
     new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.04, side: THREE.DoubleSide })
@@ -803,6 +2606,125 @@ async function createThreeStudio(root, canvas) {
   reflection.rotation.x = -Math.PI / 2;
   reflection.position.set(0, -1.37, -0.2);
   scene.add(reflection);
+
+  const caustics = new THREE.Mesh(
+    new THREE.CircleGeometry(2.65, 128),
+    new THREE.MeshBasicMaterial({
+      map: runtimeTextures.caustics,
+      color: 0xffffff,
+      transparent: true,
+      opacity: 0.16,
+      depthWrite: false,
+      blending: THREE.AdditiveBlending,
+      side: THREE.DoubleSide
+    })
+  );
+  caustics.rotation.x = -Math.PI / 2;
+  caustics.position.set(-0.05, -1.355, -0.28);
+  caustics.renderOrder = 1;
+  scene.add(caustics);
+
+  const BACKDROP_PRESETS = {
+    Velvet:  { color: 0x141a1c, floorColor: 0x1c2326, floorOpacity: 0.42, sheen: 0xcbded5, plinth: 0x101615 },
+    Marble:  { color: 0xe8e3dc, floorColor: 0xf2efe9, floorOpacity: 0.66, sheen: 0xffffff, plinth: 0xcfc6b7 },
+    Onyx:    { color: 0x05080a, floorColor: 0x080a0c, floorOpacity: 0.74, sheen: 0xa6c2c9, plinth: 0x0a0d10 },
+    Linen:   { color: 0xc7b9a3, floorColor: 0xd9cbb4, floorOpacity: 0.5, sheen: 0xf3e7cd, plinth: 0x8a7659 },
+    Sweep:   { color: 0xeef0f2, floorColor: 0xf6f7f8, floorOpacity: 0.62, sheen: 0xffffff, plinth: 0xbfc4c8 },
+    Concrete: { color: 0x3a3d40, floorColor: 0x4c5054, floorOpacity: 0.58, sheen: 0x8a9094, plinth: 0x2e3134 },
+    Driftwood: { color: 0x6e553a, floorColor: 0x8a6d4c, floorOpacity: 0.56, sheen: 0xd9b889, plinth: 0x4d3b27 },
+    Holographic: { color: 0x1a0a2e, floorColor: 0x2a1450, floorOpacity: 0.7, sheen: 0xff7af0, plinth: 0x12082a },
+    Smoke:   { color: 0x16161a, floorColor: 0x202028, floorOpacity: 0.52, sheen: 0x8c7fa6, plinth: 0x0d0d10 },
+    Ivory:   { color: 0xf2ead9, floorColor: 0xf8f1e3, floorOpacity: 0.7, sheen: 0xffffff, plinth: 0xc9bda3 }
+  };
+
+  function applyBackdrop(name) {
+    const preset = BACKDROP_PRESETS[name] || BACKDROP_PRESETS.Velvet;
+    backdrop.material.color.setHex(preset.color);
+    backdrop.material.opacity = name === "Sweep" || name === "Marble" ? 0.94 : 0.82;
+    floor.material.color.setHex(preset.floorColor);
+    floor.material.opacity = preset.floorOpacity;
+    floor.material.sheenColor.setHex(preset.sheen);
+    floor.material.needsUpdate = true;
+    plinth.material.color.setHex(preset.plinth);
+    plinth.material.needsUpdate = true;
+  }
+
+  const VIEW_PRESETS = {
+    "Three-Quarter": { z: cameraHomeZ,            rx: 0.03,             ry: -0.18 },
+    "Macro":         { z: cameraMinZ + 0.2,       rx: 0.18,             ry: -0.12 },
+    "Top-Down":      { z: cameraHomeZ - 0.6,      rx: -Math.PI / 2.2,   ry: 0 },
+    "Profile":       { z: cameraHomeZ - 0.3,      rx: 0,                ry: Math.PI / 2.1 }
+  };
+  function applyView(name) {
+    const preset = VIEW_PRESETS[name] || VIEW_PRESETS["Three-Quarter"];
+    targetCameraZ = preset.z;
+    targetRotationX = preset.rx;
+    targetRotationY = preset.ry;
+  }
+
+  // Hide ring-specific controls (Band Style, Hidden Halo) when the user is
+  // designing a Necklace / Bracelet / Earrings piece. Anything tagged
+  // [data-piece-only="X"] is shown only when state.piece === "X".
+  function applyPieceOptionVisibility(piece) {
+    root.querySelectorAll("[data-piece-only]").forEach((node) => {
+      const allowed = node.getAttribute("data-piece-only");
+      const show = !allowed || allowed.split(",").map((s) => s.trim()).includes(piece);
+      node.hidden = !show;
+      node.style.display = show ? "" : "none";
+    });
+
+    // Rebuild the silhouette dropdown with the chosen piece's sub-types so
+    // the user can pick e.g. "Cigar Band" for rings or "Y-Drop" for
+    // necklaces. The currently-selected value is preserved if it's valid
+    // for the new piece, otherwise the first entry is chosen.
+    const silSelect = root.querySelector('[data-designer-field="silhouette"]');
+    if (silSelect) {
+      const list = SILHOUETTES[piece] || SILHOUETTES.Ring;
+      const previous = silSelect.value;
+      const keep = list.includes(previous) ? previous : list[0];
+      silSelect.innerHTML = "";
+      list.forEach((name) => {
+        const opt = document.createElement("option");
+        opt.value = name;
+        opt.textContent = name;
+        if (name === keep) opt.selected = true;
+        silSelect.appendChild(opt);
+      });
+      if (currentState && currentState.silhouette !== keep) {
+        currentState.silhouette = keep;
+      }
+    }
+  }
+
+  function applyLightingMode(modeName) {
+    const mode = LIGHTING_MODES[modeName] || LIGHTING_MODES.Daylight;
+
+    renderer.toneMappingExposure = mode.exposure;
+    hemi.intensity = mode.hemi;
+    key.intensity = mode.key;
+    fill.intensity = mode.fill;
+    rim.intensity = mode.rim;
+    gemPunch.intensity = mode.punch;
+    tableFlash.intensity = mode.table;
+    key.color.set(mode.keyColor);
+    fill.color.set(mode.fillColor);
+    rim.color.set(mode.rimColor);
+    gemPunch.color.set(mode.punchColor);
+    floor.material.opacity = mode.floorOpacity;
+    caustics.material.opacity = modeName === "Flash" ? 0.26 : modeName === "Showroom" ? 0.2 : 0.14;
+    glassPlate.material.opacity = modeName === "Candlelight" ? 0.14 : 0.18;
+    reflection.material.opacity = modeName === "Flash" ? 0.075 : 0.04;
+    softboxes.forEach((panel, index) => {
+      panel.material.opacity = modeName === "Flash" ? 0.2 : index === 1 && modeName === "Candlelight" ? 0.18 : 0.12 + index * 0.018;
+    });
+    sparkle.children.forEach((gem) => {
+      gem.material.opacity = mode.sparkleOpacity * (currentState && currentState.sparkleBurst ? 1.65 : 1);
+    });
+    if (currentState && currentState.sparkleBurst) {
+      renderer.toneMappingExposure = mode.exposure + 0.08;
+    }
+    root.dataset.designerLighting = modeName.toLowerCase();
+  }
 
   const sparkleMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.5 });
 
@@ -819,36 +2741,202 @@ async function createThreeStudio(root, canvas) {
     const rect = canvas.getBoundingClientRect();
     const width = Math.max(1, Math.round(rect.width));
     const height = Math.max(1, Math.round(rect.height));
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 3));
     renderer.setSize(width, height, false);
     camera.aspect = width / height;
     camera.updateProjectionMatrix();
   }
 
+  // Goldsmith reference colors per metal + karat. These are the linear-sRGB
+  // base colors that real jewelers see; they're what drives the *base* color
+  // of the metal before any environment reflection / specular tint.
+  const METAL_KARAT_COLORS = {
+    "Yellow Gold": {
+      "10K": 0xd9c071,
+      "14K": 0xe2b85a,
+      "18K": 0xeab64a,
+      "22K": 0xf5c441,
+      default: 0xeab64a
+    },
+    "Rose Gold": {
+      "10K": 0xd2a292,
+      "14K": 0xcd8c7c,
+      "18K": 0xc1786a,
+      "22K": 0xba6f5f,
+      default: 0xc1786a
+    },
+    "White Gold": {
+      "10K": 0xe6e9ec,
+      "14K": 0xeaedf0,
+      "18K": 0xeef1f3,
+      "22K": 0xf1f4f6,
+      default: 0xeef1f3
+    },
+    "Platinum": {
+      "950": 0xe1e6ea,
+      default: 0xd6dee2
+    },
+    // Champagne Gold - pale warm gold, less saturated than yellow gold.
+    "Champagne Gold": {
+      "10K": 0xe6d0a1,
+      "14K": 0xddc18a,
+      "18K": 0xd4b574,
+      "22K": 0xceac66,
+      default: 0xd4b574
+    },
+    // Black Gold (black rhodium plating over gold) - very dark gunmetal with
+    // a faint warm undertone. Keep base color extremely dark so the highly
+    // metallic F0 reads as a near-mirror black surface.
+    "Black Gold": {
+      "10K": 0x2a2622,
+      "14K": 0x232020,
+      "18K": 0x1d1b1c,
+      "22K": 0x171516,
+      default: 0x1d1b1c
+    },
+    // Mirror Silver - hyper-reflective bright argentium / rhodium look
+    "Mirror Silver": {
+      "950": 0xf2f5f8,
+      default: 0xeef2f5
+    },
+    // Bronze Patina - warm coppery brown with greenish oxidation hint
+    "Bronze Patina": {
+      "10K": 0x8a6a44,
+      "14K": 0x7a5a3a,
+      "18K": 0x6e4f30,
+      default: 0x7a5a3a
+    },
+    // Two-Tone Mix - warm/cool blend, body reads as soft champagne so the
+    // contrasting sheen tint (when twoTone toggle is on) reads cleanly.
+    "Two-Tone Mix": {
+      "14K": 0xd6c2a2,
+      "18K": 0xd6c2a2,
+      default: 0xd6c2a2
+    }
+  };
+  // Specular tint - the color of the reflection highlight. Real gold reflects
+  // light back with its own hue (warm), while white gold/platinum reflect
+  // nearly pure white.
+  const METAL_SPECULAR_TINT = {
+    "Yellow Gold": 0xfff0c0,
+    "Rose Gold":   0xffd5c4,
+    "White Gold":  0xfafcff,
+    "Platinum":    0xf4f7fa,
+    "Champagne Gold": 0xffe9b8,
+    "Black Gold":  0x8a8082,
+    "Mirror Silver": 0xffffff,
+    "Bronze Patina": 0xffd9a0,
+    "Two-Tone Mix": 0xfff0d0
+  };
+  // Attenuation/rim color for transmissive clearcoat - subtle warming.
+  const METAL_SHEEN_TINT = {
+    "Yellow Gold": 0xffdf86,
+    "Rose Gold":   0xf9b4a0,
+    "White Gold":  0xeef4ff,
+    "Platinum":    0xe7eef3,
+    "Champagne Gold": 0xffd896,
+    "Black Gold":  0x6a5f60,
+    "Mirror Silver": 0xf0f6ff,
+    "Bronze Patina": 0xffc888,
+    "Two-Tone Mix": 0xffd9a0
+  };
+
+  function metalBaseColor(metal, karat) {
+    const table = METAL_KARAT_COLORS[metal] || METAL_KARAT_COLORS["White Gold"];
+    return new THREE.Color(table[karat] ?? table.default);
+  }
+
   function materialForMetal() {
-    const finish = FINISH_SETTINGS[currentState.finish] || FINISH_SETTINGS["High Polish"];
-    const normalScale = currentState.finish === "Soft Satin" ? 0.12 : currentState.finish === "Milgrain Edge" ? 0.08 : 0.045;
-    const metalNormal = runtimeTextures.metalNormal || runtimeTextures.brushNormal;
-    const metalRoughness = currentState.finish === "High Polish"
-      ? runtimeTextures.microRoughness
-      : runtimeTextures.metalRoughness || runtimeTextures.microRoughness;
+    const isSatin     = currentState.finish === "Soft Satin";
+    const isMilgrain  = currentState.finish === "Milgrain Edge";
+    const isPolish    = currentState.finish === "High Polish";
+    const isHammered  = currentState.finish === "Hammered";
+    const isSandblast = currentState.finish === "Sandblast";
+    const metal       = currentState.metal;
+
+    // For polished gold the *body* color is F0. A clearcoat layer (transparent
+    // lacquer over the metal) reflects environment light tinted toward WHITE,
+    // sitting on top of the gold and visually drowning the F0 hue. Real
+    // polished jewelry has no such coating, so clearcoat must be 0. Likewise a
+    // dark roughnessMap multiplied with a low base value drives the surface
+    // back toward a perfect mirror, also hiding F0. We keep polish uniform.
+    const baseRoughness = isPolish    ? 0.32
+      : isMilgrain  ? 0.42
+      : isHammered  ? 0.55
+      : isSandblast ? 0.78
+      :               0.58;
+
+    // Brushed grain direction — visible only when normal map is meaningful
+    // (satin/milgrain). On polish we keep micro-bumps off.
+    const anisoRotation = metal === "Rose Gold"   ?  0.55
+      :                   metal === "Yellow Gold" ?  0.25
+      :                                             -0.18;
+
+    // Pick a per-finish normal map. Hammered and Sandblast each have their own
+    // procedural normal so the surface relief is physically distinct, not just
+    // a roughness tweak. High Polish gets a *very* faint brushed normal so
+    // reflections aren't a perfect mathematical mirror — real polished gold
+    // carries imperceptible polish-wheel marks that scatter light just
+    // enough to read as a physical object instead of CGI.
+    const finishNormalMap =
+      isPolish    ? (runtimeTextures.brushNormal || runtimeTextures.metalNormal)
+      : isHammered  ? runtimeTextures.hammeredNormal
+      : isSandblast ? runtimeTextures.sandblastNormal
+      : (runtimeTextures.metalNormal || runtimeTextures.brushNormal);
+
+    const normalAmount =
+      isSatin     ? 0.22
+      : isMilgrain  ? 0.12
+      : isHammered  ? 0.55
+      : isSandblast ? 0.18
+      : isPolish    ? 0.035   // whisper-thin polish marks
+      :               0;
 
     return new THREE.MeshPhysicalMaterial({
-      color: METAL_COLORS[currentState.metal],
-      metalness: currentState.finish === "Soft Satin" ? 0.82 : 0.95,
-      roughness: finish.roughness,
-      roughnessMap: metalRoughness,
-      normalMap: metalNormal,
-      normalScale: new THREE.Vector2(normalScale, normalScale),
-      anisotropy: currentState.finish === "Soft Satin" ? 0.82 : 0.42,
-      anisotropyRotation: currentState.metal === "Rose Gold" ? 0.42 : -0.18,
-      anisotropyMap: runtimeTextures.brushNormal,
-      clearcoat: finish.clearcoat,
-      clearcoatRoughness: Math.min(0.4, finish.roughness * 0.62),
-      clearcoatNormalMap: runtimeTextures.brushNormal,
-      clearcoatNormalScale: new THREE.Vector2(0.018, 0.018),
-      envMapIntensity: 1.2,
-      reflectivity: 0.86
+      color: metalBaseColor(metal, currentState.karat),
+      metalness: 1,
+      roughness: baseRoughness,
+      // Real polished gold still has micro-roughness variation from the
+      // polishing wheel — perfectly uniform roughness reads as CGI plastic.
+      // The microRoughness map adds 1–2% surface variation that's invisible
+      // up close but breaks the mathematical mirror and gives the metal a
+      // "breathing" quality across the band's length.
+      roughnessMap: isPolish
+        ? (runtimeTextures.microRoughness || null)
+        : (runtimeTextures.metalRoughness || null),
+      normalMap: finishNormalMap,
+      normalScale: new THREE.Vector2(normalAmount, normalAmount),
+      // A trace of anisotropy on polished metal mimics the directional
+      // sweep of a jeweller's polishing wheel — not visible as streaks but
+      // it elongates highlights subtly the way real polished gold does.
+      anisotropy: isSatin ? 0.85 : isMilgrain ? 0.4 : isPolish ? 0.12 : 0,
+      anisotropyRotation: anisoRotation,
+      // Clearcoat OFF for polished metal — this was the killer washing out
+      // every gold tone with a white mirror layer. Milgrain/satin get just a
+      // hint to suggest a hand-applied sealer wax.
+      clearcoat: isMilgrain ? 0.12 : isHammered ? 0.18 : 0,
+      clearcoatRoughness: isHammered ? 0.55 : 0.35,
+      // Energy-balanced env reflection. HDR studio is already bright; over 1.0
+      // the F0 hue starts to wash out at near-normal viewing angles. The
+      // envMul comes from the active lighting mode so bright presets
+      // (Flash, Showroom) automatically dial the metal reflection DOWN to
+      // keep the karat hue from clipping to white.
+      envMapIntensity: (isPolish ? 1.0 : isMilgrain ? 0.9 : isSandblast ? 0.72 : 0.85) * (LIGHTING_MODES[currentState.lighting]?.envMul ?? 1),
+      // Subtle satin sheen on satin finish — adds the cloth-like soft rim.
+      sheen: isSatin ? 0.25 : (currentState && currentState.twoTone ? 0.45 : 0),
+      // Two-tone toggle paints a contrasting sheen tint over the metal so
+      // warm metals get a cool flash band (and vice versa) — reads as
+      // mixed-metal craftsmanship without changing geometry.
+      sheenColor: (currentState && currentState.twoTone)
+        ? (/(Yellow|Rose|Champagne|Bronze)/.test(metal) ? 0xcfe0ff : 0xffd9a8)
+        : (METAL_SHEEN_TINT[metal] || 0xffffff),
+      sheenRoughness: 0.6,
+      // A whisper of iridescence on polished gold — adds the warm-cool color
+      // shift jewellers see across the band as the piece is rotated. Kept
+      // very low so the karat hue still reads.
+      iridescence: isPolish ? 0.08 : 0,
+      iridescenceIOR: 1.25,
+      iridescenceThicknessRange: [110, 360]
     });
   }
 
@@ -871,34 +2959,47 @@ async function createThreeStudio(root, canvas) {
   function materialForStone() {
     const profile = stoneProfile();
     const isDiamond = currentState.stone === "Clear Diamond";
-    const isEmerald = currentState.stone === "Emerald Green";
+    const isOpaque = currentState.stone === "Black Onyx";
+    const isOpal = currentState.stone === "Fire Opal";
+    const glow = !!(currentState && currentState.emissiveGlow);
 
+    // A real gemstone has no surface body texture - all the visible
+    // structure comes from refraction, dispersion and the env map. We rely
+    // on the non-indexed faceted geometry (computeVertexNormals → per-face
+    // normals) for crisp facet-edge shading; flatShading is therefore not
+    // needed and is actually counterproductive with transmission because it
+    // disables proper per-fragment normal sampling for the refraction pass.
     return new THREE.MeshPhysicalMaterial({
       color: profile.color,
-      map: isDiamond ? runtimeTextures.gemInclusions : null,
-      metalness: 0,
+      metalness: isOpaque ? 0.15 : 0,
       roughness: profile.roughness,
-      flatShading: true,
-      normalMap: runtimeTextures.gemNormal,
-      normalScale: new THREE.Vector2(isDiamond ? 0.018 : 0.032, isDiamond ? 0.018 : 0.032),
       transparent: true,
       side: THREE.DoubleSide,
-      opacity: profile.opacity,
+      opacity: 1,
       transmission: profile.transmission,
-      thickness: isEmerald ? 0.56 : 0.92,
+      thickness: profile.thickness || 1,
       ior: profile.ior,
       dispersion: profile.dispersion,
       attenuationColor: profile.absorption,
       attenuationDistance: profile.attenuationDistance,
+      // Emissive glow: stone self-illuminates with its absorption hue.
+      // Diamonds get a cooler white glow; coloreds get a saturated glow.
+      emissive: glow ? (isDiamond ? new THREE.Color(0xbfd6ff) : new THREE.Color(profile.absorption)) : new THREE.Color(0x000000),
+      emissiveIntensity: glow ? (isDiamond ? 0.35 : 0.7) : 0,
       specularIntensity: 1,
       specularColor: 0xffffff,
       reflectivity: 1,
       clearcoat: 1,
-      clearcoatRoughness: 0.025,
-      envMapIntensity: isDiamond ? 2.35 : 1.48,
-      iridescence: isDiamond ? 0.08 : 0.02,
-      iridescenceIOR: profile.ior,
-      premultipliedAlpha: true
+      clearcoatRoughness: 0.003,
+      envMapIntensity: isDiamond ? 2.95 : 2.25,
+      // Iridescence enriches diamond fire but desaturates colored hues, so
+      // colored stones get only a whisper to keep the body color brilliant.
+      // Fire opal gets a strong play-of-color shift.
+      iridescence: isOpal ? 0.85 : isDiamond ? 0.28 : 0.025,
+      iridescenceIOR: isOpal ? 1.45 : 1.32,
+      ...(isOpal ? { iridescenceThicknessRange: [200, 800] } : {}),
+      sheen: isDiamond ? 0.08 : 0,
+      sheenColor: 0xbfd6ff
     });
   }
 
@@ -939,288 +3040,393 @@ async function createThreeStudio(root, canvas) {
     }
   }
 
-  function gemPoint(angle, radius, z, shape = currentState.shape) {
-    const cos = Math.cos(angle);
-    const sin = Math.sin(angle);
-    let x = cos * radius;
-    let y = sin * radius;
+  // ---------------------------------------------------------------------------
+  // Real faceted gem geometry. Each shape uses its proper facet topology with
+  // flat (per-facet) shading so reflections look like a cut stone rather than
+  // a smooth blob. Built non-indexed so computeVertexNormals yields face normals.
+  // ---------------------------------------------------------------------------
 
-    if (shape === "Oval") {
-      x *= 0.74;
-      y *= 1.18;
-    } else if (shape === "Pear") {
-      const taper = sin > 0 ? 1 - sin * 0.52 : 1 + Math.abs(sin) * 0.08;
-      x *= 0.78 * taper;
-      y *= sin > 0 ? 1.28 : 0.86;
-      y -= radius * 0.08;
-    } else if (shape === "Cushion") {
-      const cornerLift = 0.88 + Math.max(Math.abs(cos), Math.abs(sin)) * 0.2;
-      x *= cornerLift;
-      y *= cornerLift;
+  function shapeOutline(shape, ux, uy) {
+    switch (shape) {
+      case "Oval":
+        return [ux * 0.78, uy * 1.18];
+      case "Cushion": {
+        const k = 0.86 + Math.max(Math.abs(ux), Math.abs(uy)) * 0.22;
+        return [ux * k, uy * k];
+      }
+      case "Pear": {
+        const taper = uy > 0 ? 1 - uy * 0.46 : 1 + Math.abs(uy) * 0.06;
+        return [ux * 0.8 * taper, (uy > 0 ? uy * 1.32 : uy * 0.84) - 0.08];
+      }
+      case "Marquise": {
+        const point = 1 - Math.abs(ux) * 0.46;
+        return [ux * 0.58, uy * 1.42 * point];
+      }
+      case "Heart": {
+        if (uy > 0.55) {
+          const t = (uy - 0.55) / 0.45;
+          return [ux * (1 - t * 0.55) * 1.02, uy * 1.04 - t * 0.42 * Math.abs(uy)];
+        }
+        return [ux * 1.04, uy * 1.04];
+      }
+      default:
+        return [ux, uy];
     }
+  }
+  function outlineAt(shape, angle, radiusScale) {
+    const [ux, uy] = shapeOutline(shape, Math.cos(angle), Math.sin(angle));
+    return [ux * radiusScale, uy * radiusScale];
+  }
 
+  function vec(x, y, z) {
     return new THREE.Vector3(x, y, z);
   }
 
-  function gemRing(count, radius, z, shape = currentState.shape, offset = 0) {
-    return Array.from({ length: count }, (_, index) => {
-      const angle = offset + (Math.PI * 2 * index) / count;
-      return gemPoint(angle, radius, z, shape);
+  function pushTri(arr, a, b, c) {
+    arr.push(a.x, a.y, a.z, b.x, b.y, b.z, c.x, c.y, c.z);
+  }
+  function pushQuad(arr, a, b, c, d) {
+    pushTri(arr, a, b, c);
+    pushTri(arr, a, c, d);
+  }
+
+  // Build a box with all 12 edges chamfered. Real machined / cast metal
+  // never has perfectly sharp 90° edges — a small bevel catches a thin
+  // highlight that's the difference between "object" and "render".
+  function makeChamferedBox(w, h, d, chamfer) {
+    const ch = Math.min(chamfer ?? Math.min(w, h, d) * 0.12, w * 0.45, h * 0.45, d * 0.45);
+    const rx = w / 2 - ch;
+    const ry = h / 2 - ch;
+    const shape = new THREE.Shape();
+    shape.moveTo(-rx, -h / 2);
+    shape.lineTo(rx, -h / 2);
+    shape.quadraticCurveTo(w / 2, -h / 2, w / 2, -ry);
+    shape.lineTo(w / 2, ry);
+    shape.quadraticCurveTo(w / 2, h / 2, rx, h / 2);
+    shape.lineTo(-rx, h / 2);
+    shape.quadraticCurveTo(-w / 2, h / 2, -w / 2, ry);
+    shape.lineTo(-w / 2, -ry);
+    shape.quadraticCurveTo(-w / 2, -h / 2, -rx, -h / 2);
+    const geo = new THREE.ExtrudeGeometry(shape, {
+      depth: Math.max(0.0001, d - ch * 2),
+      bevelEnabled: true,
+      bevelThickness: ch,
+      bevelSize: ch,
+      bevelSegments: 3,
+      curveSegments: 4,
+      steps: 1
     });
+    geo.translate(0, 0, -(d - ch * 2) / 2);
+    geo.computeVertexNormals();
+    return geo;
   }
 
-  function pushGemVertex(positions, uvs, point, uvScale) {
-    positions.push(point.x, point.y, point.z);
-    uvs.push(0.5 + point.x / uvScale, 0.5 + point.y / uvScale);
-  }
-
-  function pushGemTriangle(positions, uvs, a, b, c, uvScale) {
-    pushGemVertex(positions, uvs, a, uvScale);
-    pushGemVertex(positions, uvs, b, uvScale);
-    pushGemVertex(positions, uvs, c, uvScale);
-  }
-
-  function pushGemQuad(positions, uvs, a, b, c, d, uvScale) {
-    pushGemTriangle(positions, uvs, a, b, d, uvScale);
-    pushGemTriangle(positions, uvs, b, c, d, uvScale);
-  }
-
-  function createCutStoneGeometry(size, shape = currentState.shape, segments = null) {
-    const count = segments || (shape === "Pear" ? 36 : shape === "Oval" ? 34 : 32);
-    const depth = shape === "Pear" ? size * 1.26 : shape === "Cushion" ? size * 0.98 : size * 1.08;
-    const tableRadius = size * (shape === "Pear" ? 0.31 : shape === "Cushion" ? 0.36 : 0.38);
-    const crownRadius = size * (shape === "Pear" ? 0.64 : 0.66);
-    const girdleRadius = size * (shape === "Cushion" ? 0.86 : 0.9);
-    const pavilionRadius = size * (shape === "Pear" ? 0.48 : 0.56);
-    const table = gemRing(count, tableRadius, depth * 0.45, shape, Math.PI / count);
-    const crown = gemRing(count, crownRadius, depth * 0.18, shape);
-    const girdle = gemRing(count, girdleRadius, 0, shape, Math.PI / count);
-    const pavilion = gemRing(count, pavilionRadius, -depth * 0.3, shape);
-    const tableCenter = new THREE.Vector3(0, shape === "Pear" ? -size * 0.04 : 0, depth * 0.52);
-    const culet = new THREE.Vector3(0, shape === "Pear" ? -size * 0.08 : 0, -depth * 0.58);
-    const positions = [];
-    const uvs = [];
-    const uvScale = size * 2.2;
-
-    for (let index = 0; index < count; index += 1) {
-      const next = (index + 1) % count;
-      pushGemTriangle(positions, uvs, tableCenter, table[index], table[next], uvScale);
-      pushGemQuad(positions, uvs, table[index], crown[index], crown[next], table[next], uvScale);
-      pushGemQuad(positions, uvs, crown[index], girdle[index], girdle[next], crown[next], uvScale);
-      pushGemQuad(positions, uvs, girdle[index], pavilion[index], pavilion[next], girdle[next], uvScale);
-      pushGemTriangle(positions, uvs, pavilion[next], pavilion[index], culet, uvScale);
-    }
-
+  function finishGeometry(positions) {
     const geometry = new THREE.BufferGeometry();
     geometry.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
-    geometry.setAttribute("uv", new THREE.Float32BufferAttribute(uvs, 2));
     geometry.computeVertexNormals();
-
     return geometry;
   }
 
-  function makeGemLineGeometry(size, shape, count) {
-    const depth = shape === "Pear" ? size * 1.26 : shape === "Cushion" ? size * 0.98 : size * 1.08;
-    const tableRadius = size * (shape === "Pear" ? 0.31 : shape === "Cushion" ? 0.36 : 0.38);
-    const crownRadius = size * (shape === "Pear" ? 0.64 : 0.66);
-    const girdleRadius = size * (shape === "Cushion" ? 0.86 : 0.9);
-    const pavilionRadius = size * (shape === "Pear" ? 0.48 : 0.56);
-    const table = gemRing(count, tableRadius, depth * 0.535, shape, Math.PI / count);
-    const crown = gemRing(count, crownRadius, depth * 0.18, shape);
-    const girdle = gemRing(count, girdleRadius, 0.01, shape, Math.PI / count);
-    const pavilion = gemRing(count, pavilionRadius, -depth * 0.28, shape);
-    const positions = [];
-
-    function addLine(a, b) {
-      positions.push(a.x, a.y, a.z, b.x, b.y, b.z);
-    }
-
-    for (let index = 0; index < count; index += 1) {
-      const next = (index + 1) % count;
-      addLine(table[index], table[next]);
-      addLine(girdle[index], girdle[next]);
-
-      if (index % 2 === 0) {
-        addLine(table[index], crown[index]);
-        addLine(crown[index], girdle[index]);
-        addLine(girdle[index], pavilion[index]);
+  // Deterministic per-vertex micro-jitter. Real hand-cut diamonds are
+  // never mathematically symmetric to micron precision — each facet sits
+  // at a slightly different angle. Sub-percent positional jitter perturbs
+  // facet normals by ~0.3–0.8°, the same human-cutter variance that
+  // distinguishes a real polished stone from a CGI one. Because each vertex
+  // object is referenced across multiple triangles, jittering in place
+  // keeps the gem watertight (no facet cracks).
+  function jitterStoneVerts(arrays, amp, seedStart = 1) {
+    let seed = seedStart;
+    for (const arr of arrays) {
+      for (const v of arr) {
+        const h1 = Math.sin(seed * 12.9898) * 43758.5453;
+        const h2 = Math.sin(seed * 78.233 + 4.1) * 43758.5453;
+        const h3 = Math.sin(seed * 39.346 + 7.9) * 43758.5453;
+        v.x += ((h1 - Math.floor(h1)) * 2 - 1) * amp;
+        v.y += ((h2 - Math.floor(h2)) * 2 - 1) * amp;
+        v.z += ((h3 - Math.floor(h3)) * 2 - 1) * amp;
+        seed += 1;
       }
     }
-
-    const geometry = new THREE.BufferGeometry();
-    geometry.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
-
-    return geometry;
   }
 
-  function addGemFacetOverlay(stone, size) {
-    const profile = stoneProfile();
-    const count = currentState.shape === "Pear" ? 36 : currentState.shape === "Oval" ? 34 : 32;
-    const lineMaterial = new THREE.LineBasicMaterial({
-      color: profile.table,
-      transparent: true,
-      opacity: currentState.stone === "Clear Diamond" ? 0.58 : 0.32,
-      depthWrite: false
-    });
-    const lines = new THREE.LineSegments(makeGemLineGeometry(size, currentState.shape, count), lineMaterial);
-    const fireColors = [0xffd0ef, 0xcbeeff, 0xffebb0, 0xded0ff, 0xc9fff0];
+  // 57-facet round-brilliant topology mapped through a shape outline.
+  // Used for Round, Oval, Cushion, Pear, Marquise, Heart.
+  function createBrilliantGeometry(size, shape) {
+    const N = shape === "Cushion" || shape === "Marquise" || shape === "Heart" ? 8 : 8; // 8-fold
+    const tableScale = shape === "Marquise" ? 0.42 : shape === "Pear" ? 0.4 : shape === "Heart" ? 0.5 : 0.5;
+    const starScale  = shape === "Marquise" ? 0.66 : 0.72;
+    const ugScale    = 0.96; // girdle radius
+    const gmScale    = 0.96;
+    const pmScale    = shape === "Marquise" ? 0.52 : 0.58;
+    const culetOffset = shape === "Pear" ? -size * 0.06 : 0;
 
-    stone.add(lines);
+    const crownH  = size * 0.38;
+    const tableZ  = size * 0.52;
+    const starZ   = size * 0.44;
+    // Real diamonds have a faceted girdle band (~1.5–3% of total depth)
+    // between the upper-girdle facets and the lower-girdle facets. Without
+    // it the stone shows a knife-edge silhouette — a dead CGI giveaway.
+    const girdleH = size * 0.022;
+    const girdleUpperZ =  girdleH;   // UG meets girdle here
+    const girdleLowerZ = -girdleH;   // GM meets girdle here
+    const girdleZ = 0;               // (kept for back-compat below)
+    const pavZ    = -size * 0.32;
+    const culetZ  = -size * 0.72;
 
-    function addHighlight(width, height, x, y, z, rotation, opacity, color = profile.table) {
-      const highlight = new THREE.Mesh(
-        new THREE.PlaneGeometry(width, height),
-        scintillatingMaterial({
-          color,
-          transparent: true,
-          opacity,
-          depthWrite: false,
-          side: THREE.DoubleSide,
-          blending: THREE.AdditiveBlending
-        }, 0.0022)
-      );
+    const T = [], UG = [], S = [], GM = [], PM = [];
+    for (let i = 0; i < N; i += 1) {
+      const a = (i / N) * Math.PI * 2;
+      const am = ((i + 0.5) / N) * Math.PI * 2;
+      const [tx, ty] = outlineAt(shape, a, size * tableScale);
+      const [ux, uy] = outlineAt(shape, a, size * ugScale);
+      const [sx, sy] = outlineAt(shape, am, size * starScale);
+      const [gx, gy] = outlineAt(shape, am, size * gmScale);
+      const [px, py] = outlineAt(shape, am, size * pmScale);
+      T.push(vec(tx, ty, tableZ));
+      UG.push(vec(ux, uy, girdleUpperZ));
+      S.push(vec(sx, sy, starZ));
+      GM.push(vec(gx, gy, girdleLowerZ));
+      PM.push(vec(px, py, pavZ));
+    }
+    const tableCenter = vec(0, culetOffset * 0.4, tableZ);
+    const culet = vec(0, culetOffset, culetZ);
 
-      highlight.position.set(x, y, z);
-      highlight.rotation.z = rotation;
-      highlight.renderOrder = 4;
-      stone.add(highlight);
+    // Tiny culet facet: real round brilliants almost always have a small
+    // octagonal culet facet rather than a mathematically perfect point.
+    // Without it, the bottom apex is a sharp singular vertex that catches
+    // light as a tiny CGI "hot spot." We replace the single point with a
+    // small N-gon at the same Z (one vertex per pavilion main, at the
+    // SAME angle as the main so each pavilion main terminates cleanly at
+    // its own culet-facet edge).
+    const culetFacetR = size * 0.012; // ~1.2% of half-diameter
+    const CF = [];
+    for (let i = 0; i < N; i += 1) {
+      const a = (i / N) * Math.PI * 2;
+      CF.push(vec(Math.cos(a) * culetFacetR, culetOffset + Math.sin(a) * culetFacetR, culetZ));
     }
 
-    addHighlight(size * 0.5, size * 0.07, -size * 0.08, size * 0.08, size * 0.64, -0.24, currentState.stone === "Clear Diamond" ? 0.42 : 0.24);
-    addHighlight(size * 0.32, size * 0.045, size * 0.16, -size * 0.18, size * 0.63, 0.56, currentState.stone === "Clear Diamond" ? 0.34 : 0.2, 0xffffff);
-    addHighlight(size * 0.22, size * 0.035, -size * 0.24, -size * 0.14, size * 0.62, -0.74, currentState.stone === "Clear Diamond" ? 0.26 : 0.16, profile.tint);
+    // Micro-jitter every conceptual vertex. Real hand-cut diamonds are
+    // never 8-fold symmetric to micron precision — each facet sits at a
+    // slightly different angle. Sub-percent positional jitter (~0.25% of
+    // half-diameter) tilts each face plane by ~0.3–0.8° which is exactly
+    // the human-cutter variance that distinguishes a real stone from a
+    // computer-generated one. Because each vertex object is referenced
+    // across multiple triangles, jittering in place keeps the gem
+    // watertight (no cracks between facets).
+    jitterStoneVerts([T, UG, S, GM, PM, CF], size * 0.0025);
 
-    for (let index = 0; index < 8; index += 1) {
-      const angle = (Math.PI * 2 * index) / 8 + 0.1;
-      const next = angle + Math.PI / 10;
-      const near = gemPoint(angle, size * 0.18, size * 0.625, currentState.shape);
-      const farA = gemPoint(angle, size * 0.58, size * 0.47, currentState.shape);
-      const farB = gemPoint(next, size * 0.52, size * 0.49, currentState.shape);
-      const panelGeometry = new THREE.BufferGeometry();
-      const flashColor = index % 3 === 0 ? profile.tint : index % 3 === 1 ? profile.table : 0xffffff;
-
-      panelGeometry.setAttribute("position", new THREE.Float32BufferAttribute([
-        near.x, near.y, near.z,
-        farA.x, farA.y, farA.z,
-        farB.x, farB.y, farB.z
-      ], 3));
-      panelGeometry.computeVertexNormals();
-
-      stone.add(new THREE.Mesh(
-        panelGeometry,
-        scintillatingMaterial({
-          color: flashColor,
-          transparent: true,
-          opacity: currentState.stone === "Clear Diamond" ? 0.2 : 0.12,
-          depthWrite: false,
-          side: THREE.DoubleSide,
-          blending: THREE.AdditiveBlending
-        }, 0.0017)
-      ));
+    const positions = [];
+    // Table (n triangles fanned from center) - flat single normal across whole table after computeVertexNormals because they share the same plane.
+    for (let i = 0; i < N; i += 1) {
+      pushTri(positions, tableCenter, T[i], T[(i + 1) % N]);
     }
-
-    for (let index = 0; index < 6; index += 1) {
-      const angle = (Math.PI * 2 * index) / 6 + 0.32;
-      const next = angle + Math.PI / 8;
-      const near = gemPoint(angle, size * 0.24, size * 0.32, currentState.shape);
-      const farA = gemPoint(angle, size * 0.76, size * 0.08, currentState.shape);
-      const farB = gemPoint(next, size * 0.68, size * 0.1, currentState.shape);
-      const shadowGeometry = new THREE.BufferGeometry();
-
-      shadowGeometry.setAttribute("position", new THREE.Float32BufferAttribute([
-        near.x, near.y, near.z,
-        farA.x, farA.y, farA.z,
-        farB.x, farB.y, farB.z
-      ], 3));
-
-      stone.add(new THREE.Mesh(
-        shadowGeometry,
-        new THREE.MeshBasicMaterial({
-          color: currentState.stone === "Clear Diamond" ? 0x5c6f76 : profile.absorption,
-          transparent: true,
-          opacity: currentState.stone === "Clear Diamond" ? 0.12 : 0.22,
-          depthWrite: false,
-          side: THREE.DoubleSide
-        })
-      ));
+    // Star facets - flat triangles between table edge and crown ridge.
+    for (let i = 0; i < N; i += 1) {
+      pushTri(positions, T[i], S[i], T[(i + 1) % N]);
     }
+    // Bezel kites - one per main, sides meet star tips.
+    for (let i = 0; i < N; i += 1) {
+      pushQuad(positions, T[i], S[(i + N - 1) % N], UG[i], S[i]);
+    }
+    // Upper girdle facets - 2 triangles per main between bezel apex and star tip.
+    for (let i = 0; i < N; i += 1) {
+      pushTri(positions, S[i], UG[i], GM[i]);
+      pushTri(positions, S[i], GM[i], UG[(i + 1) % N]);
+    }
+    // Lower girdle facets - 2 triangles per main between girdle and pavilion mid.
+    for (let i = 0; i < N; i += 1) {
+      pushTri(positions, UG[i], PM[(i + N - 1) % N], GM[(i + N - 1) % N]);
+      pushTri(positions, UG[i], PM[i], GM[i]);
+    }
+    // Pavilion main facets - kites from girdle main through pavilion mids
+    // to the culet-facet edge. CF[i] sits directly under UG[i] (same main
+    // angle), so each pavilion main is a clean trapezoid.
+    for (let i = 0; i < N; i += 1) {
+      pushQuad(positions, UG[i], PM[i], CF[i], PM[(i + N - 1) % N]);
+    }
+    // Culet facet itself (small N-gon centred on the culet point).
+    for (let i = 0; i < N; i += 1) {
+      pushTri(positions, culet, CF[(i + 1) % N], CF[i]);
+    }
+    return finishGeometry(positions);
+  }
 
-    for (let index = 0; index < 10; index += 1) {
-      const angle = (Math.PI * 2 * index) / 10 + 0.18;
-      const point = gemPoint(angle, size * 0.44, size * 0.58, currentState.shape);
-      const glint = new THREE.Mesh(
-        new THREE.TetrahedronGeometry(size * (0.022 + (index % 3) * 0.006), 0),
-        scintillatingMaterial({
-          color: fireColors[index % fireColors.length],
-          transparent: true,
-          opacity: profile.fire,
-          depthWrite: false,
-          blending: THREE.AdditiveBlending
-        }, 0.0028)
-      );
+  // Step-cut emerald / asscher.
+  function createStepCutGeometry(size, shape) {
+    const isSquare = shape === "Asscher";
+    const halfX = size * (isSquare ? 0.78 : 0.74);
+    const halfY = size * (isSquare ? 0.78 : 1.16);
+    const corner = size * 0.18; // chamfer
+    const tableInset = size * 0.18;
+    const tableZ = size * 0.5;
+    const girdleZ = 0;
+    const pavZ = -size * 0.72;
+    const stepRatio = [0.0, 0.35, 0.7]; // outline shrink along step rings going down crown
 
-      glint.position.copy(point);
-      glint.rotation.set(angle * 0.2, angle * 0.7, angle);
-      stone.add(glint);
+    // 8-vertex outline (rectangle with chamfered corners).
+    function outlineRect(scaleXY, z) {
+      const sx = halfX * scaleXY;
+      const sy = halfY * scaleXY;
+      const cx = corner * scaleXY;
+      const cy = corner * scaleXY;
+      return [
+        vec( sx - cx,  sy, z),
+        vec(-sx + cx,  sy, z),
+        vec(-sx,  sy - cy, z),
+        vec(-sx, -sy + cy, z),
+        vec(-sx + cx, -sy, z),
+        vec( sx - cx, -sy, z),
+        vec( sx, -sy + cy, z),
+        vec( sx,  sy - cy, z)
+      ];
+    }
+    const positions = [];
+    // Three rings on the crown (table edge + 2 steps down to girdle).
+    const rings = [
+      outlineRect(1 - tableInset / size, tableZ),                 // table edge
+      outlineRect(1 - tableInset / size + 0.06, tableZ - size * 0.07), // first step
+      outlineRect(1, girdleZ)                                      // girdle
+    ];
+    // Pavilion: two step rings then converge to a keel line (or culet point for square).
+    const pavRings = [
+      outlineRect(0.84, -size * 0.18),
+      outlineRect(0.5, -size * 0.42)
+    ];
+    // Sub-percent vertex jitter so the step facets don't sit at
+    // mathematically perfect right angles — real lapidary work is
+    // never that clean.
+    jitterStoneVerts([rings[0], rings[1], rings[2], pavRings[0], pavRings[1]], size * 0.0022);
+    // Table fan from center.
+    const tc = vec(0, 0, tableZ);
+    for (let i = 0; i < 8; i += 1) pushTri(positions, tc, rings[0][i], rings[0][(i + 1) % 8]);
+    // Crown steps (band of quads between adjacent rings).
+    for (let r = 0; r < rings.length - 1; r += 1) {
+      const a = rings[r], b = rings[r + 1];
+      for (let i = 0; i < 8; i += 1) {
+        pushQuad(positions, a[i], b[i], b[(i + 1) % 8], a[(i + 1) % 8]);
+      }
+    }
+    // Pavilion: two step rings then converge to a keel line (or culet point for square).
+    const girdle = rings[2];
+    const ringsDown = [girdle, ...pavRings];
+    for (let r = 0; r < ringsDown.length - 1; r += 1) {
+      const a = ringsDown[r], b = ringsDown[r + 1];
+      for (let i = 0; i < 8; i += 1) {
+        pushQuad(positions, a[i], b[i], b[(i + 1) % 8], a[(i + 1) % 8]);
+      }
+    }
+    // Final pavilion converges. Emerald: a horizontal keel line (two points along x). Asscher: point.
+    if (isSquare) {
+      const culet = vec(0, 0, pavZ);
+      const inner = pavRings[pavRings.length - 1];
+      for (let i = 0; i < 8; i += 1) pushTri(positions, inner[i], inner[(i + 1) % 8], culet);
+    } else {
+      const keelA = vec(-size * 0.18, 0, pavZ);
+      const keelB = vec( size * 0.18, 0, pavZ);
+      const inner = pavRings[pavRings.length - 1];
+      // Connect each inner ring vertex to nearest keel point.
+      for (let i = 0; i < 8; i += 1) {
+        const v0 = inner[i];
+        const v1 = inner[(i + 1) % 8];
+        const k0 = v0.x < 0 ? keelA : keelB;
+        const k1 = v1.x < 0 ? keelA : keelB;
+        if (k0 === k1) {
+          pushTri(positions, v0, v1, k0);
+        } else {
+          // straddling - add bridge triangle
+          pushTri(positions, v0, v1, k0);
+          pushTri(positions, v1, k1, k0);
+        }
+      }
+    }
+    return finishGeometry(positions);
+  }
+
+  // Princess: square modified-brilliant - inverted pyramid with chevron pavilion.
+  function createPrincessGeometry(size) {
+    const half = size * 0.78;
+    const tableHalf = size * 0.6;
+    const tableZ = size * 0.48;
+    const girdleZ = 0;
+    const culetZ = -size * 0.84;
+    const T = [
+      vec( tableHalf,  tableHalf, tableZ),
+      vec(-tableHalf,  tableHalf, tableZ),
+      vec(-tableHalf, -tableHalf, tableZ),
+      vec( tableHalf, -tableHalf, tableZ)
+    ];
+    const G = [
+      vec( half,  half, girdleZ),
+      vec(-half,  half, girdleZ),
+      vec(-half, -half, girdleZ),
+      vec( half, -half, girdleZ)
+    ];
+    // Mid-edge girdle helpers (for chevron pavilion).
+    const Gm = [
+      vec(0, half, girdleZ),
+      vec(-half, 0, girdleZ),
+      vec(0, -half, girdleZ),
+      vec(half, 0, girdleZ)
+    ];
+    const culet = vec(0, 0, culetZ);
+    // Mid-pavilion chevron verts (between corners and culet).
+    const Pm = [
+      vec( half * 0.4,  half * 0.4, culetZ * 0.45),
+      vec(-half * 0.4,  half * 0.4, culetZ * 0.45),
+      vec(-half * 0.4, -half * 0.4, culetZ * 0.45),
+      vec( half * 0.4, -half * 0.4, culetZ * 0.45)
+    ];
+
+    // Sub-percent jitter on every conceptual vertex so the four-fold
+    // princess symmetry isn't mathematically perfect — real princess
+    // cuts have ~0.3–0.5° facet-angle variance from the cutter.
+    jitterStoneVerts([T, G, Gm, Pm, [culet]], size * 0.0025);
+
+    const positions = [];
+    // Table - 2 triangles.
+    pushQuad(positions, T[0], T[1], T[2], T[3]);
+    // Crown bevels - 4 trapezoid quads.
+    for (let i = 0; i < 4; i += 1) {
+      pushQuad(positions, T[i], T[(i + 1) % 4], G[(i + 1) % 4], G[i]);
+    }
+    // Pavilion chevrons - 2 chevron facets per side.
+    for (let i = 0; i < 4; i += 1) {
+      const a = G[i], b = Gm[i], c = G[(i + 1) % 4];
+      const pa = Pm[i], pc = Pm[(i + 1) % 4];
+      pushTri(positions, a, pa, b);
+      pushTri(positions, b, pa, culet);
+      pushTri(positions, b, culet, pc);
+      pushTri(positions, b, pc, c);
+    }
+    return finishGeometry(positions);
+  }
+
+  function createCutStoneGeometry(size, shape = currentState.shape) {
+    switch (shape) {
+      case "Emerald":
+      case "Asscher":
+        return createStepCutGeometry(size, shape);
+      case "Princess":
+        return createPrincessGeometry(size);
+      default:
+        return createBrilliantGeometry(size, shape);
     }
   }
 
   function makeStone(scale = 1) {
     const size = Number(currentState.size) * 0.24 * scale;
-    const material = materialForStone();
-    const profile = stoneProfile();
     const stone = new THREE.Group();
-    const mesh = new THREE.Mesh(createCutStoneGeometry(size, currentState.shape), material);
-    const core = new THREE.Mesh(
-      createCutStoneGeometry(size * 0.76, currentState.shape, currentState.shape === "Pear" ? 24 : 22),
-      new THREE.MeshBasicMaterial({
-        color: profile.absorption,
-        transparent: true,
-        opacity: currentState.stone === "Clear Diamond" ? 0.08 : 0.2,
-        depthWrite: false,
-        blending: THREE.AdditiveBlending
-      })
-    );
-
-    const table = new THREE.Mesh(
-      new THREE.CircleGeometry(size * (currentState.shape === "Pear" ? 0.31 : currentState.shape === "Cushion" ? 0.36 : 0.38), 48),
-      new THREE.MeshBasicMaterial({
-        color: profile.table,
-        transparent: true,
-        opacity: currentState.stone === "Clear Diamond" ? 0.36 : 0.18,
-        depthWrite: false,
-        side: THREE.DoubleSide
-      })
-    );
-    table.position.z = size * 0.59;
-    table.scale.y = currentState.shape === "Oval" ? 1.22 : currentState.shape === "Pear" ? 1.08 : 0.9;
-    core.scale.z = 0.82;
-
-    stone.add(core, mesh, table);
-    addGemFacetOverlay(stone, size);
-
+    const mesh = new THREE.Mesh(createCutStoneGeometry(size, currentState.shape), materialForStone());
+    mesh.userData.isGem = true;
+    stone.add(mesh);
     return enableShadows(stone);
   }
 
   function makeMeleeStone(size, material) {
-    const profile = stoneProfile();
-    const group = new THREE.Group();
-    const mesh = new THREE.Mesh(createCutStoneGeometry(size, "Round", 14), material);
-    const table = new THREE.Mesh(
-      new THREE.CircleGeometry(size * 0.36, 18),
-      new THREE.MeshBasicMaterial({
-        color: profile.table,
-        transparent: true,
-        opacity: currentState.stone === "Clear Diamond" ? 0.34 : 0.18,
-        depthWrite: false,
-        side: THREE.DoubleSide
-      })
-    );
-
-    table.position.z = size * 0.56;
-    group.add(mesh, table);
-
-    return enableShadows(group);
+    const mesh = new THREE.Mesh(createBrilliantGeometry(size, "Round"), material);
+    mesh.castShadow = true;
+    return mesh;
   }
 
   function addHalo(parent, centerX, centerY, radius, count, z, scaleY = 1) {
@@ -1229,13 +3435,39 @@ async function createThreeStudio(root, canvas) {
     }
 
     const material = materialForStone();
+    const metal = materialForMetal();
+    const haloStoneR = 0.048 + Number(currentState.size) * 0.006;
+
+    // Under-collar: a thin metal torus that sits a hair below the halo
+    // girdle plane. This is what stops the halo from reading as a ring of
+    // floating gems — every set halo has a continuous bezel rail behind it.
+    const collar = new THREE.Mesh(
+      new THREE.TorusGeometry(radius, haloStoneR * 0.42, 16, Math.max(64, count * 2)),
+      metal
+    );
+    collar.position.set(centerX, centerY, z - haloStoneR * 0.25);
+    collar.scale.y = scaleY;
+    parent.add(collar);
 
     for (let index = 0; index < count; index += 1) {
       const angle = (Math.PI * 2 * index) / count;
-      const gem = makeMeleeStone(0.048 + Number(currentState.size) * 0.006, material);
+      const gem = makeMeleeStone(haloStoneR, material);
       gem.position.set(centerX + Math.cos(angle) * radius, centerY + Math.sin(angle) * radius * scaleY, z);
       gem.rotation.set(angle * 0.3, angle, 0);
       parent.add(gem);
+      // Tiny corner bead between this stone and the next — clamps the
+      // girdle into the collar.
+      const next = (Math.PI * 2 * (index + 0.5)) / count;
+      const bead = new THREE.Mesh(
+        new THREE.SphereGeometry(haloStoneR * 0.32, 18, 14),
+        metal
+      );
+      bead.position.set(
+        centerX + Math.cos(next) * radius,
+        centerY + Math.sin(next) * radius * scaleY,
+        z + haloStoneR * 0.25
+      );
+      parent.add(bead);
     }
   }
 
@@ -1254,21 +3486,48 @@ async function createThreeStudio(root, canvas) {
       size = 0.043
     } = options;
     const material = materialForStone();
-
+    const metal = materialForMetal();
+    // Each accent gets a drilled-seat shadow underneath so it reads as
+    // bead-set into the band, and corner beads between adjacent stones
+    // clamp the row visually.
+    const angles = [];
     for (let index = 0; index < count; index += 1) {
       const progress = count === 1 ? 0.5 : index / (count - 1);
       const angle = start + (end - start) * progress;
+      angles.push(angle);
+      const sx = x + Math.cos(angle) * radius;
+      const sy = y + Math.sin(angle) * radius * scaleY;
+      parent.add(makePaveSeat(sx, sy, z + size * 0.6, size * 0.95, angle));
       const gem = makeMeleeStone(size, material);
-      gem.position.set(x + Math.cos(angle) * radius, y + Math.sin(angle) * radius * scaleY, z);
+      gem.position.set(sx, sy, z);
       gem.rotation.set(angle * 0.2, angle * 0.9, 0);
       parent.add(gem);
+    }
+    // Corner beads between every adjacent pair, on inner + outer edges.
+    const beadR = size * 0.34;
+    for (let i = 0; i < angles.length - 1; i += 1) {
+      const a = (angles[i] + angles[i + 1]) / 2;
+      const innerR = radius - size * 0.55;
+      const outerR = radius + size * 0.55;
+      parent.add(makePaveBead(
+        x + Math.cos(a) * innerR,
+        y + Math.sin(a) * innerR * scaleY,
+        z + beadR * 0.55, beadR, metal
+      ));
+      parent.add(makePaveBead(
+        x + Math.cos(a) * outerR,
+        y + Math.sin(a) * outerR * scaleY,
+        z + beadR * 0.55, beadR, metal
+      ));
     }
   }
 
   function makeCylinderBetween(start, end, radius, material) {
     const direction = new THREE.Vector3().subVectors(end, start);
     const length = direction.length();
-    const mesh = new THREE.Mesh(new THREE.CylinderGeometry(radius, radius, length, 16), material);
+    // 24-segment cylinder reads as a smooth wire on close-up; 16 was
+    // visibly faceted on prong posts and gallery rails under inspect.
+    const mesh = new THREE.Mesh(new THREE.CylinderGeometry(radius, radius, length, 24), material);
 
     mesh.position.copy(start).add(end).multiplyScalar(0.5);
     mesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), direction.normalize());
@@ -1276,58 +3535,122 @@ async function createThreeStudio(root, canvas) {
     return mesh;
   }
 
-  function addProngs(parent, centerX, centerY, centerZ, radius, count = 6, scaleY = 1) {
+  // Tiny half-sphere bead used to clamp the girdle of band-set stones.
+  // Real pavé work uses these between every two adjacent stones; in a row
+  // of N stones there are typically N+1 beads (or 2N corner beads for a
+  // double row). The bead radius is ~38% of the stone diameter.
+  function makePaveBead(x, y, z, radius, material) {
+    const bead = new THREE.Mesh(new THREE.SphereGeometry(radius, 20, 16), material);
+    bead.position.set(x, y, z);
+    bead.castShadow = true;
+    return bead;
+  }
+
+  // Cut a darker recess underneath a band-set stone so the gem reads as
+  // seated INTO the metal, not glued on top. The recess is a small dark
+  // disc that breaks the bright reflection where the stone would be drilled.
+  function makePaveSeat(x, y, z, radius, ang) {
+    const seat = new THREE.Mesh(
+      new THREE.CircleGeometry(radius, 18),
+      new THREE.MeshBasicMaterial({ color: 0x0a0908, transparent: true, opacity: 0.85, depthWrite: false })
+    );
+    seat.position.set(x, y, z);
+    seat.rotation.z = ang;
+    seat.renderOrder = 1;
+    return seat;
+  }
+
+  // Generic prong cluster for non-ring pieces (necklace / bracelet / earrings).
+  //
+  // Why this used to look "floating":
+  //   The old implementation built a vertical cylinder of fixed length 0.28
+  //   centered at centerZ+0.05 and placed a sphere "tip" at centerZ+0.2,
+  //   regardless of the gem's actual height. For tennis links (gem radius
+  //   ~0.05) the tip ended up 0.13 ABOVE the crown.
+  //
+  // New behaviour:
+  //   Caller passes `stoneZ` (gem girdle z) and `stoneSize` (mesh half-dia).
+  //   We derive baseZ / tipZ from the stone's real geometry and use the
+  //   curved-prong builder (post + solder torus at base + curled claw at tip)
+  //   so every prong physically grips the crown and is welded to the basket
+  //   rail at its base.
+  function addProngs(parent, centerX, centerY, centerZ, radius, count = 6, scaleY = 1, opts = {}) {
     const metal = materialForMetal();
     const prongRadius = 0.015 * weightValue();
-
-    for (let index = 0; index < count; index += 1) {
-      const angle = (Math.PI * 2 * index) / count;
-      const x = centerX + Math.cos(angle) * radius;
-      const y = centerY + Math.sin(angle) * radius * scaleY;
-      const post = new THREE.Mesh(new THREE.CylinderGeometry(prongRadius, prongRadius * 1.22, 0.28, 12), metal);
-      const tip = new THREE.Mesh(new THREE.SphereGeometry(prongRadius * 1.75, 12, 8), metal);
-
-      post.position.set(x, y, centerZ + 0.05);
-      post.rotation.x = Math.PI / 2;
-      tip.position.set(x, y, centerZ + 0.2);
-      parent.add(post, tip);
+    // Default geometry assumes the stone half-diameter ≈ prong-circle radius
+    // (i.e. prongs hug the girdle from a hair outside), with the girdle
+    // plane just above the basket centre. Callers can override either
+    // explicitly when they know the exact stone metrics.
+    const stoneSize = opts.stoneSize ?? radius * 0.9;
+    const stoneZ    = opts.stoneZ    ?? (centerZ + stoneSize * 0.18);
+    // Base: pull DOWN into the basket so the post visibly springs from the
+    // lower gallery rail instead of from mid-air just below the gem.
+    const baseZ = centerZ - stoneSize * 0.45;
+    // Tip: bend OVER the crown — sits at the stone's table elevation
+    // (girdle + ~50% of stone height), the jewel-spec "claw over crown".
+    const tipZ  = stoneZ + stoneSize * 0.50;
+    const baseR = radius;
+    const tipR  = radius * 0.82;
+    for (let i = 0; i < count; i += 1) {
+      const ang = (Math.PI * 2 * i) / count + Math.PI / count;
+      addCurvedProng(
+        parent, centerX, centerY, ang,
+        baseR, tipR,
+        baseZ, tipZ,
+        prongRadius, scaleY, metal
+      );
     }
   }
 
   function addBezel(parent, centerX, centerY, centerZ, radius, scaleY = 1) {
     const metal = materialForMetal();
-    const bezel = new THREE.Mesh(new THREE.TorusGeometry(radius, 0.024 * weightValue(), 16, 96), metal);
+    const bezel = new THREE.Mesh(new THREE.TorusGeometry(radius, 0.024 * weightValue(), 24, 128), metal);
 
     bezel.position.set(centerX, centerY, centerZ + 0.04);
     bezel.scale.y = scaleY;
     parent.add(bezel);
   }
 
-  function addGalleryBasket(parent, centerX, centerY, centerZ, radius, scaleY = 1) {
+  // Gallery basket for non-ring pieces. Two rails (upper at gem girdle,
+  // lower well below) joined by N vertical struts whose count matches the
+  // prong count so prong-base / strut-top share a vertex visually.
+  //
+  // The UPPER rail was previously missing — only the lower torus was
+  // rendered, so prong posts appeared to spring from open air. Now the
+  // upper rail closes the basket at gem girdle level.
+  function addGalleryBasket(parent, centerX, centerY, centerZ, radius, scaleY = 1, opts = {}) {
     const metal = materialForMetal();
     const railRadius = 0.014 * weightValue();
-    const lowerZ = centerZ - 0.12;
-    const upperZ = centerZ + 0.05;
-    const basket = new THREE.Group();
-    const lowerRail = new THREE.Mesh(new THREE.TorusGeometry(radius * 0.72, railRadius, 10, 72), metal);
+    const strutCount = opts.strutCount ?? 6;
+    // Lower rail sits below stone so basket has visible depth. Upper rail
+    // sits AT girdle level (centerZ) so prongs spring from a real rail.
+    const lowerZ = centerZ - 0.10;
+    const upperZ = centerZ + 0.01;
+    const upperR = radius * 0.94;
+    const lowerR = radius * 0.68;
 
+    const upperRail = new THREE.Mesh(new THREE.TorusGeometry(upperR, railRadius, 16, 96), metal);
+    upperRail.position.set(centerX, centerY, upperZ);
+    upperRail.scale.y = scaleY;
+    const lowerRail = new THREE.Mesh(new THREE.TorusGeometry(lowerR, railRadius, 16, 96), metal);
     lowerRail.position.set(centerX, centerY, lowerZ);
     lowerRail.scale.y = scaleY;
-    basket.add(lowerRail);
+    parent.add(upperRail, lowerRail);
 
-    for (let index = 0; index < 6; index += 1) {
-      const angle = (Math.PI * 2 * index) / 6;
-      const x = centerX + Math.cos(angle) * radius * 0.68;
-      const y = centerY + Math.sin(angle) * radius * scaleY * 0.68;
-      basket.add(makeCylinderBetween(
-        new THREE.Vector3(x, y, lowerZ),
-        new THREE.Vector3(centerX + Math.cos(angle) * radius * 0.9, centerY + Math.sin(angle) * radius * scaleY * 0.9, upperZ),
-        railRadius * 0.74,
-        metal
-      ));
+    for (let i = 0; i < strutCount; i += 1) {
+      const ang = (Math.PI * 2 * i) / strutCount;
+      const top = new THREE.Vector3(
+        centerX + Math.cos(ang) * upperR,
+        centerY + Math.sin(ang) * upperR * scaleY,
+        upperZ
+      );
+      const bot = new THREE.Vector3(
+        centerX + Math.cos(ang) * lowerR,
+        centerY + Math.sin(ang) * lowerR * scaleY,
+        lowerZ
+      );
+      parent.add(makeCylinderBetween(top, bot, railRadius * 0.78, metal));
     }
-
-    parent.add(basket);
   }
 
   function addMilgrain(parent, centerX, centerY, radius, count, z, scaleY = 1, size = 0.018) {
@@ -1339,24 +3662,95 @@ async function createThreeStudio(root, canvas) {
 
     for (let index = 0; index < count; index += 1) {
       const angle = (Math.PI * 2 * index) / count;
-      const bead = new THREE.Mesh(new THREE.SphereGeometry(size * weightValue(), 10, 8), metal);
+      const bead = new THREE.Mesh(new THREE.SphereGeometry(size * weightValue(), 16, 12), metal);
       bead.position.set(centerX + Math.cos(angle) * radius, centerY + Math.sin(angle) * radius * scaleY, z);
       parent.add(bead);
     }
   }
 
   function addSetting(parent, centerX, centerY, centerZ, radius, options = {}) {
-    const { scaleY = 1, prongs = 6, shoulders = false } = options;
+    const {
+      scaleY = 1,
+      prongs = 6,
+      shoulders = false,
+      stoneSize = radius * 0.9,
+      stoneZ = centerZ + stoneSize * 0.18
+    } = options;
+    const setting = currentState.setting;
 
-    if (currentState.setting === "Bezel") {
+    if (setting === "Bezel") {
       addBezel(parent, centerX, centerY, centerZ, radius, scaleY);
-    } else {
-      addProngs(parent, centerX, centerY, centerZ, radius, prongs, scaleY);
+      addGalleryBasket(parent, centerX, centerY, centerZ, radius, scaleY, { strutCount: 6 });
+      return;
     }
 
-    addGalleryBasket(parent, centerX, centerY, centerZ, radius, scaleY);
+    if (setting === "Tension") {
+      // Two flat arms grip the stone from opposite sides. No basket, no
+      // prongs over the crown — the gem appears suspended between the arms.
+      const metal = materialForMetal();
+      const armT = 0.024 * weightValue();
+      const armH = stoneSize * 1.1;
+      for (const side of [-1, 1]) {
+        const anchorX = centerX + side * radius * 1.8;
+        const tipX    = centerX + side * radius * 1.04;
+        const dx = tipX - anchorX;
+        const len = Math.abs(dx);
+        const arm = new THREE.Mesh(makeChamferedBox(len, armH * 0.55, armT), metal);
+        arm.position.set((anchorX + tipX) / 2, centerY, stoneZ);
+        parent.add(arm);
+        const pad = new THREE.Mesh(makeChamferedBox(armT * 1.2, armH * 0.55, armT * 2.4), metal);
+        pad.position.set(tipX, centerY, stoneZ);
+        parent.add(pad);
+      }
+      return;
+    }
 
-    if (currentState.setting === "Cathedral" && shoulders) {
+    if (setting === "Trellis") {
+      // Interlaced 4-prong head: prong bases sit 45° from the gallery
+      // strut posts, and two crossing arc bars sweep UNDER the pavilion to
+      // tie opposite shoulders together (the visual signature of a real
+      // trellis head). Without these arcs a "trellis" looks identical to a
+      // normal prong setting, which is the bug the user pointed out for
+      // the bracelet.
+      const metal = materialForMetal();
+      const prongRadius = 0.015 * weightValue();
+      const baseZ = centerZ - stoneSize * 0.42;
+      const tipZ  = stoneZ + stoneSize * 0.55;
+      const baseR = radius * 0.96;
+      const tipR  = radius * 0.78;
+      for (let i = 0; i < 4; i += 1) {
+        const ang = (Math.PI * 2 * i) / 4 + Math.PI / 4;
+        addCurvedProng(
+          parent, centerX, centerY, ang,
+          baseR, tipR, baseZ, tipZ,
+          prongRadius, scaleY, metal
+        );
+      }
+      // 2 crossing arc bars — one along x-axis, one along y-axis — that
+      // dip under the gem before climbing back to the opposite shoulder.
+      for (let i = 0; i < 2; i += 1) {
+        const arcAng = i * Math.PI / 2;
+        const a = new THREE.Vector3(
+          centerX + Math.cos(arcAng) * baseR,
+          centerY + Math.sin(arcAng) * baseR * scaleY,
+          centerZ
+        );
+        const b = new THREE.Vector3(
+          centerX - Math.cos(arcAng) * baseR,
+          centerY - Math.sin(arcAng) * baseR * scaleY,
+          baseZ - stoneSize * 0.12
+        );
+        parent.add(makeCylinderBetween(a, b, prongRadius * 0.85, metal));
+      }
+      addGalleryBasket(parent, centerX, centerY, centerZ, radius, scaleY, { strutCount: 4 });
+      return;
+    }
+
+    // Default: Prong (also Cathedral — the shoulder ramps are added below).
+    addProngs(parent, centerX, centerY, centerZ, radius, prongs, scaleY, { stoneZ, stoneSize });
+    addGalleryBasket(parent, centerX, centerY, centerZ, radius, scaleY, { strutCount: prongs });
+
+    if (setting === "Cathedral" && shoulders) {
       const metal = materialForMetal();
       const tube = 0.028 * weightValue();
       parent.add(
@@ -1366,53 +3760,1536 @@ async function createThreeStudio(root, canvas) {
     }
   }
 
+  // Build a real comfort-fit band by sweeping a CLOSED elliptical cross
+  // section around a torus path.
+  //
+  // Why the cross-section must be closed (not a half-arc):
+  //   The camera looks down +Z. The ring lies in the XY plane (finger axis
+  //   = Z). A half-arc that only bulges radially outward gives every band
+  //   surface a normal in the XY plane — those normals are ~90° (grazing)
+  //   to the camera, so Fresnel forces the reflection toward F90 = white
+  //   for ANY metal. That's why an "open" profile reads as plain white
+  //   regardless of which gold you pick.
+  //
+  //   A closed ellipse adds true side faces at z = ±profileHeight/2 whose
+  //   normals point toward ±Z (i.e. toward the camera). At those near-
+  //   normal angles you see F0 = the goldsmith base color (yellow / rose /
+  //   white / platinum), so the band finally shows its metal.
+  //
+  //   We also build the geometry INDEXED with shared vertices so
+  //   computeVertexNormals produces smooth interpolated normals — no
+  //   faceted "disco quilt" aggregation that washes out hue.
+  function makeBandGeometry(majorRadius, profileWidth, profileHeight, style = "Solitaire") {
+    const segments = 220;
+    const profileSegments = 32;          // around the closed ellipse
+    const isKnife = style === "Knife-Edge";
+    const isTwist = style === "Twist";
+
+    // Closed cross section in local (r, h) space, traversed CCW so that
+    // generated face normals end up pointing OUTWARD from the swept tube.
+    //   r is the radial offset added to majorRadius.
+    //   h is the axial offset along the finger axis (z).
+    //
+    // Ellipse parameters:
+    //   Outer extreme:  r = +profileWidth,         h = 0
+    //   Top side face:  r =  profileWidth/2,       h = +profileHeight/2
+    //   Inner extreme:  r =  0 (against finger),   h = 0
+    //   Bottom side:    r =  profileWidth/2,       h = -profileHeight/2
+    //
+    // For Knife-Edge we sharpen the outer extreme into a ridge by pulling
+    // the radial term with an exponent > 1 (preserves closure).
+    const profile = [];
+    const rCenter = profileWidth * 0.5;
+    const rHalf   = profileWidth * 0.5;
+    const hHalf   = profileHeight * 0.5;
+    for (let j = 0; j < profileSegments; j += 1) {
+      const t = j / profileSegments;
+      const ang = t * Math.PI * 2;             // 0..2π, closes on itself
+      let cR = Math.cos(ang);
+      const cH = Math.sin(ang);
+      if (isKnife) {
+        // Sharpen outer extreme (cR ≈ +1) into a ridge; soften the rest.
+        const s = Math.sign(cR);
+        cR = s * Math.pow(Math.abs(cR), 0.55);
+      }
+      profile.push({
+        r: rCenter + cR * rHalf,
+        h: cH * hHalf
+      });
+    }
+
+    // Build shared vertex grid: cols × profileSegments (both wrap).
+    const cols = segments;
+    const rows = profileSegments;
+    const positions = new Float32Array(cols * rows * 3);
+    for (let i = 0; i < cols; i += 1) {
+      const ang = (i / cols) * Math.PI * 2;
+      const twist = isTwist ? Math.sin(ang * 3) * 0.06 : 0;
+      const cx = Math.cos(ang);
+      const sy = Math.sin(ang);
+      for (let j = 0; j < rows; j += 1) {
+        const p = profile[j];
+        const radial = majorRadius + p.r;
+        const idx = (i * rows + j) * 3;
+        positions[idx + 0] = cx * radial;
+        positions[idx + 1] = sy * radial;
+        positions[idx + 2] = p.h + twist;
+      }
+    }
+
+    // Indices: two triangles per quad. Both i and j wrap so the band has
+    // no seams in either direction → smooth normals everywhere.
+    const indices = new Uint32Array(cols * rows * 6);
+    let k = 0;
+    for (let i = 0; i < cols; i += 1) {
+      const iNext = (i + 1) % cols;
+      for (let j = 0; j < rows; j += 1) {
+        const jNext = (j + 1) % rows;
+        const a =  i     * rows + j;
+        const b =  iNext * rows + j;
+        const c =  iNext * rows + jNext;
+        const d =  i     * rows + jNext;
+        // Winding chosen so face normals point OUTWARD from the swept tube.
+        indices[k++] = a; indices[k++] = b; indices[k++] = c;
+        indices[k++] = a; indices[k++] = c; indices[k++] = d;
+      }
+    }
+
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+    geometry.setIndex(new THREE.BufferAttribute(indices, 1));
+    // Sub-percent organic micro-displacement: real cast → polished gold is
+    // never mathematically perfect. Adding 0.15% pseudo-random perturbation
+    // (orders of magnitude smaller than the band width) breaks the dead
+    // symmetry that screams "computer" without producing visible bumps.
+    // The hash is deterministic per-vertex so the band re-renders identically.
+    const microAmp = Math.min(profileWidth, profileHeight) * 0.0085;
+    for (let v = 0; v < cols * rows; v += 1) {
+      const idx = v * 3;
+      // Cheap deterministic hash → [-1, 1]
+      const h1 = Math.sin(v * 12.9898) * 43758.5453;
+      const h2 = Math.sin(v * 78.233 + 4.1) * 43758.5453;
+      const h3 = Math.sin(v * 39.346 + 7.9) * 43758.5453;
+      const nx = (h1 - Math.floor(h1)) * 2 - 1;
+      const ny = (h2 - Math.floor(h2)) * 2 - 1;
+      const nz = (h3 - Math.floor(h3)) * 2 - 1;
+      positions[idx + 0] += nx * microAmp;
+      positions[idx + 1] += ny * microAmp;
+      positions[idx + 2] += nz * microAmp;
+    }
+    geometry.computeVertexNormals();
+    return geometry;
+  }
+
+  // ---------------------------------------------------------------------------
+  // ALGORITHMIC RING GEOMETRY
+  //
+  // Every position in the ring (gem, prongs, halo, side stones, pavé) is
+  // derived from a small set of inputs (size, weight, shape, band style)
+  // using real jeweler proportions.  Nothing is placed with a magic number.
+  //
+  //   Conventions:
+  //     - Finger axis = world Z (band lies in XY plane).
+  //     - "Up" on the ring (where the center stone sits) = +Y.
+  //     - Stone tables face +Z (toward camera). Girdle = stone's local XY plane.
+  //
+  //   Reference proportions (Tolkowsky-ideal round brilliant, generalized):
+  //     - Crown height (girdle → table)   ≈ 16.2% of diameter
+  //     - Pavilion depth (girdle → culet) ≈ 43.1% of diameter
+  //     - Table diameter                  ≈ 53% of girdle diameter
+  //   The geometry builders (createBrilliantGeometry / step-cut / princess)
+  //   already encode these as `size * 0.52` (tableZ) and `size * -0.72`
+  //   (culetZ), where `size` is the half-diameter. We mirror those numbers
+  //   here so every dependent placement is consistent with the meshes.
+  //
+  //   Side-stone spacing uses the chord formula:
+  //     chord = 2 R sin(Δθ / 2)   ⇒   Δθ = 2 · asin(chord / (2R))
+  //   so the angular offset around the band is exactly what is needed for
+  //   girdle-to-girdle tangency plus a small metal gap.
+  // ---------------------------------------------------------------------------
+  function computeRingGeometry(state) {
+    const S = Number(state.size) || 1;
+    const W = Number(state.weight) || 1;
+    const shape = state.shape || "Round";
+
+    // ---- gem (center stone) ------------------------------------------------
+    // The mesh builders use `size = baseHalfDia` as their input. We mirror
+    // the same math here so every coordinate stays consistent with the mesh.
+    const baseHalfDia = 0.24 * 1.18 * S;          // mesh half-diameter scalar
+    // shape outline scaling (matches `shapeOutline` in the gem builders)
+    const SHAPE_W = { Round: 1.00, Oval: 0.78, Cushion: 1.00, Princess: 1.00,
+                      Emerald: 0.74, Asscher: 1.00, Marquise: 0.58,
+                      Pear: 0.80, Heart: 1.04 };
+    const SHAPE_H = { Round: 1.00, Oval: 1.18, Cushion: 1.00, Princess: 1.00,
+                      Emerald: 1.16, Asscher: 1.00, Marquise: 1.42,
+                      Pear: 1.32, Heart: 1.04 };
+    const ratioW = SHAPE_W[shape] ?? 1;
+    const ratioH = SHAPE_H[shape] ?? 1;
+    const gemHalfW = baseHalfDia * 0.96 * ratioW; // ugScale=0.96 → girdle outer
+    const gemHalfH = baseHalfDia * 0.96 * ratioH;
+    const gemR     = Math.max(gemHalfW, gemHalfH); // bounding girdle radius
+    // Vertical extent (above/below girdle plane in mesh local Z):
+    const crownH    = baseHalfDia * 0.52;          // girdle → table
+    const pavilionH = baseHalfDia * 0.72;          // girdle → culet
+
+    // ---- band -------------------------------------------------------------
+    // Band radius grows with both finger size proxy AND gem so the center
+    // stone never overpowers a tiny shank.
+    const bandWidth  = 0.082 * W * (0.85 + S * 0.12); // radial thickness (Δr)
+    const bandHeight = 0.13  * W * (0.85 + S * 0.10); // axial (z) extent
+    // bandMajorR is the centerline of the cross-section. Outer edge at +Y is
+    // where the head/basket attaches.
+    const bandMajorR = Math.max(1.10, gemR * 2.8 + bandWidth * 0.4);
+    const bandTopY   = bandMajorR + bandWidth * 0.5; // outer edge of band at top
+    const bandTopZ   = bandHeight * 0.5;             // band's top face (camera-side)
+
+    // ---- center stone placement ------------------------------------------
+    // The gem girdle plane (gem local Z=0) is positioned so that the
+    // PAVILION CULET sits ABOVE the band's outer ridge with clearance.
+    // After the head subgroup's -90° X rotation, the gem occupies the
+    // world line (0, gemY + z_local, 0); culet at world Y = gemY+gemZ-
+    // pavilionH must exceed bandTopY for the stone not to pass through
+    // the band. Old formula (gemZ = 0.55·pavilionH) buried the culet ~0.04
+    // inside the band volume — visible as the stone clipping into the shank.
+    const culetClearance = Math.max(0.014, bandTopZ * 0.35);
+    // Head origin lives AT the band's outer ridge so head-local z=0 is the
+    // band's outer surface; everything in the head is measured from there.
+    const gemY = bandTopY;
+    // Gem girdle sits ABOVE the band by pavilionH + clearance, so the culet
+    // just kisses the band's outer ridge at the head's attach angle.
+    const gemZ = pavilionH + culetClearance;
+
+    // ---- prongs (basket) -------------------------------------------------
+    // Auto: 5 prongs for pointed shapes (Pear / Marquise / Heart) for tip
+    // protection, 6 otherwise. The user can force 4 / 6 / 8 via the
+    // "Prong count" control.
+    const autoProngCount = (shape === "Pear" || shape === "Marquise" || shape === "Heart") ? 5 : 6;
+    const overrideProng = parseInt(currentState.prongCount, 10);
+    const prongCount = Number.isFinite(overrideProng) ? overrideProng : autoProngCount;
+    const prongRadius = 0.015 * W * (1 + (S - 1) * 0.15);
+    // Prong post sits on a circle slightly inside the gem girdle so the
+    // metal hugs the stone. Tip bends inward over the crown. Post base
+    // anchors AT the basket upper rail so the solder torus visually fuses
+    // to the rail (instead of floating mid-air below it).
+    const prongPostR = gemR * 0.94;
+    const prongTipR  = gemR * 0.80;                  // bent inward at top
+    const prongBaseZ = gemZ - pavilionH * 0.30;      // = basketUpperZ
+    const prongTipZ  = gemZ + crownH * 0.55;         // bend over the crown
+    // Use the gem's aspect ratio so non-round shapes get an elliptical prong ring
+    const prongScaleY = ratioH / Math.max(ratioW, 1e-6);
+
+    // ---- gallery basket --------------------------------------------------
+    // Lower rail is at head-local z = 0, which after rotation lives at
+    // world (x, bandTopY, z) — i.e. coincident with the band's outer
+    // ridge at the head's attach angle. Upper rail sits just below the
+    // gem girdle so prong posts spring directly from the rail.
+    const basketUpperR = gemR * 0.92;
+    const basketLowerR = gemR * 0.74;
+    const basketUpperZ = gemZ - pavilionH * 0.30;    // just below girdle
+    const basketLowerZ = 0;                          // coincident with band crown
+    const galleryRadius = 0.013 * W;
+
+    // ---- halo ------------------------------------------------------------
+    const haloStoneR = Math.max(0.034, gemR * 0.12);
+    const haloRadius = gemR + haloStoneR + 0.012;    // tangent + small gap
+    const haloZ      = gemZ - 0.005;                 // same plane as girdle
+    const haloCount  = Math.max(14, Math.round((2 * Math.PI * haloRadius) / (haloStoneR * 2.2)));
+
+    // ---- side stones (Three-Stone) ---------------------------------------
+    // Real jewelers use side stones 25-65% of center carat. We use 0.55 area
+    // ratio → linear ratio sqrt(0.55) ≈ 0.74 ... but visually 0.55 reads as
+    // a clear hierarchy, so we use that as the linear scale.
+    const sideRatio = 0.55;
+    const sideGemR  = gemR * sideRatio;
+    const sideCrownH    = crownH * sideRatio;
+    const sidePavilionH = pavilionH * sideRatio;
+    // Girdle-to-girdle metal gap so the bezel/prong line isn't infinitely thin:
+    const metalGap = Math.max(0.018, gemR * 0.06);
+    // Required chord between center stone girdle center and side stone girdle
+    // center, projected onto the band's circumference plane. Both the center
+    // gem and the side stones live on the bandTopY circle (NOT bandMajorR —
+    // bandTopY is the outer ridge of the shank where stones actually mount),
+    // so the chord-to-angle conversion must use bandTopY or the spacing
+    // comes out wider than spec.
+    const sideChord = gemR + sideGemR + metalGap;
+    const sideΔθ = 2 * Math.asin(Math.min(0.92, sideChord / (2 * bandTopY)));
+    const sideAngles = [Math.PI / 2 + sideΔθ, Math.PI / 2 - sideΔθ];
+    // Side stones live in world space (not in headGroup), so their z is in
+    // world coordinates. The band's TOP face is at world z = +bandTopZ. The
+    // side stone's CULET (world z = sideZ - sidePavilionH) must clear the
+    // band's top face so the stone doesn't punch through the metal.
+    // Clearance = pavilion depth + small visual gap.
+    const sideCulet  = Math.max(0.012, bandTopZ * 0.25);
+    const sideRingR = bandTopY;                       // distance from origin = bandTopY
+    const sideZ     = bandTopZ + sidePavilionH + sideCulet;
+    const sideStones = sideAngles.map((ang) => ({
+      ang,
+      x: Math.cos(ang) * sideRingR,
+      y: Math.sin(ang) * sideRingR,
+      z: sideZ,
+      gemR: sideGemR,
+      crownH: sideCrownH,
+      pavilionH: sidePavilionH,
+      meshSize: baseHalfDia * sideRatio,             // pass straight to createCutStoneGeometry
+      prongCount: prongCount === 5 ? 4 : 4,           // side stones use 4 prongs typically
+      prongPostR: sideGemR * 0.92,
+      prongTipR:  sideGemR * 0.78,
+      prongBaseZ: sideZ - sidePavilionH * 0.5,
+      prongTipZ:  sideZ + sideCrownH * 0.55,
+      prongRadius: prongRadius * 0.75
+    }));
+
+    // ---- pavé / channel along shank --------------------------------------
+    // Stones sit flush in the band crown (top-mount), tables facing +Z so the
+    // viewer sees a stripe of light along the shoulder. Their CENTER is at
+    // the band top crown; the pavilion punches a hair into the metal.
+    const paveStoneSize = 0.034 + W * 0.004;
+    // Tangent spacing: arc length between stones = 1.95 × stone diameter
+    // (jeweler-spec tight pavé; tighter than 2.1 to maximise sparkle while
+    // still leaving room for corner beads).
+    const paveArc = paveStoneSize * 1.95;
+    // Cathedral shoulders are tubes that rise from the band crown toward the
+    // head — push the pavé start further out so beads don't sit underneath
+    // the shoulder tube. Same logic for hidden halo melee that hugs the
+    // pavilion just above the band crown.
+    const headClearance =
+      (currentState.setting === "Cathedral" ? 0.16 : 0) +
+      (currentState.hiddenHalo ? 0.08 : 0);
+    const paveAngStart = sideΔθ + paveArc / bandMajorR * 0.6 + headClearance; // start just past side stones (or past head if solitaire)
+    const paveAngEnd   = Math.PI - paveAngStart;
+    const paveAngSpan  = paveAngEnd - paveAngStart;
+    const paveCount    = Math.max(6, Math.floor((bandMajorR * paveAngSpan) / paveArc));
+    // Two pavé rows centred on the band crown, separated by 0.95× diameter
+    // (so adjacent rows almost touch — maximum coverage / minimum metal show).
+    const paveRowGap   = paveStoneSize * 0.96;
+    // Pavé girdle sits below the band top so the table is ≈18% proud.
+    const paveZ        = bandTopZ - paveStoneSize * 0.18;
+    // Bead radius: ~36% of stone radius (corner-bead spec).
+    const paveBeadR    = paveStoneSize * 0.36;
+
+    return {
+      S, W, shape,
+      // gem
+      gemR, gemHalfW, gemHalfH, crownH, pavilionH,
+      meshHalfDia: baseHalfDia,
+      gemPos: { x: 0, y: gemY, z: gemZ },
+      // band
+      bandMajorR, bandWidth, bandHeight, bandTopY, bandTopZ,
+      // setting
+      prongCount, prongRadius, prongPostR, prongTipR,
+      prongBaseZ, prongTipZ, prongScaleY,
+      basketUpperR, basketLowerR, basketUpperZ, basketLowerZ, galleryRadius,
+      // halo
+      haloStoneR, haloRadius, haloZ, haloCount,
+      // side stones
+      sideStones, sideΔθ,
+      // pavé
+      paveStoneSize, paveAngStart, paveAngEnd, paveCount, paveRowGap, paveZ,
+      paveBeadR
+    };
+  }
+
+  // Curved prong: a tapered cylinder from (baseR, baseZ) on the prong circle
+  // up to a tip inset radially toward the gem at (tipR, tipZ). The post
+  // physically holds the gem against the basket — not a vertical pillar.
+  function addCurvedProng(group, centerX, centerY, ang, baseR, tipR, baseZ, tipZ, radius, scaleY, material) {
+    const base = new THREE.Vector3(
+      centerX + Math.cos(ang) * baseR,
+      centerY + Math.sin(ang) * baseR * scaleY,
+      baseZ
+    );
+    const tip = new THREE.Vector3(
+      centerX + Math.cos(ang) * tipR,
+      centerY + Math.sin(ang) * tipR * scaleY,
+      tipZ
+    );
+    const post = makeCylinderBetween(base, tip, radius, material);
+    group.add(post);
+
+    // Solder joint: a tiny torus where the prong springs from the gallery
+    // rail, hiding the seam between cylinder and basket. ~1.4× the post
+    // radius, tucked just under the base point.
+    const solder = new THREE.Mesh(
+      new THREE.TorusGeometry(radius * 1.35, radius * 0.45, 8, 18),
+      material
+    );
+    solder.position.copy(base);
+    // Lay the torus flat so its ring axis matches the prong post direction.
+    const dir = new THREE.Vector3().subVectors(tip, base).normalize();
+    solder.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), dir);
+    group.add(solder);
+
+    // Claw: a slightly flattened bead bent INWARD toward the gem axis so
+    // it visibly grips OVER the crown facet — the diagnostic detail that
+    // separates a jeweler-finished setting from CG geometry. We pull the
+    // claw radially inward by ~1.5× the post radius, then squish it along
+    // its post axis so it reads as a curled claw, not a sphere.
+    const inwardDir = new THREE.Vector3(-Math.cos(ang), -Math.sin(ang) * scaleY, 0).normalize();
+    const clawCenter = tip.clone().addScaledVector(inwardDir, radius * 1.45);
+    // Drop the claw slightly DOWN (toward the crown) so it overlaps the
+    // crown facets instead of sitting above them.
+    clawCenter.z -= radius * 0.35;
+    const claw = new THREE.Mesh(
+      new THREE.SphereGeometry(radius * 1.55, 20, 16),
+      material
+    );
+    claw.position.copy(clawCenter);
+    // Squash along the post direction so the claw reads as a wrap, not ball.
+    claw.scale.set(1.05, 1.05, 0.62);
+    claw.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), dir);
+    group.add(claw);
+  }
+
+  function getBandCrownPoint(angle, majorRadius, bandWidth, bandHeight, style = "Solitaire") {
+    const radial = majorRadius + bandWidth * 0.5;
+    const twistZ = style === "Twist" ? Math.sin(angle * 3) * 0.06 : 0;
+    return new THREE.Vector3(
+      Math.cos(angle) * radial,
+      Math.sin(angle) * radial,
+      bandHeight * 0.5 + twistZ
+    );
+  }
+
+  function addShoulderRailSupports(parent, centerX, centerY, angle, bandPoint, railZ, span, radius, material) {
+    const tangent = new THREE.Vector3(-Math.sin(angle), Math.cos(angle), 0);
+    for (const sign of [-1, 1]) {
+      const base = bandPoint.clone().addScaledVector(tangent, span * sign);
+      const tip = new THREE.Vector3(
+        centerX + tangent.x * span * 0.78 * sign,
+        centerY + tangent.y * span * 0.78 * sign,
+        railZ
+      );
+      parent.add(makeCylinderBetween(base, tip, radius, material));
+    }
+  }
+
+  function addRectGalleryFrame(parent, centerX, centerY, angle, z, halfW, halfH, radius, material) {
+    const cs = Math.cos(angle);
+    const sn = Math.sin(angle);
+    const pointAt = (lx, ly, pz = z) => new THREE.Vector3(
+      centerX + cs * lx - sn * ly,
+      centerY + sn * lx + cs * ly,
+      pz
+    );
+    const corners = [
+      pointAt(-halfW, -halfH),
+      pointAt(halfW, -halfH),
+      pointAt(halfW, halfH),
+      pointAt(-halfW, halfH)
+    ];
+    for (let i = 0; i < corners.length; i += 1) {
+      parent.add(makeCylinderBetween(corners[i], corners[(i + 1) % corners.length], radius, material));
+    }
+    return { corners, pointAt };
+  }
+
+  // ---------------------------------------------------------------------------
+  // ATTACHMENT TEMPLATES
+  //
+  // bandCrownAt(angle, G) returns the band's outer-ridge contact point at
+  // angle `angle`. It is the single authoritative source of truth for
+  // "where on the band does something attach" — every prong base, tension
+  // arm, cathedral ramp, side-stone bezel rail, accent seat and pavé seat
+  // must derive its anchor from this helper (NOT from raw bandMajorR or
+  // gemPos math), so no component can ever float relative to the band.
+  //
+  //   pos     – world position on the band's outer ridge at that angle
+  //   tangent – unit vector along the band's circumference at that point
+  //   outward – unit vector pointing radially out of the finger axis
+  //   normal  – unit vector along the finger axis (band's flat normal)
+  //
+  // For Knife-Edge bands the outer ridge bulges into a peak; for Twist
+  // bands the ridge wobbles in z by sin(3θ)*0.06. Both are encoded here
+  // so callers never have to special-case the band style themselves.
+  function bandCrownAt(angle, G, style) {
+    const s = style || "Solitaire";
+    const radial = G.bandMajorR + G.bandWidth * 0.5;
+    const twistZ = s === "Twist" ? Math.sin(angle * 3) * 0.06 : 0;
+    return {
+      pos: new THREE.Vector3(
+        Math.cos(angle) * radial,
+        Math.sin(angle) * radial,
+        G.bandTopZ + twistZ
+      ),
+      tangent: new THREE.Vector3(-Math.sin(angle), Math.cos(angle), 0),
+      outward: new THREE.Vector3(Math.cos(angle), Math.sin(angle), 0),
+      normal: new THREE.Vector3(0, 0, 1)
+    };
+  }
+
+  // ---------------------------------------------------------------------------
+  // COMPONENT INDEX  (every jewelled-piece part the renderer can emit)
+  //
+  //   BAND parts
+  //     makeBandGeometry(majorR, profileW, profileH, style)
+  //       — closed comfort-fit elliptical sweep; profile is the cross-section
+  //         and the swept circle is the band centerline. Anchor: bandCrownAt.
+  //     channel walls (two slim torus rings) — clamp a row of step-cuts
+  //     milgrain rails (two rings of beads on ±bandHeight/2 edges)
+  //
+  //   GEM parts
+  //     createBrilliantGeometry / createStepCutGeometry / createPrincessGeometry
+  //       — table at gem-local +z, culet at gem-local -pavilionH, girdle at 0.
+  //     halo melee (table-up brilliant ring around gem girdle)
+  //     hidden-halo melee (table-radial brilliant ring under gem pavilion)
+  //
+  //   HEAD parts (gem holders)
+  //     prong head  — addCurvedProng × N around basket; claws curl over crown
+  //     bezel head  — single torus rail at gem girdle
+  //     tension head — two flat arms emerging from band shoulders, clamp girdle
+  //     trellis head — interlaced 4 prongs + crossing under-pavilion arc bars
+  //     basket gallery (addGalleryBasket) — upper + lower rail joined by struts
+  //     under-bezel rail (slim torus) — sits directly under side-stone pavilion
+  //     cathedral shoulders (cylinders) — bridge band → head bottom
+  //     shoulder rail supports (cylinders) — bridge band → side-stone gallery
+  //     rectangular gallery frame (4 cylinders) — for baguette / step-cut sides
+  //
+  //   STATION parts (small melee mounts along the band)
+  //     pavé seat (dark circle for drilled hole)
+  //     pavé bead (corner bead between adjacent melees)
+  //
+  //   CHAIN / EARRING parts
+  //     chain bead sphere, bail vertical torus, jump ring, link cylinder,
+  //     stud post + butterfly back, hoop torus.
+  //
+  // ASSEMBLY GRAMMAR (parent → child contact rule)
+  //
+  //   Band.outerRidge[θ]   ←──connects──→   Head.lowerRail[0]   (prong/bezel)
+  //   Head.upperRail       ←──connects──→   Prong.post.base     (each prong)
+  //   Prong.tip            ←──contact───→   Gem.girdle[θ]
+  //   Bezel.rim            ←──contact───→   Gem.girdle (all θ)
+  //   Tension.arm.anchor   ←──on band───→   Band.outerRidge[π/2 ± shoulderΔ]
+  //   Tension.arm.tip      ←──contact───→   Gem.girdle[E + W]
+  //   Cathedral.ramp.base  ←──on band───→   Band.outerRidge[π/2 ± shoulderΔ]
+  //   Cathedral.ramp.tip   ←──welds────→   Head.lowerRail[π/2]
+  //   SideStone.bezel.rim  ←──contact───→   SideGem.girdle
+  //   SideStone.rail       ←──struts───→   Band.outerRidge[sideΔθ]
+  //   PaveSeat[θ]          ←──coincident→   Band.crownTop[θ]
+  //   PaveBead             ←──between───→   PaveSeat[θ_i] + PaveSeat[θ_{i+1}]
+  //   Halo.collar          ←──tangent──→   Gem.girdle.outerR + meleeR
+  //   HiddenHalo.melee     ←──tangent──→   Gem.pavilion.surface[θ]
+  //   Chain.lowest         ←──coincident→   Bail.top
+  //   Bail.bottom          ←──coincident→   Head.lowerRail (pendant)
+  //   Lobe (y=0)           ←──pierced──→   Stud.post / DropEarring.jumpRing
+  //   JumpRing             ←──link────→   Drop.link.top
+  //   Drop.link.bottom     ←──coincident→   Head.lowerRail (drop)
+  //
+  // INVARIANT: every position in the geometry should be derivable from the
+  // attach point of its parent component via one of the templates above.
+  // No call site should hand-write coordinates that aren't anchored to a
+  // parent component's outer surface.
+  // ---------------------------------------------------------------------------
+
+  // ---------------------------------------------------------------------------
+  // REFERENCE INDEX  (20-piece source catalogue → studio capabilities)
+  //
+  // Source: Jewelry_Reference_Catalogue_20_Internet_Sourced_Pieces.docx
+  // The 20 reference pieces are documented as `ref_R1_*` … `ref_E5_*` entries
+  // in DESIGN_PRESETS above. Each preset carries a `catalogue` block with
+  // `achievable` ∈ { full, partial, skin-only } and `needsFeature[]`.
+  //
+  // ACHIEVABLE NOW (procedural renderer reproduces the brief to-spec):
+  //   R1  Smoky Halo Statement Ring        — Halo + warm body stone
+  //   R2  Vintage Three-Stone Diamond Ring  — Three-Stone + milgrain
+  //   R3  Citrine & Diamond Bypass Ring     — Bypass band + colored center
+  //   R4  Classic Bridal Solitaire          — Solitaire + Pavé band
+  //   R5  Milgrain Halo Diamond Ring        — Halo + Pavé + milgrain
+  //   B3  Emerald & Diamond Cuff            — bezel center + accents
+  //   B4  Ruby & Diamond Band Bracelet      — channel-set rubies
+  //   E2  Aquamarine Pear Drop Pavé         — pear drop + halo + pavé
+  //
+  // PARTIAL (silhouette + setting match; surface ornament approximated):
+  //   B1  Two-Tone Silver Bangle w/ Gold Drop  – needs two-tone material zoning
+  //   N3  Amethyst Rope Necklace               – needs twisted-rope chain
+  //   N5  Malaya Garnet Statement Necklace     – needs scroll-link front
+  //   E1  Diamond Drop w/ Snap-On Covers       – needs enamel cover variants
+  //
+  // SKIN-ONLY (the SIGNATURE feature of the reference is not a renderer
+  // capability yet — the preset emits a plausible substitute but the
+  // distinctive ornament is missing):
+  //   B2  Charm Story Bracelet      – needs makeCharm(motif) + jump rings
+  //   B5  Heritage Enamel Bangle    – needs makeChampleveEnamelPanel
+  //   N1  Edwardian Pearl Collar    – needs makeOpenworkScrollPanel
+  //   N2  Four-Strand Pearl & Enamel– needs makeMultiStrandPearl + enamel
+  //   N4  Freshwater Pearl Lace     – needs iridescent pearl material + lace
+  //   E3  Filigree Cone Drops       – needs makeFiligreeCone wire scrollwork
+  //   E4  Ancient Granulation Orbs  – needs makeGranulationOrb bead patterns
+  //   E5  Lion-Head Twisted Hoops   – needs makeAnimalHeadTerminal sculpt
+  //
+  // REALISM DELTA  (independent of motif support — what lifts the current
+  // renderer above a "CG plastic" look toward photographic reference):
+  //
+  //   1. Geometry segments: every torus / lathe in jewellery hot-path is at
+  //      ≥96 radial segments; verify no setting code drops below 64.
+  //   2. Edge bevels: gem girdles and band edges should carry a 0.012mm
+  //      micro-bevel — sharp boolean edges read as CG. Use Curve→tubeR≈0.01.
+  //   3. Subtle vertex jitter on prong/bezel inner faces (±0.004mm) breaks
+  //      the perfect mirror reflection that screams synthetic.
+  //   4. HDR IBL is already loaded (studio_small_08_1k.hdr) — verify the
+  //      gem material `envMapIntensity` ≥ 1.5 and metal ≥ 1.1.
+  //   5. Side-light from below at very low intensity (rim fill) makes
+  //      prongs photographically pop instead of looking like extruded prims.
+  //   6. Background depth-of-field blur at f/2.8 equivalent — already
+  //      handled per backdrop preset; ensure macro view doesn't disable it.
+  //   7. Pavé melee should be set in DRILLED HOLES (small dark seat circle
+  //      under each bead) — already present via `pavé seat`; confirm the
+  //      seat texture renders dark in current lighting.
+  //   8. Milgrain bead spacing should equal bead diameter (no gaps, no
+  //      overlap). Render-test at Macro view shows whether spacing drifts.
+  //
+  // The component renderer is sized so that the achievable subset of the
+  // reference catalogue passes a "photograph at arm's length" test. The
+  // skin-only set needs the listed `makeXxx` generators to be implemented
+  // before its catalogue entries can be promoted to full.
+  //
+  // FIXED-ISSUES LOG (audit pass — placement / intersection / orientation)
+  //
+  // Each entry below is a real bug that was producing "Roblox-look" output
+  // and has been permanently corrected.
+  //
+  //   [F1] Bezel double-stack
+  //        Cause:   addAlgorithmicSetting added a bezel torus at z ≈ gemZ-0.01,
+  //                 then the generic basket code unconditionally appended an
+  //                 upper rail at z = gemZ - pavilionH*0.30, producing two
+  //                 concentric rings 0.05 apart — a visible "collar floating
+  //                 above a thinner ring".
+  //        Fix:     Bezel branch now emits ONE chunky torus + 4 cardinal
+  //                 struts down to a single lower rail welded to band crown,
+  //                 then returns early so the generic basket is skipped.
+  //
+  //   [F2] Channel walls intersecting the stones
+  //        Cause:   Wall tori placed at bandMajorR ± channelStoneSize*0.62
+  //                 sat INSIDE the princess half-diagonal (~0.92), so the
+  //                 metal walls visibly punched through the gem footprint.
+  //        Fix:     New offset = channelStoneSize * 1.02 + wallTubeR; walls
+  //                 now clamp from outside the stone row, as in real channel
+  //                 work.
+  //
+  //   [F3] Three-Stone side stones table-orientation mismatch
+  //        Cause:   Centre stone sits inside a headGroup rotated -π/2 X, so
+  //                 its table faces world +Y. Side stones were placed in
+  //                 world space with rotation.x = tiltDir*0.10 only — their
+  //                 tables faced world +Z. The trio read as "centre stone
+  //                 upright, side stones laid flat".
+  //        Fix:     Side stones now rotate (-π/2 + tiltDir*0.08, 0, 0); all
+  //                 three tables now share the +Y plane.
+  //
+  //   [F4] Tapered Baguette table-orientation mismatch
+  //        Cause:   Same as [F3] — table faced +Z, plus an extra rotateY
+  //                 was stacked on top of rotation.set producing double-
+  //                 applied yaw.
+  //        Fix:     Single rotation.set(-π/2, ang-π/2, ±0.05) locks tables
+  //                 to +Y, yaws long axis tangent to band, leans ±3° outward.
+  //
+  //   [F5] Side-stone chord conversion used wrong circle
+  //        Cause:   sideΔθ = 2*asin(sideChord/(2*bandMajorR)) — but the gem
+  //                 centre and side gems both sit on the bandTopY circle.
+  //                 Using bandMajorR over-estimated angle → tighter packing
+  //                 than intended (no intersection, but uneven gap).
+  //        Fix:     Denominator now bandTopY.
+  //
+  //   [F6] Milgrain head trim clipping into halo melee
+  //        Cause:   milgrainR = gemR + haloStoneR*2.2 ≈ gemR + 0.075, while
+  //                 halo outer melee edge reaches gemR + 2*haloStoneR + 0.012
+  //                 ≈ gemR + 0.080. Beads sat INSIDE the halo melees and
+  //                 z-fought them.
+  //        Fix:     With-halo trim radius = haloRadius + haloStoneR*1.42
+  //                 (clear of every halo gem); without-halo radius unchanged.
+  //
+  //   [F7] Bypass band intersecting main shank
+  //        Cause:   Bypass band built at the SAME bandMajorR as the main
+  //                 shank then tilted (x, y) — the two shank volumes
+  //                 interpenetrated everywhere they overlapped.
+  //        Fix:     Bypass band now built at bandMajorR + bandWidth*0.55,
+  //                 so it visibly rides OVER the main shank at crossings.
+  //
+  //   [F8] Necklace halo behind the pendant girdle
+  //        Cause:   placeFocalAt called addHalo with z = 0.11 hardcoded
+  //                 while pendant girdle sat at z = 0.16 → halo wrapped
+  //                 around the pavilion edge instead of ringing the table.
+  //        Fix:     Halo z = pendantZ - stoneHalfDia*0.04 (just behind the
+  //                 girdle plane). Milgrain trim similarly snapped.
+  //
+  // OPEN (documented, not yet fixed because each needs a new helper):
+  //   - Halo melee in addHalo() (necklace/bracelet/earrings) carry an
+  //     intentional artistic tilt rotation.set(angle*0.3, angle, 0).
+  //     If the user wants strict table-up consistency with the ring renderer,
+  //     swap to (0, 0, angle) for a flat-table halo.
+  //   - Bypass is still a closed second band; a true bypass requires a
+  //     custom curve (single shank that splits and crosses itself), which
+  //     would need a new makeBypassShank(curve) generator.
+  //   - Earring post is connected to the lobe via a butterfly back but
+  //     does not visibly bond to the gem's pavilion — a small bridge mesh
+  //     would close that visual gap.
+  // ---------------------------------------------------------------------------
+
+  function addAlgorithmicSetting(group, G, centerX, centerY, metal) {
+    if (currentState.setting === "Bezel") {
+      // Bezel: a single chunky torus hugging the girdle. The bezel ring IS
+      // the head's upper rail — no separate gallery upper rail (the old
+      // code stacked a thin upper torus 0.05 below the bezel, creating a
+      // visible double-ring "floating collar" look). Vertical struts drop
+      // straight from the bezel rim to the band crown so the bezel is
+      // physically welded to the shank.
+      const bezelTube = 0.032 * G.W;
+      const bezelR   = G.gemR * 1.02;
+      const bezelZ   = G.gemPos.z - bezelTube * 0.2; // just below girdle
+      const bezel = new THREE.Mesh(
+        new THREE.TorusGeometry(bezelR, bezelTube, 20, 128),
+        metal
+      );
+      bezel.position.set(centerX, centerY, bezelZ);
+      bezel.scale.y = G.prongScaleY;
+      group.add(bezel);
+      // 4 vertical struts (basket lower rail → bezel rim) at cardinal
+      // angles. These replace the floating upper rail + struts the
+      // generic basket would have added.
+      const strutR = G.galleryRadius * 0.95;
+      for (let i = 0; i < 4; i += 1) {
+        const ang = (Math.PI * 2 * i) / 4 + Math.PI / 4;
+        const top = new THREE.Vector3(
+          centerX + Math.cos(ang) * bezelR * 0.92,
+          centerY + Math.sin(ang) * bezelR * 0.92 * G.prongScaleY,
+          bezelZ
+        );
+        const bot = new THREE.Vector3(
+          centerX + Math.cos(ang) * G.basketLowerR,
+          centerY + Math.sin(ang) * G.basketLowerR * G.prongScaleY,
+          G.basketLowerZ
+        );
+        group.add(makeCylinderBetween(top, bot, strutR, metal));
+      }
+      // Lower rail welds the struts onto the band crown.
+      const lowerRail = new THREE.Mesh(
+        new THREE.TorusGeometry(G.basketLowerR, G.galleryRadius, 16, 96),
+        metal
+      );
+      lowerRail.position.set(centerX, centerY, G.basketLowerZ);
+      lowerRail.scale.y = G.prongScaleY;
+      group.add(lowerRail);
+      return; // skip the generic basket (which would re-add an upper rail)
+    } else if (currentState.setting === "Tension") {
+      // Tension: stone suspended between two flat metal arms physically
+      // emerging from the band's SHOULDERS (±π/2 from the head angle) and
+      // clamping the girdle. The arms used to anchor at
+      // (±bandMajorR*0.62, …) which is INSIDE the finger hole — floating
+      // metal. Now they anchor at the band's actual outer ridge via
+      // bandCrownAt() so the arms physically continue out of the shank.
+      const gemWorld = new THREE.Vector3(centerX, centerY, 0);
+      for (const side of [-1, 1]) {
+        const armW = G.gemR * 0.55;      // tangential width of the arm
+        const armT = 0.034 * G.W;        // metal thickness (radial)
+        const shoulderAng = Math.PI / 2 + side * (Math.PI / 2 - 0.08);
+        const anchor = bandCrownAt(shoulderAng, G).pos;
+        const tip = new THREE.Vector3(
+          centerX + side * G.gemR * 1.03,
+          centerY,
+          0
+        );
+        const dx = tip.x - anchor.x;
+        const dy = tip.y - anchor.y;
+        const len = Math.hypot(dx, dy);
+        const arm = new THREE.Mesh(makeChamferedBox(len, armW, armT), metal);
+        arm.position.set((anchor.x + tip.x) / 2, (anchor.y + tip.y) / 2, anchor.z);
+        arm.rotation.z = Math.atan2(dy, dx);
+        group.add(arm);
+        // Flat clamp pad at the gem's girdle.
+        const clampPad = new THREE.Mesh(makeChamferedBox(armT * 1.2, armW, armT * 2.4), metal);
+        clampPad.position.set(tip.x, tip.y, 0);
+        clampPad.rotation.z = Math.atan2(dy, dx);
+        group.add(clampPad);
+      }
+      // Tiny solder ring at each anchor so the arms read as fused to the
+      // band crown rather than ending in a hard butt-joint.
+      for (const side of [-1, 1]) {
+        const shoulderAng = Math.PI / 2 + side * (Math.PI / 2 - 0.08);
+        const anchor = bandCrownAt(shoulderAng, G).pos;
+        const solder = new THREE.Mesh(
+          new THREE.SphereGeometry(0.034 * G.W * 1.15, 16, 12), metal
+        );
+        solder.position.copy(anchor);
+        group.add(solder);
+      }
+      // Silence the unused gemWorld var (used as a sanity reference if we
+      // later add a centre fillet — keeps the symbol live for clarity).
+      void gemWorld;
+      return; // no gallery basket for tension settings
+    } else if (currentState.setting === "Trellis") {
+      // Trellis: prongs from opposite shoulders interlace UNDER the gem
+      // before curling up to clamp the crown. We render this as 4 prongs
+      // with their base points rotated 45° from the gallery posts and an
+      // extra mid-control arc segment that crosses the centre line.
+      for (let i = 0; i < 4; i += 1) {
+        const ang = (Math.PI * 2 * i) / 4 + Math.PI / 4;
+        addCurvedProng(
+          group, centerX, centerY, ang,
+          G.prongPostR * 0.85, G.prongTipR,
+          G.prongBaseZ - G.pavilionH * 0.35, G.prongTipZ,
+          G.prongRadius, G.prongScaleY, metal
+        );
+      }
+      // Crossing arc bars: 2 thin metal arcs sweeping under the pavilion.
+      for (let i = 0; i < 2; i += 1) {
+        const arcAng = i * Math.PI / 2;
+        const a = new THREE.Vector3(
+          centerX + Math.cos(arcAng) * G.basketUpperR,
+          centerY + Math.sin(arcAng) * G.basketUpperR * G.prongScaleY,
+          G.basketUpperZ
+        );
+        const b = new THREE.Vector3(
+          centerX - Math.cos(arcAng) * G.basketUpperR,
+          centerY - Math.sin(arcAng) * G.basketUpperR * G.prongScaleY,
+          G.basketLowerZ - G.pavilionH * 0.15
+        );
+        group.add(makeCylinderBetween(a, b, G.galleryRadius * 0.9, metal));
+      }
+    } else {
+      // Prongs: bent posts climbing from gallery rail up over the crown
+      const setRot = (Number(currentState.setRotation) || 0) * Math.PI / 180;
+      for (let i = 0; i < G.prongCount; i += 1) {
+        const ang = (Math.PI * 2 * i) / G.prongCount + Math.PI / G.prongCount + setRot;
+        addCurvedProng(
+          group, centerX, centerY, ang,
+          G.prongPostR, G.prongTipR,
+          G.prongBaseZ, G.prongTipZ,
+          G.prongRadius, G.prongScaleY, metal
+        );
+      }
+    }
+    // Gallery basket: two rails at top/bottom + 6 vertical struts.
+    const upperRail = new THREE.Mesh(
+      new THREE.TorusGeometry(G.basketUpperR, G.galleryRadius, 16, 96),
+      metal
+    );
+    upperRail.position.set(centerX, centerY, G.basketUpperZ);
+    upperRail.scale.y = G.prongScaleY;
+    const lowerRail = new THREE.Mesh(
+      new THREE.TorusGeometry(G.basketLowerR, G.galleryRadius, 16, 96),
+      metal
+    );
+    lowerRail.position.set(centerX, centerY, G.basketLowerZ);
+    lowerRail.scale.y = G.prongScaleY;
+    group.add(upperRail, lowerRail);
+    const strutCount = G.prongCount;
+    for (let i = 0; i < strutCount; i += 1) {
+      const ang = (Math.PI * 2 * i) / strutCount;
+      const top = new THREE.Vector3(
+        centerX + Math.cos(ang) * G.basketUpperR,
+        centerY + Math.sin(ang) * G.basketUpperR * G.prongScaleY,
+        G.basketUpperZ
+      );
+      const bot = new THREE.Vector3(
+        centerX + Math.cos(ang) * G.basketLowerR,
+        centerY + Math.sin(ang) * G.basketLowerR * G.prongScaleY,
+        G.basketLowerZ
+      );
+      group.add(makeCylinderBetween(top, bot, G.galleryRadius * 0.85, metal));
+    }
+  }
+
   function buildRing() {
     const metal = materialForMetal();
+    const meleeMaterial = materialForStone();
     const group = new THREE.Group();
-    const weight = weightValue();
-    const bandRadius = 1.18 + (weight - 1) * 0.08;
-    const tube = 0.072 * weight;
-    const stoneRadius = Number(currentState.size) * 0.22 * 1.18;
-    const band = new THREE.Mesh(new THREE.TorusGeometry(bandRadius, tube, 40, 190), metal);
-    const stone = makeStone(1.18);
+    const style = currentState.band || "Solitaire";
+    const G = computeRingGeometry(currentState);
 
-    band.rotation.z = 0;
-    stone.position.set(0, 1.22, 0.2);
-    addSetting(group, 0, 1.22, 0.13, stoneRadius * 0.92, { scaleY: 0.86, prongs: currentState.shape === "Pear" ? 5 : 6, shoulders: true });
-    addHalo(group, 0, 1.22, stoneRadius + 0.13, 18, 0.14, 0.86);
-    addMilgrain(group, 0, 1.22, stoneRadius + (currentState.halo ? 0.22 : 0.07), 32, 0.19, 0.86);
-    addAccentStones(group, bandRadius, 18, { z: 0.13, size: 0.04, start: Math.PI * 0.16, end: Math.PI * 0.84 });
-    group.add(band, stone);
+    // Fine-tune: halo gap + count overrides, prong height multiplier.
+    const haloGapMm = Number(currentState.haloGap) || 0;
+    if (haloGapMm !== 0) {
+      G.haloRadius += haloGapMm * 0.018;
+    }
+    const haloOverride = currentState.haloCount;
+    if (haloOverride && haloOverride !== "Auto") {
+      const n = parseInt(haloOverride, 10);
+      if (Number.isFinite(n) && n > 0) G.haloCount = n;
+    }
+    const prongHeightMul = Number(currentState.prongHeight) || 1;
+    if (prongHeightMul !== 1) {
+      G.prongTipZ = G.prongBaseZ + (G.prongTipZ - G.prongBaseZ) * prongHeightMul;
+    }
+    // Setting rotation: spins the head (stone + prongs + halo) around the
+    // vertical axis. Stone tilt: rocks just the stone within its setting.
+    const setRot = (Number(currentState.setRotation) || 0) * Math.PI / 180;
+    const stoneTilt = (Number(currentState.stoneTilt) || 0) * Math.PI / 180;
+
+    // ---- band ----
+    // The silhouette field swaps the shank profile: a single ring, a
+    // wide cigar, two thin parallel rails (split shank), a thinned-out
+    // tapered shank, or two stacked rings.
+    const silhouette = currentState.silhouette || "Classic Round";
+    if (silhouette === "Split Shank") {
+      const halfH = G.bandHeight * 0.42;
+      const rail = makeBandGeometry(G.bandMajorR, G.bandWidth * 0.6, halfH, style);
+      const left = new THREE.Mesh(rail, metal);
+      const right = new THREE.Mesh(rail, metal);
+      left.position.z = -G.bandHeight * 0.55;
+      right.position.z = G.bandHeight * 0.55;
+      group.add(left, right);
+    } else if (silhouette === "Stacked Double") {
+      const halfH = G.bandHeight * 0.45;
+      const rail = makeBandGeometry(G.bandMajorR, G.bandWidth * 0.82, halfH, style);
+      const top = new THREE.Mesh(rail, metal);
+      const bot = new THREE.Mesh(rail, metal);
+      top.position.z = G.bandHeight * 0.58;
+      bot.position.z = -G.bandHeight * 0.58;
+      group.add(top, bot);
+    } else {
+      let bandW = G.bandWidth;
+      let bandH = G.bandHeight;
+      if (silhouette === "Cigar Band") { bandW *= 1.55; bandH *= 1.45; }
+      else if (silhouette === "Tapered Shank") { bandW *= 0.7; bandH *= 0.82; }
+      const bandGeometry = makeBandGeometry(G.bandMajorR, bandW, bandH, style);
+      const band = new THREE.Mesh(bandGeometry, metal);
+      group.add(band);
+    }
+
+    // ---- milgrain edge: tiny beaded rails along the band's top edges
+    // for a vintage Edwardian/Art Deco trim. Cheap to render: just two
+    // rings of small spheres at \u00b1bandHeight/2.
+    if (currentState.milgrain) {
+      const beadR = 0.022 * G.W;
+      const beadCount = 96;
+      const edgeR = G.bandMajorR;
+      const edgeZ = G.bandHeight * 0.5 + beadR * 0.18;
+      const beadGeo = new THREE.SphereGeometry(beadR, 16, 12);
+      for (const sign of [-1, 1]) {
+        for (let i = 0; i < beadCount; i += 1) {
+          const a = (i / beadCount) * Math.PI * 2;
+          const bead = new THREE.Mesh(beadGeo, metal);
+          bead.position.set(Math.cos(a) * edgeR, Math.sin(a) * edgeR, sign * edgeZ);
+          group.add(bead);
+        }
+      }
+    }
+
+    // ---- head sub-group ----
+    // A real engagement ring has the stone's table facing OUTWARD from the
+    // band (radially up, away from the finger top) — i.e. perpendicular to
+    // the band axis. The head construction code below (stone, prongs,
+    // basket, halo, milgrain trim) is all written with the head's "up"
+    // direction along its own local +Z. We square that circle by putting
+    // the entire head into a sub-group positioned at the band crown and
+    // rotated -90° around X, so head-local +Z becomes band-local +Y. The
+    // construction code stays unchanged inside the sub-group.
+    //
+    // Tension settings keep their arms in the band's XY plane (since the
+    // arms physically emerge from the band shoulders), but the stone
+    // itself is rotated table-up so the ring reads correctly. The stone
+    // is lifted above the band crown to sit between the tension arms.
+    const isTension = currentState.setting === "Tension";
+    const headGroup = isTension ? group : new THREE.Group();
+    if (!isTension) {
+      headGroup.position.set(G.gemPos.x, G.gemPos.y, 0);
+      headGroup.rotation.x = -Math.PI / 2;
+      group.add(headGroup);
+    }
+    // Center-stone local position. For Tension the stone sits above the
+    // band at world (0, gemY+gemZ, 0) with table facing world +Y.
+    const stoneLocalX = isTension ? G.gemPos.x : 0;
+    const stoneLocalY = isTension ? (G.gemPos.y + G.gemPos.z) : 0;
+    const stoneLocalZ = isTension ? 0 : G.gemPos.z;
+    // Same convention for the setting helper's (centerX, centerY) inputs.
+    const headCenterX = isTension ? G.gemPos.x : 0;
+    const headCenterY = isTension ? (G.gemPos.y + G.gemPos.z) : 0;
+
+    // ---- center stone ----
+    const stoneMesh = new THREE.Mesh(
+      createCutStoneGeometry(G.meshHalfDia, currentState.shape),
+      materialForStone()
+    );
+    stoneMesh.userData.isGem = true;
+    stoneMesh.position.set(stoneLocalX, stoneLocalY, stoneLocalZ);
+    stoneMesh.rotation.z = setRot;
+    // For Tension the stone lives in the main group, so it needs its own
+    // -90° X rotation to bring its table up (the headGroup that handles
+    // this for other settings is bypassed for Tension).
+    stoneMesh.rotation.x = stoneTilt + (isTension ? -Math.PI / 2 : 0);
+    stoneMesh.castShadow = true;
+    headGroup.add(stoneMesh);
+
+    // ---- head: prongs + basket holding the center stone ----
+    addAlgorithmicSetting(headGroup, G, headCenterX, headCenterY, metal);
+
+    // Cathedral shoulders: structural ramps from band up to the head.
+    // Base points are derived from bandCrownAt() so they physically sit on
+    // the band's outer ridge — the old hardcoded (±0.55*bandMajorR, …)
+    // anchors were inside the finger hole and read as floating arches.
+    if (currentState.setting === "Cathedral") {
+      const tube = 0.028 * G.W;
+      const shoulderΔ = 0.62; // ~35° each side of the head
+      const baseL = bandCrownAt(Math.PI / 2 + shoulderΔ, G).pos;
+      const baseR = bandCrownAt(Math.PI / 2 - shoulderΔ, G).pos;
+      // After the head sub-group's -90° X rotation the basket lower rail
+      // (head-local z = 0) lives in world at y = bandTopY. The basket
+      // circle's ends in head-local ±X map to world ±X. So the head's
+      // contact patches sit at world (±basketLowerR, bandTopY, 0).
+      const headHalfWidth = G.basketLowerR * 0.92;
+      const headL = new THREE.Vector3(-headHalfWidth, G.bandTopY, 0);
+      const headR = new THREE.Vector3( headHalfWidth, G.bandTopY, 0);
+      group.add(
+        makeCylinderBetween(baseL, headL, tube, metal),
+        makeCylinderBetween(baseR, headR, tube, metal)
+      );
+    }
+
+    // ---- halo (table-up melee tangent to the girdle) ----
+    if (currentState.halo) {
+      const haloAngles = [];
+      const cs = Math.cos(setRot), sn = Math.sin(setRot);
+      for (let i = 0; i < G.haloCount; i += 1) {
+        const ang = (Math.PI * 2 * i) / G.haloCount;
+        haloAngles.push(ang);
+        const gem = makeMeleeStone(G.haloStoneR, meleeMaterial);
+        // Follow the gem's outline so a marquise halo isn't a perfect circle.
+        const [ox, oy] = outlineAt(currentState.shape, ang, G.haloRadius);
+        // Rotate the outline point by the setting rotation so the halo
+        // tracks a spun marquise/baguette stone.
+        const rx = ox * cs - oy * sn;
+        const ry = ox * sn + oy * cs;
+        gem.position.set(headCenterX + rx, headCenterY + ry, G.haloZ);
+        gem.rotation.set(0, 0, ang + setRot); // table-up, oriented around its own axis
+        headGroup.add(gem);
+      }
+      // Shared corner beads between every adjacent halo pair, on the inner
+      // and outer edges of the halo ring (just like a curved pavé row).
+      const haloBeadR = G.haloStoneR * 0.32;
+      const haloBeadZ = G.haloZ + G.haloStoneR * 0.42;
+      for (let i = 0; i < haloAngles.length; i += 1) {
+        const next = (i + 1) % haloAngles.length;
+        let a = (haloAngles[i] + haloAngles[next]) / 2;
+        if (next === 0) a += Math.PI; // wrap-around midpoint
+        const [ix, iy] = outlineAt(currentState.shape, a, G.haloRadius - G.haloStoneR * 0.45);
+        const [ox2, oy2] = outlineAt(currentState.shape, a, G.haloRadius + G.haloStoneR * 0.45);
+        const innerX = ix * cs - iy * sn;
+        const innerY = ix * sn + iy * cs;
+        const outerX = ox2 * cs - oy2 * sn;
+        const outerY = ox2 * sn + oy2 * cs;
+        headGroup.add(makePaveBead(headCenterX + innerX, headCenterY + innerY, haloBeadZ, haloBeadR, metal));
+        headGroup.add(makePaveBead(headCenterX + outerX, headCenterY + outerY, haloBeadZ, haloBeadR, metal));
+      }
+    }
+
+    // Milgrain bead trim along the head edge
+    if (currentState.finish === "Milgrain Edge") {
+      // Trim sits OUTSIDE the halo (if any) — the old formula
+      // (gemR + haloStoneR*2.2) put the milgrain ring at radius ~gemR+0.075
+      // while the halo's outer melee edge reaches gemR + 2*haloStoneR +
+      // 0.012 ≈ gemR + 0.080, so beads were clipping into the halo melee.
+      const milgrainR = currentState.halo
+        ? G.haloRadius + G.haloStoneR + G.haloStoneR * 0.42
+        : G.gemR + 0.06;
+      const milgrainCount = Math.round(2 * Math.PI * milgrainR / 0.06);
+      for (let i = 0; i < milgrainCount; i += 1) {
+        const ang = (Math.PI * 2 * i) / milgrainCount;
+        const bead = new THREE.Mesh(
+          new THREE.SphereGeometry(0.018 * G.W, 16, 12), metal
+        );
+        const [bx, by] = outlineAt(currentState.shape, ang, milgrainR);
+        bead.position.set(headCenterX + bx, headCenterY + by, G.gemPos.z + 0.005);
+        headGroup.add(bead);
+      }
+    }
+
+    // ---- band-style ornaments ----
+    if (style === "Pavé") {
+      // Top-mount pavé: two parallel rows of round melee seated in the band
+      // crown. Beads sit at the CORNERS of each stone's footprint, on a 3-row
+      // grid (inner edge / centerline between rows / outer edge). Interior
+      // corners are shared with neighbours so the bead count = 3 × (N+1) for
+      // a 2×N pavé layout — jeweler's standard.
+      const rowOffsets = [-G.paveRowGap * 0.5, +G.paveRowGap * 0.5];
+      const rowAngles = [];
+      rowOffsets.forEach((offset) => {
+        const rowR = G.bandMajorR + offset;
+        const count = Math.max(6, Math.floor((rowR * (G.paveAngEnd - G.paveAngStart)) / (G.paveStoneSize * 1.95)));
+        const angles = [];
+        for (let i = 0; i < count; i += 1) {
+          const t = count === 1 ? 0.5 : i / (count - 1);
+          const ang = G.paveAngStart + (G.paveAngEnd - G.paveAngStart) * t;
+          angles.push(ang);
+          const sx = Math.cos(ang) * rowR;
+          const sy = Math.sin(ang) * rowR;
+          // Drilled-seat shadow slightly SMALLER than stone, so the stone
+          // visibly overhangs the hole rim (the bright reflection ring you
+          // see on real pavé work).
+          group.add(makePaveSeat(sx, sy, G.bandTopZ + 0.001, G.paveStoneSize * 0.92, ang));
+          const gem = makeMeleeStone(G.paveStoneSize * 0.98, meleeMaterial);
+          gem.position.set(sx, sy, G.paveZ);
+          gem.rotation.set(0, 0, ang); // table-up; girdle aligned to band tangent
+          group.add(gem);
+        }
+        rowAngles.push({ rowR, angles });
+      });
+      // 3×(N+1) corner-bead grid: 3 radial rails (inner / mid / outer),
+      // beads at every gap angle of the densest row.
+      const denseRow = rowAngles[0].angles.length >= rowAngles[1].angles.length ? rowAngles[0] : rowAngles[1];
+      const beadZ = G.bandTopZ + G.paveBeadR * 0.55;
+      const beadRails = [
+        G.bandMajorR - G.paveRowGap * 0.5 - G.paveStoneSize * 0.48, // inner edge
+        G.bandMajorR,                                                // centerline between rows
+        G.bandMajorR + G.paveRowGap * 0.5 + G.paveStoneSize * 0.48   // outer edge
+      ];
+      for (let i = 0; i <= denseRow.angles.length; i += 1) {
+        const a = (i === 0) ? denseRow.angles[0] - (denseRow.angles[1] - denseRow.angles[0]) * 0.5
+                : (i === denseRow.angles.length) ? denseRow.angles[denseRow.angles.length - 1] + (denseRow.angles[denseRow.angles.length - 1] - denseRow.angles[denseRow.angles.length - 2]) * 0.5
+                : (denseRow.angles[i - 1] + denseRow.angles[i]) * 0.5;
+        beadRails.forEach((rr, idx) => {
+          // Center rail beads are slightly smaller (they're shared between
+          // 4 stones in real pavé, so less metal shows).
+          const r = idx === 1 ? G.paveBeadR * 0.82 : G.paveBeadR;
+          group.add(makePaveBead(Math.cos(a) * rr, Math.sin(a) * rr, beadZ, r, metal));
+        });
+      }
+    } else if (style === "Channel") {
+      // Channel: a row of step-cut stones sits flush between two raised metal
+      // walls. We use a single row of princess-cut stones with tables facing
+      // radially outward; the walls are slim torus rings hugging both sides
+      // of the row.
+      const channelStoneSize = G.paveStoneSize * 1.45;
+      const count = Math.max(5, Math.floor((G.bandMajorR * (G.paveAngEnd - G.paveAngStart)) / (channelStoneSize * 2.05)));
+      const channelZ = G.bandTopZ - channelStoneSize * 0.15;
+      for (let i = 0; i < count; i += 1) {
+        const t = count === 1 ? 0.5 : i / (count - 1);
+        const ang = G.paveAngStart + (G.paveAngEnd - G.paveAngStart) * t;
+        const cx = Math.cos(ang) * G.bandMajorR;
+        const cy = Math.sin(ang) * G.bandMajorR;
+        // Dark seat under stone.
+        group.add(makePaveSeat(cx, cy, G.bandTopZ + 0.001, channelStoneSize * 1.0, ang));
+        const gem = new THREE.Mesh(createPrincessGeometry(channelStoneSize * 0.92), meleeMaterial);
+        gem.position.set(cx, cy, channelZ);
+        gem.rotation.set(0, 0, ang); // tables face +Z, edges align to band
+        group.add(gem);
+      }
+      // Two raised walls (torus rings) flanking the row, set proud of the band
+      // top so they visibly clamp the row from both sides. Walls sit OUTSIDE
+      // the stone footprint — the old offset (channelStoneSize * 0.62)
+      // placed the walls INSIDE the stone half-width (≈0.92), making the
+      // walls visually punch through the gem rows. New offset is the
+      // princess half-diagonal + wall tube radius + a hair of breathing room.
+      const wallR = G.bandWidth * 0.16;
+      const wallZ = G.bandTopZ + wallR * 0.4;
+      const wallOffset = channelStoneSize * 1.02 + wallR;
+      const wallOuter = new THREE.Mesh(
+        new THREE.TorusGeometry(G.bandMajorR + wallOffset, wallR, 14, 240), metal
+      );
+      wallOuter.position.z = wallZ;
+      const wallInner = new THREE.Mesh(
+        new THREE.TorusGeometry(G.bandMajorR - wallOffset, wallR, 14, 240), metal
+      );
+      wallInner.position.z = wallZ;
+      group.add(wallOuter, wallInner);
+    } else if (style === "Three-Stone") {
+      // Each side stone gets a real basket+prong setting derived from G,
+      // plus a supported under-bezel rail that rises off the shoulder.
+      // This keeps the pavilion out of the shank and removes the "floating
+      // side stone" look from the old approximation.
+      G.sideStones.forEach((side, idx) => {
+        const shoulderPoint = getBandCrownPoint(side.ang, G.bandMajorR, G.bandWidth, G.bandHeight, style);
+        const sideRingR = G.bandTopY + side.gemR * 0.24;
+        const sideX = Math.cos(side.ang) * sideRingR;
+        const sideY = Math.sin(side.ang) * sideRingR;
+        // sideZ chosen so the pavilion CULET (sideZ - pavilionH) sits ABOVE
+        // the band's outer face (shoulderPoint.z = bandTopZ) by a clearance
+        // — so the stone can never punch through the metal.
+        const sideCulet = Math.max(0.012, G.bandTopZ * 0.25);
+        const sideZ = Math.max(side.z, shoulderPoint.z + side.pavilionH + sideCulet);
+        const railZ = sideZ - side.pavilionH * 0.22;
+        const sideMesh = new THREE.Mesh(
+          createCutStoneGeometry(side.meshSize, currentState.shape), meleeMaterial
+        );
+        sideMesh.position.set(sideX, sideY, sideZ);
+        // Tables face world +Y (same plane as the centre stone, which is
+        // rotated -π/2 X via headGroup). Without this rotation the side
+        // gems' tables face world +Z while the centre faces +Y — a 90°
+        // mismatch that reads as "side stones laid flat" in any 3/4 view.
+        // The tiltDir adds a small lean outward (±5.7°) around the band
+        // tangent so each side stone faces a hair away from the centre.
+        const tiltDir = idx === 0 ? -1 : 1;
+        sideMesh.rotation.set(-Math.PI / 2 + tiltDir * 0.08, 0, 0);
+        sideMesh.castShadow = true;
+        sideMesh.userData.isGem = true;
+        group.add(sideMesh);
+        // Tiny 4-prong head holding the side stone.
+        for (let i = 0; i < side.prongCount; i += 1) {
+          const ang = (Math.PI * 2 * i) / side.prongCount + Math.PI / side.prongCount;
+          const localAng = ang + side.ang;
+          addCurvedProng(
+            group, sideX, sideY, localAng,
+            side.prongPostR, side.prongTipR,
+            railZ, sideZ + side.crownH * 0.55,
+            side.prongRadius, 1, metal
+          );
+        }
+        // Under-bezel rail: sits directly under the pavilion instead of at
+        // the old prong-base height, and is tied back into the shoulder.
+        const bezel = new THREE.Mesh(
+          new THREE.TorusGeometry(side.gemR * 0.97, G.galleryRadius * 0.95, 12, 72), metal
+        );
+        bezel.position.set(sideX, sideY, railZ);
+        bezel.scale.y = G.prongScaleY;
+        group.add(bezel);
+        addShoulderRailSupports(
+          group,
+          sideX,
+          sideY,
+          side.ang,
+          shoulderPoint,
+          railZ,
+          side.gemR * 0.30,
+          G.galleryRadius * 0.72,
+          metal
+        );
+      });
+    } else if (style === "Tapered Baguette") {
+      // Two trapezoidal step-cut side stones flanking the center, tables
+      // coplanar with the center table. Classic 1950s engagement silhouette.
+      // Baguette is created as a flat hexagonal step-cut with tapered outline.
+      const bgRatio = 0.42;                        // baguette : center linear ratio
+      const bgHalfDia = G.meshHalfDia * bgRatio;
+      const bgGap = Math.max(0.020, G.gemR * 0.08);
+      // Distance from center stone girdle center to baguette girdle center.
+      const bgChord = G.gemR + bgHalfDia * 0.92 + bgGap;
+      const bgΔθ = 2 * Math.asin(Math.min(0.92, bgChord / (2 * G.bandMajorR)));
+      const bgAngles = [Math.PI / 2 + bgΔθ, Math.PI / 2 - bgΔθ];
+      bgAngles.forEach((ang, idx) => {
+        const shoulderPoint = getBandCrownPoint(ang, G.bandMajorR, G.bandWidth, G.bandHeight, style);
+        const bgRingR = G.bandTopY + bgHalfDia * 0.28;
+        const bx = Math.cos(ang) * bgRingR;
+        const by = Math.sin(ang) * bgRingR;
+        // Pavilion CULET (bz - bgHalfDia*0.72) must sit above the band's
+        // top face (shoulderPoint.z = bandTopZ) by an explicit clearance.
+        const bgCulet = Math.max(0.012, G.bandTopZ * 0.25);
+        const bgPavilionH = bgHalfDia * 0.72;
+        const bz = Math.max(
+          shoulderPoint.z + bgPavilionH + bgCulet,
+          G.gemPos.z - (G.pavilionH - bgPavilionH) * 0.2
+        );
+        const railZ = bz - bgHalfDia * 0.34;
+        // Build a tapered emerald-cut so the long edge is parallel to the band.
+        const bgMesh = new THREE.Mesh(createStepCutGeometry(bgHalfDia, "Emerald"), meleeMaterial);
+        bgMesh.position.set(bx, by, bz);
+        // Table faces world +Y (matches centre stone). Then spin around
+        // local Y by `ang` to orient the long edge tangent to the band,
+        // and a tiny lean (±3°) around local Z away from centre. Order:
+        // first lay the table flat to +Y (-π/2 X), then yaw the long axis.
+        bgMesh.rotation.set(-Math.PI / 2, ang - Math.PI / 2, (idx === 0 ? 1 : -1) * 0.05);
+        // Scale the outline narrow + long so it reads as a baguette, not square.
+        bgMesh.scale.set(0.55, 1.35, 1);
+        // (extra rotateY removed: the rotation.set above already encodes the
+        // outward lean and yaw — stacking a rotateY on top double-applied
+        // the yaw and produced tilted-table baguettes.)
+        bgMesh.castShadow = true;
+        bgMesh.userData.isGem = true;
+        group.add(bgMesh);
+        // Supported baguette gallery: a thin rectangular rail under the stone
+        // plus shoulder struts so the frame is welded into the shank.
+        const frameHalfW = bgHalfDia * 0.38;
+        const frameHalfH = bgHalfDia * 1.10;
+        const { pointAt } = addRectGalleryFrame(
+          group,
+          bx,
+          by,
+          ang,
+          railZ,
+          frameHalfW,
+          frameHalfH,
+          G.galleryRadius * 0.82,
+          metal
+        );
+        addShoulderRailSupports(
+          group,
+          bx,
+          by,
+          ang,
+          shoulderPoint,
+          railZ,
+          bgHalfDia * 0.26,
+          G.galleryRadius * 0.68,
+          metal
+        );
+        // 4 micro-prongs: each corner bead now has a real post rising from
+        // the gallery frame instead of a floating sphere.
+        const cornerOffsets = [
+          [-frameHalfW, frameHalfH],
+          [frameHalfW, frameHalfH],
+          [-frameHalfW, -frameHalfH],
+          [frameHalfW, -frameHalfH]
+        ];
+        cornerOffsets.forEach(([ox, oy]) => {
+          const base = pointAt(ox * 0.96, oy * 0.96, railZ);
+          const tip = pointAt(ox * 0.80, oy * 0.88, bz + bgHalfDia * 0.44);
+          group.add(makeCylinderBetween(base, tip, G.prongRadius * 0.52, metal));
+          const prong = new THREE.Mesh(
+            new THREE.SphereGeometry(G.prongRadius * 0.92, 16, 12), metal
+          );
+          prong.position.copy(tip);
+          group.add(prong);
+        });
+      });
+    } else if (style === "Twist") {
+      // Second entwined micro-band offset 180° in twist phase. The twist
+      // amplitude is taken from makeBandGeometry's `Math.sin(ang*3)*0.06`.
+      const twistBand = new THREE.Mesh(
+        makeBandGeometry(G.bandMajorR * 1.005, G.bandWidth * 0.55, G.bandHeight * 0.7, "Twist"),
+        metal
+      );
+      twistBand.rotation.z = Math.PI / 3; // phase shift so the two strands interleave
+      group.add(twistBand);
+    } else if (style === "Eternity") {
+      // Full circumference of melee — a continuous ring of light. Same
+      // top-mount + corner-bead treatment as pavé but wrapping 360° with
+      // a single dense row (the eternity standard).
+      const eternityCount = Math.max(28, Math.floor((Math.PI * 2 * G.bandMajorR) / (G.paveStoneSize * 1.95)));
+      const angles = [];
+      for (let i = 0; i < eternityCount; i += 1) {
+        const ang = (Math.PI * 2 * i) / eternityCount;
+        angles.push(ang);
+        const ex = Math.cos(ang) * G.bandMajorR;
+        const ey = Math.sin(ang) * G.bandMajorR;
+        group.add(makePaveSeat(ex, ey, G.bandTopZ + 0.001, G.paveStoneSize * 0.92, ang));
+        const gem = makeMeleeStone(G.paveStoneSize * 1.02, meleeMaterial);
+        gem.position.set(ex, ey, G.paveZ);
+        gem.rotation.set(0, 0, ang); // table-up
+        group.add(gem);
+      }
+      // Two bead rails (inner + outer girdle line), one bead per stone gap.
+      const beadZ = G.bandTopZ + G.paveBeadR * 0.55;
+      const innerR = G.bandMajorR - G.paveStoneSize * 0.48;
+      const outerR = G.bandMajorR + G.paveStoneSize * 0.48;
+      for (let i = 0; i < angles.length; i += 1) {
+        const next = (i + 1) % angles.length;
+        let a = (angles[i] + angles[next]) / 2;
+        if (next === 0) a += Math.PI;
+        group.add(makePaveBead(Math.cos(a) * innerR, Math.sin(a) * innerR, beadZ, G.paveBeadR, metal));
+        group.add(makePaveBead(Math.cos(a) * outerR, Math.sin(a) * outerR, beadZ, G.paveBeadR, metal));
+      }
+    } else if (style === "Bypass") {
+      // A second shank crossing the first at a slight pitch. The bypass
+      // band sits at a HAIR larger radius than the main shank so the two
+      // physically overlap (one crossing over the other) instead of
+      // intersecting through each other's metal volume.
+      const bypassBand = new THREE.Mesh(
+        makeBandGeometry(G.bandMajorR + G.bandWidth * 0.55, G.bandWidth * 0.75, G.bandHeight * 0.8, "Solitaire"),
+        metal
+      );
+      bypassBand.rotation.x = 0.22;
+      bypassBand.rotation.y = 0.14;
+      group.add(bypassBand);
+    }
+
+    // Accent (small scattered melee on the shank shoulders) — skip for
+    // styles that already cover the shoulder.
+    if (currentState.accent && style !== "Pavé" && style !== "Channel" && style !== "Three-Stone" && style !== "Eternity" && style !== "Tapered Baguette") {
+      // Side-stone density: Sparse halves the row, Dense adds 50 %.
+      const densityFactor = currentState.accentDensity === "Sparse" ? 0.5
+        : currentState.accentDensity === "Dense" ? 1.5
+        : 1;
+      const accentCount = Math.max(3, Math.round(10 * densityFactor));
+      const accentSize = 0.034 + G.W * 0.003;
+      const accentBeadR = accentSize * 0.34;
+      // Accent rows sit on the band shoulders. When a halo is active push
+      // them further from the head so the outer halo bezel doesn't crowd
+      // the first accent stone.
+      const accentStart = G.sideΔθ + (currentState.halo ? 0.32 : 0.18);
+      const accentEnd = Math.PI - accentStart;
+      const accentZ = G.bandTopZ - accentSize * 0.18; // sunk for seated look
+      const beadZ = G.bandTopZ + accentBeadR * 0.55;
+      const innerR = G.bandMajorR - accentSize * 0.45;
+      const outerR = G.bandMajorR + accentSize * 0.45;
+
+      [accentStart, -accentStart].forEach((shoulderStart) => {
+        const shoulderEnd = shoulderStart > 0 ? accentEnd : -accentEnd;
+        const angles = [];
+        for (let i = 0; i < accentCount; i += 1) {
+          const t = i / (accentCount - 1);
+          const ang = shoulderStart + (shoulderEnd - shoulderStart) * t;
+          angles.push(ang);
+          const ax = Math.cos(ang) * G.bandMajorR;
+          const ay = Math.sin(ang) * G.bandMajorR;
+          group.add(makePaveSeat(ax, ay, G.bandTopZ + 0.001, accentSize * 0.92, ang));
+          const gem = makeMeleeStone(accentSize, meleeMaterial);
+          gem.position.set(ax, ay, accentZ);
+          gem.rotation.set(0, 0, ang); // table-up, aligned to band tangent
+          group.add(gem);
+        }
+        // Corner beads on inner + outer rails at every gap.
+        for (let i = 0; i <= angles.length; i += 1) {
+          const a = (i === 0) ? angles[0] - (angles[1] - angles[0]) * 0.5
+                  : (i === angles.length) ? angles[angles.length - 1] + (angles[angles.length - 1] - angles[angles.length - 2]) * 0.5
+                  : (angles[i - 1] + angles[i]) * 0.5;
+          group.add(makePaveBead(Math.cos(a) * innerR, Math.sin(a) * innerR, beadZ, accentBeadR, metal));
+          group.add(makePaveBead(Math.cos(a) * outerR, Math.sin(a) * outerR, beadZ, accentBeadR, metal));
+        }
+      });
+    }
+
+    // Hidden Halo: a ring of melee mounted UNDER the center stone's girdle,
+    // visible only from profile / 3-quarter — the modern "surprise sparkle"
+    // trick used by Tiffany, Brian Gavin et al.
+    //
+    // Lives INSIDE headGroup so the halo rotates with the head; positions
+    // are in head-local coordinates. Each melee is tangent to the pavilion
+    // surface (the gem's outline at the appropriate z) instead of using a
+    // hardcoded 1.05*gemR which only matched a round center stone and left
+    // the melee floating for elongated cuts.
+    if (currentState.hiddenHalo) {
+      const hiddenStoneR = G.gemR * 0.09;
+      const hiddenZ      = G.gemPos.z - G.pavilionH * 0.22;
+      // Outline at z = hiddenZ is interpolated between girdle (full outline)
+      // and culet (point). z = girdle - 0.22*pavilionH → outline factor 0.78.
+      const pavilionFactor = 0.78;
+      const hiddenCount  = Math.max(16, Math.round((Math.PI * 2 * G.gemR * pavilionFactor) / (hiddenStoneR * 2.2)));
+      for (let i = 0; i < hiddenCount; i += 1) {
+        const ang = (Math.PI * 2 * i) / hiddenCount;
+        const [ox, oy] = outlineAt(currentState.shape, ang, G.gemR * pavilionFactor + hiddenStoneR + 0.006);
+        const gem = makeMeleeStone(hiddenStoneR, meleeMaterial);
+        // Position is in head-local; the headGroup rotation will bring it
+        // to world. Roll each gem so its table faces radially outward
+        // from the centre stone (visible in profile, hidden in plan view).
+        gem.position.set(ox, oy, hiddenZ);
+        gem.rotation.set(0, Math.PI / 2, ang);
+        headGroup.add(gem);
+      }
+    }
+
     group.rotation.x = -0.08;
     return enableShadows(group);
   }
 
   function buildNecklace() {
     const metal = materialForMetal();
+    const meleeMat = materialForStone();
     const group = new THREE.Group();
     const weight = weightValue();
     const beadSize = 0.052 * weight;
-    const stoneRadius = Number(currentState.size) * 0.2 * 1.08;
+    const silhouette = currentState.silhouette || "Pendant";
 
-    for (let index = 0; index < 42; index += 1) {
-      const t = index / 41;
-      const x = (t - 0.5) * 3.8;
-      const y = -0.48 - Math.cos((t - 0.5) * Math.PI) * 0.82;
+    // ----- chain curve (silhouette controls span + droop) -----
+    // Each silhouette uses a different parametric curve so the chain
+    // physically reads as a Y-drop, lariat, choker, etc.
+    const beadCount = silhouette === "Choker" ? 48 : silhouette === "Lariat" ? 56 : 42;
+    const spanX     = silhouette === "Choker" ? 2.6 : silhouette === "Lariat" ? 4.4 : 3.8;
+    const droop     = silhouette === "Choker" ? 0.42
+                    : silhouette === "Lariat" ? 1.05
+                    : silhouette === "Y-Drop" ? 0.92
+                    : 0.82;
+    const chainPath = []; // sampled (x,y) along chain, for station/lariat stones
+    for (let index = 0; index < beadCount; index += 1) {
+      const t = index / (beadCount - 1);
+      const x = (t - 0.5) * spanX;
+      // Lariat: asymmetric curve dipping deeper on one side, with both ends
+      // converging toward the front.
+      const dipShape = silhouette === "Lariat"
+        ? -Math.cos((t - 0.42) * Math.PI * 1.05)
+        : -Math.cos((t - 0.5) * Math.PI);
+      const y = -0.48 + dipShape * droop;
+      chainPath.push({ x, y });
       const bead = new THREE.Mesh(new THREE.SphereGeometry(beadSize, 18, 12), metal);
       bead.position.set(x, y, 0);
       group.add(bead);
     }
 
-    const bail = new THREE.Mesh(new THREE.TorusGeometry(0.15, 0.018 * weight, 16, 56), metal);
-    bail.position.set(0, -1.02, 0.06);
-    group.add(bail);
+    const lowest = chainPath.reduce((acc, p) => (p.y < acc.y ? p : acc), chainPath[0]);
+    // Real pendant assembly geometry:
+    //   chain bead (attachY) → bail (vertical loop, touches chain) → pendant
+    //   The bail must be a *vertical* torus (rotation.x = π/2) so you can see
+    //   THROUGH it; the previous flat-disc orientation read as a coin glued
+    //   between the chain and the gem. The pendant centre is derived from the
+    //   bail's actual outer rim so there's never a floating gap.
+    const placeFocalAt = (x, attachY, scale, addBail) => {
+      const focalScale = 1.08 * scale;
+      const stoneHalfDia = Number(currentState.size) * 0.24 * focalScale;
+      const settingR = stoneHalfDia * 1.06;
+      let focalY;
+      if (addBail) {
+        const bailR = 0.085 * scale;
+        const bailTube = 0.018 * weight;
+        const bail = new THREE.Mesh(new THREE.TorusGeometry(bailR, bailTube, 18, 64), metal);
+        // Bail top tangent to the chain bead (one bead-radius beneath attachY).
+        const bailCenterY = attachY - bailR - bailTube - beadSize * 0.35;
+        bail.position.set(x, bailCenterY, 0);
+        bail.rotation.x = Math.PI / 2; // vertical loop — see-through, faces camera
+        group.add(bail);
+        // Pendant crown (table top) sits just below bail's lower rim.
+        focalY = bailCenterY - bailR - bailTube - stoneHalfDia * 0.65;
+      } else {
+        // No bail: stone hangs directly from chain — table top kisses chain bead.
+        focalY = attachY - beadSize * 0.4 - stoneHalfDia * 0.9;
+      }
+      const pendant = makeStone(focalScale);
+      const pendantZ = 0.16;
+      pendant.position.set(x, focalY, pendantZ);
+      addSetting(group, x, focalY, pendantZ - stoneHalfDia * 0.18, settingR, {
+        scaleY: 0.92,
+        prongs: currentState.shape === "Pear" ? 5 : 6,
+        stoneSize: stoneHalfDia,
+        stoneZ: pendantZ
+      });
+      if (currentState.halo) {
+        // Halo girdle coplanar with pendant girdle (pendantZ). The old
+        // hardcoded z = 0.11 sat 0.05 BEHIND the pendant girdle (z = 0.16),
+        // which left the halo wrapping around the pavilion edge instead of
+        // ringing the table.
+        addHalo(group, x, focalY, settingR + 0.10 * scale, 18, pendantZ - stoneHalfDia * 0.04, 0.92);
+      }
+      addMilgrain(group, x, focalY, settingR + (currentState.halo ? 0.20 : 0.06), 32, pendantZ + stoneHalfDia * 0.02, 0.92);
+      group.add(pendant);
+    };
 
-    const pendant = makeStone(1.08);
-    pendant.position.set(0, -1.37, 0.16);
-    addSetting(group, 0, -1.37, 0.1, stoneRadius * 0.94, { scaleY: 0.92, prongs: currentState.shape === "Pear" ? 5 : 6 });
-    addHalo(group, 0, -1.37, stoneRadius + 0.12, 18, 0.11, 0.92);
-    addMilgrain(group, 0, -1.37, stoneRadius + (currentState.halo ? 0.21 : 0.07), 32, 0.16, 0.92);
-    group.add(pendant);
+    if (silhouette === "Choker") {
+      // Small centerpiece kissing the front of the chain, no bail.
+      placeFocalAt(lowest.x, lowest.y, 0.55, false);
+    } else if (silhouette === "Station") {
+      // Five accent stones evenly distributed across the chain, each
+      // bezel-set into the chain itself (no hanging).
+      const stations = 5;
+      for (let i = 0; i < stations; i += 1) {
+        const t = (i + 1) / (stations + 1);
+        const idx = Math.floor(t * (chainPath.length - 1));
+        const p = chainPath[idx];
+        const stationScale = 0.32;
+        const stationHalfDia = Number(currentState.size) * 0.24 * stationScale;
+        const stationZ = 0.08;
+        const stone = makeStone(stationScale);
+        stone.position.set(p.x, p.y, stationZ);
+        addSetting(group, p.x, p.y, stationZ - stationHalfDia * 0.18, stationHalfDia * 1.06, {
+          scaleY: 0.9, prongs: 4, stoneSize: stationHalfDia, stoneZ: stationZ
+        });
+        group.add(stone);
+      }
+    } else if (silhouette === "Y-Drop") {
+      // Bail at the bottom of the main chain, then a SHORT drop-chain of
+      // beads ending in the pendant. The bail is attached to the LAST drop
+      // bead — not floating between drop and pendant as before.
+      const dropTop = { x: lowest.x, y: lowest.y - 0.05 };
+      const drops = 8;
+      let lastDropBeadY = dropTop.y;
+      for (let i = 0; i < drops; i += 1) {
+        const t = (i + 1) / (drops + 1);
+        const by = dropTop.y - t * 0.42;
+        const bead = new THREE.Mesh(new THREE.SphereGeometry(beadSize * 0.78, 16, 10), metal);
+        bead.position.set(dropTop.x, by, 0);
+        group.add(bead);
+        lastDropBeadY = by;
+      }
+      placeFocalAt(dropTop.x, lastDropBeadY - beadSize * 0.78, 0.95, true);
+    } else if (silhouette === "Lariat") {
+      // Two pendants — one on each strand end, plus a knot-bead at the
+      // crossover point near the front. Stones hang DIRECTLY off the chain
+      // ends (no bail) like a real lariat.
+      const knot = new THREE.Mesh(new THREE.SphereGeometry(beadSize * 1.6, 18, 14), metal);
+      knot.position.set(lowest.x, lowest.y, 0.05);
+      group.add(knot);
+      const left  = chainPath[Math.floor(chainPath.length * 0.08)];
+      const right = chainPath[Math.floor(chainPath.length * 0.92)];
+      placeFocalAt(left.x,  left.y,  0.55, false);
+      placeFocalAt(right.x, right.y, 0.55, false);
+    } else {
+      // Pendant (default): bail at the lowest chain bead, gem hangs from bail.
+      placeFocalAt(lowest.x, lowest.y, 1.0, true);
+    }
+
     group.scale.setScalar(1.18);
     return enableShadows(group);
   }
@@ -1421,18 +5298,164 @@ async function createThreeStudio(root, canvas) {
     const metal = materialForMetal();
     const group = new THREE.Group();
     const weight = weightValue();
-    const stoneRadius = Number(currentState.size) * 0.2 * 0.78;
-    const band = new THREE.Mesh(new THREE.TorusGeometry(1.42, 0.06 * weight, 40, 190), metal);
-    const stone = makeStone(0.78);
+    const silhouette = currentState.silhouette || "Bangle";
+    const majorR = 1.42;
+    const tube = 0.06 * weight;
+    // Band-front-top transform: where a focal stone sits on a tilted/scaled
+    // bangle. The band is a torus(majorR, tube) in XY with scale.y = 0.62
+    // then rotation.x = 0.24. The top of the band centreline in band-local
+    // (un-rotated) coords is (0, majorR * 0.62, 0); apply rotation.x = 0.24
+    // to land in world space and add an outward offset of (tube + stoneR)
+    // along the same rotated normal so the gem rests ON the band surface,
+    // not floating in front of it. This is the bug the user pointed out —
+    // gem (1.04, 0.43, 0.2) was at radius ≈ 1.13 while band centreline at
+    // that angle was at world y ≈ 0.583. Now snap to band-local top.
+    const bandTiltX = 0.24;
+    const cosT = Math.cos(bandTiltX);
+    const sinT = Math.sin(bandTiltX);
+    const bandTopLocal = new THREE.Vector3(0, majorR * 0.62, 0);
+    const bandTopWorld = new THREE.Vector3(
+      bandTopLocal.x,
+      bandTopLocal.y * cosT,
+      bandTopLocal.y * sinT
+    );
 
-    band.scale.y = 0.62;
-    band.rotation.x = 0.24;
-    stone.position.set(1.04, 0.43, 0.2);
-    addSetting(group, 1.04, 0.43, 0.13, stoneRadius * 0.96, { scaleY: 0.86, prongs: currentState.shape === "Pear" ? 5 : 6 });
-    addHalo(group, 1.04, 0.43, stoneRadius + 0.1, 16, 0.14, 0.86);
-    addMilgrain(group, 1.04, 0.43, stoneRadius + (currentState.halo ? 0.2 : 0.06), 28, 0.18, 0.86);
-    addAccentStones(group, 1.42, 26, { scaleY: 0.62, z: 0.14, size: 0.038, start: Math.PI * 0.06, end: Math.PI * 0.94 });
-    group.add(band, stone);
+    if (silhouette === "Cuff") {
+      // Open cuff: 3/4-arc tube with rounded end caps.
+      const arc = Math.PI * 1.55; // ~280° (open at the back)
+      const curve = new THREE.Curve();
+      curve.getPoint = (t) => {
+        const a = -arc / 2 + t * arc;
+        return new THREE.Vector3(Math.cos(a) * majorR, Math.sin(a) * majorR * 0.62, 0);
+      };
+      const band = new THREE.Mesh(new THREE.TubeGeometry(curve, 120, tube * 1.15, 18, false), metal);
+      band.rotation.x = bandTiltX;
+      group.add(band);
+      // Rounded caps at the open ends.
+      [-arc / 2, arc / 2].forEach((a) => {
+        const cap = new THREE.Mesh(new THREE.SphereGeometry(tube * 1.18, 18, 14), metal);
+        cap.position.set(Math.cos(a) * majorR, Math.sin(a) * majorR * 0.62, 0);
+        cap.rotation.x = bandTiltX;
+        group.add(cap);
+      });
+      // Center stone perched on the band top.
+      const cuffScale = 0.78;
+      const cuffHalfDia = Number(currentState.size) * 0.24 * cuffScale;
+      const settingR = cuffHalfDia * 1.06;
+      const offset = tube * 1.15 + cuffHalfDia * 0.35;
+      const sx = 0;
+      const sy = bandTopWorld.y + cosT * offset;
+      const sz = bandTopWorld.z + sinT * offset;
+      const stone = makeStone(cuffScale);
+      stone.position.set(sx, sy, sz);
+      addSetting(group, sx, sy, sz - cuffHalfDia * 0.4, settingR, {
+        scaleY: 0.92, prongs: 6, stoneSize: cuffHalfDia, stoneZ: sz
+      });
+      if (currentState.halo) addHalo(group, sx, sy, settingR + 0.09, 16, sz - 0.02, 0.92);
+      group.add(stone);
+    } else if (silhouette === "Tennis") {
+      // Continuous loop of prong-set stones along a flattened ellipse.
+      // Each link has its own correctly-sized basket; adjacent baskets are
+      // joined by tiny metal link bars at gallery-rail height.
+      const links = 36;
+      const tennisScale = 0.18;
+      const tennisHalfDia = Number(currentState.size) * 0.24 * tennisScale;
+      const settingR = tennisHalfDia * 1.08;
+      const positions = [];
+      for (let i = 0; i < links; i += 1) {
+        const a = (i / links) * Math.PI * 2;
+        const x = Math.cos(a) * majorR;
+        const y = Math.sin(a) * majorR * 0.62;
+        positions.push({ x, y });
+        const stone = makeStone(tennisScale);
+        const tennisZ = tennisHalfDia * 0.4;
+        stone.position.set(x, y, tennisZ);
+        addSetting(group, x, y, tennisZ - tennisHalfDia * 0.5, settingR, {
+          scaleY: 0.85, prongs: 4, stoneSize: tennisHalfDia, stoneZ: tennisZ
+        });
+        group.add(stone);
+      }
+      // Articulation link bars below the baskets so the bracelet reads as
+      // chain-jointed, not a row of floating mounts.
+      for (let i = 0; i < links; i += 1) {
+        const a = positions[i];
+        const b = positions[(i + 1) % links];
+        group.add(makeCylinderBetween(
+          new THREE.Vector3(a.x, a.y, -tennisHalfDia * 0.6),
+          new THREE.Vector3(b.x, b.y, -tennisHalfDia * 0.6),
+          0.014,
+          metal
+        ));
+      }
+    } else if (silhouette === "Station") {
+      // Plain band with five small stones spaced around the front arc, each
+      // truly seated on the band (computed against band's tilted normal).
+      const band = new THREE.Mesh(new THREE.TorusGeometry(majorR, tube, 40, 190), metal);
+      band.scale.y = 0.62;
+      band.rotation.x = bandTiltX;
+      group.add(band);
+      const stations = 5;
+      const startA = Math.PI * 0.22;
+      const endA   = Math.PI * 0.78;
+      const stationScale = 0.32;
+      const stationHalfDia = Number(currentState.size) * 0.24 * stationScale;
+      const settingR = stationHalfDia * 1.06;
+      const offset = tube + stationHalfDia * 0.35;
+      for (let i = 0; i < stations; i += 1) {
+        const t = i / (stations - 1);
+        const a = startA + t * (endA - startA);
+        // Position on tilted band: local (cos a * majorR, sin a * majorR * .62, 0)
+        // rotated by bandTiltX around X, then offset outward by `offset` along
+        // the rotated band normal at that point.
+        const lx = Math.cos(a) * majorR;
+        const ly = Math.sin(a) * majorR * 0.62;
+        const wy = ly * cosT;
+        const wz = ly * sinT;
+        // Outward normal at the top of a tilted torus is approximately
+        // (sign(x)*0, cosT, sinT) — same direction as band-top normal, since
+        // all stations sit on the upper arc.
+        const sx = lx;
+        const sy = wy + cosT * offset;
+        const sz = wz + sinT * offset;
+        const stone = makeStone(stationScale);
+        stone.position.set(sx, sy, sz);
+        addSetting(group, sx, sy, sz - stationHalfDia * 0.4, settingR, {
+          scaleY: 0.9, prongs: 4, stoneSize: stationHalfDia, stoneZ: sz
+        });
+        group.add(stone);
+      }
+    } else {
+      // Default: Bangle — single solid band with a focal stone on the top.
+      const band = new THREE.Mesh(new THREE.TorusGeometry(majorR, tube, 40, 190), metal);
+      band.scale.y = 0.62;
+      band.rotation.x = bandTiltX;
+      group.add(band);
+      const bangleScale = 0.78;
+      const bangleHalfDia = Number(currentState.size) * 0.24 * bangleScale;
+      const settingR = bangleHalfDia * 1.06;
+      const offset = tube + bangleHalfDia * 0.35;
+      const sx = 0;
+      const sy = bandTopWorld.y + cosT * offset;
+      const sz = bandTopWorld.z + sinT * offset;
+      const stone = makeStone(bangleScale);
+      stone.position.set(sx, sy, sz);
+      addSetting(group, sx, sy, sz - bangleHalfDia * 0.4, settingR, {
+        scaleY: 0.92,
+        prongs: currentState.shape === "Pear" ? 5 : 6,
+        stoneSize: bangleHalfDia,
+        stoneZ: sz
+      });
+      if (currentState.halo) addHalo(group, sx, sy, settingR + 0.09, 16, sz - 0.02, 0.92);
+      addMilgrain(group, sx, sy, settingR + (currentState.halo ? 0.18 : 0.05), 28, sz - 0.04, 0.92);
+      if (currentState.accent) {
+        addAccentStones(group, majorR, 26, {
+          scaleY: 0.62, z: tube * 0.6, size: 0.038,
+          start: Math.PI * 0.06, end: Math.PI * 0.94
+        });
+      }
+      group.add(stone);
+    }
+
     group.rotation.z = -0.18;
     return enableShadows(group);
   }
@@ -1441,22 +5464,124 @@ async function createThreeStudio(root, canvas) {
     const group = new THREE.Group();
     const metal = materialForMetal();
     const weight = weightValue();
-    const stoneRadius = Number(currentState.size) * 0.2 * 0.88;
+    const silhouette = currentState.silhouette || "Stud";
 
     [-0.76, 0.76].forEach((x) => {
-      const earring = makeStone(0.88);
-      const post = new THREE.Mesh(new THREE.CylinderGeometry(0.018 * weight, 0.018 * weight, 0.34, 14), metal);
-      const backing = new THREE.Mesh(new THREE.TorusGeometry(0.11, 0.014 * weight, 14, 42), metal);
+      if (silhouette === "Huggie") {
+        // A small hoop hugging the earlobe, with a single accent stone at
+        // the bottom-front of the hoop (positioned ON the torus tube).
+        const hoopR = 0.32;
+        const hoopTube = 0.038 * weight;
+        const hoop = new THREE.Mesh(new THREE.TorusGeometry(hoopR, hoopTube, 18, 64), metal);
+        hoop.position.set(x, 0, 0);
+        group.add(hoop);
+        const huggieScale = 0.45;
+        const huggieHalfDia = Number(currentState.size) * 0.24 * huggieScale;
+        const huggieY = -hoopR + hoopTube * 0.4;
+        const stone = makeStone(huggieScale);
+        const huggieZ = hoopTube + huggieHalfDia * 0.5;
+        stone.position.set(x, huggieY, huggieZ);
+        addSetting(group, x, huggieY, huggieZ - huggieHalfDia * 0.5, huggieHalfDia * 1.06, {
+          scaleY: 0.9, prongs: 4, stoneSize: huggieHalfDia, stoneZ: huggieZ
+        });
+        group.add(stone);
+        return;
+      }
 
-      earring.position.set(x, 0, 0.18);
-      post.position.set(x, -0.34, -0.08);
-      post.rotation.x = Math.PI / 2;
-      backing.position.set(x, -0.35, -0.2);
-      group.add(earring);
-      addSetting(group, x, 0, 0.12, stoneRadius * 0.94, { scaleY: 0.9, prongs: currentState.shape === "Pear" ? 5 : 6 });
-      addHalo(group, x, 0, stoneRadius + 0.11, 16, 0.13, 0.9);
-      addMilgrain(group, x, 0, stoneRadius + (currentState.halo ? 0.2 : 0.06), 28, 0.18, 0.9);
+      // ---- post + butterfly back ----
+      // Stud: post extends STRAIGHT BEHIND the stone (into the lobe).
+      // Drop / Chandelier: post sits at the TOP of the earring at the lobe;
+      // the stone hangs BELOW the post via a connecting link + jump ring.
+      const isDrop = silhouette === "Drop" || silhouette === "Chandelier";
+      const earringScale = 0.88;
+      const earringHalfDia = Number(currentState.size) * 0.24 * earringScale;
+      const settingR = earringHalfDia * 1.06;
+      const stoneY = isDrop ? -0.42 : 0;
+      const postAttachY = isDrop ? 0 : stoneY; // where the post pierces the lobe
+      const postRadius = 0.018 * weight;
+      const postLength = 0.34;
+      const post = new THREE.Mesh(
+        new THREE.CylinderGeometry(postRadius, postRadius, postLength, 16),
+        metal
+      );
+      post.position.set(x, postAttachY, -postLength * 0.5 - earringHalfDia * 0.2);
+      post.rotation.x = Math.PI / 2; // cylinder axis along Z (into the lobe)
+      const backing = new THREE.Mesh(
+        new THREE.TorusGeometry(0.07, 0.014 * weight, 18, 48),
+        metal
+      );
+      backing.position.set(x, postAttachY, -postLength - earringHalfDia * 0.2 + 0.02);
+      backing.rotation.y = Math.PI / 2; // ring lies in YZ plane → faces along X... want it parallel to lobe (XY plane facing -Z)
+      // Actually we want the butterfly ring co-planar with the lobe (so its
+      // hole receives the post). Default torus is in the XY plane (axis = Z),
+      // which IS what we want for a back facing the post's Z-axis. Reset rot:
+      backing.rotation.set(0, 0, 0);
       group.add(post, backing);
+
+      if (isDrop) {
+        // Vertical connecting link from post (at y=0) down to stone top.
+        const linkTopY = postAttachY - 0.04;
+        const linkBotY = stoneY + earringHalfDia * 0.9;
+        const linkLen = Math.max(0.05, linkTopY - linkBotY);
+        const link = new THREE.Mesh(
+          new THREE.CylinderGeometry(0.014 * weight, 0.014 * weight, linkLen, 14),
+          metal
+        );
+        link.position.set(x, (linkTopY + linkBotY) / 2, 0.06);
+        group.add(link);
+        // Vertical jump ring at the top (between post and link).
+        const jumpR = 0.04;
+        const jump = new THREE.Mesh(
+          new THREE.TorusGeometry(jumpR, 0.012 * weight, 16, 40), metal
+        );
+        jump.position.set(x, postAttachY - jumpR, 0.04);
+        jump.rotation.x = Math.PI / 2;
+        group.add(jump);
+      }
+
+      const earring = makeStone(earringScale);
+      const earringZ = 0.18;
+      earring.position.set(x, stoneY, earringZ);
+      group.add(earring);
+      addSetting(group, x, stoneY, earringZ - earringHalfDia * 0.4, settingR, {
+        scaleY: 0.9,
+        prongs: currentState.shape === "Pear" ? 5 : 6,
+        stoneSize: earringHalfDia,
+        stoneZ: earringZ
+      });
+      if (currentState.halo) {
+        addHalo(group, x, stoneY, settingR + 0.10, 16, 0.13, 0.9);
+      }
+      addMilgrain(group, x, stoneY, settingR + (currentState.halo ? 0.20 : 0.06), 28, 0.18, 0.9);
+
+      if (silhouette === "Chandelier") {
+        // Three small teardrops dangling beneath the main stone, tied to it
+        // with thin metal links so they read as articulated.
+        const teardropScale = 0.34;
+        const teardropHalfDia = Number(currentState.size) * 0.24 * teardropScale;
+        const tetraYOffsets = [-0.36, -0.44, -0.36];
+        [-0.16, 0, 0.16].forEach((dx, i) => {
+          const tdY = stoneY + tetraYOffsets[i];
+          const teardropZ = 0.12;
+          const teardrop = makeStone(teardropScale);
+          teardrop.position.set(x + dx, tdY, teardropZ);
+          group.add(teardrop);
+          addSetting(group, x + dx, tdY, teardropZ - teardropHalfDia * 0.5, teardropHalfDia * 1.06, {
+            scaleY: 0.9, prongs: 4, stoneSize: teardropHalfDia, stoneZ: teardropZ
+          });
+          // Thin link from main stone bottom edge down to teardrop top edge.
+          const linkTopY = stoneY - earringHalfDia * 0.95;
+          const linkBotY = tdY + teardropHalfDia * 0.95;
+          if (linkTopY > linkBotY) {
+            const lk = new THREE.Mesh(
+              new THREE.CylinderGeometry(0.010 * weight, 0.010 * weight, linkTopY - linkBotY, 12),
+              metal
+            );
+            lk.position.set(x + dx * 0.6, (linkTopY + linkBotY) / 2, 0.10);
+            group.add(lk);
+          }
+        });
+      }
     });
 
     return enableShadows(group);
@@ -1465,6 +5590,10 @@ async function createThreeStudio(root, canvas) {
   function rebuild(state) {
     currentState = state;
     clearModel();
+    applyLightingMode(currentState.lighting);
+    applyBackdrop(currentState.backdrop);
+    applyView(currentState.view);
+    applyPieceOptionVisibility(currentState.piece);
 
     const builders = {
       Ring: buildRing,
@@ -1473,9 +5602,28 @@ async function createThreeStudio(root, canvas) {
       Earrings: buildEarrings
     };
 
-    model.add((builders[currentState.piece] || buildRing)());
-    model.scale.setScalar(currentState.piece === "Ring" ? 0.64 : currentState.piece === "Earrings" ? 0.84 : 0.76);
-    model.position.set(currentState.piece === "Necklace" ? -0.28 : currentState.piece === "Earrings" ? -0.2 : -0.58, currentState.piece === "Necklace" ? 0.08 : 0, 0);
+    const pieceGroup = (builders[currentState.piece] || buildRing)();
+    model.add(pieceGroup);
+    model.scale.setScalar(
+      currentState.piece === "Ring" ? 0.64
+      : currentState.piece === "Earrings" ? 0.84
+      : currentState.piece === "Necklace" ? 0.62
+      : 0.76
+    );
+    // Centre necklace in the viewer panel; other pieces retain the historic
+    // slight left offset that lived alongside the older overlay editor.
+    const defaultX = currentState.piece === "Necklace" ? 0
+      : currentState.piece === "Earrings" ? -0.2
+      : -0.58;
+    // Necklace hangs from the top of the frame so the pendant floats free
+    // above the plinth instead of resting on it.
+    const defaultY = currentState.piece === "Necklace" ? 1.45 : 0;
+    model.userData.defaultX = defaultX;
+    model.userData.defaultY = defaultY;
+    // In inspect mode keep the piece at its natural vertical position so a
+    // necklace doesn't drop out of view; centre horizontally so the piece
+    // sits in the middle of the loupe view.
+    model.position.set(isInspecting ? 0 : defaultX, defaultY, 0);
     resize();
   }
 
@@ -1492,30 +5640,173 @@ async function createThreeStudio(root, canvas) {
     });
   }
 
-  function animate(time = 0) {
-    if (!isDragging) {
-      targetRotationY += 0.0016;
+  function clamp(value, min, max) {
+    return Math.max(min, Math.min(max, value));
+  }
+
+  function getPointerDistance() {
+    const pointers = Array.from(activePointers.values());
+
+    if (pointers.length < 2) {
+      return 0;
     }
 
-    const idleLift = Math.sin(time * 0.00028) * 0.035;
-    model.rotation.y += (targetRotationY + Math.sin(time * 0.00035) * 0.08 - model.rotation.y) * 0.08;
+    return Math.hypot(pointers[0].x - pointers[1].x, pointers[0].y - pointers[1].y);
+  }
+
+  function setInspectMode(enabled) {
+    isInspecting = Boolean(enabled);
+    activePointers.clear();
+    isDragging = false;
+    lastPinchDistance = 0;
+    if (!isInspecting) {
+      isAutoOrbiting = false;
+    }
+    // Pull camera in for inspect; restore on exit.
+    targetCameraZ = isInspecting ? Math.min(targetCameraZ, 4.6) : cameraHomeZ;
+    root.classList.toggle("is-inspecting", isInspecting);
+    // Inspect mode gets a touch more punch — like a jeweller's loupe lamp.
+    renderer.toneMappingExposure = isInspecting ? 1.18 : 1.05;
+    // Hide stage fixtures so the piece floats in pure black during inspect.
+    floor.visible = !isInspecting;
+    plinth.visible = !isInspecting;
+    glassPlate.visible = !isInspecting;
+    softboxes.forEach((s) => { s.visible = !isInspecting; });
+    contactShadow.visible = true; // keep the soft grounding shadow
+    // Resize on next frame so the canvas picks up the new (fullscreen or
+    // normal) bounding box.
+    window.requestAnimationFrame(() => {
+      resize();
+      window.requestAnimationFrame(resize);
+    });
+  }
+
+  function setAutoOrbit(enabled) {
+    isAutoOrbiting = Boolean(enabled);
+  }
+
+  function resetView() {
+    targetRotationX = 0.03;
+    targetRotationY = -0.18;
+    inspectPanX = 0;
+    inspectPanY = 0;
+    targetCameraZ = isInspecting ? 4.6 : cameraHomeZ;
+  }
+
+  function takeScreenshot(filename = "jewellery-design.png") {
+    // Re-render once with preserveDrawingBuffer = true (set at construction)
+    // so the canvas still has pixels to read.
+    renderer.render(scene, camera);
+    try {
+      const url = renderer.domElement.toDataURL("image/png");
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      return true;
+    } catch (error) {
+      return false;
+    }
+  }
+
+  function setReadoutListener(fn) {
+    onReadoutChange = typeof fn === "function" ? fn : null;
+    lastReadoutKey = "";
+  }
+
+  function animate(time = 0) {
+    if (!isDragging && (!isInspecting || isAutoOrbiting)) {
+      // Faster orbit while inspect+auto, gentle drift otherwise.
+      targetRotationY += isAutoOrbiting ? 0.006 : (isInspecting ? 0 : 0.0016);
+    }
+
+    const idleLift = (isInspecting && !isAutoOrbiting) ? 0 : Math.sin(time * 0.00028) * 0.035;
+    const idleTurn = (isInspecting && !isAutoOrbiting) ? 0 : Math.sin(time * 0.00035) * 0.08;
+
+    // Smoothly center the model in inspect mode; restore offset on exit.
+    // Inspect mode uses the piece's natural Y (e.g. a necklace's hanging
+    // height) as the baseline so pieces don't drop out of view, and the
+    // inspect pan offsets ride on top of that baseline.
+    const baseX = model.userData.defaultX ?? 0;
+    const baseY = model.userData.defaultY ?? 0;
+    const targetX = isInspecting ? inspectPanX : baseX;
+    const targetY = isInspecting ? (baseY + inspectPanY) : baseY;
+    model.position.x += (targetX - model.position.x) * 0.1;
+    model.position.y += (targetY - model.position.y) * 0.1;
+
+    // Push live camera/rotation readout to subscribers (HUD).
+    if (onReadoutChange) {
+      const rxDeg = Math.round((model.rotation.x * 180 / Math.PI + 360) % 360);
+      const ryDeg = Math.round((model.rotation.y * 180 / Math.PI + 360) % 360);
+      const zoom = (cameraHomeZ / Math.max(0.001, camera.position.z)).toFixed(2);
+      const key = `${rxDeg}|${ryDeg}|${zoom}`;
+      if (key !== lastReadoutKey) {
+        lastReadoutKey = key;
+        onReadoutChange({ rx: rxDeg, ry: ryDeg, zoom });
+      }
+    }
+    model.rotation.y += (targetRotationY + idleTurn - model.rotation.y) * 0.08;
     model.rotation.x += (targetRotationX + idleLift - model.rotation.x) * 0.08;
+    camera.position.z += (targetCameraZ - camera.position.z) * 0.1;
+    camera.position.y += ((isInspecting ? 0.5 : 0.62) - camera.position.y) * 0.08;
+    camera.lookAt(0, 0, 0);
     sparkle.rotation.y += 0.0018;
     sparkle.rotation.x = Math.sin(time * 0.00018) * 0.08;
+
+    // Slowly rotate the environment so the metal's reflections live and breathe.
+    // Faster spin in inspect for showier highlights. envMapRotation needs Three r152+.
+    if (scene.environment && scene.environmentRotation) {
+      scene.environmentRotation.y += isInspecting ? 0.0024 : 0.0009;
+    }
+    caustics.rotation.z += 0.00035;
+    reflection.rotation.z -= 0.00018;
+    softboxes[0].material.opacity += (0.14 + Math.sin(time * 0.0009) * 0.018 - softboxes[0].material.opacity) * 0.04;
+    softboxes[2].material.opacity += (0.11 + Math.sin(time * 0.0012 + 1.4) * 0.014 - softboxes[2].material.opacity) * 0.04;
     animateScintillation(time);
     renderer.render(scene, camera);
     frameId = window.requestAnimationFrame(animate);
   }
 
   function onPointerDown(event) {
+    if (!isInspecting) {
+      return;
+    }
+
+    event.preventDefault();
+    activePointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
     isDragging = true;
     lastPointerX = event.clientX;
     lastPointerY = event.clientY;
+    lastPinchDistance = getPointerDistance();
     canvas.setPointerCapture?.(event.pointerId);
   }
 
   function onPointerMove(event) {
+    if (!isInspecting || !activePointers.has(event.pointerId)) {
+      return;
+    }
+
+    event.preventDefault();
+    activePointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+
+    if (activePointers.size >= 2) {
+      const pinchDistance = getPointerDistance();
+
+      if (lastPinchDistance) {
+        targetCameraZ = clamp(targetCameraZ - (pinchDistance - lastPinchDistance) * 0.012, cameraMinZ, cameraMaxZ);
+      }
+
+      lastPinchDistance = pinchDistance;
+      isDragging = false;
+      return;
+    }
+
     if (!isDragging) {
+      isDragging = true;
+      lastPointerX = event.clientX;
+      lastPointerY = event.clientY;
       return;
     }
 
@@ -1524,14 +5815,37 @@ async function createThreeStudio(root, canvas) {
     const deltaX = (event.clientX - lastPointerX) / width;
     const deltaY = (event.clientY - lastPointerY) / height;
 
-    targetRotationY += deltaX * 3.2;
-    targetRotationX = Math.max(-0.42, Math.min(0.42, targetRotationX + deltaY * 1.8));
+    // Shift / right-button / middle-button drag = PAN along the Y axis
+    // (and X for completeness). Regular drag = orbit. This gives Inspect 3D
+    // a true vertical axis so you can travel up the side of the ring or
+    // down past the gallery.
+    const panMode = event.shiftKey || event.buttons === 2 || event.buttons === 4;
+    if (panMode) {
+      const panScale = 2.2;
+      inspectPanX = clamp(inspectPanX + deltaX * panScale, -1.6, 1.6);
+      inspectPanY = clamp(inspectPanY - deltaY * panScale, -1.8, 1.8);
+    } else {
+      targetRotationY += deltaX * 3.2;
+      // Expanded tilt range so the user can look straight down at the top
+      // of the band or up under the gallery (was ±0.42 rad ≈ 24°).
+      targetRotationX = clamp(targetRotationX + deltaY * 2.4, -1.45, 1.45);
+    }
     lastPointerX = event.clientX;
     lastPointerY = event.clientY;
   }
 
   function onPointerUp(event) {
-    isDragging = false;
+    activePointers.delete(event.pointerId);
+    lastPinchDistance = getPointerDistance();
+
+    if (activePointers.size === 1) {
+      const pointer = activePointers.values().next().value;
+      lastPointerX = pointer.x;
+      lastPointerY = pointer.y;
+      isDragging = true;
+    } else {
+      isDragging = false;
+    }
 
     try {
       canvas.releasePointerCapture?.(event.pointerId);
@@ -1540,11 +5854,72 @@ async function createThreeStudio(root, canvas) {
     }
   }
 
+  function onWheel(event) {
+    if (!isInspecting) {
+      return;
+    }
+
+    event.preventDefault();
+    targetCameraZ = clamp(targetCameraZ + event.deltaY * 0.0038, cameraMinZ, cameraMaxZ);
+  }
+
+  // Suppress the browser context menu so right-button drag can be used as
+  // a pan gesture without a menu popping up over the canvas.
+  function onContextMenu(event) {
+    if (isInspecting) event.preventDefault();
+  }
+
+  // Keyboard nudges while inspecting: arrows tilt/orbit, Shift+arrows pan
+  // along Y/X, +/- zoom. Gives keyboard users a path to the same vertical
+  // axis the mouse now provides.
+  function onKeyDown(event) {
+    if (!isInspecting) return;
+    if (event.target && (event.target.tagName === "INPUT" || event.target.tagName === "TEXTAREA" || event.target.isContentEditable)) return;
+    const step = event.shiftKey ? 0.18 : 0.08;
+    switch (event.key) {
+      case "ArrowUp":
+        if (event.shiftKey) inspectPanY = clamp(inspectPanY + step, -1.8, 1.8);
+        else targetRotationX = clamp(targetRotationX - step, -1.45, 1.45);
+        event.preventDefault();
+        break;
+      case "ArrowDown":
+        if (event.shiftKey) inspectPanY = clamp(inspectPanY - step, -1.8, 1.8);
+        else targetRotationX = clamp(targetRotationX + step, -1.45, 1.45);
+        event.preventDefault();
+        break;
+      case "ArrowLeft":
+        if (event.shiftKey) inspectPanX = clamp(inspectPanX - step, -1.6, 1.6);
+        else targetRotationY -= step;
+        event.preventDefault();
+        break;
+      case "ArrowRight":
+        if (event.shiftKey) inspectPanX = clamp(inspectPanX + step, -1.6, 1.6);
+        else targetRotationY += step;
+        event.preventDefault();
+        break;
+      case "+":
+      case "=":
+        targetCameraZ = clamp(targetCameraZ - 0.25, cameraMinZ, cameraMaxZ);
+        event.preventDefault();
+        break;
+      case "-":
+      case "_":
+        targetCameraZ = clamp(targetCameraZ + 0.25, cameraMinZ, cameraMaxZ);
+        event.preventDefault();
+        break;
+      default:
+        break;
+    }
+  }
+
   canvas.addEventListener("pointerdown", onPointerDown);
   canvas.addEventListener("pointermove", onPointerMove);
   canvas.addEventListener("pointerup", onPointerUp);
   canvas.addEventListener("pointercancel", onPointerUp);
   canvas.addEventListener("pointerleave", onPointerUp);
+  canvas.addEventListener("wheel", onWheel, { passive: false });
+  canvas.addEventListener("contextmenu", onContextMenu);
+  window.addEventListener("keydown", onKeyDown);
   window.addEventListener("resize", resize);
   rebuild(currentState);
   animate();
@@ -1552,6 +5927,13 @@ async function createThreeStudio(root, canvas) {
   return {
     renderer: "three",
     update: rebuild,
+    setInspectMode,
+    setAutoOrbit,
+    resetView,
+    takeScreenshot,
+    setReadoutListener,
+    isAutoOrbiting: () => isAutoOrbiting,
+    isInspecting: () => isInspecting,
     destroy() {
       window.cancelAnimationFrame(frameId);
       canvas.removeEventListener("pointerdown", onPointerDown);
@@ -1559,6 +5941,9 @@ async function createThreeStudio(root, canvas) {
       canvas.removeEventListener("pointerup", onPointerUp);
       canvas.removeEventListener("pointercancel", onPointerUp);
       canvas.removeEventListener("pointerleave", onPointerUp);
+      canvas.removeEventListener("wheel", onWheel);
+      canvas.removeEventListener("contextmenu", onContextMenu);
+      window.removeEventListener("keydown", onKeyDown);
       window.removeEventListener("resize", resize);
       disposableTextures.forEach((texture) => texture.dispose());
       renderer.dispose();
@@ -1576,6 +5961,9 @@ function createFallbackStudio(root, fallback, mainCanvas) {
     renderer: "fallback",
     update(state) {
       drawFallback(canvas, state);
+    },
+    setInspectMode(enabled) {
+      root.classList.toggle("is-inspecting", Boolean(enabled));
     }
   };
 }
@@ -1592,21 +5980,36 @@ function recordCanvasState(root, canvas, rendererName) {
   });
 }
 
-async function setupDesigner() {
-  const root = document.querySelector("[data-design-studio]");
-
+async function setupDesigner(root = document.querySelector("[data-design-studio]")) {
   if (!root) {
     return;
   }
+
+  if (root.dataset.designerReady === "true") {
+    return;
+  }
+
+  root.dataset.designerReady = "loading";
 
   const canvas = root.querySelector("[data-designer-canvas]");
   const fallback = root.querySelector("[data-designer-fallback]");
   const controls = root.querySelector("[data-designer-controls]");
   const sendButton = root.querySelector("[data-send-design]");
+  const saveButton = root.querySelector("[data-save-design]");
+  const shareButton = root.querySelector("[data-share-design]");
+  const compareButton = root.querySelector("[data-compare-design]");
+  const inspectButton = root.querySelector("[data-inspect-design]");
+  const randomizeButton = root.querySelector("[data-randomize-design]");
+  const undoButton = root.querySelector("[data-undo-design]");
+  const redoButton = root.querySelector("[data-redo-design]");
+  const downloadButton = root.querySelector("[data-download-design]");
+  const presetButtons = root.querySelectorAll("[data-designer-preset]");
+  const status = root.querySelector("[data-designer-share-status]");
   let studio = null;
 
-  setInitialPiece(root);
+  setInitialDesignState(root);
   setSummary(root, getState(root));
+  updateDesignerSmartDetails(root, getState(root));
 
   try {
     studio = await createThreeStudio(root, canvas);
@@ -1618,12 +6021,324 @@ async function setupDesigner() {
   const update = () => {
     const state = getState(root);
     setSummary(root, state);
+    updateDesignerSmartDetails(root, state);
+    writeStoredDesignState(DESIGN_STORAGE_KEY, state);
     studio.update(state);
     recordCanvasState(root, canvas.hidden ? fallback.querySelector("[data-designer-fallback-canvas]") : canvas, studio.renderer);
+    pushHistory(state);
   };
+
+  // ---- undo / redo history --------------------------------------------
+  // Snapshot every settled state so the user can reverse mistakes. We
+  // coalesce rapid slider input (last-write-wins within 280 ms) so we
+  // don't fill the stack with one entry per pixel of drag.
+  const history = [];
+  let historyIndex = -1;
+  let isRestoringHistory = false;
+  let coalesceTimer = null;
+  const HISTORY_MAX = 60;
+
+  const refreshHistoryButtons = () => {
+    if (undoButton) undoButton.disabled = historyIndex <= 0;
+    if (redoButton) redoButton.disabled = historyIndex >= history.length - 1;
+  };
+
+  const pushHistory = (state) => {
+    if (isRestoringHistory) return;
+    const serialized = JSON.stringify(state);
+    if (history[historyIndex] === serialized) return;
+    if (coalesceTimer) window.clearTimeout(coalesceTimer);
+    coalesceTimer = window.setTimeout(() => {
+      // Drop forward history when committing a new branch.
+      history.splice(historyIndex + 1);
+      history.push(serialized);
+      if (history.length > HISTORY_MAX) {
+        history.shift();
+      } else {
+        historyIndex += 1;
+      }
+      refreshHistoryButtons();
+    }, 280);
+  };
+
+  const restoreFromHistory = () => {
+    const serialized = history[historyIndex];
+    if (!serialized) return;
+    isRestoringHistory = true;
+    try {
+      applyDesignState(root, JSON.parse(serialized));
+      const state = getState(root);
+      setSummary(root, state);
+      updateDesignerSmartDetails(root, state);
+      writeStoredDesignState(DESIGN_STORAGE_KEY, state);
+      studio.update(state);
+    } finally {
+      isRestoringHistory = false;
+      refreshHistoryButtons();
+    }
+  };
+
+  // Seed the stack with the initial state so the very first user change
+  // can be undone back to the starting point.
+  history.push(JSON.stringify(getState(root)));
+  historyIndex = 0;
+  refreshHistoryButtons();
+
+  designerUpdates.set(root, update);
 
   controls?.addEventListener("input", update);
   controls?.addEventListener("change", update);
+
+  presetButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      const preset = DESIGN_PRESETS[button.dataset.designerPreset];
+
+      if (!preset) {
+        return;
+      }
+
+      applyDesignState(root, preset);
+      setDesignerStatus(status, `${button.textContent.trim()} design loaded.`);
+      update();
+    });
+  });
+
+  randomizeButton?.addEventListener("click", () => {
+    applyDesignState(root, createRandomDesignState(getState(root)));
+    setDesignerStatus(status, "A fresh design direction is ready.");
+    update();
+  });
+
+  const setInspectButtonState = (enabled, message = "") => {
+    inspectButton?.setAttribute("aria-pressed", String(Boolean(enabled)));
+
+    if (inspectButton) {
+      // Only update text content if it's a text-based button (not an icon button)
+      if (!inspectButton.querySelector("svg")) {
+        inspectButton.textContent = enabled ? "Exit Inspect" : "Inspect 3D";
+      }
+    }
+
+    studio.setInspectMode?.(enabled);
+
+    if (message) {
+      setDesignerStatus(status, message);
+    }
+  };
+
+  inspectButton?.addEventListener("click", () => {
+    const enabled = inspectButton.getAttribute("aria-pressed") !== "true";
+
+    setInspectButtonState(
+      enabled,
+      enabled ? "Inspect mode unlocked: drag, pinch, or scroll to zoom." : "Auto rotation restored."
+    );
+  });
+
+  root.addEventListener("designer:close", () => {
+    setInspectButtonState(false);
+  });
+
+  // ---- Fullscreen Inspect HUD wiring ---------------------------------------
+  const hud = root.querySelector("[data-inspect-hud]");
+  const hudExit = root.querySelector("[data-inspect-exit]");
+  const hudReadout = root.querySelector("[data-inspect-readout]");
+  const hudLightingLabel = root.querySelector("[data-inspect-lighting-label]");
+  const hudTitle = root.querySelector("[data-inspect-title]");
+  const orbitChip = root.querySelector('[data-inspect-action="orbit"]');
+  const lightingChip = root.querySelector('[data-inspect-action="lighting"]');
+  const resetChip = root.querySelector('[data-inspect-action="reset"]');
+  const screenshotChip = root.querySelector('[data-inspect-action="screenshot"]');
+  const viewChips = root.querySelectorAll("[data-inspect-view]");
+  const lightingOrder = ["Daylight", "Candlelight", "Showroom", "Flash"];
+
+  const setRadioField = (name, value) => {
+    const input = root.querySelector(`[data-designer-field="${name}"][value="${value}"]`);
+    if (input) {
+      input.checked = true;
+      input.dispatchEvent(new Event("change", { bubbles: true }));
+    }
+  };
+
+  const refreshLightingLabel = () => {
+    const current = getState(root).lighting || "Daylight";
+    if (hudLightingLabel) hudLightingLabel.textContent = current;
+  };
+
+  const refreshTitle = () => {
+    const s = getState(root);
+    if (hudTitle) hudTitle.textContent = `${s.piece} · ${s.metal}`;
+  };
+
+  // Live camera/angle readout
+  studio.setReadoutListener?.(({ rx, ry, zoom }) => {
+    if (!hudReadout) return;
+    hudReadout.textContent = `Y ${ry}° · X ${rx}° · Zoom ${zoom}×`;
+  });
+
+  hudExit?.addEventListener("click", () => {
+    setInspectButtonState(false, "Auto rotation restored.");
+  });
+
+  orbitChip?.addEventListener("click", () => {
+    const enabled = orbitChip.getAttribute("aria-pressed") !== "true";
+    orbitChip.setAttribute("aria-pressed", String(enabled));
+    studio.setAutoOrbit?.(enabled);
+    setDesignerStatus(status, enabled ? "Auto-orbit on." : "Auto-orbit off.");
+  });
+
+  lightingChip?.addEventListener("click", () => {
+    const current = getState(root).lighting || "Daylight";
+    const next = lightingOrder[(lightingOrder.indexOf(current) + 1) % lightingOrder.length];
+    setRadioField("lighting", next);
+    refreshLightingLabel();
+  });
+
+  resetChip?.addEventListener("click", () => {
+    studio.resetView?.();
+    orbitChip?.setAttribute("aria-pressed", "false");
+    studio.setAutoOrbit?.(false);
+    setDesignerStatus(status, "View reset.");
+  });
+
+  screenshotChip?.addEventListener("click", () => {
+    const ok = studio.takeScreenshot?.(`tj-design-${Date.now()}.png`);
+    setDesignerStatus(status, ok ? "Image downloaded." : "Could not save image.");
+  });
+
+  viewChips.forEach((chip) => {
+    chip.addEventListener("click", () => {
+      const view = chip.dataset.inspectView;
+      setRadioField("view", view);
+      viewChips.forEach((c) => c.classList.toggle("is-active", c === chip));
+    });
+  });
+
+  // Double-click the canvas to reset rotation/zoom
+  canvas.addEventListener("dblclick", () => {
+    if (studio.isInspecting?.()) {
+      studio.resetView?.();
+    }
+  });
+
+  // ESC closes inspect mode anywhere on the page
+  document.addEventListener("keydown", (event) => {
+    if (!studio.isInspecting?.()) return;
+    if (event.key === "Escape") {
+      setInspectButtonState(false, "Inspect closed.");
+    } else if (event.key === "r" || event.key === "R") {
+      studio.resetView?.();
+    } else if (event.key === " " || event.code === "Space") {
+      event.preventDefault();
+      orbitChip?.click();
+    }
+  });
+
+  // Sync HUD labels when underlying state changes (presets / form / etc.)
+  controls?.addEventListener("change", () => { refreshLightingLabel(); refreshTitle(); });
+  refreshLightingLabel();
+  refreshTitle();
+
+  saveButton?.addEventListener("click", () => {
+    const state = getState(root);
+
+    writeStoredDesignState(SAVED_DESIGN_KEY, state);
+    updateDesignerSmartDetails(root, state);
+    setDesignerStatus(status, "Design saved in this browser.");
+  });
+
+  shareButton?.addEventListener("click", async () => {
+    const state = getState(root);
+    const url = createDesignUrl(state);
+
+    try {
+      await navigator.clipboard.writeText(url);
+      setDesignerStatus(status, "Design link copied.");
+    } catch (error) {
+      window.history.replaceState(null, "", url);
+      setDesignerStatus(status, "Design link is now in the address bar.");
+    }
+  });
+
+  compareButton?.addEventListener("click", () => {
+    const savedState = readStoredDesignState(SAVED_DESIGN_KEY);
+    const savedSummary = root.querySelector("[data-designer-saved-summary]");
+    const savedCard = root.querySelector("[data-designer-saved-card]");
+
+    if (!savedState) {
+      setDesignerStatus(status, "Save a design first.");
+      return;
+    }
+
+    if (savedCard && savedSummary) {
+      savedCard.hidden = false;
+      savedSummary.textContent = `Saved: ${createCompactDesignLabel(savedState)} | Current: ${createCompactDesignLabel(getState(root))}`;
+    }
+
+    setDesignerStatus(status, "Saved design compared.");
+  });
+
+  undoButton?.addEventListener("click", () => {
+    if (historyIndex <= 0) return;
+    historyIndex -= 1;
+    restoreFromHistory();
+    setDesignerStatus(status, "Undid last change.");
+  });
+
+  redoButton?.addEventListener("click", () => {
+    if (historyIndex >= history.length - 1) return;
+    historyIndex += 1;
+    restoreFromHistory();
+    setDesignerStatus(status, "Redid change.");
+  });
+
+  downloadButton?.addEventListener("click", () => {
+    const sourceCanvas = canvas.hidden ? fallback.querySelector("[data-designer-fallback-canvas]") : canvas;
+    if (!sourceCanvas) return;
+    try {
+      sourceCanvas.toBlob((blob) => {
+        if (!blob) {
+          setDesignerStatus(status, "Could not capture the canvas.");
+          return;
+        }
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        const state = getState(root);
+        const safe = `${state.piece}-${state.shape}-${state.stone}`.replace(/[^a-z0-9-]+/gi, "-").toLowerCase();
+        link.href = url;
+        link.download = `tjc-design-${safe}.png`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.setTimeout(() => URL.revokeObjectURL(url), 4000);
+        setDesignerStatus(status, "Design image downloaded.");
+      }, "image/png");
+    } catch (error) {
+      setDesignerStatus(status, "Download failed — try Save Image in Inspect mode.");
+    }
+  });
+
+  // Keyboard shortcuts — work anywhere outside text inputs.
+  document.addEventListener("keydown", (event) => {
+    if (root.hidden) return;
+    const target = event.target;
+    const isTyping = target instanceof HTMLElement && (
+      target.matches("input[type=text], textarea, [contenteditable=true]")
+    );
+    if (isTyping) return;
+    const mod = event.metaKey || event.ctrlKey;
+    if (mod && (event.key === "z" || event.key === "Z")) {
+      event.preventDefault();
+      if (event.shiftKey) {
+        redoButton?.click();
+      } else {
+        undoButton?.click();
+      }
+    } else if (mod && (event.key === "y" || event.key === "Y")) {
+      event.preventDefault();
+      redoButton?.click();
+    }
+  });
 
   sendButton?.addEventListener("click", async () => {
     const state = getState(root);
@@ -1635,6 +6350,7 @@ async function setupDesigner() {
       await attachDesignScreenshot(sourceCanvas, state);
     } catch (error) {
       root.dataset.designerCaptureError = error instanceof Error ? error.message : "Unable to attach design preview";
+      updateDesignBriefCard(state);
     }
 
     fillRequestForm(state);
@@ -1645,6 +6361,125 @@ async function setupDesigner() {
   });
 
   update();
+  root.dataset.designerReady = "true";
 }
 
-document.addEventListener("DOMContentLoaded", setupDesigner);
+function ensureDesignerReady(root) {
+  if (!designerSetupPromise) {
+    designerSetupPromise = setupDesigner(root).catch((error) => {
+      designerSetupPromise = null;
+      throw error;
+    });
+  }
+
+  return designerSetupPromise;
+}
+
+function isSamePageDesignStudioLink(link) {
+  if (!link || link.hash !== DESIGN_STUDIO_HASH) {
+    return false;
+  }
+
+  const url = new URL(link.href, window.location.href);
+
+  return url.origin === window.location.origin && url.pathname === window.location.pathname;
+}
+
+function syncDesignerFromCurrentUrl(root) {
+  setInitialDesignState(root);
+  designerUpdates.get(root)?.();
+}
+
+async function openDesignStudio(root, options = {}) {
+  const { url = null, scroll = true } = options;
+  const closeButton = document.querySelector("[data-close-design-studio]");
+
+  if (!root) {
+    return;
+  }
+
+  if (url) {
+    window.history.pushState(null, "", url.toString());
+  }
+
+  root.hidden = false;
+  root.dataset.designerOptIn = "true";
+  if (closeButton) {
+    closeButton.hidden = false;
+  }
+
+  if (scroll) {
+    window.requestAnimationFrame(() => {
+      root.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  }
+
+  await ensureDesignerReady(root);
+  syncDesignerFromCurrentUrl(root);
+}
+
+function closeDesignStudio(root) {
+  const closeButton = document.querySelector("[data-close-design-studio]");
+
+  if (!root) {
+    return;
+  }
+
+  root.hidden = true;
+  root.dataset.designerOptIn = "false";
+  root.dispatchEvent(new CustomEvent("designer:close"));
+  if (closeButton) {
+    closeButton.hidden = true;
+  }
+
+  const requestForm = document.querySelector("#request-form");
+  const url = new URL(window.location.href);
+  url.hash = "request-form";
+  window.history.replaceState(null, "", url.toString());
+
+  requestForm?.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function setupDesignerGate() {
+  const root = document.querySelector("[data-design-studio]");
+  const closeButton = document.querySelector("[data-close-design-studio]");
+
+  if (!root) {
+    return;
+  }
+
+  if (window.location.hash !== DESIGN_STUDIO_HASH) {
+    root.hidden = true;
+    if (closeButton) {
+      closeButton.hidden = true;
+    }
+  }
+
+  closeButton?.addEventListener("click", () => {
+    closeDesignStudio(root);
+  });
+
+  document.addEventListener("click", (event) => {
+    const target = event.target;
+    const link = target instanceof Element ? target.closest("a[href]") : null;
+
+    if (!isSamePageDesignStudioLink(link)) {
+      return;
+    }
+
+    event.preventDefault();
+    openDesignStudio(root, { url: new URL(link.href, window.location.href) });
+  });
+
+  window.addEventListener("hashchange", () => {
+    if (window.location.hash === DESIGN_STUDIO_HASH) {
+      openDesignStudio(root);
+    }
+  });
+
+  if (window.location.hash === DESIGN_STUDIO_HASH) {
+    openDesignStudio(root, { scroll: false });
+  }
+}
+
+document.addEventListener("DOMContentLoaded", setupDesignerGate);

@@ -73,8 +73,8 @@
                 We will review your request and guide you through the next steps.
               </p>
               <div class="button-row">
-                <a class="button" href="#design-studio">Open Design Studio</a>
-                <a class="button-secondary" href="#request-form">Start Your Custom Request</a>
+                <a class="button" href="#request-form">Start Your Custom Request</a>
+                <a class="button-secondary" href="#design-studio">Open Design Studio</a>
               </div>
             </div>
 
@@ -86,13 +86,138 @@
           </div>
         </section>
 
-        <section class="design-studio" id="design-studio" data-design-studio>
-          <div class="design-studio__stage" aria-label="Custom jewellery design preview">
+        <section class="section section--soft" id="custom-guide">
+          <div class="container custom-guide" data-custom-guide>
+            <div class="section-heading" data-reveal>
+              <span class="eyebrow">Custom guide</span>
+              <div class="accent-rule"></div>
+              <h2>Find a strong starting direction</h2>
+            </div>
+
+            <div class="custom-guide__shell" data-reveal>
+              <form class="custom-guide__form">
+                <fieldset>
+                  <legend>Piece</legend>
+                  <div class="option-grid">
+                    <label class="option-chip"><input type="radio" name="guide-piece" value="Ring" checked>Ring</label>
+                    <label class="option-chip"><input type="radio" name="guide-piece" value="Necklace">Necklace</label>
+                    <label class="option-chip"><input type="radio" name="guide-piece" value="Bracelet">Bracelet</label>
+                    <label class="option-chip"><input type="radio" name="guide-piece" value="Earrings">Earrings</label>
+                  </div>
+                </fieldset>
+
+                <fieldset>
+                  <legend>Occasion</legend>
+                  <div class="option-grid">
+                    <label class="option-chip"><input type="radio" name="guide-occasion" value="engagement" checked>Engagement</label>
+                    <label class="option-chip"><input type="radio" name="guide-occasion" value="gift">Gift</label>
+                    <label class="option-chip"><input type="radio" name="guide-occasion" value="event">Event</label>
+                    <label class="option-chip"><input type="radio" name="guide-occasion" value="personal">Personal</label>
+                  </div>
+                </fieldset>
+
+                <fieldset>
+                  <legend>Wear</legend>
+                  <div class="option-grid">
+                    <label class="option-chip"><input type="radio" name="guide-wear" value="daily" checked>Daily</label>
+                    <label class="option-chip"><input type="radio" name="guide-wear" value="occasion">Occasion</label>
+                    <label class="option-chip"><input type="radio" name="guide-wear" value="statement">Statement</label>
+                    <label class="option-chip"><input type="radio" name="guide-wear" value="delicate">Delicate</label>
+                  </div>
+                </fieldset>
+
+                <fieldset>
+                  <legend>Budget</legend>
+                  <div class="option-grid">
+                    <label class="option-chip"><input type="radio" name="guide-budget" value="simple" checked>Simple</label>
+                    <label class="option-chip"><input type="radio" name="guide-budget" value="detailed">Detailed</label>
+                    <label class="option-chip"><input type="radio" name="guide-budget" value="premium">Premium</label>
+                    <label class="option-chip"><input type="radio" name="guide-budget" value="statement">Statement</label>
+                  </div>
+                </fieldset>
+
+                <fieldset>
+                  <legend>Metal</legend>
+                  <div class="option-grid">
+                    <label class="option-chip"><input type="radio" name="guide-metal" value="White Gold" checked>White Gold</label>
+                    <label class="option-chip"><input type="radio" name="guide-metal" value="Yellow Gold">Yellow Gold</label>
+                    <label class="option-chip"><input type="radio" name="guide-metal" value="Rose Gold">Rose Gold</label>
+                    <label class="option-chip"><input type="radio" name="guide-metal" value="Platinum">Platinum</label>
+                  </div>
+                </fieldset>
+
+                <fieldset>
+                  <legend>Mood</legend>
+                  <div class="option-grid">
+                    <label class="option-chip"><input type="radio" name="guide-mood" value="modern" checked>Modern</label>
+                    <label class="option-chip"><input type="radio" name="guide-mood" value="vintage">Vintage</label>
+                    <label class="option-chip"><input type="radio" name="guide-mood" value="romantic">Romantic</label>
+                    <label class="option-chip"><input type="radio" name="guide-mood" value="bold">Bold</label>
+                  </div>
+                </fieldset>
+              </form>
+
+              <div class="custom-guide__result" aria-live="polite">
+                <div class="custom-guide__result-header">
+                  <span class="eyebrow">Three directions tuned to your brief</span>
+                  <p class="custom-guide__summary" data-guide-summary>—</p>
+                </div>
+                <div class="guide-directions" data-guide-directions></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="design-studio" id="design-studio" data-design-studio hidden>
+          <div class="container design-studio__shell">
+          <div class="design-studio__split">
+          <div class="design-studio__stage" data-designer-stage aria-label="Custom jewellery design preview">
             <canvas class="design-studio__canvas" data-designer-canvas aria-label="Interactive custom jewellery preview"></canvas>
             <div class="design-studio__fallback" data-designer-fallback hidden>
               <canvas data-designer-fallback-canvas aria-label="Custom jewellery preview"></canvas>
             </div>
-          </div>
+
+            <!-- Expand button — top-right of viewer -->
+            <button class="studio-expand-btn" type="button" data-inspect-design aria-pressed="false" aria-label="Expand 3D view">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                <path d="M1 6V1h5M10 1h5v5M15 10v5h-5M6 15H1v-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+
+            <!-- Fullscreen Inspect 3D HUD (only visible when inspecting) -->
+            <div class="inspect-hud" data-inspect-hud aria-hidden="true">
+              <div class="inspect-hud__top">
+                <div class="inspect-hud__title">
+                  <span class="inspect-hud__eyebrow">Inspect</span>
+                  <strong data-inspect-title>3D Studio</strong>
+                </div>
+                <div class="inspect-hud__readout" data-inspect-readout>—</div>
+                <button class="inspect-hud__close" type="button" data-inspect-exit aria-label="Exit inspect mode">Close ✕</button>
+              </div>
+
+              <div class="inspect-hud__hint" data-inspect-hint>
+                Drag to orbit · shift + drag to pan up/down · scroll to zoom · arrows to nudge · double-click to reset
+              </div>
+
+              <div class="inspect-hud__rail inspect-hud__rail--left" aria-label="Camera presets">
+                <button class="inspect-chip" type="button" data-inspect-view="Three-Quarter">3/4</button>
+                <button class="inspect-chip" type="button" data-inspect-view="Macro">Macro</button>
+                <button class="inspect-chip" type="button" data-inspect-view="Top-Down">Top</button>
+                <button class="inspect-chip" type="button" data-inspect-view="Profile">Profile</button>
+              </div>
+
+              <div class="inspect-hud__panel" aria-label="Inspect controls">
+                <button class="inspect-chip" type="button" data-inspect-action="orbit" aria-pressed="false" title="Auto-orbit">
+                  <span class="inspect-chip__dot"></span>Orbit
+                </button>
+                <button class="inspect-chip" type="button" data-inspect-action="lighting" title="Cycle lighting">
+                  <span data-inspect-lighting-label>Daylight</span>
+                </button>
+                <button class="inspect-chip" type="button" data-inspect-action="reset" title="Reset camera">Reset</button>
+                <button class="inspect-chip" type="button" data-inspect-action="screenshot" title="Download a still image">Save Image</button>
+              </div>
+            </div>
+          </div><!-- /.design-studio__stage -->
 
           <div class="design-studio__overlay">
             <div class="design-studio__intro" data-reveal>
@@ -105,14 +230,45 @@
             </div>
 
             <form class="designer-panel" data-designer-controls data-reveal>
-              <div class="designer-panel__group">
-                <label for="designer-piece">Piece</label>
-                <select id="designer-piece" data-designer-field="piece">
-                  <option>Ring</option>
-                  <option>Necklace</option>
-                  <option>Bracelet</option>
-                  <option>Earrings</option>
-                </select>
+              <div class="designer-presets" aria-label="Design presets">
+                <button class="designer-preset" type="button" data-designer-preset="classic">Classic Engagement</button>
+                <button class="designer-preset" type="button" data-designer-preset="cocktail">Bold Cocktail</button>
+                <button class="designer-preset" type="button" data-designer-preset="pendant">Minimal Pendant</button>
+                <button class="designer-preset" type="button" data-designer-preset="vintage">Vintage Halo</button>
+                <button class="designer-preset" type="button" data-designer-preset="estate">Emerald-cut Estate</button>
+                <button class="designer-preset" type="button" data-designer-preset="princessPave">Princess Pavé</button>
+                <button class="designer-preset" type="button" data-designer-preset="trinity">Rose Twist</button>
+                <button class="designer-preset" type="button" data-designer-preset="celestial">Celestial Drop</button>
+                <button class="designer-preset" type="button" data-designer-preset="brutalist">Brutalist Hex</button>
+                <button class="designer-preset" type="button" data-designer-preset="neonCyber">Neon Cyber</button>
+                <button class="designer-preset" type="button" data-designer-preset="punkSpike">Onyx Punk</button>
+                <button class="designer-preset" type="button" data-designer-preset="sunsetGlow">Sunset Glow</button>
+                <button class="designer-preset designer-preset--accent" type="button" data-randomize-design>Surprise Me</button>
+              </div>
+
+              <div class="designer-smart-summary" aria-label="Current design snapshot">
+                <span><small>Piece</small><strong data-designer-smart-piece>Ring</strong></span>
+                <span><small>Metal</small><strong data-designer-smart-metal>White Gold</strong></span>
+                <span><small>Stone</small><strong data-designer-smart-stone>Clear Diamond</strong></span>
+              </div>
+
+              <div class="designer-panel__split">
+                <div class="designer-panel__group">
+                  <label for="designer-piece">Piece</label>
+                  <select id="designer-piece" data-designer-field="piece">
+                    <option>Ring</option>
+                    <option>Necklace</option>
+                    <option>Bracelet</option>
+                    <option>Earrings</option>
+                  </select>
+                </div>
+
+                <div class="designer-panel__group">
+                  <label for="designer-silhouette">Style</label>
+                  <select id="designer-silhouette" data-designer-field="silhouette">
+                    <!-- options injected by JS based on the selected piece -->
+                  </select>
+                </div>
               </div>
 
               <fieldset class="designer-panel__group">
@@ -122,6 +278,11 @@
                   <label class="swatch-option"><input type="radio" name="designer-metal" value="Platinum" data-designer-field="metal"><span style="--swatch:#d9e1e5;"></span>Platinum</label>
                   <label class="swatch-option"><input type="radio" name="designer-metal" value="Yellow Gold" data-designer-field="metal"><span style="--swatch:#d5a647;"></span>Yellow Gold</label>
                   <label class="swatch-option"><input type="radio" name="designer-metal" value="Rose Gold" data-designer-field="metal"><span style="--swatch:#c98778;"></span>Rose Gold</label>
+                  <label class="swatch-option"><input type="radio" name="designer-metal" value="Champagne Gold" data-designer-field="metal"><span style="--swatch:#d4b574;"></span>Champagne Gold</label>
+                  <label class="swatch-option"><input type="radio" name="designer-metal" value="Black Gold" data-designer-field="metal"><span style="--swatch:#3a3438;"></span>Black Gold</label>
+                  <label class="swatch-option"><input type="radio" name="designer-metal" value="Mirror Silver" data-designer-field="metal"><span style="--swatch:#f4f6f8;"></span>Mirror Silver</label>
+                  <label class="swatch-option"><input type="radio" name="designer-metal" value="Bronze Patina" data-designer-field="metal"><span style="--swatch:#7a5a3a;"></span>Bronze Patina</label>
+                  <label class="swatch-option"><input type="radio" name="designer-metal" value="Two-Tone Mix" data-designer-field="metal"><span style="--swatch:linear-gradient(90deg,#d5a647 0%,#d5a647 50%,#e8eef1 50%,#e8eef1 100%);"></span>Two-Tone Mix</label>
                 </div>
               </fieldset>
 
@@ -129,9 +290,11 @@
                 <div class="designer-panel__group">
                   <label for="designer-setting">Setting</label>
                   <select id="designer-setting" data-designer-field="setting">
-                    <option>Prong</option>
-                    <option>Bezel</option>
-                    <option>Cathedral</option>
+                    <option title="Classic claw prongs — the most secure, traditional way to set a stone. Maximum light return.">Prong</option>
+                    <option title="A continuous metal rim wraps the girdle. Sleekest, safest profile — ideal for active wear.">Bezel</option>
+                    <option title="Side metal flares rise like an arch under the centre stone, lifting it dramatically off the band.">Cathedral</option>
+                    <option title="Curved arms cross under the gem in an interwoven X — a romantic vintage look with great finger flow.">Trellis</option>
+                    <option title="Two solid arms grip the stone under metal pressure — modern, architectural, no visible prongs.">Tension</option>
                   </select>
                 </div>
 
@@ -141,6 +304,10 @@
                     <option>High Polish</option>
                     <option>Soft Satin</option>
                     <option>Milgrain Edge</option>
+                    <option>Hammered</option>
+                    <option>Sandblast</option>
+                    <option title="Long parallel directional grain — modern matte sheen">Brushed</option>
+                    <option title="Texturized micro-stipple that catches light like crushed crystal">Stardust</option>
                   </select>
                 </div>
               </div>
@@ -150,9 +317,18 @@
                   <label for="designer-shape">Stone Shape</label>
                   <select id="designer-shape" data-designer-field="shape">
                     <option>Round</option>
-                    <option>Pear</option>
-                    <option>Oval</option>
+                    <option>Princess</option>
                     <option>Cushion</option>
+                    <option>Oval</option>
+                    <option>Emerald</option>
+                    <option>Asscher</option>
+                    <option>Marquise</option>
+                    <option>Pear</option>
+                    <option>Heart</option>
+                    <option title="Triangular brilliant — three sharp points, exceptional fire">Trillion</option>
+                    <option title="Long rectangular step-cut — Art Deco architectural">Baguette</option>
+                    <option title="Six-sided geometric — modern contemporary edge">Hexagon</option>
+                    <option title="Elongated diamond/rhombus — unconventional sculptural">Kite</option>
                   </select>
                 </div>
 
@@ -163,9 +339,86 @@
                     <option>Blush Sapphire</option>
                     <option>Blue Sapphire</option>
                     <option>Emerald Green</option>
+                    <option>Ruby Red</option>
+                    <option>Amethyst Purple</option>
+                    <option>Aquamarine</option>
+                    <option title="Opaque jet-black — mirror sheen, ultimate contrast">Black Onyx</option>
+                    <option title="Milky play-of-color rainbow shift across the surface">Fire Opal</option>
+                    <option title="Sun-yellow champagne brilliance">Citrine Yellow</option>
+                    <option title="Romantic peachy-pink, soft warmth">Morganite Peach</option>
+                    <option title="Vivid violet-blue with strong fire">Tanzanite Violet</option>
+                    <option title="Smoky diamond with characterful inclusions — one-of-a-kind">Salt &amp; Pepper</option>
                   </select>
                 </div>
               </div>
+
+              <div class="designer-panel__split">
+                <div class="designer-panel__group">
+                  <label for="designer-karat">Karat</label>
+                  <select id="designer-karat" data-designer-field="karat">
+                    <option>10K</option>
+                    <option>14K</option>
+                    <option selected>18K</option>
+                    <option>22K</option>
+                    <option>950</option>
+                  </select>
+                </div>
+
+                <div class="designer-panel__group" data-piece-only="Ring">
+                  <label for="designer-band">Band Style</label>
+                  <select id="designer-band" data-designer-field="band">
+                    <option>Solitaire</option>
+                    <option>Pavé</option>
+                    <option>Channel</option>
+                    <option>Three-Stone</option>
+                    <option>Tapered Baguette</option>
+                    <option>Twist</option>
+                    <option>Knife-Edge</option>
+                    <option>Eternity</option>
+                    <option>Bypass</option>
+                  </select>
+                </div>
+              </div>
+
+              <fieldset class="designer-panel__group">
+                <legend>Sparkle</legend>
+                <div class="lighting-row">
+                  <label class="light-option"><input type="radio" name="designer-lighting" value="Daylight" data-designer-field="lighting" checked><span>Daylight</span></label>
+                  <label class="light-option"><input type="radio" name="designer-lighting" value="Candlelight" data-designer-field="lighting"><span>Candlelight</span></label>
+                  <label class="light-option"><input type="radio" name="designer-lighting" value="Showroom" data-designer-field="lighting"><span>Showroom</span></label>
+                  <label class="light-option"><input type="radio" name="designer-lighting" value="Flash" data-designer-field="lighting"><span>Flash</span></label>
+                  <label class="light-option"><input type="radio" name="designer-lighting" value="Sunset" data-designer-field="lighting"><span>Sunset</span></label>
+                  <label class="light-option"><input type="radio" name="designer-lighting" value="Moonlight" data-designer-field="lighting"><span>Moonlight</span></label>
+                  <label class="light-option"><input type="radio" name="designer-lighting" value="Neon" data-designer-field="lighting"><span>Neon</span></label>
+                  <label class="light-option"><input type="radio" name="designer-lighting" value="Softbox" data-designer-field="lighting"><span>Softbox</span></label>
+                </div>
+              </fieldset>
+
+              <fieldset class="designer-panel__group">
+                <legend>Backdrop</legend>
+                <div class="lighting-row">
+                  <label class="light-option"><input type="radio" name="designer-backdrop" value="Velvet" data-designer-field="backdrop" checked><span>Velvet</span></label>
+                  <label class="light-option"><input type="radio" name="designer-backdrop" value="Marble" data-designer-field="backdrop"><span>Marble</span></label>
+                  <label class="light-option"><input type="radio" name="designer-backdrop" value="Onyx" data-designer-field="backdrop"><span>Onyx</span></label>
+                  <label class="light-option"><input type="radio" name="designer-backdrop" value="Linen" data-designer-field="backdrop"><span>Linen</span></label>
+                  <label class="light-option"><input type="radio" name="designer-backdrop" value="Sweep" data-designer-field="backdrop"><span>Sweep</span></label>
+                  <label class="light-option"><input type="radio" name="designer-backdrop" value="Concrete" data-designer-field="backdrop"><span>Concrete</span></label>
+                  <label class="light-option"><input type="radio" name="designer-backdrop" value="Driftwood" data-designer-field="backdrop"><span>Driftwood</span></label>
+                  <label class="light-option"><input type="radio" name="designer-backdrop" value="Holographic" data-designer-field="backdrop"><span>Holographic</span></label>
+                  <label class="light-option"><input type="radio" name="designer-backdrop" value="Smoke" data-designer-field="backdrop"><span>Smoke</span></label>
+                  <label class="light-option"><input type="radio" name="designer-backdrop" value="Ivory" data-designer-field="backdrop"><span>Ivory</span></label>
+                </div>
+              </fieldset>
+
+              <fieldset class="designer-panel__group">
+                <legend>Camera View</legend>
+                <div class="lighting-row">
+                  <label class="light-option"><input type="radio" name="designer-view" value="Three-Quarter" data-designer-field="view" checked><span>Three-Quarter</span></label>
+                  <label class="light-option"><input type="radio" name="designer-view" value="Macro" data-designer-field="view"><span>Macro</span></label>
+                  <label class="light-option"><input type="radio" name="designer-view" value="Top-Down" data-designer-field="view"><span>Top-Down</span></label>
+                  <label class="light-option"><input type="radio" name="designer-view" value="Profile" data-designer-field="view"><span>Profile</span></label>
+                </div>
+              </fieldset>
 
               <div class="designer-panel__group">
                 <label for="designer-size">Stone Size <span data-designer-size-label>1.2 ct feel</span></label>
@@ -180,6 +433,27 @@
               <div class="designer-panel__split">
                 <label class="toggle-option"><input type="checkbox" data-designer-field="halo" checked><span>Diamond frame</span></label>
                 <label class="toggle-option"><input type="checkbox" data-designer-field="accent" checked><span>Side stones</span></label>
+                <label class="toggle-option" data-piece-only="Ring"><input type="checkbox" data-designer-field="hiddenHalo"><span>Hidden halo</span></label>
+                <label class="toggle-option" data-piece-only="Ring"><input type="checkbox" data-designer-field="milgrain"><span>Milgrain edges</span></label>
+              </div>
+
+              <fieldset class="designer-panel__group">
+                <legend>Wild mode <small style="font-weight:normal;opacity:0.7;">— push the look</small></legend>
+                <div class="designer-panel__split">
+                  <label class="toggle-option" title="Stone self-illuminates with its own hue — magical glow"><input type="checkbox" data-designer-field="emissiveGlow"><span>Emissive glow</span></label>
+                  <label class="toggle-option" title="Layer a contrasting metal sheen across the band"><input type="checkbox" data-designer-field="twoTone"><span>Two-tone metal</span></label>
+                  <label class="toggle-option" title="Pump the room sparkle for a hero shot"><input type="checkbox" data-designer-field="sparkleBurst"><span>Sparkle burst</span></label>
+                </div>
+              </fieldset>
+
+              <div class="designer-panel__group" data-piece-only="Ring">
+                <label for="designer-prong-count">Prong count</label>
+                <select id="designer-prong-count" data-designer-field="prongCount">
+                  <option>Auto</option>
+                  <option>4</option>
+                  <option>6</option>
+                  <option>8</option>
+                </select>
               </div>
 
               <div class="designer-panel__group">
@@ -187,13 +461,175 @@
                 <input id="designer-engraving" type="text" maxlength="32" placeholder="Initials, date, or short phrase" data-designer-field="engraving">
               </div>
 
+              <details class="designer-fine-tune">
+                <summary>Fine-tune <small>· optional adjustments</small></summary>
+                <div class="designer-fine-tune__grid">
+                  <div class="designer-fine-tune__field" data-piece-only="Ring">
+                    <label for="designer-set-rotation">Setting rotation <span data-designer-output-for="setRotation">0°</span></label>
+                    <input id="designer-set-rotation" type="range" min="0" max="180" step="5" value="0" data-designer-field="setRotation" data-designer-output-suffix="°">
+                  </div>
+                  <div class="designer-fine-tune__field" data-piece-only="Ring">
+                    <label for="designer-stone-tilt">Stone tilt <span data-designer-output-for="stoneTilt">0°</span></label>
+                    <input id="designer-stone-tilt" type="range" min="-15" max="15" step="1" value="0" data-designer-field="stoneTilt" data-designer-output-suffix="°">
+                  </div>
+                  <div class="designer-fine-tune__field" data-piece-only="Ring">
+                    <label for="designer-prong-height">Prong height <span data-designer-output-for="prongHeight">1.00×</span></label>
+                    <input id="designer-prong-height" type="range" min="0.7" max="1.3" step="0.05" value="1" data-designer-field="prongHeight" data-designer-output-suffix="×">
+                  </div>
+                  <div class="designer-fine-tune__field" data-piece-only="Ring">
+                    <label for="designer-accent-density">Side stone density</label>
+                    <select id="designer-accent-density" data-designer-field="accentDensity">
+                      <option>Auto</option>
+                      <option>Sparse</option>
+                      <option>Dense</option>
+                    </select>
+                  </div>
+                  <div class="designer-fine-tune__field" data-piece-only="Ring">
+                    <label for="designer-halo-gap">Halo gap <span data-designer-output-for="haloGap">0.00 mm</span></label>
+                    <input id="designer-halo-gap" type="range" min="-0.5" max="1.5" step="0.1" value="0" data-designer-field="haloGap" data-designer-output-suffix=" mm">
+                  </div>
+                  <div class="designer-fine-tune__field" data-piece-only="Ring">
+                    <label for="designer-halo-count">Halo count</label>
+                    <select id="designer-halo-count" data-designer-field="haloCount">
+                      <option>Auto</option>
+                      <option>8</option>
+                      <option>12</option>
+                      <option>16</option>
+                      <option>20</option>
+                    </select>
+                  </div>
+                </div>
+                <p class="designer-fine-tune__hint">Only applies to rings. Resets when you load a preset.</p>
+              </details>
+
               <div class="designer-summary" data-designer-summary></div>
 
-              <div class="button-row">
-                <button class="button" type="button" data-send-design>Send Design to Request Form</button>
-                <a class="button-secondary" href="#request-form">Skip to Form</a>
+              <div class="designer-saved-card" data-designer-saved-card hidden>
+                <span>Saved Design</span>
+                <p data-designer-saved-summary></p>
               </div>
             </form>
+          </div><!-- /.design-studio__overlay -->
+          </div><!-- /.design-studio__split -->
+
+          <div class="design-studio__actions">
+            <div class="button-row">
+              <button class="button" type="button" data-send-design>Send Design to Request Form</button>
+              <button class="button-secondary" type="button" data-undo-design title="Undo (⌘Z / Ctrl+Z)" disabled>Undo</button>
+              <button class="button-secondary" type="button" data-redo-design title="Redo (⌘⇧Z / Ctrl+Shift+Z)" disabled>Redo</button>
+              <button class="button-secondary" type="button" data-save-design>Save Design</button>
+              <button class="button-secondary" type="button" data-share-design>Share Link</button>
+              <button class="button-secondary" type="button" data-compare-design>Compare Saved</button>
+              <button class="button-secondary" type="button" data-download-design title="Download a PNG of the current view">Download PNG</button>
+              <a class="button-secondary" href="#request-form">Skip to Form</a>
+            </div>
+            <p class="designer-action-status" data-designer-share-status aria-live="polite"></p>
+          </div>
+          </div><!-- /.design-studio__shell -->
+        </section>
+
+        <section class="section section--soft" id="gemstone-guide">
+          <div class="container gemstone-guide" data-gemstone-guide>
+            <div class="section-heading" data-reveal>
+              <span class="eyebrow">Stone guide</span>
+              <div class="accent-rule"></div>
+              <h2>Choose the feeling of the centre stone</h2>
+            </div>
+
+            <div class="gemstone-toolbar" data-reveal>
+              <div class="gemstone-filters" role="group" aria-label="Filter by palette">
+                <button type="button" class="gem-filter is-active" data-gemstone-filter="all">All</button>
+                <button type="button" class="gem-filter" data-gemstone-filter="colourless">Colourless</button>
+                <button type="button" class="gem-filter" data-gemstone-filter="warm">Warm</button>
+                <button type="button" class="gem-filter" data-gemstone-filter="cool">Cool</button>
+              </div>
+              <button type="button" class="button-secondary gemstone-compare-toggle" data-gemstone-compare-toggle aria-pressed="false">Compare Stones</button>
+            </div>
+
+            <div class="gemstone-grid" data-reveal>
+              <button class="gemstone-card is-active" type="button" data-gemstone="Clear Diamond">
+                <span class="gemstone-photo">
+                  <img src="assets/images/gemstones/clear-diamond.jpg" alt="Clear diamond gemstone">
+                </span>
+                <strong>Clear Diamond</strong>
+                <small>Bright, timeless, highest sparkle</small>
+                <span class="gemstone-card__meters">
+                  <span class="gem-meter__bar" title="Hardness"><i style="width:100%"></i></span>
+                  <span class="gem-meter__bar" title="Brilliance"><i style="width:100%"></i></span>
+                </span>
+              </button>
+              <button class="gemstone-card" type="button" data-gemstone="Blush Sapphire">
+                <span class="gemstone-photo">
+                  <img src="assets/images/gemstones/blush-sapphire.jpg" alt="Blush sapphire gemstone">
+                </span>
+                <strong>Blush Sapphire</strong>
+                <small>Soft colour, romantic warmth</small>
+                <span class="gemstone-card__meters">
+                  <span class="gem-meter__bar" title="Hardness"><i style="width:90%"></i></span>
+                  <span class="gem-meter__bar" title="Brilliance"><i style="width:78%"></i></span>
+                </span>
+              </button>
+              <button class="gemstone-card" type="button" data-gemstone="Blue Sapphire">
+                <span class="gemstone-photo">
+                  <img src="assets/images/gemstones/blue-sapphire.jpg" alt="Blue sapphire gemstone">
+                </span>
+                <strong>Blue Sapphire</strong>
+                <small>Deep colour, polished contrast</small>
+                <span class="gemstone-card__meters">
+                  <span class="gem-meter__bar" title="Hardness"><i style="width:90%"></i></span>
+                  <span class="gem-meter__bar" title="Brilliance"><i style="width:80%"></i></span>
+                </span>
+              </button>
+              <button class="gemstone-card" type="button" data-gemstone="Emerald Green">
+                <span class="gemstone-photo">
+                  <img src="assets/images/gemstones/emerald-green.jpg" alt="Emerald green gemstone">
+                </span>
+                <strong>Emerald Green</strong>
+                <small>Rich tone, vintage character</small>
+                <span class="gemstone-card__meters">
+                  <span class="gem-meter__bar" title="Hardness"><i style="width:60%"></i></span>
+                  <span class="gem-meter__bar" title="Brilliance"><i style="width:65%"></i></span>
+                </span>
+              </button>
+            </div>
+
+            <div class="gemstone-detail" data-reveal aria-live="polite">
+              <div class="gemstone-detail__visual" data-gemstone-visual></div>
+              <div class="gemstone-detail__body">
+                <span class="eyebrow">Stone profile</span>
+                <h3 data-gemstone-title>Clear Diamond</h3>
+                <p data-gemstone-copy>Best for maximum brilliance, classic engagement pieces, and designs where sparkle is the main event.</p>
+
+                <div class="gem-meter" data-gemstone-meters></div>
+
+                <div class="gem-detail__row">
+                  <small class="eyebrow">Suits</small>
+                  <div class="gem-chips" data-gemstone-suits></div>
+                </div>
+                <div class="gem-detail__row">
+                  <small class="eyebrow">Best cuts</small>
+                  <div class="gem-chips" data-gemstone-cuts></div>
+                </div>
+
+                <dl data-gemstone-specs></dl>
+
+                <div class="gem-detail__notes">
+                  <p><strong>Care.</strong> <span data-gemstone-care></span></p>
+                  <p><strong>Sourcing.</strong> <span data-gemstone-sourcing></span></p>
+                </div>
+
+                <a class="button-secondary" href="#design-studio" data-gemstone-apply>Try This Stone</a>
+              </div>
+            </div>
+
+            <aside class="gem-compare" data-gemstone-compare hidden aria-label="Stone comparison">
+              <header class="gem-compare__header">
+                <strong>Comparing stones</strong>
+                <button type="button" class="gem-compare__close" data-gemstone-compare-close aria-label="Close comparison">✕</button>
+              </header>
+              <div class="gem-compare__list" data-compare-list></div>
+              <p class="gem-compare__hint">Tap up to two stones from the grid to compare side by side.</p>
+            </aside>
           </div>
         </section>
 
@@ -244,6 +680,28 @@
               <p class="sr-only">
                 <label>Do not fill this out if you're human: <input name="bot-field"></label>
               </p>
+
+              <div class="design-brief-card form-field--wide" data-design-brief-card hidden>
+                <div class="design-brief-card__media">
+                  <img data-design-brief-image alt="Custom jewellery design preview" hidden>
+                  <div class="design-brief-card__placeholder" data-design-brief-placeholder>
+                    <span>Design Preview</span>
+                  </div>
+                </div>
+                <div class="design-brief-card__body">
+                  <span class="eyebrow">Design Summary</span>
+                  <h3 data-design-brief-title>Custom ring starting point</h3>
+                  <p data-design-brief-copy>Clean custom direction with white gold, diamond detail, and daylight sparkle.</p>
+                  <dl data-design-brief-specs></dl>
+                  <ol class="brief-timeline" data-design-brief-steps>
+                    <li>Request review</li>
+                    <li>Consultation</li>
+                    <li>Quote and design direction</li>
+                    <li>Production window</li>
+                  </ol>
+                </div>
+              </div>
+
               <div class="form-field">
                 <label for="full-name">Full Name</label>
                 <input id="full-name" name="full-name" type="text" autocomplete="name" required>
@@ -269,6 +727,89 @@
                   <option>Earrings</option>
                   <option>Other</option>
                 </select>
+              </div>
+
+              <div class="context-fields form-field--wide" data-context-fields>
+                <div class="context-field-grid" data-context-panel="Ring">
+                  <div class="form-field">
+                    <label for="ring-size">Ring Size</label>
+                    <input id="ring-size" name="ring-size" type="text" placeholder="Size 5, 6, 7, custom">
+                  </div>
+                  <div class="form-field">
+                    <label for="band-profile">Band Profile</label>
+                    <select id="band-profile" name="band-profile">
+                      <option>Fine pavé</option>
+                      <option>Classic solitaire</option>
+                      <option>Wide statement</option>
+                      <option>Vintage detail</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="context-field-grid" data-context-panel="Necklace" hidden>
+                  <div class="form-field">
+                    <label for="chain-length">Chain Length</label>
+                    <select id="chain-length" name="chain-length">
+                      <option>16 inches</option>
+                      <option>18 inches</option>
+                      <option>20 inches</option>
+                      <option>Custom length</option>
+                    </select>
+                  </div>
+                  <div class="form-field">
+                    <label for="pendant-scale">Pendant Scale</label>
+                    <select id="pendant-scale" name="pendant-scale">
+                      <option>Delicate</option>
+                      <option>Classic</option>
+                      <option>Statement</option>
+                      <option>Layering piece</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="context-field-grid" data-context-panel="Bracelet" hidden>
+                  <div class="form-field">
+                    <label for="bracelet-length">Bracelet Length</label>
+                    <input id="bracelet-length" name="bracelet-length" type="text" placeholder="6.5 in, 7 in, custom">
+                  </div>
+                  <div class="form-field">
+                    <label for="bracelet-fit">Bracelet Fit</label>
+                    <select id="bracelet-fit" name="bracelet-fit">
+                      <option>Close fit</option>
+                      <option>Classic fit</option>
+                      <option>Loose stack</option>
+                      <option>Adjustable</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="context-field-grid" data-context-panel="Earrings" hidden>
+                  <div class="form-field">
+                    <label for="earring-style">Earring Style</label>
+                    <select id="earring-style" name="earring-style">
+                      <option>Studs</option>
+                      <option>Huggies</option>
+                      <option>Drops</option>
+                      <option>Statement pair</option>
+                    </select>
+                  </div>
+                  <div class="form-field">
+                    <label for="backing-style">Backing Style</label>
+                    <select id="backing-style" name="backing-style">
+                      <option>Push back</option>
+                      <option>Screw back</option>
+                      <option>Lever back</option>
+                      <option>Clip option</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="context-field-grid" data-context-panel="Other" hidden>
+                  <div class="form-field form-field--wide">
+                    <label for="custom-piece-notes">Custom Piece Notes</label>
+                    <input id="custom-piece-notes" name="custom-piece-notes" type="text" placeholder="Brooch, anklet, charm, reset, repair-inspired custom">
+                  </div>
+                </div>
               </div>
 
               <div class="form-field">
@@ -301,6 +842,18 @@
                 </div>
               </div>
 
+              <div class="budget-estimator form-field--wide" data-budget-estimator>
+                <div>
+                  <span class="eyebrow">Scope Estimate</span>
+                  <h3 data-budget-title>Choose a budget direction</h3>
+                  <p data-budget-copy>Budget, materials, stone size, and detail level help shape the first recommendation.</p>
+                </div>
+                <div class="budget-meter" aria-hidden="true">
+                  <span data-budget-meter></span>
+                </div>
+                <dl data-budget-specs></dl>
+              </div>
+
               <div class="form-field">
                 <label for="occasion">Occasion</label>
                 <input id="occasion" name="occasion" type="text" placeholder="Gift, personal piece, engagement, event">
@@ -309,6 +862,25 @@
               <div class="form-field">
                 <label for="needed-by">Needed By Date</label>
                 <input id="needed-by" name="needed-by" type="date">
+              </div>
+
+              <div class="form-field form-field--wide private-inquiry">
+                <label class="private-inquiry__toggle"><input type="checkbox" name="private-inquiry" value="yes" data-private-inquiry-toggle><span>Private high-value inquiry</span></label>
+                <div class="private-inquiry__fields" data-private-inquiry-fields hidden>
+                  <div class="form-field">
+                    <label for="preferred-contact">Preferred Contact Method</label>
+                    <select id="preferred-contact" name="preferred-contact">
+                      <option>Email first</option>
+                      <option>Phone call</option>
+                      <option>Text message</option>
+                      <option>Private appointment</option>
+                    </select>
+                  </div>
+                  <div class="form-field">
+                    <label for="privacy-notes">Privacy Notes</label>
+                    <input id="privacy-notes" name="privacy-notes" type="text" placeholder="Discretion, gift timing, travel, concierge details">
+                  </div>
+                </div>
               </div>
 
               <div class="form-field form-field--wide">
@@ -352,6 +924,15 @@
           <input name="email-address">
           <input name="phone-number">
           <input name="piece-type">
+          <input name="ring-size">
+          <input name="band-profile">
+          <input name="chain-length">
+          <input name="pendant-scale">
+          <input name="bracelet-length">
+          <input name="bracelet-fit">
+          <input name="earring-style">
+          <input name="backing-style">
+          <input name="custom-piece-notes">
           <input name="metal-preference">
           <input name="stone-preference">
           <input name="finish-preference">
@@ -359,6 +940,9 @@
           <input name="budget">
           <input name="occasion">
           <input name="needed-by">
+          <input name="private-inquiry">
+          <input name="preferred-contact">
+          <input name="privacy-notes">
           <input name="inspiration-upload" type="file">
           <input name="inspiration-link">
           <textarea name="description"></textarea>
@@ -405,6 +989,11 @@
               <h2>Questions before you begin</h2>
             </div>
 
+            <div class="faq-search" data-reveal>
+              <label class="sr-only" for="faq-search">Search FAQ</label>
+              <input id="faq-search" type="search" placeholder="Search questions" data-faq-search>
+            </div>
+
             <div class="faq-list">
               <article class="faq-item" data-reveal>
                 <button class="faq-question" type="button"><span>How long does the process take?</span><span>+</span></button>
@@ -444,6 +1033,8 @@
           </div>
         </section>
       </main>
+
+      <button class="design-studio__close" type="button" data-close-design-studio aria-label="Close design studio" hidden>Close Studio</button>
 
       <footer class="footer">
         <div class="container">
