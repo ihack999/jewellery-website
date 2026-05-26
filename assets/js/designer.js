@@ -2961,14 +2961,13 @@ async function createThreeStudio(root, canvas) {
 
   const sparkleMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.5 });
 
-  for (let index = 0; index < 34; index += 1) {
-    const gem = new THREE.Mesh(
-      new THREE.OctahedronGeometry(0.018 + Math.random() * 0.024, 0),
-      sparkleMaterial
-    );
-    gem.position.set((Math.random() - 0.5) * 6, (Math.random() - 0.5) * 3.8, -1.2 - Math.random() * 2.8);
-    sparkle.add(gem);
-  }
+  // The original code scattered 34 octahedron "sparkle gems" behind the
+  // ring as bokeh fakes. With the Phase 1 post-chain (bloom + CA) and the
+  // Phase 4 DOF in place, those low-poly octahedra read as obvious
+  // CG diamond-shaped pixel artifacts, not as photographic bokeh. They
+  // are intentionally disabled here — real depth-of-field on the actual
+  // gem highlights now provides the soft glow these were faking.
+  void sparkleMaterial;
 
   // -------------------------------------------------------------------
   // PHASE 1 — Photoreal post-processing chain.
@@ -3098,7 +3097,7 @@ async function createThreeStudio(root, canvas) {
         cameraFar:     { value: 100 },
         focusDist:     { value: 5.75 },
         focusRange:    { value: 0.55 },
-        bokehScale:    { value: 0.0018 },
+        bokehScale:    { value: 0.016 },
         texelSize:     { value: new THREE.Vector2(1 / 1024, 1 / 1024) },
         time:          { value: 0 }
       },
@@ -3129,17 +3128,17 @@ async function createThreeStudio(root, canvas) {
         "  float z = d * 2.0 - 1.0;",
         "  return (2.0 * cameraNear * cameraFar) / (cameraFar + cameraNear - z * (cameraFar - cameraNear));",
         "}",
-        // 7-tap hexagonal bokeh sample pattern — visually softer than a
-        // box blur, cheap (only 7 taps), and gives a slight 'gem facet'
-        // sparkle to defocused highlights. Offsets are pre-baked unit
-        // vectors on a hex; the shader scales them by CoC * bokehScale.
-        "const vec2 BOKEH[6] = vec2[6](",
-        "  vec2( 1.000,  0.000),",
-        "  vec2( 0.500,  0.866),",
-        "  vec2(-0.500,  0.866),",
-        "  vec2(-1.000,  0.000),",
-        "  vec2(-0.500, -0.866),",
-        "  vec2( 0.500, -0.866)",
+        // 13-tap bokeh: 1 center + 6 inner hex ring (0.5 radius) + 6 outer
+        // hex ring (1.0 radius). The single-ring 6-tap version produced
+        // visible 'ghost copies' of bright sources scattered across the
+        // backdrop — at high CoC every dark pixel within reach of the gem
+        // would alias to (1/7)·brightness, creating a hexagonal halo of
+        // floating sparkles. Two concentric rings smooth this out.
+        "const vec2 BOKEH[12] = vec2[12](",
+        "  vec2( 0.500,  0.000), vec2( 0.250,  0.433), vec2(-0.250,  0.433),",
+        "  vec2(-0.500,  0.000), vec2(-0.250, -0.433), vec2( 0.250, -0.433),",
+        "  vec2( 1.000,  0.000), vec2( 0.500,  0.866), vec2(-0.500,  0.866),",
+        "  vec2(-1.000,  0.000), vec2(-0.500, -0.866), vec2( 0.500, -0.866)",
         ");",
         "void main() {",
         "  vec2 d = vUv - 0.5;",
@@ -3155,7 +3154,7 @@ async function createThreeStudio(root, canvas) {
         // CoC * bokehScale. When CoC = 0 (in focus), all taps converge at
         // center → pin-sharp. Each tap also gets the chromatic split so
         // bokeh discs retain the rim CA fringe.
-        "  vec2 radius = texelSize * (coc * bokehScale * 600.0);",
+        "  vec2 radius = texelSize * (coc * bokehScale * 380.0);",
         "  vec4 sceneSample = texture2D(tScene, vUv);",
         "  vec3 col;",
         "  col.r = texture2D(tScene, vUv - d * ca).r;",
@@ -3164,10 +3163,10 @@ async function createThreeStudio(root, canvas) {
         // Mix in hexagonal blur when out of focus.
         "  if (coc > 0.01) {",
         "    vec3 blurred = sceneSample.rgb;",
-        "    for (int i = 0; i < 6; i++) {",
+        "    for (int i = 0; i < 12; i++) {",
         "      blurred += texture2D(tScene, vUv + BOKEH[i] * radius).rgb;",
         "    }",
-        "    blurred *= (1.0 / 7.0);",
+        "    blurred *= (1.0 / 13.0);",
         "    col = mix(col, blurred, coc);",
         "  }",
         "  vec3 b = texture2D(tBloom0, vUv).rgb;",
@@ -4035,7 +4034,69 @@ async function createThreeStudio(root, canvas) {
     const mesh = new THREE.Mesh(createCutStoneGeometry(size, currentState.shape), materialForStone());
     mesh.userData.isGem = true;
     stone.add(mesh);
+    // Phase 2 — Salt-and-pepper inclusions: a handful of microscopic dark
+    // specks (and a few translucent 'feathers') frozen inside the gem
+    // volume. Because the surrounding stone is MeshPhysicalMaterial with
+    // transmission > 0, three.js renders these specks in the transmission
+    // pre-pass so they show up correctly through refraction. Count and
+    // tint are tuned per-stone: emeralds get a denser 'jardin', clear
+    // diamonds get VS-grade sparse pinpoints, opaque stones get none.
+    addSaltAndPepperInclusions(mesh, size, currentState.stone);
     return enableShadows(stone);
+  }
+
+  function addSaltAndPepperInclusions(parentMesh, size, stoneName) {
+    const profile = STONE_PROFILES[stoneName];
+    if (!profile || (profile.transmission || 0) < 0.6) return;
+
+    // Emerald: famous 'jardin' of inclusions. Clear diamond: VS-grade
+    // sparse pinpoints. Coloured corundum (sapphire/ruby): moderate.
+    let count;
+    if (stoneName === "Emerald Green") count = 9;
+    else if (stoneName === "Clear Diamond") count = 3;
+    else count = 5;
+
+    // Black opaque specks (carbon/graphite pinpoints) and a few faint
+    // translucent feathers. Both use MeshBasicMaterial so they don't pick
+    // up scene lighting — real inclusions read as light-blocking, not
+    // light-emitting. fog:false because the scene has no fog and we want
+    // crisp dots.
+    const matBlack = new THREE.MeshBasicMaterial({ color: 0x0a0c0f, fog: false, toneMapped: false });
+    const matFeather = new THREE.MeshBasicMaterial({
+      color: 0xffffff,
+      transparent: true,
+      opacity: 0.28,
+      fog: false,
+      toneMapped: false,
+      depthWrite: false
+    });
+
+    for (let i = 0; i < count; i += 1) {
+      // Uniform-volume sample inside a sphere of 0.32 * stone size. Cube
+      // root of uniform random keeps density even — naive Math.random()
+      // for the radius clusters inclusions in the center.
+      const r = Math.cbrt(Math.random()) * size * 0.32;
+      const theta = Math.random() * Math.PI * 2;
+      const phi = Math.acos(2 * Math.random() - 1);
+      const x = r * Math.sin(phi) * Math.cos(theta);
+      const y = r * Math.sin(phi) * Math.sin(theta);
+      const z = r * Math.cos(phi);
+
+      // ~70% are black pinpoints, ~30% are faint white feathers. Tiny:
+      // 0.8%-2% of stone size — large enough to be visible under inspect
+      // mode, small enough to look like flaws, not features.
+      const isBlack = Math.random() < 0.7;
+      const radius = size * (0.008 + Math.random() * 0.012);
+      const speck = new THREE.Mesh(
+        new THREE.SphereGeometry(radius, 6, 4),
+        isBlack ? matBlack : matFeather
+      );
+      speck.position.set(x, y, z);
+      // Feathers get slightly elongated to read as crack-like, not
+      // spherical bubbles.
+      if (!isBlack) speck.scale.set(1.0, 0.3 + Math.random() * 0.3, 1.6 + Math.random() * 0.6);
+      parentMesh.add(speck);
+    }
   }
 
   function makeMeleeStone(size, material) {
