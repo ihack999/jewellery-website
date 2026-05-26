@@ -474,14 +474,16 @@ class ARTryOn {
     // One-Euro filters per channel — much cleaner than EMA for tracking jitter.
     // Position: low cutoff, low beta (slow corrections, very smooth).
     // Scale:    even lower cutoff (depth wobble is annoying).
-    // Quat:     channel-per-component (we re-normalize each frame).
-    this.filtPx = new OneEuro(1.2, 0.015);
-    this.filtPy = new OneEuro(1.2, 0.015);
-    this.filtScale = new OneEuro(0.6, 0.01);
-    this.filtQx = new OneEuro(2.0, 0.02);
-    this.filtQy = new OneEuro(2.0, 0.02);
-    this.filtQz = new OneEuro(2.0, 0.02);
-    this.filtQw = new OneEuro(2.0, 0.02);
+    // Angle/pitch: per-scalar, then we build the quaternion AFTER smoothing
+    //   (avoids 4-channel hemisphere headaches and is way more stable).
+    this.filtPx = new OneEuro(1.4, 0.012);
+    this.filtPy = new OneEuro(1.4, 0.012);
+    this.filtScale = new OneEuro(0.5, 0.008);
+    // Angle: filter sin/cos separately so the wrap at ±π doesn't cause jumps.
+    this.filtAngleSin = new OneEuro(1.5, 0.02);
+    this.filtAngleCos = new OneEuro(1.5, 0.02);
+    // Pitch: extra-slow filter — finger pitch from foreshortening is noisy.
+    this.filtPitch = new OneEuro(0.6, 0.01);
     // Finger diameter (meters) filtered hard — the digit display would
     // flicker between sizes otherwise. Low cutoff + low beta = lazy lock.
     this.filtFingerDia = new OneEuro(0.3, 0.005);
@@ -633,19 +635,26 @@ class ARTryOn {
     );
     this.camera.position.z = 100;
 
-    // Three-point rig — acts as a fallback before the HDR env loads, and
+    // Lighting rig — acts as a fallback before the HDR env loads, and
     // adds shaped specular punch on top of the env's diffuse contribution.
-    const hemi = new THREE.HemisphereLight(0xffffff, 0x404a55, 0.45);
+    // The sparkle light is animated each frame to make the gem scintillate.
+    const hemi = new THREE.HemisphereLight(0xffffff, 0x404a55, 0.55);
     this.scene.add(hemi);
-    const key = new THREE.DirectionalLight(0xffffff, 0.9);
-    key.position.set(0.8, 1, 0.6);
+    const key = new THREE.DirectionalLight(0xffffff, 1.4);
+    key.position.set(0.8, 1.0, 0.6);
     this.scene.add(key);
-    const fill = new THREE.DirectionalLight(0xc7d6ff, 0.4);
+    const fill = new THREE.DirectionalLight(0xc7d6ff, 0.55);
     fill.position.set(-0.7, 0.4, 0.5);
     this.scene.add(fill);
-    const rim = new THREE.DirectionalLight(0xfff1d8, 0.55);
-    rim.position.set(0, 0.5, -1);
+    const rim = new THREE.DirectionalLight(0xfff1d8, 0.7);
+    rim.position.set(-0.2, 0.6, -1);
     this.scene.add(rim);
+    // Scintillation light — small, fast-moving point light positioned just
+    // off-axis from the camera; its intensity is modulated in the loop so
+    // the stone gets a wandering specular flash even when the hand is still.
+    this._sparkleLight = new THREE.PointLight(0xffffff, 1.2, 0, 2);
+    this._sparkleLight.position.set(0, 0, 200);
+    this.scene.add(this._sparkleLight);
 
     const state = readDesignState();
     // Prefer the designer's full ring builder (halo, prongs, milgrain,
@@ -691,16 +700,23 @@ class ARTryOn {
      * is ~15% thicker than the finger inner hole on a snug fit). Length
      * is 8 × outer radius so the sleeve extends well past the PIP and MCP
      * landmarks in either direction. */
-    const fingerR = this._ringLocalOuterR * 0.85;
-    const fingerL = this._ringLocalOuterR * 8;
-    const occluderGeom = new THREE.CylinderGeometry(fingerR, fingerR, fingerL, 32, 1, true);
+    const fingerR = this._ringLocalOuterR * 0.92;
+    const fingerL = this._ringLocalOuterR * 14;
+    const occluderGeom = new THREE.CylinderGeometry(fingerR, fingerR, fingerL, 48, 1, false);
     occluderGeom.rotateX(Math.PI / 2);  // align cylinder axis to local +Z
     const occluderMat = new THREE.MeshBasicMaterial({
       colorWrite: false,
-      depthWrite: true
+      depthWrite: true,
+      depthTest: true,
+      transparent: false,
+      side: THREE.FrontSide,
+      polygonOffset: true,
+      polygonOffsetFactor: -1,
+      polygonOffsetUnits: -1
     });
     this._occluder = new THREE.Mesh(occluderGeom, occluderMat);
-    this._occluder.renderOrder = -1;
+    this._occluder.renderOrder = -100;
+    this._occluder.frustumCulled = false;
     this.ring.add(this._occluder);
 
     // Async HDR environment for PBR reflections — the ring looks plasticky
@@ -756,13 +772,26 @@ class ARTryOn {
       const result = this.handLandmarker.detectForVideo(this.video, now);
       this.applyResult(result);
     }
+    /* Scintillation — wander the sparkle light around the ring on a Lissajous
+     * path so the stone gets a continuous, asymmetric specular flash even
+     * when the hand is held still. Two incommensurate frequencies keep the
+     * motion from looking periodic. */
+    if (this._sparkleLight && this.ring && this.ring.visible) {
+      const t = now * 0.001;
+      const r = 220;
+      this._sparkleLight.position.set(
+        this.ring.position.x + Math.cos(t * 1.7) * r,
+        this.ring.position.y + Math.sin(t * 2.3) * r * 0.6 + 60,
+        180 + Math.sin(t * 1.1) * 30
+      );
+      this._sparkleLight.intensity = 1.0 + 0.6 * Math.sin(t * 3.7) + 0.4 * Math.cos(t * 5.3);
+    }
     this.renderer.render(this.scene, this.camera);
   };
 
   applyResult(result) {
     const landmarks = result?.landmarks?.[0];
     const world = result?.worldLandmarks?.[0];
-    const handedness = result?.handedness?.[0]?.[0]?.categoryName;  // 'Left'/'Right' in raw image
 
     if (!landmarks || !world) {
       this.handLostFrames++;
@@ -780,110 +809,123 @@ class ARTryOn {
     const w = this.canvas.clientWidth;
     const h = this.canvas.clientHeight;
     const now = performance.now();
-
     const [baseIdx, tipIdx] = this.fingerLandmarks();
-    const base = landmarks[baseIdx];
-    const tip = landmarks[tipIdx];
 
-    /* ----- 2D POSITION (mirrored, in three.js pixel space) -----
-       The video is css-mirrored; the overlay canvas is NOT, so we mirror X
-       here (1 - x) to land the ring on the visually correct hand. Y is
-       flipped because three.js is Y-up while image is Y-down. */
-    const baseX = (1 - base.x) * w - w / 2;
-    const baseY = -(base.y * h - h / 2);
-    const tipX = (1 - tip.x) * w - w / 2;
-    const tipY = -(tip.y * h - h / 2);
+    /* ============================================================
+     * POSE STRATEGY (rewrite)
+     * ------------------------------------------------------------
+     * Old approach built a full 3D basis from worldLandmarks cross
+     * products, which amplified per-frame noise in the depth (z)
+     * channel and produced visible jitter + occasional flips.
+     *
+     * New approach decomposes into three low-noise scalars:
+     *   1. (px, py)   — image-space midpoint of MCP↔PIP (very stable)
+     *   2. angle      — in-plane finger direction from atan2 (stable)
+     *   3. pitch      — out-of-plane tilt from foreshortening of the
+     *                   image projection vs the world-space length
+     *                   (noisier than 1+2, smoothed harder)
+     * Each scalar is smoothed independently, then a deterministic
+     * basis is reconstructed AFTER smoothing. No more quaternion
+     * channel-wise filtering, no hemisphere flips, no cross product
+     * noise amplification.
+     * ============================================================ */
 
-    // Ring sits ~30% up the proximal phalanx (base → PIP segment).
-    const tParam = 0.30;
+    /* --- pixels-per-meter calibration (knuckle line) --- */
+    const idxImg = landmarks[INDEX_MCP];
+    const pkyImg = landmarks[PINKY_MCP];
+    const handWidthPx = Math.hypot((pkyImg.x - idxImg.x) * w, (pkyImg.y - idxImg.y) * h);
+    const idxW = world[INDEX_MCP];
+    const pkyW = world[PINKY_MCP];
+    const handWidthM = Math.hypot(pkyW.x - idxW.x, pkyW.y - idxW.y, pkyW.z - idxW.z) || 0.08;
+    const pxPerMeter = handWidthPx / handWidthM;
+    this._updateSizeReadout(handWidthM, now);
+
+    /* --- 2D position (mirrored: video is CSS-flipped, overlay is not) --- */
+    const baseImg = landmarks[baseIdx];
+    const tipImg = landmarks[tipIdx];
+    const baseX = (1 - baseImg.x) * w - w / 2;
+    const baseY = -(baseImg.y * h - h / 2);
+    const tipX = (1 - tipImg.x) * w - w / 2;
+    const tipY = -(tipImg.y * h - h / 2);
+    // Ring sits at ~50% of the proximal phalanx (visually centered between
+    // the knuckle and PIP joint — that's where rings actually sit).
+    const tParam = 0.50;
     const rawPx = baseX + (tipX - baseX) * tParam;
     const rawPy = baseY + (tipY - baseY) * tParam;
 
-    /* ----- SCALE — use 3D finger length so out-of-plane rotation does not
-       shrink the ring.  We measure the WORLD-space distance between adjacent
-       knuckles and multiply by a pixels-per-meter factor derived from the
-       image-space hand width (index MCP ↔ pinky MCP). */
-    const k1Img = landmarks[INDEX_MCP];
-    const k2Img = landmarks[PINKY_MCP];
-    const handWidthPx = Math.hypot((k2Img.x - k1Img.x) * w, (k2Img.y - k1Img.y) * h);
-    const k1W = world[INDEX_MCP];
-    const k2W = world[PINKY_MCP];
-    const handWidthM = Math.hypot(k2W.x - k1W.x, k2W.y - k1W.y, k2W.z - k1W.z) || 0.08;
-    const pxPerMeter = handWidthPx / handWidthM;
+    /* --- in-plane finger angle (image space) --- */
+    const dx = tipX - baseX;
+    const dy = tipY - baseY;
+    const imgLen = Math.hypot(dx, dy) || 1;
+    const fx = dx / imgLen;
+    const fy = dy / imgLen;
+    // We mirror the X axis of the source (selfie view), so the in-plane
+    // sense is already correct.
 
-    /* ----- size readout ----- updated every frame from world-space hand
-     * width × a per-finger anthropometric ratio. Smoothed with One-Euro to
-     * keep the digit stable. */
-    this._updateSizeReadout(handWidthM, now);
+    /* --- out-of-plane pitch from foreshortening ---
+     * If finger were exactly in the image plane: imgLen ≈ worldLen × pxPerMeter
+     * If finger points toward/away camera: imgLen shrinks, ratio < 1.
+     * cos(pitch) = imgLen / (worldLen * pxPerMeter), clamped.
+     * Sign: if the TIP is closer to the camera than the BASE in world Z,
+     *       pitch is positive (head tilts toward camera).  MediaPipe world
+     *       z is "smaller = closer to camera" for image landmarks but for
+     *       worldLandmarks z grows toward camera in some builds; we infer
+     *       sign from which direction makes the visual prediction match.
+     *       Empirically: tip closer to camera → wTip.z < wBase.z. */
+    const wBase = world[baseIdx];
+    const wTip = world[tipIdx];
+    const worldLen = Math.hypot(wTip.x - wBase.x, wTip.y - wBase.y, wTip.z - wBase.z) || 0.04;
+    const expectedFlatPx = worldLen * pxPerMeter;
+    const cosPitch = Math.max(0.15, Math.min(1, imgLen / expectedFlatPx));
+    const pitchMag = Math.acos(cosPitch);
+    const pitchSign = (wTip.z < wBase.z) ? +1 : -1;
+    const rawPitch = pitchMag * pitchSign;
 
-    // Calibrate so the ring's outer rim corresponds to a real ~11mm radius
-    // (22mm OD — typical engagement ring). We scale by `targetOuterPx /
-    // localOuterR` so the same code works for the simplified placeholder
-    // (local outer R = 1.0) AND the designer's full ring (local outer R
-    // ≈ bandMajorR + bandWidth/2, usually 1.1–1.5).
-    const targetOuterMeters = 0.011;
+    /* --- scale ---
+     * Calibrate the ring's outer rim to a real ~9.5mm radius (≈19mm OD —
+     * typical women's engagement-ring outside diameter). Designer ring's
+     * local outer R varies (1.1–1.5) so divide it out. */
+    const targetOuterMeters = 0.0095;
     const localOuterR = this._ringLocalOuterR || 1.0;
     const rawScale = (pxPerMeter * targetOuterMeters) / localOuterR;
 
-    /* ----- 3D ORIENTATION via worldLandmarks -----
-       Build an orthonormal basis from the hand:
-         fwd   = finger base → tip      (becomes ring's local +Y, toward setting)
-         right = index_MCP → pinky_MCP  (across the palm)
-         up    = right × fwd            (palm normal; setting points along this)
-       Then re-orthogonalize.  Mirror X to match the css-mirrored video. */
-    this._vFwd.set(
-      -(world[tipIdx].x - world[baseIdx].x),
-      -(world[tipIdx].y - world[baseIdx].y),   // mediapipe Y is down
-      -(world[tipIdx].z - world[baseIdx].z)
-    ).normalize();
-    this._vRight.set(
-      -(k2W.x - k1W.x),
-      -(k2W.y - k1W.y),
-      -(k2W.z - k1W.z)
-    ).normalize();
-    // Up = right × fwd (right-hand rule).  For a palm-down (back of hand to
-    // camera) gesture this points toward camera, which is what we want for
-    // the stone to sit on top of the finger.
-    this._vUp.crossVectors(this._vRight, this._vFwd).normalize();
-    // Re-orthogonalize right so the basis is square.
-    this._vRight.crossVectors(this._vFwd, this._vUp).normalize();
-
-    // Flip up if the user is showing the palm (stone should still face camera).
-    if (this._vUp.z < 0) {
-      this._vUp.multiplyScalar(-1);
-      this._vRight.multiplyScalar(-1);
-    }
-
-    /* Ring local axes: +Y up toward setting, +Z is the torus axis (finger),
-       +X is sideways.  We need a basis where:
-         local +Y = world up   (palm normal pointing away from palm)
-         local +Z = world fwd  (finger direction)
-         local +X = world right
-       Matrix4.makeBasis(x, y, z) builds exactly this. */
-    this._mat.makeBasis(this._vRight, this._vUp, this._vFwd);
-    this._quat.setFromRotationMatrix(this._mat);
-
-    /* ----- Smoothing (One-Euro on each component) ----- */
+    /* --- smooth each scalar independently --- */
     const px = this.filtPx.filter(rawPx, now);
     const py = this.filtPy.filter(rawPy, now);
     const s = this.filtScale.filter(rawScale, now);
+    // Angle: filter sin & cos separately so the ±π wrap doesn't cause a
+    // pop. Then re-derive the angle's components from the smoothed pair.
+    const fxS = this.filtAngleCos.filter(fx, now);
+    const fyS = this.filtAngleSin.filter(fy, now);
+    const aLen = Math.hypot(fxS, fyS) || 1;
+    const fxN = fxS / aLen;
+    const fyN = fyS / aLen;
+    const pitch = this.filtPitch.filter(rawPitch, now);
+    const cosP = Math.cos(pitch);
+    const sinP = Math.sin(pitch);
 
-    // For quaternions, filter each component then normalize.  Guard against
-    // hemisphere flips by aligning with the previous quaternion.
-    if (this._prevQuat && this._quat.dot(this._prevQuat) < 0) {
-      this._quat.x = -this._quat.x;
-      this._quat.y = -this._quat.y;
-      this._quat.z = -this._quat.z;
-      this._quat.w = -this._quat.w;
-    }
-    const qx = this.filtQx.filter(this._quat.x, now);
-    const qy = this.filtQy.filter(this._quat.y, now);
-    const qz = this.filtQz.filter(this._quat.z, now);
-    const qw = this.filtQw.filter(this._quat.w, now);
-    const qLen = Math.hypot(qx, qy, qz, qw) || 1;
-    this.ring.quaternion.set(qx / qLen, qy / qLen, qz / qLen, qw / qLen);
-    if (!this._prevQuat) this._prevQuat = new THREE.Quaternion();
-    this._prevQuat.copy(this.ring.quaternion);
+    /* --- reconstruct basis AFTER smoothing ---
+     * Local axis mapping (designer + simple ring both use this convention):
+     *   +Z = finger axis (band axis through the ring's hole)
+     *   +Y = "up" — points toward the stone/head
+     *   +X = sideways (set/shank tangent)
+     *
+     * Place at pitch=0:
+     *   +Z → (fxN, fyN, 0)
+     *   +Y → (-fyN, fxN, 0)  [90° CCW in image plane]
+     *   +X → +Y × +Z = (0, 0, -1)  [points into the screen]
+     *
+     * Rotate +X and +Y around the finger axis (+Z) by `pitch` so the head
+     * tilts toward/away from the camera as the finger pitches up. Closed
+     * form via Rodrigues with axis k=(fxN,fyN,0):
+     *   +X' = (-fyN·sin, fxN·sin, -cos)
+     *   +Y' = (-fyN·cos, fxN·cos,  sin)
+     *   +Z  = (fxN, fyN, 0)                              (unchanged) */
+    this._vRight.set(-fyN * sinP, fxN * sinP, -cosP);
+    this._vUp.set(-fyN * cosP, fxN * cosP, sinP);
+    this._vFwd.set(fxN, fyN, 0);
+    this._mat.makeBasis(this._vRight, this._vUp, this._vFwd);
+    this.ring.quaternion.setFromRotationMatrix(this._mat);
 
     this.ring.position.set(px, py, 0);
     this.ring.scale.setScalar(s);
