@@ -1020,6 +1020,12 @@ function guideBudgetFormValue(value) {
   }[value] || "1000 to 5000";
 }
 
+function syncDesignStudioPublicEntries() {
+  document.querySelectorAll("[data-design-studio-entry], [data-gemstone-apply]").forEach((entry) => {
+    entry.hidden = !DESIGN_STUDIO_PUBLIC;
+  });
+}
+
 function createGuideContext(answers) {
   return {
     occasion: answers.occasion || "engagement",
@@ -2736,6 +2742,7 @@ function setupCustomFormProgress() {
 
 document.addEventListener("DOMContentLoaded", () => {
   setupSkipLink();
+  syncDesignStudioPublicEntries();
   setupToasts();
   setupScrollProgress();
   setupHeader();
