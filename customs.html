@@ -391,6 +391,34 @@
                     <option>Bypass</option>
                   </select>
                 </div>
+
+                <div class="designer-panel__group" data-piece-only="Necklace">
+                  <label for="designer-chain-type">Chain</label>
+                  <select id="designer-chain-type" data-designer-field="chainType">
+                    <option>Cable</option>
+                    <option>Curb</option>
+                    <option>Box</option>
+                    <option>Rope</option>
+                    <option>Snake</option>
+                    <option>Figaro</option>
+                    <option>Wheat</option>
+                    <option>Herringbone</option>
+                    <option>Byzantine</option>
+                    <option>Mariner</option>
+                  </select>
+                </div>
+
+                <div class="designer-panel__group" data-piece-only="Necklace">
+                  <label for="designer-clasp">Clasp</label>
+                  <select id="designer-clasp" data-designer-field="clasp">
+                    <option>Lobster</option>
+                    <option>Spring Ring</option>
+                    <option>Toggle</option>
+                    <option>Box</option>
+                    <option>S-Hook</option>
+                    <option>Hidden</option>
+                  </select>
+                </div>
               </div>
 
               <fieldset class="designer-panel__group">
@@ -410,8 +438,8 @@
               <fieldset class="designer-panel__group">
                 <legend>Backdrop</legend>
                 <div class="lighting-row">
-                  <label class="light-option"><input type="radio" name="designer-backdrop" value="Studio White" data-designer-field="backdrop" checked><span>Studio White</span></label>
-                  <label class="light-option"><input type="radio" name="designer-backdrop" value="Velvet" data-designer-field="backdrop"><span>Velvet</span></label>
+                  <label class="light-option"><input type="radio" name="designer-backdrop" value="Studio White" data-designer-field="backdrop"><span>Studio White</span></label>
+                  <label class="light-option"><input type="radio" name="designer-backdrop" value="Velvet" data-designer-field="backdrop" checked><span>Velvet</span></label>
                   <label class="light-option"><input type="radio" name="designer-backdrop" value="Marble" data-designer-field="backdrop"><span>Marble</span></label>
                   <label class="light-option"><input type="radio" name="designer-backdrop" value="Onyx" data-designer-field="backdrop"><span>Onyx</span></label>
                   <label class="light-option"><input type="radio" name="designer-backdrop" value="Linen" data-designer-field="backdrop"><span>Linen</span></label>
@@ -529,7 +557,7 @@
           <div class="design-studio__actions">
             <div class="button-row">
               <button class="button" type="button" data-send-design>Send Design to Request Form</button>
-              <button class="button-secondary" type="button" data-ar-tryon data-piece-only="Ring" title="Try the ring on with your camera">Try On (AR)</button>
+              <button class="button-secondary" type="button" data-ar-tryon title="Try the piece on with your camera">Try On (AR)</button>
               <button class="button-secondary" type="button" data-undo-design title="Undo (⌘Z / Ctrl+Z)" disabled>Undo</button>
               <button class="button-secondary" type="button" data-redo-design title="Redo (⌘⇧Z / Ctrl+Shift+Z)" disabled>Redo</button>
               <button class="button-secondary" type="button" data-save-design>Save Design</button>

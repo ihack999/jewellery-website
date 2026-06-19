@@ -246,22 +246,27 @@ Track concrete code locations against the spec. Update as upgrades land.
 | § | Concept           | Code location                                       | Status |
 |---|-------------------|-----------------------------------------------------|--------|
 | 2 | curved tapered prongs | [assets/js/designer.js](../assets/js/designer.js) `makeTaperedTube` / `addCurvedProng` | live |
+| 2 | necklace chain patterns | [assets/js/designer.js](../assets/js/designer.js) `CHAIN_EMITTERS` (Cable/Curb/Box/Rope/Snake/Figaro/Wheat/Herringbone/Byzantine/Mariner) | live — every emitter walks the shared arc-length `chainPath`; link spacing equals Δs so consecutive links kiss without crossing; helical patterns bound cross-section within link envelope so the chain reads as one continuous part |
+| 2 | necklace clasp closures | [assets/js/designer.js](../assets/js/designer.js) `CLASP_EMITTERS` (Lobster/Spring Ring/Toggle/Box/S-Hook/Hidden) | live — clasps anchored AT endpoint frame (position + outward tangent); jump-ring threads outermost chain link so the closure never floats sideways |
 | 2 | thickness penalty | [assets/js/designer.js](../assets/js/designer.js) `computeRealityEnergy::e_thickness` | live (score-only; geometry clamp TODO) |
 | 3 | BRDF / metalness  | [assets/js/designer.js](../assets/js/designer.js) `materialForMetal` | live — anisotropy/sheen/iridescence per finish |
 | 3 | UV anisotropy     | [assets/js/designer.js](../assets/js/designer.js) `makeBandGeometry` / `makeTaperedTube` | live — UVs follow surface flow |
 | 3 | env reflections   | [assets/js/ar-tryon.js](../assets/js/ar-tryon.js)   | live — HDR PMREM + envMapIntensity=1.6 |
-| 4 | AR pose           | [assets/js/ar-tryon.js](../assets/js/ar-tryon.js)   | live — One-Euro + scalar decomposition |
-| 4 | AR jitter         | [assets/js/ar-tryon.js](../assets/js/ar-tryon.js)   | live — rAF lerp/slerp toward target |
-| 5 | contact (shadow)  | [assets/js/ar-tryon.js](../assets/js/ar-tryon.js)   | live — soft shadow disc + finger occluder |
+| 4 | AR pose           | [assets/js/ar-tryon.js](../assets/js/ar-tryon.js)   | live — true 3D SO(3) basis (finger axis rotates into depth at high pitch), 3D-derived pitch & dorsal-axis roll from MediaPipe worldLandmarks (palm × finger cross product), confidence-gated, One-Euro per-scalar filters, physical fit scale |
+| 4 | Necklace AR smart tracking | [assets/js/ar-tryon.js](../assets/js/ar-tryon.js) | live — Pose Landmarker full model solves the suprasternal notch from shoulders + mouth/nose/ears + hip/spine vector; shoulder line is Gram-Schmidt aligned to body-up, scale is shoulder-span driven, and torso yaw feeds the necklace frame |
+| 4 | AR jitter         | [assets/js/ar-tryon.js](../assets/js/ar-tryon.js)   | live — motion-aware rAF lerp/slerp τ (tightens during fast confident motion) + constant-velocity forward predictor (cap 60 ms, confidence-gated) hides detection latency + jitter-EMA residual fed back into §14 lock score |
+| 5 | contact (shadow)  | [assets/js/ar-tryon.js](../assets/js/ar-tryon.js)   | live — per-finger anatomical occluder taper (index/middle/ring/pinky each have own distal/proximal ratios from hand morphometrics) + measured-radius contact-fit shadow + 0.45 mm flesh-compression dip along −stone-axis when contact is good |
+| 5 | Necklace AR contact/wrap | [assets/js/ar-tryon.js](../assets/js/ar-tryon.js) | live — confidence-gated clavicle shadow plus reversible child-transform wrapping bends chain ends up/back around the neck cylinder while keeping pendants front-facing |
+| 11| sparkle (AR)      | [assets/js/ar-tryon.js](../assets/js/ar-tryon.js)   | live — phase-locked sparkle lights gated by motion energy × view-aware Fresnel (stone-normal·view)^1.6 × light-gradient alignment |
 | 8 | NoDrop            | [assets/js/designer.js](../assets/js/designer.js) `computeNoDropDefects` | live — 3-scale defect scan (coarse/mid/fine), fed into E_real + Gate-C |
 | 9 | Gate-C correction | [assets/js/designer.js](../assets/js/designer.js) `proposeGateCCorrection` | live — Fix button on score badge |
 | 10| brand memory (HDWA-FSE) | [assets/js/designer.js](../assets/js/designer.js) `computeBrandAlignment` | live — complex inner-product alignment, drift-axis Gate-C |
 | 11| dispersion        | [assets/js/designer.js](../assets/js/designer.js) `materialForStone` | live — fire-driven dispersion + iridescence + env intensity |
 | 11| micro-sparkle lights | [assets/js/designer.js](../assets/js/designer.js) `animateMicroSparkles` | live — 3 PointLights, phase-locked on burst (§11 coherence) |
-| 11| sparkle (AR)      | [assets/js/ar-tryon.js](../assets/js/ar-tryon.js)   | partial — wandering point light only |
 | 13| manufacturability | [assets/js/designer.js](../assets/js/designer.js) `computeManufacturability` | live — USD cost readout on badge |
 | 14| reality score     | [assets/js/designer.js](../assets/js/designer.js) `computeRealityEnergy` / `updateRealityScore` | live — badge + tooltip + grade colours |
-| 12| delta-tile compute | [assets/js/ar-tryon.js](../assets/js/ar-tryon.js)  | TODO — region-of-interest update budget |
+| 14| AR lock score     | [assets/js/ar-tryon.js](../assets/js/ar-tryon.js)  | live — `S_real = w·tracking + w·contact + w·motionGate + w·stability`; stability term comes from §4 jitter EMA |
+| 12| delta-tile compute | [assets/js/ar-tryon.js](../assets/js/ar-tryon.js)  | live — adaptive MediaPipe detection budget from motion/confidence/cost |
 
 Upgrade order agreed with project owner:
 
