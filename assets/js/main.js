@@ -1,3 +1,5 @@
+const DESIGN_STUDIO_PUBLIC = false;
+
 const products = [
   {
     slug: "pear-halo-ring",
@@ -1050,7 +1052,8 @@ function createCustomDesignHref(state, context = {}) {
     params.set("form-budget", context.budgetFormValue || guideBudgetFormValue(context.budget));
   }
 
-  return `customs.html?${params.toString()}#design-studio`;
+  const targetHash = DESIGN_STUDIO_PUBLIC ? "design-studio" : "request-form";
+  return `customs.html?${params.toString()}#${targetHash}`;
 }
 
 function recommendCustomDirection(answers) {
@@ -1281,19 +1284,22 @@ function setupCustomGuide() {
 
     const actions = document.createElement("div");
     actions.className = "guide-direction__actions";
-    const open = document.createElement("a");
-    open.className = "button";
-    open.href = createCustomDesignHref(rec.state, rec.context);
-    open.textContent = "Open in Studio";
     const apply = document.createElement("button");
     apply.type = "button";
-    apply.className = "button-secondary";
+    apply.className = DESIGN_STUDIO_PUBLIC ? "button-secondary" : "button";
     apply.textContent = "Use for Request";
     apply.addEventListener("click", () => {
       applyGuideRecommendationToForm(rec);
       document.querySelector("#request-form")?.scrollIntoView({ behavior: "smooth", block: "start" });
     });
-    actions.append(open, apply);
+    if (DESIGN_STUDIO_PUBLIC) {
+      const open = document.createElement("a");
+      open.className = "button";
+      open.href = createCustomDesignHref(rec.state, rec.context);
+      open.textContent = "Open in Studio";
+      actions.append(open);
+    }
+    actions.append(apply);
 
     article.append(header, note, price, meter, dl, actions);
     return article;
@@ -1519,13 +1525,16 @@ function setupGemstoneGuide() {
 
     renderMeters(metersHost, guideData);
     renderChips(suitsHost, guideData.suits);
-    renderChips(cutsHost, guideData.bestCuts, {
+    renderChips(cutsHost, guideData.bestCuts, DESIGN_STUDIO_PUBLIC ? {
       href: (shape) => `customs.html?stone=${encodeURIComponent(name)}&shape=${encodeURIComponent(shape)}#design-studio`
-    });
+    } : {});
 
     if (apply) {
-      const params = new URLSearchParams({ stone: name, shape: (guideData.bestCuts && guideData.bestCuts[0]) || "Oval" });
-      apply.href = `customs.html?${params.toString()}#design-studio`;
+      apply.hidden = !DESIGN_STUDIO_PUBLIC;
+      if (DESIGN_STUDIO_PUBLIC) {
+        const params = new URLSearchParams({ stone: name, shape: (guideData.bestCuts && guideData.bestCuts[0]) || "Oval" });
+        apply.href = `customs.html?${params.toString()}#design-studio`;
+      }
     }
 
     if (specs) {
@@ -2420,7 +2429,8 @@ function setupCustomsSectionRail() {
   const main = document.querySelector("main");
   if (!main) return;
 
-  const sections = Array.from(main.querySelectorAll("section[id]"));
+  const sections = Array.from(main.querySelectorAll("section[id]"))
+    .filter((section) => !section.hidden && (DESIGN_STUDIO_PUBLIC || section.id !== "design-studio"));
   const items = sections
     .map((section) => {
       const heading = section.querySelector("h1, h2");

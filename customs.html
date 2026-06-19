@@ -75,7 +75,7 @@
               </p>
               <div class="button-row">
                 <a class="button" href="#request-form">Start Your Custom Request</a>
-                <a class="button-secondary" href="#design-studio">Open Design Studio</a>
+                <a class="button-secondary" href="#design-studio" data-design-studio-entry hidden>Open Design Studio</a>
               </div>
             </div>
 
@@ -169,6 +169,7 @@
           </div>
         </section>
 
+        <!-- Studio code is preserved here; public visibility is controlled by DESIGN_STUDIO_PUBLIC in assets/js/designer.js and assets/js/main.js. -->
         <section class="design-studio" id="design-studio" data-design-studio hidden>
           <div class="container design-studio__shell">
           <div class="design-studio__split">
@@ -661,7 +662,7 @@
                   <p><strong>Sourcing.</strong> <span data-gemstone-sourcing></span></p>
                 </div>
 
-                <a class="button-secondary" href="#design-studio" data-gemstone-apply>Try This Stone</a>
+                <a class="button-secondary" href="#design-studio" data-gemstone-apply hidden>Try This Stone</a>
               </div>
             </div>
 

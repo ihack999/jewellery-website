@@ -258,6 +258,7 @@ const TEXTURE_URLS = {
 };
 
 const DESIGN_STUDIO_HASH = "#design-studio";
+const DESIGN_STUDIO_PUBLIC = false;
 const designerUpdates = new WeakMap();
 let designerSetupPromise = null;
 
@@ -10415,6 +10416,20 @@ function setupDesignerGate() {
   const closeButton = document.querySelector("[data-close-design-studio]");
 
   if (!root) {
+    return;
+  }
+
+  if (!DESIGN_STUDIO_PUBLIC) {
+    root.hidden = true;
+    root.dataset.designerPublic = "false";
+    if (closeButton) {
+      closeButton.hidden = true;
+    }
+    if (window.location.hash === DESIGN_STUDIO_HASH) {
+      const url = new URL(window.location.href);
+      url.hash = "request-form";
+      window.history.replaceState(null, "", url.toString());
+    }
     return;
   }
 
