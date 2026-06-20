@@ -2246,7 +2246,7 @@ function setupDreamGenerator() {
   let savedSignature = "";
   let renderLoop = null;
 
-  const lockDesign = (message = "Save your contact details to unlock the generator.") => {
+  const lockDesign = (message = "") => {
     contactSaved = false;
     savedSignature = "";
     designFieldset.disabled = true;

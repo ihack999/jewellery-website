@@ -127,52 +127,64 @@
                     <fieldset data-dream-design-fieldset disabled>
                       <div class="form-field">
                         <label for="dream-piece-type">Piece Type</label>
-                        <select id="dream-piece-type" name="dream-piece-type" required>
-                          <option>Ring</option>
-                          <option>Necklace</option>
-                          <option>Bracelet</option>
-                          <option>Earrings</option>
-                        </select>
+                        <input id="dream-piece-type" name="dream-piece-type" type="text" list="dream-piece-options" value="Ring" placeholder="Ring, necklace, bracelet, earrings, anklet" autocomplete="off" required>
+                        <datalist id="dream-piece-options">
+                          <option value="Ring"></option>
+                          <option value="Necklace"></option>
+                          <option value="Bracelet"></option>
+                          <option value="Earrings"></option>
+                          <option value="Anklet"></option>
+                          <option value="Charm"></option>
+                        </datalist>
                       </div>
                       <div class="form-field">
                         <label for="dream-metal">Metal</label>
-                        <select id="dream-metal" name="dream-metal" required>
-                          <option>18K white gold</option>
-                          <option>14K yellow gold</option>
-                          <option>18K yellow gold</option>
-                          <option>Rose gold</option>
-                          <option>Platinum</option>
-                        </select>
+                        <input id="dream-metal" name="dream-metal" type="text" list="dream-metal-options" value="18K white gold" placeholder="18K white gold, platinum, mixed metal" autocomplete="off" required>
+                        <datalist id="dream-metal-options">
+                          <option value="18K white gold"></option>
+                          <option value="14K yellow gold"></option>
+                          <option value="18K yellow gold"></option>
+                          <option value="Rose gold"></option>
+                          <option value="Platinum"></option>
+                          <option value="Two-tone gold"></option>
+                        </datalist>
                       </div>
                       <div class="form-field">
                         <label for="dream-stone">Stone</label>
-                        <select id="dream-stone" name="dream-stone" required>
-                          <option>White diamond</option>
-                          <option>Blue diamond</option>
-                          <option>Yellow diamond</option>
-                          <option>Blue sapphire</option>
-                          <option>Emerald</option>
-                          <option>Ruby</option>
-                        </select>
+                        <input id="dream-stone" name="dream-stone" type="text" list="dream-stone-options" value="White diamond" placeholder="Blue diamond, oval sapphire, no stone" autocomplete="off" required>
+                        <datalist id="dream-stone-options">
+                          <option value="White diamond"></option>
+                          <option value="Blue diamond"></option>
+                          <option value="Yellow diamond"></option>
+                          <option value="Blue sapphire"></option>
+                          <option value="Emerald"></option>
+                          <option value="Ruby"></option>
+                          <option value="No stone"></option>
+                        </datalist>
                       </div>
                       <div class="form-field">
                         <label for="dream-style">Style / Vibe</label>
-                        <select id="dream-style" name="dream-style" required>
-                          <option>Timeless and elegant</option>
-                          <option>Romantic and soft</option>
-                          <option>Vintage inspired</option>
-                          <option>Bold statement</option>
-                          <option>Clean modern</option>
-                        </select>
+                        <input id="dream-style" name="dream-style" type="text" list="dream-style-options" value="Timeless and elegant" placeholder="Vintage, bold, romantic, minimal" autocomplete="off" required>
+                        <datalist id="dream-style-options">
+                          <option value="Timeless and elegant"></option>
+                          <option value="Romantic and soft"></option>
+                          <option value="Vintage inspired"></option>
+                          <option value="Bold statement"></option>
+                          <option value="Clean modern"></option>
+                          <option value="Old money luxury"></option>
+                        </datalist>
                       </div>
                       <div class="form-field">
                         <label for="dream-budget">Budget Direction</label>
-                        <select id="dream-budget" name="dream-budget" required>
-                          <option>$500 to $1,000</option>
-                          <option>$1,000 to $5,000</option>
-                          <option>$5,000 to $10,000</option>
-                          <option>$10,000+</option>
-                        </select>
+                        <input id="dream-budget" name="dream-budget" type="text" list="dream-budget-options" value="$1,000 to $5,000" placeholder="$2,500, flexible, no budget yet" autocomplete="off" required>
+                        <datalist id="dream-budget-options">
+                          <option value="$500 to $1,000"></option>
+                          <option value="$1,000 to $5,000"></option>
+                          <option value="$5,000 to $10,000"></option>
+                          <option value="$10,000+"></option>
+                          <option value="Flexible"></option>
+                          <option value="Not sure yet"></option>
+                        </datalist>
                       </div>
                       <div class="form-field form-field--wide dream-spec-field">
                         <label for="dream-custom-spec">Write Your Own Specification</label>
@@ -183,7 +195,7 @@
                         <button class="button" type="submit" data-dream-generate-submit>Generate + Send Design</button>
                         <button class="button-secondary" type="button" data-dream-retry hidden>Retry</button>
                       </div>
-                      <p class="status-note" data-dream-design-status>Save your contact details to unlock the generator.</p>
+                      <p class="status-note" data-dream-design-status></p>
                     </fieldset>
                   </form>
                 </article>
