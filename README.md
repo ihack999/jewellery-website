@@ -75,31 +75,24 @@ about.html
 contact.html
 ```
 
-## Google Sheets Lead Webhook
+## Zapier Lead Webhook
 
-Create a Google Sheet with a tab named `Leads`, then create an Apps Script web app connected to that sheet:
+Create a Zap using **Webhooks by Zapier** with a **Catch Hook** trigger. Use the webhook URL as the Netlify environment variable `DREAM_LEAD_ZAPIER_WEBHOOK_URL`.
 
-```js
-function doPost(e) {
-  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Leads");
-  const data = JSON.parse(e.postData.contents || "{}");
+The Dream Design lead webhook sends this JSON payload:
 
-  sheet.appendRow([
-    data.submittedAt || new Date().toISOString(),
-    data.source || "dream-design",
-    data.name || "",
-    data.email || "",
-    data.phone || "",
-    data.page || ""
-  ]);
-
-  return ContentService
-    .createTextOutput(JSON.stringify({ ok: true }))
-    .setMimeType(ContentService.MimeType.JSON);
+```json
+{
+  "submittedAt": "2026-06-20T00:00:00.000Z",
+  "source": "dream-design",
+  "name": "Client Name",
+  "email": "client@example.com",
+  "phone": "555-555-5555",
+  "page": "Dream Design"
 }
 ```
 
-Deploy it as a web app, copy the `/exec` URL, and add it in Netlify environment variables as `DREAM_LEAD_SHEET_WEBHOOK_URL`.
+In Zapier, add a Google Sheets action after the webhook trigger and map those fields into the sheet columns. The older `DREAM_LEAD_SHEET_WEBHOOK_URL` variable is still supported as a fallback.
 
 ## Notes
 
@@ -107,6 +100,6 @@ Deploy it as a web app, copy the `/exec` URL, and add it in Netlify environment 
 - Replace the placeholder SVG files in `assets/images/` with final photography and brand assets when available.
 - The forms submit to Netlify and can email notifications through Netlify form hooks.
 - The dream design generator expects `OPENAI_API_KEY` in Netlify environment variables. It starts high-quality OpenAI Responses jobs asynchronously, then polls `generate-dream-design-status` so Netlify does not time out. Optional overrides: `OPENAI_RESPONSE_IMAGE_MODEL`, `OPENAI_IMAGE_TOOL_MODEL`, `OPENAI_PROMPT_MODEL`, `OPENAI_IMAGE_SIZE`, and `OPENAI_IMAGE_QUALITY`.
-- Dream Design contact leads can also be sent to Google Sheets. Deploy a Google Apps Script web app with a `doPost(e)` handler that appends `submittedAt`, `source`, `name`, `email`, `phone`, and `page`, then add its `/exec` URL to Netlify as `DREAM_LEAD_SHEET_WEBHOOK_URL`.
+- Dream Design contact leads can also be sent to Zapier. Add the Zapier Catch Hook URL to Netlify as `DREAM_LEAD_ZAPIER_WEBHOOK_URL`, then map the webhook fields into Google Sheets inside Zapier.
 - SMS alerts require Twilio credentials in Netlify environment variables.
 - Cart interactions are still UI-only and need a checkout integration if you want live purchasing.

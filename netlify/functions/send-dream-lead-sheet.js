@@ -22,13 +22,13 @@ exports.handler = async (event) => {
     return json(405, { error: "Method not allowed" });
   }
 
-  const webhookUrl = process.env.DREAM_LEAD_SHEET_WEBHOOK_URL;
+  const webhookUrl = process.env.DREAM_LEAD_ZAPIER_WEBHOOK_URL || process.env.DREAM_LEAD_SHEET_WEBHOOK_URL;
 
   if (!webhookUrl) {
     return json(200, {
       ok: true,
       skipped: true,
-      message: "Google Sheets lead webhook is not configured."
+      message: "Dream Design lead webhook is not configured."
     });
   }
 
@@ -52,7 +52,7 @@ exports.handler = async (event) => {
   if (!lead.name || !lead.email) {
     return json(400, {
       error: "missing_required_fields",
-      message: "Name and email are required before sending a dream design lead to Google Sheets."
+      message: "Name and email are required before sending a dream design lead."
     });
   }
 
@@ -66,8 +66,8 @@ exports.handler = async (event) => {
 
     if (!response.ok) {
       return json(502, {
-        error: "sheet_webhook_failed",
-        message: "Google Sheets webhook did not accept the lead.",
+        error: "lead_webhook_failed",
+        message: "Dream Design lead webhook did not accept the lead.",
         details: text.slice(0, 500)
       });
     }
@@ -75,8 +75,8 @@ exports.handler = async (event) => {
     return json(200, { ok: true });
   } catch (error) {
     return json(502, {
-      error: "sheet_webhook_unreachable",
-      message: "Google Sheets webhook could not be reached.",
+      error: "lead_webhook_unreachable",
+      message: "Dream Design lead webhook could not be reached.",
       details: error?.message || "Unknown error"
     });
   }
