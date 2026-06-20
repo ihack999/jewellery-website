@@ -4,21 +4,22 @@ const CUSTOMS_PREFORM_PUBLIC = false;
 const products = [
   {
     slug: "pear-halo-ring",
-    name: "Pear Halo Ring",
+    name: "Rare Blue Diamond Ring",
     category: "rings",
-    materials: "14k white gold with pear-cut centre stone",
-    price: 850,
-    shortDescription: "A luminous pear-cut ring with a delicate halo and refined pavé band.",
+    materials: "18K white gold with 1.00 ct pear-shaped blue diamond",
+    priceLabel: "Please inquire for pricing",
+    shortDescription: "A rare and elegant blue diamond ring featuring a 1.00 ct pear-shaped blue diamond set in a double halo design with 18K white gold. Available in natural or lab-grown blue diamond options. Please inquire for pricing.",
     description:
-      "The Pear Halo Ring is shaped around a cool-toned pear-cut centre stone, a bright halo, and a slender pavé band that keeps the statement polished and wearable.",
+      "A rare and elegant blue diamond ring featuring a 1.00 ct pear-shaped blue diamond set in a double halo design with 18K white gold. Available in natural or lab-grown blue diamond options. Please inquire for pricing.",
     specs: [
-      ["Materials", "14k white gold, pear-cut centre stone"],
-      ["Sizing", "Available in sizes 5 to 9"],
-      ["Finish", "High polish with pavé detailing"],
-      ["Timeline", "Ready to ship in 5 to 7 business days"]
+      ["Stone", "1.00 ct pear-shaped blue diamond"],
+      ["Design", "Double halo ring"],
+      ["Metal", "18K white gold"],
+      ["Available Options", "Natural blue diamond or lab-grown blue diamond"],
+      ["Pricing", "Please inquire for pricing"]
     ],
-    care: "Store in its pouch and clean gently with a soft jewellery cloth.",
-    shipping: "Complimentary gift-ready packaging with tracked Canadian shipping.",
+    care: "Professional care guidance is provided with the final stone and setting selection.",
+    shipping: "Made to order; timeline and delivery details are confirmed during inquiry.",
     heroImage: "assets/images/drive/img-8503.jpg",
     gallery: [
       "assets/images/drive/img-8503.jpg",
@@ -30,21 +31,23 @@ const products = [
   },
   {
     slug: "diamond-tennis-necklace",
-    name: "Diamond Tennis Necklace",
+    name: "The She’s Unstoppable Tennis Necklace",
     category: "necklaces",
-    materials: "Sterling silver with crystal-set line",
-    price: 680,
-    shortDescription: "A bright tennis-style necklace with clean sparkle and an easy neckline.",
+    materials: "10.00 ct total carat weight diamonds in 14K white or yellow gold",
+    price: 11000,
+    priceLabel: "Starting at $11,000",
+    shortDescription: "A timeless and empowering tennis necklace featuring 10.00 ct total carat weight diamonds, designed to symbolize confidence, strength, and elegance. Available in 14K white gold or yellow gold, with natural or lab-grown diamond options. Lab diamond option starts at $11,000.",
     description:
-      "The Diamond Tennis Necklace follows the collarbone with a continuous line of bright stones, giving special-occasion polish while staying clean enough for modern styling.",
+      "A timeless and empowering tennis necklace featuring 10.00 ct total carat weight diamonds, designed to symbolize confidence, strength, and elegance. Available in 14K white gold or yellow gold, with natural or lab-grown diamond options. Lab diamond option starts at $11,000.",
     specs: [
-      ["Materials", "Sterling silver, crystal-set links"],
-      ["Length", "16 inches with extender"],
-      ["Finish", "High polish setting"],
-      ["Timeline", "Ready to ship in 3 to 5 business days"]
+      ["Stone", "10.00 ct total carat weight diamonds"],
+      ["Design", "Classic tennis necklace"],
+      ["Metal", "14K white gold or 14K yellow gold"],
+      ["Available Options", "Natural diamonds or lab-grown diamonds"],
+      ["Pricing", "Lab diamond option starting at $11,000. Please inquire for natural diamond pricing."]
     ],
-    care: "Avoid fragrance contact and store flat to protect the stone setting.",
-    shipping: "Wrapped in a structured keepsake box with polishing cloth included.",
+    care: "Store flat, avoid fragrance contact, and clean gently to protect the diamond setting.",
+    shipping: "Made to order with timing confirmed after diamond and metal selection.",
     heroImage: "assets/images/drive/img-4403.jpg",
     gallery: [
       "assets/images/drive/img-4403.jpg",
@@ -56,21 +59,24 @@ const products = [
   },
   {
     slug: "diamond-bracelet-stack",
-    name: "Diamond Bracelet Stack",
+    name: "The Quiet Power Tennis Bracelet",
     category: "bracelets",
-    materials: "Sterling silver with diamond-like stones",
-    price: 1200,
-    shortDescription: "A layered bracelet stack with crisp stone settings and editorial shine.",
+    materials: "1.50 ct total carat weight lab-grown diamonds in 14K gold",
+    price: 2500,
+    priceLabel: "Starting at $2,500",
+    shortDescription: "A refined and elegant tennis bracelet featuring 1.50 ct total carat weight lab-grown diamonds in VS clarity and F–G colour. Set in 14K gold, this piece is designed to represent quiet confidence, strength, and effortless beauty. Lab diamond option starts at $2,500.",
     description:
-      "The Diamond Bracelet Stack brings together slim tennis-style bracelets with a clean, light-catching rhythm designed for polished evening styling.",
+      "A refined and elegant tennis bracelet featuring 1.50 ct total carat weight lab-grown diamonds in VS clarity and F–G colour. Set in 14K gold, this piece is designed to represent quiet confidence, strength, and effortless beauty. Lab diamond option starts at $2,500.",
     specs: [
-      ["Materials", "Sterling silver, crystal-set links"],
-      ["Length", "6.75 to 7 inches"],
-      ["Closure", "Low-profile box clasp"],
-      ["Timeline", "Made to order in 2 to 3 weeks"]
+      ["Stone", "1.50 ct total carat weight lab-grown diamonds"],
+      ["Diamond Quality", "VS clarity, F–G colour"],
+      ["Design", "Classic tennis bracelet"],
+      ["Metal", "14K gold"],
+      ["Available Options", "Lab-grown diamonds; natural diamonds available by request"],
+      ["Pricing", "Lab diamond option starting at $2,500"]
     ],
-    care: "Store flat and separate from harder pieces to avoid surface marks.",
-    shipping: "Insured delivery and concierge tracking update included.",
+    care: "Store flat and separate from harder pieces to protect the tennis setting.",
+    shipping: "Made to order with timing confirmed during inquiry.",
     heroImage: "assets/images/drive/img-4406.jpg",
     gallery: [
       "assets/images/drive/img-4406.jpg",
@@ -82,21 +88,22 @@ const products = [
   },
   {
     slug: "vintage-halo-stud-earrings",
-    name: "Vintage Halo Stud Earrings",
+    name: "Yellow Diamond Oval Stud Earrings",
     category: "earrings",
-    materials: "Gold vermeil with crystal halo",
-    price: 240,
-    shortDescription: "A round stud pair with a warm centre and bright crystal halo.",
+    materials: "14K gold with oval-shaped yellow diamond centre stones",
+    priceLabel: "Please inquire for pricing",
+    shortDescription: "Yellow diamond oval stud earrings featuring a 1.00 ct oval-shaped yellow diamond centre stone in a double halo setting, with yellow diamonds around the centre and an outer white diamond halo. Available in 14K gold with natural or lab-grown diamond options. Please inquire for pricing.",
     description:
-      "The Vintage Halo Stud Earrings balance a warm centre stone with a crisp surrounding halo, creating a compact statement that still feels elegant.",
+      "Yellow diamond oval stud earrings featuring a 1.00 ct oval-shaped yellow diamond centre stone in a double halo setting, with yellow diamonds around the centre and an outer white diamond halo. Available in 14K gold with natural or lab-grown diamond options. Please inquire for pricing.",
     specs: [
-      ["Materials", "Gold vermeil, crystal halo"],
-      ["Size", "12 mm face"],
-      ["Closure", "Post backing"],
-      ["Timeline", "Ready to ship in 3 to 5 business days"]
+      ["Stone", "1.00 ct oval-shaped yellow diamond centre stone"],
+      ["Design", "Double halo stud earrings with a yellow diamond halo surrounding the centre stone and an outer white diamond halo"],
+      ["Metal", "14K gold"],
+      ["Available Options", "Natural diamonds or lab-grown diamonds"],
+      ["Pricing", "Please inquire for pricing"]
     ],
-    care: "Remove before showering and store in a dry pouch between wears.",
-    shipping: "Prepared in gift-ready packaging with care card included.",
+    care: "Store separately and clean gently around the double halo setting.",
+    shipping: "Made to order; timeline and delivery details are confirmed during inquiry.",
     heroImage: "assets/images/drive/img-9576.jpg",
     gallery: [
       "assets/images/drive/img-9576.jpg",
@@ -107,21 +114,23 @@ const products = [
   },
   {
     slug: "gold-bezel-hand-chain",
-    name: "Gold Bezel Hand Chain",
+    name: "14K Gold Diamond Hand Chain Bracelet",
     category: "bracelets",
-    materials: "Gold vermeil with bezel-set crystals",
-    price: 210,
-    shortDescription: "A delicate hand chain with bezel-set stones and a soft gold finish.",
+    materials: "14K yellow gold with three tiny natural bezel-set diamonds",
+    price: 750,
+    priceLabel: "Starting at $750 USD",
+    shortDescription: "A delicate 14K yellow gold diamond hand chain bracelet featuring three tiny natural diamonds, each approximately 0.10–0.20 ct. This elegant piece connects beautifully from the wrist toward the hand, creating a soft, feminine, and eye-catching handpiece.",
     description:
-      "The Gold Bezel Hand Chain traces from wrist to finger with fine links and small bezel-set stones, adding a light custom-feeling accent to occasion styling.",
+      "A delicate 14K yellow gold diamond hand chain bracelet featuring three tiny natural diamonds, each approximately 0.10–0.20 ct. This elegant piece connects beautifully from the wrist toward the hand, creating a soft, feminine, and eye-catching handpiece.",
     specs: [
-      ["Materials", "Gold vermeil, crystal stations"],
-      ["Length", "Adjustable bracelet and ring chain"],
-      ["Finish", "Polished gold tone"],
-      ["Timeline", "Ready to ship in 3 to 5 business days"]
+      ["Stone", "Three natural diamonds, approximately 0.10–0.20 ct each"],
+      ["Design", "Delicate hand chain bracelet connecting from the wrist toward the hand, featuring three tiny bezel-set diamonds"],
+      ["Metal", "14K yellow gold"],
+      ["Available Options", "Natural diamonds"],
+      ["Pricing", "Starting at $750 USD"]
     ],
     care: "Store flat, avoid moisture, and fasten before placing in its pouch.",
-    shipping: "Boxed presentation with optional gift message at checkout later.",
+    shipping: "Made to order with delivery details confirmed during inquiry.",
     heroImage: "assets/images/drive/hand-chain-2.png",
     gallery: [
       "assets/images/drive/hand-chain-2.png",
@@ -132,21 +141,23 @@ const products = [
   },
   {
     slug: "cushion-diamond-ring",
-    name: "Cushion Diamond Ring",
+    name: "1 Carat Cushion Cut Diamond Ring",
     category: "rings",
-    materials: "14k yellow gold with cushion-cut centre stone",
-    price: 920,
-    shortDescription: "A cushion-cut ring with a fine pavé band and quiet gold warmth.",
+    materials: "14K yellow or white gold with 1.00 ct cushion cut lab-grown diamond",
+    price: 2500,
+    priceLabel: "Starting at $2,500",
+    shortDescription: "A classic 1.00 ct cushion cut diamond ring featuring a four-prong setting and pavé diamonds set halfway down the band for added sparkle. Available in 14K yellow gold or 14K white gold with a lab-grown diamond centre stone.",
     description:
-      "The Cushion Diamond Ring is designed with a clean cushion-cut centre stone and a pavé band, giving the piece classic brightness with a modern profile.",
+      "A classic 1.00 ct cushion cut diamond ring featuring a four-prong setting and pavé diamonds set halfway down the band for added sparkle. Available in 14K yellow gold or 14K white gold with a lab-grown diamond centre stone.",
     specs: [
-      ["Materials", "14k yellow gold, cushion-cut stone"],
-      ["Sizing", "Available in sizes 5 to 9"],
-      ["Finish", "Polished gold with pavé band"],
-      ["Timeline", "Ready to ship in 5 to 7 business days"]
+      ["Stone", "1.00 ct cushion cut lab-grown diamond"],
+      ["Design", "Four-prong setting with pavé diamonds set halfway down the band"],
+      ["Metal", "14K yellow gold or 14K white gold"],
+      ["Available Options", "Lab-grown diamond"],
+      ["Pricing", "Starting at $2,500"]
     ],
     care: "Store separately and clean with a soft jewellery cloth after wear.",
-    shipping: "Presented in a structured box with care instructions.",
+    shipping: "Made to order with timing confirmed during inquiry.",
     heroImage: "assets/images/drive/img-4405-a.jpg",
     gallery: [
       "assets/images/drive/img-4405-a.jpg",
@@ -162,6 +173,38 @@ const money = new Intl.NumberFormat("en-CA", {
   currency: "CAD",
   maximumFractionDigits: 0
 });
+
+function productPriceLabel(product) {
+  if (product.priceLabel) {
+    return product.priceLabel;
+  }
+
+  return Number.isFinite(Number(product.price))
+    ? `Starting at ${money.format(product.price)}`
+    : "Please inquire for pricing";
+}
+
+function productPieceType(product) {
+  return {
+    rings: "Ring",
+    necklaces: "Necklace",
+    bracelets: "Bracelet",
+    earrings: "Earrings"
+  }[product.category] || "Other";
+}
+
+function productSpecValue(product, label) {
+  return product.specs.find(([name]) => name === label)?.[1] || "";
+}
+
+function productInquiryHref(product) {
+  const params = new URLSearchParams({
+    piece: productPieceType(product),
+    inquire: product.slug
+  });
+
+  return `customs.html?${params.toString()}#request-form`;
+}
 
 const FAVORITES_KEY = "tj-favorite-products";
 const RECENTLY_VIEWED_KEY = "tj-recently-viewed-products";
@@ -387,7 +430,7 @@ function renderFavoritesShelf() {
         <a class="favorite-chip" href="product.html?slug=${product.slug}">
           <img src="${product.heroImage}" alt="${product.name}" loading="lazy">
           <span>${product.name}</span>
-          <small>${money.format(product.price)}</small>
+          <small>${productPriceLabel(product)}</small>
         </a>
       `).join("")}
     </div>
@@ -441,7 +484,7 @@ function renderRecentlyViewedShelf(anchorSelector, excludeSlug = "") {
         <a class="favorite-chip" href="product.html?slug=${product.slug}">
           <img src="${product.heroImage}" alt="${product.name}" loading="lazy">
           <span>${product.name}</span>
-          <small>${money.format(product.price)}</small>
+          <small>${productPriceLabel(product)}</small>
         </a>
       `).join("")}
     </div>
@@ -552,7 +595,7 @@ function renderCompareModal() {
   }
 
   const rows = [
-    ["Price", (product) => money.format(product.price)],
+    ["Price", (product) => productPriceLabel(product)],
     ["Category", (product) => product.category],
     ["Materials", (product) => product.materials],
     ["Timeline", (product) => product.specs.find(([label]) => label === "Timeline")?.[1] || "Available by request"],
@@ -648,7 +691,7 @@ function productCardMarkup(product) {
         <div class="product-card__body">
           <h3>${product.name}</h3>
           <p class="product-card__materials">${product.materials}</p>
-          <span class="product-card__price">${money.format(product.price)}</span>
+          <span class="product-card__price">${productPriceLabel(product)}</span>
         </div>
       </a>
     </article>
@@ -759,9 +802,10 @@ function renderProductPage() {
 
   page.querySelector("[data-product-name]").textContent = product.name;
   page.querySelector("[data-product-category]").textContent = product.category.charAt(0).toUpperCase() + product.category.slice(1);
-  page.querySelector("[data-product-price]").textContent = money.format(product.price);
+  page.querySelector("[data-product-price]").textContent = productPriceLabel(product);
   page.querySelector("[data-product-materials]").textContent = product.materials;
   page.querySelector("[data-product-description]").textContent = product.description;
+  page.querySelector("[data-product-long-description]").textContent = product.description;
   page.querySelector("[data-product-shipping]").textContent = product.shipping;
   page.querySelector("[data-product-care]").textContent = product.care;
 
@@ -769,6 +813,11 @@ function renderProductPage() {
   const thumbnailGrid = page.querySelector("[data-product-thumbnails]");
   const detailList = page.querySelector("[data-product-specs]");
   const related = page.querySelector("[data-related-products]");
+  const inquiryLink = page.querySelector("[data-product-inquiry]");
+
+  if (inquiryLink) {
+    inquiryLink.href = productInquiryHref(product);
+  }
 
   const updateMainImage = (src, animate = false) => {
     if (!mainImage) {
@@ -1219,6 +1268,94 @@ function applyGuideRecommendationToForm(recommendation) {
   if (description) {
     const existing = description.value.replace(/\n*\[Guided Direction\][\s\S]*?(?=\n\n\[|$)/u, "").trim();
     description.value = `${existing ? `${existing}\n\n` : ""}[Guided Direction]\n${guideSummary}`;
+    description.dispatchEvent(new Event("input", { bubbles: true }));
+    description.closest(".form-field")?.classList.add("is-prefilled");
+  }
+}
+
+function productInquiryFromParams() {
+  const params = new URLSearchParams(window.location.search);
+  const key = params.get("inquire") || params.get("product");
+
+  if (!key) {
+    return null;
+  }
+
+  const normalized = key.trim().toLowerCase();
+  return products.find((product) => (
+    product.slug === normalized ||
+    product.name.toLowerCase() === normalized
+  )) || null;
+}
+
+function budgetValueForProduct(product) {
+  const price = Number(product.price);
+
+  if (!Number.isFinite(price)) {
+    return "";
+  }
+
+  if (price >= 10000) return "10000 plus";
+  if (price >= 5000) return "5000 to 10000";
+  if (price >= 1000) return "1000 to 5000";
+  return "500 to 1000";
+}
+
+function applyProductInquiryToForm(product) {
+  const form = document.querySelector("[data-custom-form]");
+
+  if (!form || !product) {
+    return;
+  }
+
+  const setValue = (selector, value) => {
+    const field = form.querySelector(selector);
+
+    if (!field || !value) {
+      return;
+    }
+
+    field.value = value;
+    field.dispatchEvent(new Event("input", { bubbles: true }));
+    field.dispatchEvent(new Event("change", { bubbles: true }));
+    field.closest(".form-field")?.classList.add("is-prefilled");
+  };
+
+  const specs = [
+    ["Product", product.name],
+    ["Short Description", product.shortDescription],
+    ["Stone", productSpecValue(product, "Stone")],
+    ["Diamond Quality", productSpecValue(product, "Diamond Quality")],
+    ["Design", productSpecValue(product, "Design")],
+    ["Metal", productSpecValue(product, "Metal")],
+    ["Available Options", productSpecValue(product, "Available Options")],
+    ["Pricing", productSpecValue(product, "Pricing") || productPriceLabel(product)]
+  ].filter(([, value]) => value);
+
+  const inquirySummary = specs.map(([label, value]) => `${label}: ${value}`).join("\n");
+  const description = form.querySelector("#description");
+  const designSummary = form.querySelector("[data-design-summary-field]");
+  const selectedBudget = form.querySelector(`input[name="budget"][value="${budgetValueForProduct(product)}"]`);
+
+  setValue("#piece-type", productPieceType(product));
+  setValue("#metal-preference", productSpecValue(product, "Metal"));
+  setValue("#stone-preference", productSpecValue(product, "Stone"));
+  setValue("#finish-preference", productSpecValue(product, "Design"));
+  setValue("#dimensions", productSpecValue(product, "Available Options"));
+
+  if (selectedBudget) {
+    selectedBudget.checked = true;
+    selectedBudget.dispatchEvent(new Event("change", { bubbles: true }));
+    selectedBudget.closest(".form-field")?.classList.add("is-prefilled");
+  }
+
+  if (designSummary) {
+    designSummary.value = inquirySummary;
+  }
+
+  if (description) {
+    const existing = description.value.replace(/\n*\[Piece Inquiry\][\s\S]*?(?=\n\n\[|$)/u, "").trim();
+    description.value = `${existing ? `${existing}\n\n` : ""}[Piece Inquiry]\n${inquirySummary}`;
     description.dispatchEvent(new Event("input", { bubbles: true }));
     description.closest(".form-field")?.classList.add("is-prefilled");
   }
@@ -1817,6 +1954,7 @@ function setupCustomForm() {
 
     restoreCustomFormDraft(form);
     applyGuideRecommendationToForm(recommendationFromGuideParams());
+    applyProductInquiryToForm(productInquiryFromParams());
     form.addEventListener("input", () => writeCustomFormDraft(form));
     form.addEventListener("change", () => writeCustomFormDraft(form));
 
@@ -2333,7 +2471,7 @@ function setupSearchModal() {
           <img src="${p.heroImage}" alt="" loading="lazy">
           <span class="search-result__body">
             <strong>${highlight(p.name, q)}</strong>
-            <small>${p.category} · ${money.format(p.price)}</small>
+            <small>${p.category} · ${productPriceLabel(p)}</small>
           </span>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
             <path d="M5 12H19" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
