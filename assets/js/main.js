@@ -20,12 +20,11 @@ const products = [
     ],
     care: "Professional care guidance is provided with the final stone and setting selection.",
     shipping: "Made to order; timeline and delivery details are confirmed during inquiry.",
-    heroImage: "assets/images/drive/img-8503.jpg",
+    heroImage: "assets/images/products/rare-blue-diamond-ring-1.jpeg",
     gallery: [
-      "assets/images/drive/img-8503.jpg",
-      "assets/images/drive/img-1784.jpg",
-      "assets/images/drive/img-4405-a.jpg",
-      "assets/images/drive/img-2897.jpg"
+      "assets/images/products/rare-blue-diamond-ring-1.jpeg",
+      "assets/images/products/rare-blue-diamond-ring-2.jpeg",
+      "assets/images/products/rare-blue-diamond-ring-3.jpeg"
     ],
     featured: true
   },
@@ -77,12 +76,12 @@ const products = [
     ],
     care: "Store flat and separate from harder pieces to protect the tennis setting.",
     shipping: "Made to order with timing confirmed during inquiry.",
-    heroImage: "assets/images/drive/img-4406.jpg",
+    heroImage: "assets/images/products/quiet-power-tennis-bracelet-1.jpeg",
     gallery: [
-      "assets/images/drive/img-4406.jpg",
-      "assets/images/drive/img-4427.jpg",
-      "assets/images/drive/img-4413.jpg",
-      "assets/images/drive/img-4415-a.jpg"
+      "assets/images/products/quiet-power-tennis-bracelet-1.jpeg",
+      "assets/images/products/quiet-power-tennis-bracelet-2.jpeg",
+      "assets/images/products/quiet-power-tennis-bracelet-3.jpeg",
+      "assets/images/products/quiet-power-tennis-bracelet-4.jpeg"
     ],
     featured: true
   },
@@ -131,12 +130,12 @@ const products = [
     ],
     care: "Store flat, avoid moisture, and fasten before placing in its pouch.",
     shipping: "Made to order with delivery details confirmed during inquiry.",
-    heroImage: "assets/images/drive/hand-chain-2.png",
+    heroImage: "assets/images/products/diamond-hand-chain-1.jpeg",
     gallery: [
+      "assets/images/products/diamond-hand-chain-1.jpeg",
       "assets/images/drive/hand-chain-2.png",
       "assets/images/drive/hand-chain-3.png",
-      "assets/images/drive/hand-chain-1.png",
-      "assets/images/drive/img-8503.jpg"
+      "assets/images/drive/hand-chain-1.png"
     ]
   },
   {
@@ -158,12 +157,11 @@ const products = [
     ],
     care: "Store separately and clean with a soft jewellery cloth after wear.",
     shipping: "Made to order with timing confirmed during inquiry.",
-    heroImage: "assets/images/drive/img-4405-a.jpg",
+    heroImage: "assets/images/products/cushion-diamond-ring-1.jpeg",
     gallery: [
-      "assets/images/drive/img-4405-a.jpg",
-      "assets/images/drive/img-1784.jpg",
-      "assets/images/drive/img-8503.jpg",
-      "assets/images/drive/img-4415-a.jpg"
+      "assets/images/products/cushion-diamond-ring-1.jpeg",
+      "assets/images/products/cushion-diamond-ring-2.jpeg",
+      "assets/images/products/cushion-diamond-ring-3.jpeg"
     ]
   }
 ];
