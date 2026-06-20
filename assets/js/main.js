@@ -798,19 +798,25 @@ function renderProductPage() {
 
   rememberRecentlyViewed(product.slug);
 
-  page.querySelector("[data-product-name]").textContent = product.name;
-  page.querySelector("[data-product-category]").textContent = product.category.charAt(0).toUpperCase() + product.category.slice(1);
-  page.querySelector("[data-product-price]").textContent = productPriceLabel(product);
-  page.querySelector("[data-product-materials]").textContent = product.materials;
-  page.querySelector("[data-product-description]").textContent = product.description;
-  page.querySelector("[data-product-long-description]").textContent = product.description;
-  page.querySelector("[data-product-shipping]").textContent = product.shipping;
-  page.querySelector("[data-product-care]").textContent = product.care;
+  const setText = (selector, value, scope = document) => {
+    scope.querySelectorAll(selector).forEach((element) => {
+      element.textContent = value;
+    });
+  };
+
+  setText("[data-product-name]", product.name);
+  setText("[data-product-category]", product.category.charAt(0).toUpperCase() + product.category.slice(1), page);
+  setText("[data-product-price]", productPriceLabel(product), page);
+  setText("[data-product-materials]", product.materials, page);
+  setText("[data-product-description]", product.description, page);
+  setText("[data-product-long-description]", product.description);
+  setText("[data-product-shipping]", product.shipping, page);
+  setText("[data-product-care]", product.care, page);
 
   const mainImage = page.querySelector("[data-product-main-image]");
   const thumbnailGrid = page.querySelector("[data-product-thumbnails]");
-  const detailList = page.querySelector("[data-product-specs]");
-  const related = page.querySelector("[data-related-products]");
+  const detailList = document.querySelector("[data-product-specs]");
+  const related = document.querySelector("[data-related-products]");
   const inquiryLink = page.querySelector("[data-product-inquiry]");
 
   if (inquiryLink) {
@@ -839,34 +845,38 @@ function renderProductPage() {
 
   updateMainImage(product.gallery[0]);
 
-  thumbnailGrid.innerHTML = product.gallery
-    .map(
-      (image, index) => `
-        <button class="thumbnail-button ${index === 0 ? "is-active" : ""}" type="button" data-gallery-thumb>
-          <img src="${image}" alt="${product.name} view ${index + 1}" loading="lazy">
-        </button>
-      `
-    )
-    .join("");
+  if (thumbnailGrid) {
+    thumbnailGrid.innerHTML = product.gallery
+      .map(
+        (image, index) => `
+          <button class="thumbnail-button ${index === 0 ? "is-active" : ""}" type="button" data-gallery-thumb>
+            <img src="${image}" alt="${product.name} view ${index + 1}" loading="lazy">
+          </button>
+        `
+      )
+      .join("");
 
-  detailList.innerHTML = product.specs
-    .map(
-      ([label, value]) => `
-        <li>
-          <strong>${label}</strong>
-          <span>${value}</span>
-        </li>
-      `
-    )
-    .join("");
-
-  thumbnailGrid.querySelectorAll("[data-gallery-thumb]").forEach((button, index) => {
-    button.addEventListener("click", () => {
-      thumbnailGrid.querySelectorAll("[data-gallery-thumb]").forEach((item) => item.classList.remove("is-active"));
-      button.classList.add("is-active");
-      updateMainImage(product.gallery[index], true);
+    thumbnailGrid.querySelectorAll("[data-gallery-thumb]").forEach((button, index) => {
+      button.addEventListener("click", () => {
+        thumbnailGrid.querySelectorAll("[data-gallery-thumb]").forEach((item) => item.classList.remove("is-active"));
+        button.classList.add("is-active");
+        updateMainImage(product.gallery[index], true);
+      });
     });
-  });
+  }
+
+  if (detailList) {
+    detailList.innerHTML = product.specs
+      .map(
+        ([label, value]) => `
+          <li>
+            <strong>${label}</strong>
+            <span>${value}</span>
+          </li>
+        `
+      )
+      .join("");
+  }
 
   renderProductCollection(
     related,
