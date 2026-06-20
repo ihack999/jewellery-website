@@ -673,6 +673,16 @@ function setupCompareButtons(scope = document) {
 function productCardMarkup(product) {
   const isSaved = isProductFavorite(product.slug);
   const isCompared = isProductCompared(product.slug);
+  const galleryImages = [...new Set([product.heroImage, ...(product.gallery || [])])].filter(Boolean).slice(0, 5);
+  const cardGallery = galleryImages.length > 1 ? `
+    <div class="product-card__gallery" aria-label="${product.name} image choices">
+      ${galleryImages.map((image, index) => `
+        <button class="product-card__thumb ${index === 0 ? "is-active" : ""}" type="button" data-card-image="${image}" aria-label="Show ${product.name} image ${index + 1}">
+          <img src="${image}" alt="" loading="lazy">
+        </button>
+      `).join("")}
+    </div>
+  ` : "";
 
   return `
     <article class="product-card" data-product-card="${product.slug}" data-reveal>
@@ -692,8 +702,45 @@ function productCardMarkup(product) {
           <span class="product-card__price">${productPriceLabel(product)}</span>
         </div>
       </a>
+      ${cardGallery}
     </article>
   `;
+}
+
+function setupProductCardImageChoosers(scope = document) {
+  const buttons = [];
+
+  if (scope.matches && scope.matches("[data-card-image]")) {
+    buttons.push(scope);
+  }
+
+  if (scope.querySelectorAll) {
+    buttons.push(...scope.querySelectorAll("[data-card-image]"));
+  }
+
+  buttons.forEach((button) => {
+    if (button.dataset.cardImageReady === "true") {
+      return;
+    }
+
+    button.dataset.cardImageReady = "true";
+    button.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+
+      const card = button.closest("[data-product-card]");
+      const image = card?.querySelector(".product-card__media img");
+
+      if (!card || !image || !button.dataset.cardImage) {
+        return;
+      }
+
+      image.src = button.dataset.cardImage;
+      card.querySelectorAll("[data-card-image]").forEach((thumb) => {
+        thumb.classList.toggle("is-active", thumb === button);
+      });
+    });
+  });
 }
 
 function renderProductCollection(container, items) {
@@ -706,6 +753,7 @@ function renderProductCollection(container, items) {
   setupDepthCards(container);
   setupFavoriteButtons(container);
   setupCompareButtons(container);
+  setupProductCardImageChoosers(container);
   renderFavoritesShelf();
 }
 
