@@ -98,7 +98,6 @@ function createBrief(input) {
     metal,
     stone: cleanValue(input.stone, "white diamond"),
     style: cleanValue(input.style, "timeless and elegant"),
-    budget: cleanValue(input.budget, "custom budget direction"),
     customSpec,
     metalInterpretation: premiumMetalInterpretation
       ? "The metal input was vague or typo-heavy. Silently interpret it as premium precious metal, such as platinum or 18K gold, chosen for the most luxurious visual result."
@@ -118,11 +117,10 @@ function buildPromptTemplate(brief) {
     `Metal interpretation: ${brief.metalInterpretation}`,
     `Primary stone or gemstone direction: ${brief.stone}`,
     `Style / vibe: ${brief.style}`,
-    `Budget direction: ${brief.budget}`,
     `Customer specification to prioritize: ${brief.customSpec || "No extra custom specification was provided."}`,
     "",
     "INTERPRETATION RULES:",
-    "Use the client's custom specification as the most important design direction. Use the piece type, metal, stone, style, and budget fields as supporting structure. If the client gives vague words such as \"expensive,\" \"luxury,\" \"bold,\" or \"minimal,\" translate them into visible jewellery qualities: better craftsmanship, cleaner construction, stronger stones, refined proportions, richer finishing, and more sophisticated lighting. If the metal field contains vague or typo-heavy text such as \"most expensive emtal,\" silently interpret it as premium precious metal, such as platinum or 18K gold, chosen for the most luxurious visual result. Do not display any price, budget, words, logo, watermark, initials, or text in the image.",
+    "Use the client's custom specification as the most important design direction. Use the piece type, metal, stone, and style fields as supporting structure. If the client gives vague words such as \"expensive,\" \"luxury,\" \"bold,\" or \"minimal,\" translate them into visible jewellery qualities: better craftsmanship, cleaner construction, stronger stones, refined proportions, richer finishing, and more sophisticated lighting. If the metal field contains vague or typo-heavy text such as \"most expensive emtal,\" silently interpret it as premium precious metal, such as platinum or 18K gold, chosen for the most luxurious visual result. Do not display any price, words, logo, watermark, initials, or text in the image.",
     "",
     "OVERALL LUXURY DIRECTION:",
     "Create a piece that feels elegant, personal, made-to-order, elevated, feminine but not childish, and suitable for a serious custom jewellery inquiry. The design should feel like fine jewellery, not costume jewellery. It should have believable proportions, wearable scale, secure construction, and refined craftsmanship.",

@@ -2103,6 +2103,27 @@ async function postNetlifyFormData(formData) {
   }
 }
 
+function dreamLeadSheetPayload(form) {
+  return {
+    name: getNamedFormValue(form, "dream-name"),
+    email: getNamedFormValue(form, "dream-email"),
+    phone: getNamedFormValue(form, "dream-phone"),
+    page: "Dream Design"
+  };
+}
+
+async function postDreamLeadToSheet(form) {
+  const response = await fetch("/.netlify/functions/send-dream-lead-sheet", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(dreamLeadSheetPayload(form))
+  });
+
+  if (!response.ok) {
+    throw new Error("Google Sheets lead submission failed");
+  }
+}
+
 function dreamContactSignature(form) {
   return JSON.stringify({
     name: getNamedFormValue(form, "dream-name"),
@@ -2117,7 +2138,6 @@ function dreamDesignPayload(form) {
     metal: getNamedFormValue(form, "dream-metal"),
     stone: getNamedFormValue(form, "dream-stone"),
     style: getNamedFormValue(form, "dream-style"),
-    budget: getNamedFormValue(form, "dream-budget"),
     customSpec: getNamedFormValue(form, "dream-custom-spec")
   };
 }
@@ -2180,7 +2200,6 @@ function appendDreamFormValues(formData, leadForm, designForm, result, imageFile
     "dream-metal": getNamedFormValue(designForm, "dream-metal"),
     "dream-stone": getNamedFormValue(designForm, "dream-stone"),
     "dream-style": getNamedFormValue(designForm, "dream-style"),
-    "dream-budget": getNamedFormValue(designForm, "dream-budget"),
     "dream-custom-spec": getNamedFormValue(designForm, "dream-custom-spec"),
     "dream-prompt": result.prompt || "",
     "dream-negative-prompt": result.negativePrompt || ""
@@ -2308,6 +2327,7 @@ function setupDreamGenerator() {
 
     try {
       await postNetlifyFormData(new FormData(leadForm));
+      postDreamLeadToSheet(leadForm).catch(() => {});
       unlockDesign();
     } catch (error) {
       if (leadStatus) {

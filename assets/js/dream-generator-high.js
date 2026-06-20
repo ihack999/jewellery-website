@@ -25,7 +25,6 @@
       metal: getNamedFormValue(form, "dream-metal"),
       stone: getNamedFormValue(form, "dream-stone"),
       style: getNamedFormValue(form, "dream-style"),
-      budget: getNamedFormValue(form, "dream-budget"),
       customSpec: getNamedFormValue(form, "dream-custom-spec")
     };
   }
@@ -88,7 +87,6 @@
       "dream-metal": getNamedFormValue(designForm, "dream-metal"),
       "dream-stone": getNamedFormValue(designForm, "dream-stone"),
       "dream-style": getNamedFormValue(designForm, "dream-style"),
-      "dream-budget": getNamedFormValue(designForm, "dream-budget"),
       "dream-custom-spec": getNamedFormValue(designForm, "dream-custom-spec"),
       "dream-prompt": result.prompt || "",
       "dream-negative-prompt": result.negativePrompt || ""
