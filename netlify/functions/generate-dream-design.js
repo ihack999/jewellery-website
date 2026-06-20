@@ -73,7 +73,7 @@ function buildPromptTemplate(brief) {
     "",
     "PHOTOGRAPHY AND RENDERING DIRECTIONS:",
     "Use macro product photography with a 90mm luxury-jewellery lens feel, shallow depth of field, crisp focus on the centre stone and setting, and controlled falloff.",
-    "Lighting should feel like a high-end jewellery studio: large softbox reflections, small precision sparkle highlights, gentle rim light, and clean shadow under the piece.",
+    "Lighting should feel like a high-end jewellery studio: clear bright lighting that makes the image easy to see all the details, large softbox reflections, small precision sparkle highlights, gentle rim light, and clean shadow under the piece.",
     "Background should be clean editorial luxury: warm white, pale stone, soft grey, or subtle champagne surface with no clutter, no props that distract, and no text.",
     "Composition should be centered and premium, with enough negative space for an atelier website preview while keeping the jewellery large and inspectable.",
     "The image should be ultra realistic, 4K detail, natural contrast, high dynamic range, tasteful colour grading, and no visible AI artifacts.",
