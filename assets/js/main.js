@@ -1,4 +1,5 @@
 const DESIGN_STUDIO_PUBLIC = false;
+const CUSTOMS_PREFORM_PUBLIC = false;
 
 const products = [
   {
@@ -1023,6 +1024,12 @@ function guideBudgetFormValue(value) {
 function syncDesignStudioPublicEntries() {
   document.querySelectorAll("[data-design-studio-entry], [data-gemstone-apply]").forEach((entry) => {
     entry.hidden = !DESIGN_STUDIO_PUBLIC;
+  });
+}
+
+function syncCustomsPreformSections() {
+  document.querySelectorAll("[data-customs-preform]").forEach((section) => {
+    section.hidden = !CUSTOMS_PREFORM_PUBLIC;
   });
 }
 
@@ -2742,6 +2749,7 @@ function setupCustomFormProgress() {
 
 document.addEventListener("DOMContentLoaded", () => {
   setupSkipLink();
+  syncCustomsPreformSections();
   syncDesignStudioPublicEntries();
   setupToasts();
   setupScrollProgress();

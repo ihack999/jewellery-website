@@ -63,7 +63,8 @@
       </header>
 
       <main>
-        <section class="section section--surface">
+        <!-- Pre-form sections are preserved here; public visibility is controlled by CUSTOMS_PREFORM_PUBLIC in assets/js/main.js. -->
+        <section class="section section--surface" data-customs-preform hidden>
           <div class="container split-grid">
             <div class="split-copy" data-reveal>
               <span class="eyebrow">Custom orders</span>
@@ -87,7 +88,7 @@
           </div>
         </section>
 
-        <section class="section section--soft" id="custom-guide">
+        <section class="section section--soft" id="custom-guide" data-customs-preform hidden>
           <div class="container custom-guide" data-custom-guide>
             <div class="section-heading" data-reveal>
               <span class="eyebrow">Custom guide</span>
@@ -572,7 +573,7 @@
           </div><!-- /.design-studio__shell -->
         </section>
 
-        <section class="section section--soft" id="gemstone-guide">
+        <section class="section section--soft" id="gemstone-guide" data-customs-preform hidden>
           <div class="container gemstone-guide" data-gemstone-guide>
             <div class="section-heading" data-reveal>
               <span class="eyebrow">Stone guide</span>
