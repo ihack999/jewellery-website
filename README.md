@@ -77,6 +77,6 @@ contact.html
 - The site uses local SVG artwork as polished placeholders for product and editorial imagery.
 - Replace the placeholder SVG files in `assets/images/` with final photography and brand assets when available.
 - The forms submit to Netlify and can email notifications through Netlify form hooks.
-- The dream design generator expects `DREAM_IMAGE_API_URL`, `DREAM_IMAGE_API_KEY`, and optionally `DREAM_IMAGE_API_MODEL` in Netlify environment variables.
+- The dream design generator expects `OPENAI_API_KEY` in Netlify environment variables. Optional overrides: `OPENAI_IMAGE_MODEL`, `OPENAI_PROMPT_MODEL`, `OPENAI_IMAGE_SIZE`, and `OPENAI_IMAGE_QUALITY`.
 - SMS alerts require Twilio credentials in Netlify environment variables.
 - Cart interactions are still UI-only and need a checkout integration if you want live purchasing.

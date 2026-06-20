@@ -6651,8 +6651,12 @@ a.gem-chip:hover {
 }
 
 .dream-design-form textarea {
-  min-height: 106px;
+  min-height: 132px;
   resize: vertical;
+}
+
+.dream-spec-field .tiny-note {
+  margin-top: 0.5rem;
 }
 
 .render-chamber {

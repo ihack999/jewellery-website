@@ -174,9 +174,10 @@
                           <option>$10,000+</option>
                         </select>
                       </div>
-                      <div class="form-field form-field--wide">
-                        <label for="dream-notes">Optional Notes</label>
-                        <textarea id="dream-notes" name="dream-notes" placeholder="Pear centre stone, double halo, delicate band, meaningful detail"></textarea>
+                      <div class="form-field form-field--wide dream-spec-field">
+                        <label for="dream-custom-spec">Write Your Own Specification</label>
+                        <textarea id="dream-custom-spec" name="dream-custom-spec" placeholder="Example: pear blue diamond centre, double halo, thin pavé band, white gold, elegant hand model, bright luxury studio lighting"></textarea>
+                        <p class="tiny-note">Use this for anything the quick choices do not cover.</p>
                       </div>
                       <div class="button-row form-actions">
                         <button class="button" type="submit" data-dream-generate-submit>Generate + Send Design</button>
@@ -221,7 +222,7 @@
           <input name="dream-stone">
           <input name="dream-style">
           <input name="dream-budget">
-          <textarea name="dream-notes"></textarea>
+          <textarea name="dream-custom-spec"></textarea>
           <textarea name="dream-prompt"></textarea>
           <textarea name="dream-negative-prompt"></textarea>
           <input name="generated-image" type="file">

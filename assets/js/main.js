@@ -2073,12 +2073,13 @@ function setupCustomForm() {
 }
 
 const dreamRenderMessages = [
+  "Creating the prompt",
+  "Reading your specification",
   "Shaping the band",
   "Setting the stone",
   "Balancing the prongs",
-  "Polishing the metal",
   "Lighting the studio",
-  "Rendering the final concept"
+  "Rendering the final image"
 ];
 
 function getNamedFormValue(form, name) {
@@ -2117,7 +2118,7 @@ function dreamDesignPayload(form) {
     stone: getNamedFormValue(form, "dream-stone"),
     style: getNamedFormValue(form, "dream-style"),
     budget: getNamedFormValue(form, "dream-budget"),
-    notes: getNamedFormValue(form, "dream-notes")
+    customSpec: getNamedFormValue(form, "dream-custom-spec")
   };
 }
 
@@ -2180,7 +2181,7 @@ function appendDreamFormValues(formData, leadForm, designForm, result, imageFile
     "dream-stone": getNamedFormValue(designForm, "dream-stone"),
     "dream-style": getNamedFormValue(designForm, "dream-style"),
     "dream-budget": getNamedFormValue(designForm, "dream-budget"),
-    "dream-notes": getNamedFormValue(designForm, "dream-notes"),
+    "dream-custom-spec": getNamedFormValue(designForm, "dream-custom-spec"),
     "dream-prompt": result.prompt || "",
     "dream-negative-prompt": result.negativePrompt || ""
   };
