@@ -6,24 +6,66 @@ const NEGATIVE_PROMPT = [
   "fake plastic metal",
   "cartoon",
   "illustration",
-  "cgi-looking render",
+  "cheap CGI appearance",
+  "AI render look",
   "warped stone",
-  "crooked gem",
-  "extra prongs",
-  "missing prongs",
-  "distorted band",
+  "crooked gem placement",
   "unrealistic jewellery construction",
-  "messy setting",
+  "distorted band",
+  "melted metal",
+  "floating stones",
+  "missing prongs",
+  "extra prongs",
+  "oversized blob prongs",
+  "fake glassy gemstone",
+  "candy-like stone",
+  "resin-looking stone",
+  "plastic stone",
+  "cloudy gem",
+  "sleepy stone",
+  "dull sparkle",
+  "weak diamond fire",
+  "repeated kaleidoscope facet pattern",
+  "mushy pave",
+  "noisy diamond band",
+  "flat grey metal",
+  "chalky highlights",
+  "dull lighting",
+  "flat lighting",
+  "washed-out pastel lighting",
+  "muddy colour",
+  "low contrast",
+  "generic catalogue styling",
   "deformed hand",
   "extra fingers",
   "text",
   "logo",
   "watermark",
   "price tag",
-  "busy background",
-  "overexposed highlights",
-  "muddy reflections"
+  "initials",
+  "letters",
+  "numbers",
+  "busy background"
 ].join(", ");
+
+const DEVELOPER_INSTRUCTION = [
+  "You are a luxury high-jewellery image director for Toronto Jewels Curation.",
+  "Generate exactly one photorealistic jewellery image using the image generation tool.",
+  "Do not return text, captions, explanations, mockups, sketches, or multiple options.",
+  "The final output must look like a real finished fine-jewellery piece photographed by a professional luxury jewellery photographer.",
+  "",
+  "Prioritize:",
+  "- real jewellery construction",
+  "- accurate gemstone optics",
+  "- vivid brilliance",
+  "- sharp diamond fire",
+  "- polished precious metal reflections",
+  "- fine prong and setting details",
+  "- high-end editorial lighting",
+  "- believable luxury craftsmanship",
+  "",
+  "Avoid generic AI jewellery, plastic-looking stones, dull lighting, flat catalogue styling, cartoonish proportions, and fake CGI rendering."
+].join("\n");
 
 function cleanValue(value, fallback = "", limit = 900) {
   return String(value || fallback)
@@ -33,50 +75,98 @@ function cleanValue(value, fallback = "", limit = 900) {
     .slice(0, limit);
 }
 
+function needsPremiumMetalInterpretation(value) {
+  const text = cleanValue(value).toLowerCase();
+
+  if (!text) {
+    return false;
+  }
+
+  const vagueLuxuryRequest = /\b(best|expensive|fancy|high end|high-end|luxury|luxurious|most|premium|rich|top)\b/u.test(text);
+  const metalReference = /\b(emtal|metal|metl|metel|gold|platinum|white gold|yellow gold|rose gold|mixed metal)\b/u.test(text);
+
+  return /most expensive emtal/u.test(text) || (vagueLuxuryRequest && metalReference);
+}
+
 function createBrief(input) {
+  const metal = cleanValue(input.metal, "18K white gold");
+  const customSpec = cleanValue(input.customSpec || input.notes, "", 1400);
+  const premiumMetalInterpretation = needsPremiumMetalInterpretation(metal) || needsPremiumMetalInterpretation(customSpec);
+
   return {
     pieceType: cleanValue(input.pieceType, "ring"),
-    metal: cleanValue(input.metal, "18K white gold"),
+    metal,
     stone: cleanValue(input.stone, "white diamond"),
     style: cleanValue(input.style, "timeless and elegant"),
     budget: cleanValue(input.budget, "custom budget direction"),
-    customSpec: cleanValue(input.customSpec || input.notes, "", 1400)
+    customSpec,
+    metalInterpretation: premiumMetalInterpretation
+      ? "The metal input was vague or typo-heavy. Silently interpret it as premium precious metal, such as platinum or 18K gold, chosen for the most luxurious visual result."
+      : "Use the requested metal direction as written unless it is vague or typo-heavy; if it is vague, silently choose a premium precious metal for the most luxurious visual result."
   };
 }
 
 function buildPromptTemplate(brief) {
-  const customDirection = brief.customSpec
-    ? `CUSTOMER SPECIFICATION TO PRIORITIZE: ${brief.customSpec}. Treat this as the most important design direction while still using the structured choices for material, stone, and styling context.`
-    : "CUSTOMER SPECIFICATION TO PRIORITIZE: No extra custom specification was provided, so create a refined, realistic design from the structured choices only.";
-
   return [
-    "Create one photorealistic, high-end luxury jewellery image for Toronto Jewels Curation.",
-    "The final image must look like a real finished fine-jewellery piece photographed for a premium editorial catalogue, not a sketch, cartoon, concept-art illustration, plastic CGI object, or fantasy prop.",
+    "Generate one final high-quality photorealistic luxury jewellery image from this client brief.",
+    "",
+    "This image is for Toronto Jewels Curation, a custom fine-jewellery brand. The result must look like a real luxury jewellery photograph taken for a high-end editorial campaign or maison-level jewellery catalogue. It must not look like an AI render, concept sketch, cartoon, illustration, cheap CGI object, or fantasy prop.",
     "",
     "CLIENT DESIGN INPUT:",
-    `Piece type: ${brief.pieceType}.`,
-    `Metal: ${brief.metal}.`,
-    `Primary stone or gemstone direction: ${brief.stone}.`,
-    `Style and emotional tone: ${brief.style}.`,
-    `Budget direction: ${brief.budget}. Use this only to guide complexity and scale; do not show price text.`,
-    customDirection,
+    `Piece type: ${brief.pieceType}`,
+    `Metal: ${brief.metal}`,
+    `Metal interpretation: ${brief.metalInterpretation}`,
+    `Primary stone or gemstone direction: ${brief.stone}`,
+    `Style / vibe: ${brief.style}`,
+    `Budget direction: ${brief.budget}`,
+    `Customer specification to prioritize: ${brief.customSpec || "No extra custom specification was provided."}`,
     "",
-    "DESIGN REQUIREMENTS:",
-    "Use real-world jewellery proportions with a wearable scale, balanced stone size, believable metal thickness, secure construction, and accurate setting details.",
-    "If the piece is a ring, show a refined band with realistic shank thickness, a centered stone, clean basket or gallery structure, secure prongs or bezel, and any accent stones placed symmetrically.",
-    "If the piece is a necklace, show a realistic chain or pendant with correct bale, clasp logic, stone setting, and wearable pendant scale.",
-    "If the piece is a bracelet, show believable links or tennis setting structure, precise stone alignment, clasp logic, and natural wrist-friendly curvature.",
-    "If the piece is earrings, show a matched pair or single hero earring with realistic post, backing, hinge, huggie, or drop construction as appropriate.",
-    "Metal should have luxury-grade polished reflections, soft bevels, realistic highlights, and subtle micro-surface detail without looking scratched or cheap.",
-    "Gemstones should have crisp facets, believable depth, natural sparkle, clean refraction, and colour consistent with the requested stone.",
-    "The piece should feel elegant, personal, made-to-order, feminine but not childish, and suitable for a client inquiry.",
+    "INTERPRETATION RULES:",
+    "Use the client's custom specification as the most important design direction. Use the piece type, metal, stone, style, and budget fields as supporting structure. If the client gives vague words such as \"expensive,\" \"luxury,\" \"bold,\" or \"minimal,\" translate them into visible jewellery qualities: better craftsmanship, cleaner construction, stronger stones, refined proportions, richer finishing, and more sophisticated lighting. If the metal field contains vague or typo-heavy text such as \"most expensive emtal,\" silently interpret it as premium precious metal, such as platinum or 18K gold, chosen for the most luxurious visual result. Do not display any price, budget, words, logo, watermark, initials, or text in the image.",
     "",
-    "PHOTOGRAPHY AND RENDERING DIRECTIONS:",
-    "Use macro product photography with a 90mm luxury-jewellery lens feel, shallow depth of field, crisp focus on the centre stone and setting, and controlled falloff.",
-    "Lighting should feel like a high-end jewellery studio: clear bright lighting that makes the image easy to see all the details, large softbox reflections, small precision sparkle highlights, gentle rim light, and clean shadow under the piece.",
-    "Background should be clean editorial luxury: warm white, pale stone, soft grey, or subtle champagne surface with no clutter, no props that distract, and no text.",
-    "Composition should be centered and premium, with enough negative space for an atelier website preview while keeping the jewellery large and inspectable.",
-    "The image should be ultra realistic, 4K detail, natural contrast, high dynamic range, tasteful colour grading, and no visible AI artifacts.",
+    "OVERALL LUXURY DIRECTION:",
+    "Create a piece that feels elegant, personal, made-to-order, elevated, feminine but not childish, and suitable for a serious custom jewellery inquiry. The design should feel like fine jewellery, not costume jewellery. It should have believable proportions, wearable scale, secure construction, and refined craftsmanship.",
+    "",
+    "PIECE-SPECIFIC REQUIREMENTS:",
+    "If the piece type is ring, show a realistic luxury ring with a secure centre setting, fine polished claw prongs or bezel, a believable basket or gallery, clean side profile logic, and a refined shank. The centre stone must be seated naturally in the setting, not floating or pasted on top.",
+    "If the piece type is necklace, show a realistic luxury necklace or pendant with correct chain articulation, clasp logic if visible, proper bale or connector construction, wearable pendant scale, and believable stone setting. Avoid flat necklace shapes that look stamped or decorative only.",
+    "If the piece type is bracelet, show believable bracelet curvature, correct link or tennis-setting structure, precise stone alignment, flexible construction, and a realistic clasp or hidden closure logic.",
+    "If the piece type is earrings, show either a matched pair or one strong hero earring with realistic posts, backs, hinges, huggie structure, drop construction, or ear-wearable engineering.",
+    "If the piece type is anklet, show a delicate but luxury fine-jewellery anklet with believable chain links, refined clasp logic, secure gemstone settings, and elegant wearable proportions.",
+    "",
+    "GEMSTONE REALISM REQUIREMENTS:",
+    "Gemstones must look vivid, crisp, transparent, and alive. They must have realistic gemstone optics, clean table reflections, sharp crown facets, believable pavilion light return, visible internal fire, strong scintillation, and rich natural colour. Diamonds and gemstones must not look like glass, candy, plastic, resin, acrylic, toy crystals, or repeated kaleidoscope patterns.",
+    "For diamonds, show bright white fire, sharp facet junctions, natural brilliance, crisp flashes, and believable depth.",
+    "For coloured stones, show saturated but natural colour, transparent depth, realistic refraction, and clean sparkle.",
+    "If the stone field says no stone, create a metal-focused fine-jewellery design with sculptural luxury metalwork, polished curves, engraving, texture, or architectural detail instead of gemstones.",
+    "",
+    "METAL REALISM REQUIREMENTS:",
+    "The metal must look like precious fine jewellery metal, not flat grey plastic or dull CGI. Use mirror-polished reflections, bright edge highlights, dark reflection lines, soft bevels, smooth curves, dimensional shine, and realistic metal thickness.",
+    "For 18K white gold, use a bright luxury white-metal finish with soft warmth and polished reflections.",
+    "For platinum, use a refined cool white-metal look with substantial weight, crisp highlights, and deep mirror reflection lines.",
+    "For mixed metal, combine metals intentionally, such as platinum with 18K yellow gold or rose gold accents, with clear visual separation and refined craftsmanship.",
+    "",
+    "SETTING AND CRAFTSMANSHIP REQUIREMENTS:",
+    "All stones must appear individually set and physically held. Prongs must be fine, secure, polished, and connected to the setting. Avoid oversized blob-like prongs, floating prongs, melted metal, missing prongs, extra prongs, or prongs sitting unnaturally on top of stones.",
+    "Pave stones must be individually visible and precisely set, with clean bead or micro-prong details, consistent spacing, and realistic sparkle. Avoid mushy pave, noisy glitter texture, or diamond bands that blur into one rough strip.",
+    "",
+    "DESIGN QUALITY REQUIREMENTS:",
+    "The jewellery should feel manufacturable by a fine-jewellery atelier. It should have balanced symmetry, careful stone placement, clean geometry, realistic setting depth, and professional finishing. Make the design visually impressive but still believable as a real custom fine-jewellery piece.",
+    "",
+    "PHOTOGRAPHY AND LIGHTING REQUIREMENTS:",
+    "Use dramatic high-jewellery editorial lighting rather than flat e-commerce catalogue lighting. The piece should feel radiant, sharp, dimensional, and visually expensive.",
+    "Lighting must include crisp specular highlights, controlled high contrast, bright diamond fire, sharp diamond fire, vivid gemstone colour, dark mirror reflection lines in the metal, clean separation from the background, precise sparkle highlights, strong clarity in small stones and setting details, and clear bright lighting that makes the image easy to see all the details.",
+    "Avoid overly soft pastel lighting, dull beige lighting, washed-out shadows, muddy reflections, weak sparkle, and low-contrast rendering.",
+    "",
+    "CAMERA AND COMPOSITION:",
+    "Use professional macro luxury product photography. The jewellery should be large enough to inspect, sharply focused on the main stone or main design feature, and composed elegantly with premium negative space. Use a natural product-photography angle that shows the design, construction, and stone setting clearly.",
+    "The image should look sharp, luminous, dimensional, and editorial. It should feel suitable for a luxury website hero image, product preview, or custom-design inquiry.",
+    "",
+    "BACKGROUND:",
+    "Use a refined luxury studio background that helps the jewellery stand out. Prefer cool ivory, soft light grey, pale stone, or a subtle editorial gradient with enough contrast to separate the jewellery from the surface. Avoid dull beige, muddy champagne, busy props, distracting textures, harsh patterns, or backgrounds that make the jewellery blend in.",
+    "",
+    "FINAL IMAGE QUALITY:",
+    "The final image must feel like a premium fine-jewellery photograph with high clarity, realistic materials, sharp details, vivid brilliance, and strong luxury presence. It should not feel flat, dull, artificial, generic, or cheaply rendered.",
     "",
     "STRICT AVOIDANCES:",
     `Avoid: ${NEGATIVE_PROMPT}.`
@@ -113,12 +203,7 @@ async function startBackgroundImageWithOpenAI(apiKey, templatePrompt, brief) {
       input: [
         {
           role: "developer",
-          content: [
-            "You are a luxury fine-jewellery image director for Toronto Jewels Curation.",
-            "You must generate exactly one photorealistic jewellery image using the image_generation tool.",
-            "Do not return a text-only prompt instead of the image.",
-            "Preserve all customer specifications exactly when provided and prioritize realistic jewellery construction."
-          ].join(" ")
+          content: DEVELOPER_INSTRUCTION
         },
         {
           role: "user",
