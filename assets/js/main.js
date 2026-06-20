@@ -2072,6 +2072,367 @@ function setupCustomForm() {
   });
 }
 
+const dreamRenderMessages = [
+  "Shaping the band",
+  "Setting the stone",
+  "Balancing the prongs",
+  "Polishing the metal",
+  "Lighting the studio",
+  "Rendering the final concept"
+];
+
+function getNamedFormValue(form, name) {
+  const field = form?.elements?.[name];
+
+  if (!field || !("value" in field)) {
+    return "";
+  }
+
+  return field.value.trim();
+}
+
+async function postNetlifyFormData(formData) {
+  const response = await fetch("/", {
+    method: "POST",
+    body: formData
+  });
+
+  if (!response.ok) {
+    throw new Error("Netlify form submission failed");
+  }
+}
+
+function dreamContactSignature(form) {
+  return JSON.stringify({
+    name: getNamedFormValue(form, "dream-name"),
+    email: getNamedFormValue(form, "dream-email"),
+    phone: getNamedFormValue(form, "dream-phone")
+  });
+}
+
+function dreamDesignPayload(form) {
+  return {
+    pieceType: getNamedFormValue(form, "dream-piece-type"),
+    metal: getNamedFormValue(form, "dream-metal"),
+    stone: getNamedFormValue(form, "dream-stone"),
+    style: getNamedFormValue(form, "dream-style"),
+    budget: getNamedFormValue(form, "dream-budget"),
+    notes: getNamedFormValue(form, "dream-notes")
+  };
+}
+
+function dataUrlFromBase64(base64, mimeType = "image/png") {
+  if (/^data:/u.test(base64)) {
+    return base64;
+  }
+
+  return `data:${mimeType};base64,${base64}`;
+}
+
+function dataUrlToFile(dataUrl, fileName) {
+  const [header, body] = dataUrl.split(",");
+  const mimeType = header.match(/^data:([^;]+);base64$/u)?.[1] || "image/png";
+  const binary = window.atob(body);
+  const bytes = new Uint8Array(binary.length);
+
+  for (let index = 0; index < binary.length; index += 1) {
+    bytes[index] = binary.charCodeAt(index);
+  }
+
+  return new File([bytes], fileName, { type: mimeType });
+}
+
+async function dreamImageFileFromResponse(result) {
+  const fileName = `dream-design-${Date.now()}.png`;
+
+  if (result.imageBase64) {
+    const dataUrl = dataUrlFromBase64(result.imageBase64, result.mimeType || "image/png");
+    return {
+      file: dataUrlToFile(dataUrl, fileName),
+      src: dataUrl
+    };
+  }
+
+  if (result.imageUrl) {
+    const response = await fetch(result.imageUrl);
+
+    if (!response.ok) {
+      throw new Error("Generated image could not be downloaded");
+    }
+
+    const blob = await response.blob();
+    return {
+      file: new File([blob], fileName, { type: blob.type || "image/png" }),
+      src: URL.createObjectURL(blob)
+    };
+  }
+
+  throw new Error("The generator did not return an image");
+}
+
+function appendDreamFormValues(formData, leadForm, designForm, result, imageFile) {
+  const values = {
+    "dream-name": getNamedFormValue(leadForm, "dream-name"),
+    "dream-email": getNamedFormValue(leadForm, "dream-email"),
+    "dream-phone": getNamedFormValue(leadForm, "dream-phone"),
+    "dream-piece-type": getNamedFormValue(designForm, "dream-piece-type"),
+    "dream-metal": getNamedFormValue(designForm, "dream-metal"),
+    "dream-stone": getNamedFormValue(designForm, "dream-stone"),
+    "dream-style": getNamedFormValue(designForm, "dream-style"),
+    "dream-budget": getNamedFormValue(designForm, "dream-budget"),
+    "dream-notes": getNamedFormValue(designForm, "dream-notes"),
+    "dream-prompt": result.prompt || "",
+    "dream-negative-prompt": result.negativePrompt || ""
+  };
+
+  Object.entries(values).forEach(([name, value]) => {
+    formData.set(name, value);
+  });
+
+  formData.set("generated-image", imageFile, imageFile.name);
+}
+
+function setDreamBusyState(root, busy) {
+  root.classList.toggle("is-generating", busy);
+  root.querySelectorAll("[data-dream-lead-submit], [data-dream-generate-submit], [data-dream-retry]").forEach((button) => {
+    button.disabled = busy;
+  });
+}
+
+function startDreamRenderLoop(root) {
+  const status = root.querySelector("[data-dream-render-status]");
+  let index = 0;
+
+  if (status) {
+    status.textContent = dreamRenderMessages[index];
+  }
+
+  return window.setInterval(() => {
+    index = (index + 1) % dreamRenderMessages.length;
+
+    if (status) {
+      status.textContent = dreamRenderMessages[index];
+    }
+  }, 1300);
+}
+
+function setupDreamGenerator() {
+  const root = document.querySelector("[data-dream-generator]");
+
+  if (!root) {
+    return;
+  }
+
+  const leadForm = root.querySelector("[data-dream-lead-form]");
+  const designForm = root.querySelector("[data-dream-design-form]");
+  const resultForm = document.querySelector("[data-dream-result-form]");
+  const designFieldset = root.querySelector("[data-dream-design-fieldset]");
+  const leadButton = root.querySelector("[data-dream-lead-submit]");
+  const generateButton = root.querySelector("[data-dream-generate-submit]");
+  const retryButton = root.querySelector("[data-dream-retry]");
+  const leadStatus = root.querySelector("[data-dream-lead-status]");
+  const designStatus = root.querySelector("[data-dream-design-status]");
+  const renderStatus = root.querySelector("[data-dream-render-status]");
+  const resultTitle = root.querySelector("[data-dream-result-title]");
+  const resultCopy = root.querySelector("[data-dream-result-copy]");
+  const resultImage = root.querySelector("[data-dream-result-image]");
+
+  if (!leadForm || !designForm || !resultForm || !designFieldset) {
+    return;
+  }
+
+  let contactSaved = false;
+  let savedSignature = "";
+  let renderLoop = null;
+
+  const lockDesign = (message = "Save your contact details to unlock the generator.") => {
+    contactSaved = false;
+    savedSignature = "";
+    designFieldset.disabled = true;
+    root.classList.remove("is-contact-saved");
+
+    if (designStatus) {
+      designStatus.textContent = message;
+    }
+
+    if (leadButton) {
+      leadButton.textContent = "Save Contact";
+    }
+  };
+
+  const unlockDesign = () => {
+    contactSaved = true;
+    savedSignature = dreamContactSignature(leadForm);
+    designFieldset.disabled = false;
+    root.classList.add("is-contact-saved");
+
+    if (leadStatus) {
+      leadStatus.textContent = "Contact saved. Choose your dream design details.";
+    }
+
+    if (designStatus) {
+      designStatus.textContent = "Ready to generate and send your concept.";
+    }
+
+    if (renderStatus) {
+      renderStatus.textContent = "Ready to render";
+    }
+
+    if (leadButton) {
+      leadButton.textContent = "Contact Saved";
+    }
+  };
+
+  leadForm.addEventListener("input", () => {
+    if (contactSaved && dreamContactSignature(leadForm) !== savedSignature) {
+      lockDesign("Save your updated contact details to continue.");
+    }
+  });
+
+  leadForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+
+    if (!leadForm.reportValidity()) {
+      return;
+    }
+
+    if (leadButton) {
+      leadButton.disabled = true;
+      leadButton.textContent = "Saving...";
+    }
+
+    if (leadStatus) {
+      leadStatus.textContent = "Saving your contact details...";
+    }
+
+    try {
+      await postNetlifyFormData(new FormData(leadForm));
+      unlockDesign();
+    } catch (error) {
+      if (leadStatus) {
+        leadStatus.textContent = "Contact could not be saved. Please try again.";
+      }
+    } finally {
+      if (leadButton) {
+        leadButton.disabled = false;
+      }
+    }
+  });
+
+  designForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+
+    if (!contactSaved) {
+      leadForm.requestSubmit();
+      return;
+    }
+
+    if (!designForm.reportValidity()) {
+      return;
+    }
+
+    setDreamBusyState(root, true);
+    if (retryButton) {
+      retryButton.hidden = true;
+    }
+
+    if (generateButton) {
+      generateButton.textContent = "Generating...";
+    }
+
+    if (designStatus) {
+      designStatus.textContent = "Generating your design image...";
+    }
+
+    if (resultTitle) {
+      resultTitle.textContent = "Rendering your concept";
+    }
+
+    if (resultCopy) {
+      resultCopy.textContent = "The render chamber is shaping the prompt into a jewellery image.";
+    }
+
+    renderLoop = startDreamRenderLoop(root);
+
+    try {
+      const generationResponse = await fetch("/.netlify/functions/generate-dream-design", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(dreamDesignPayload(designForm))
+      });
+      const generationResult = await generationResponse.json().catch(() => ({}));
+
+      if (!generationResponse.ok) {
+        throw new Error(generationResult.message || "The image could not be generated yet.");
+      }
+
+      const imageResult = await dreamImageFileFromResponse(generationResult);
+
+      if (resultImage) {
+        resultImage.src = imageResult.src;
+        resultImage.alt = "Generated custom jewellery design";
+      }
+
+      const resultFormData = new FormData(resultForm);
+      appendDreamFormValues(resultFormData, leadForm, designForm, generationResult, imageResult.file);
+      await postNetlifyFormData(resultFormData);
+
+      if (renderStatus) {
+        renderStatus.textContent = "Design sent";
+      }
+
+      if (designStatus) {
+        designStatus.textContent = "Design generated and sent. We will follow up soon.";
+      }
+
+      if (resultTitle) {
+        resultTitle.textContent = "Your dream design is sent";
+      }
+
+      if (resultCopy) {
+        resultCopy.textContent = "The generated image, prompt, and your details were sent with your request.";
+      }
+    } catch (error) {
+      if (retryButton) {
+        retryButton.hidden = false;
+      }
+
+      if (renderStatus) {
+        renderStatus.textContent = "Generator needs attention";
+      }
+
+      if (designStatus) {
+        designStatus.textContent = error.message || "Generation failed. Please try again.";
+      }
+
+      if (resultTitle) {
+        resultTitle.textContent = "The image did not generate";
+      }
+
+      if (resultCopy) {
+        resultCopy.textContent = "Your contact details are still saved. Try again once the generator is connected.";
+      }
+    } finally {
+      if (renderLoop) {
+        window.clearInterval(renderLoop);
+        renderLoop = null;
+      }
+
+      setDreamBusyState(root, false);
+
+      if (generateButton) {
+        generateButton.textContent = "Generate + Send Design";
+      }
+    }
+  });
+
+  retryButton?.addEventListener("click", () => {
+    designForm.requestSubmit();
+  });
+
+  lockDesign();
+}
+
 function setYear() {
   document.querySelectorAll("[data-year]").forEach((node) => {
     node.textContent = String(new Date().getFullYear());
@@ -2965,6 +3326,7 @@ document.addEventListener("DOMContentLoaded", () => {
   setupPrivateInquiry();
   setupAppointmentModal();
   setupCustomForm();
+  setupDreamGenerator();
   setupCustomsSectionRail();
   setupCustomFormProgress();
   setYear();

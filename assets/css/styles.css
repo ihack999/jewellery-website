@@ -6550,3 +6550,343 @@ a.gem-chip:hover {
   .guide-direction__actions { flex-direction: column; }
   .gem-meter__row { grid-template-columns: 80px 1fr 28px; }
 }
+
+.dream-generator {
+  min-height: calc(100vh - 96px);
+}
+
+.dream-generator__shell {
+  display: grid;
+  gap: clamp(1.5rem, 3vw, 2.6rem);
+}
+
+.dream-generator__intro {
+  max-width: 760px;
+}
+
+.dream-generator__intro h1 {
+  margin-bottom: 0.8rem;
+}
+
+.dream-generator__workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(340px, 0.88fr);
+  gap: clamp(1rem, 2.5vw, 1.8rem);
+  align-items: start;
+}
+
+.dream-generator__forms {
+  display: grid;
+  gap: 1rem;
+}
+
+.dream-step,
+.render-chamber {
+  border: 1px solid rgba(212, 222, 220, 0.92);
+  border-radius: var(--radius);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(249, 251, 250, 0.9)),
+    #ffffff;
+  box-shadow: var(--shadow-soft);
+}
+
+.dream-step {
+  padding: clamp(1rem, 2vw, 1.35rem);
+}
+
+.dream-step__heading {
+  display: flex;
+  gap: 0.9rem;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.dream-step__heading > span {
+  display: inline-grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  border: 1px solid rgba(196, 161, 90, 0.46);
+  border-radius: 50%;
+  color: var(--gold);
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+.dream-step__heading h2 {
+  margin: 0 0 0.2rem;
+  font-size: clamp(1.55rem, 2vw, 1.9rem);
+}
+
+.dream-step__heading p {
+  margin: 0;
+  color: var(--muted);
+}
+
+.dream-lead-form,
+.dream-design-form,
+.dream-design-form fieldset {
+  display: grid;
+  gap: 1rem;
+}
+
+.dream-design-form fieldset {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  padding: 0;
+  margin: 0;
+  border: 0;
+  transition: opacity var(--transition), filter var(--transition);
+}
+
+.dream-design-form fieldset:disabled {
+  opacity: 0.54;
+  filter: grayscale(0.25);
+}
+
+.dream-design-form .form-field--wide,
+.dream-design-form .form-actions,
+.dream-design-form .status-note {
+  grid-column: 1 / -1;
+}
+
+.dream-design-form textarea {
+  min-height: 106px;
+  resize: vertical;
+}
+
+.render-chamber {
+  position: sticky;
+  top: 92px;
+  overflow: hidden;
+  padding: clamp(1rem, 2vw, 1.25rem);
+  background:
+    linear-gradient(140deg, rgba(7, 16, 17, 0.98), rgba(20, 31, 31, 0.96) 52%, rgba(58, 45, 31, 0.94)),
+    var(--ink);
+  color: #ffffff;
+}
+
+.render-chamber__header {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.render-chamber__header .eyebrow {
+  color: rgba(255, 255, 255, 0.64);
+}
+
+.render-chamber__header strong {
+  color: #ffffff;
+  font-size: 0.9rem;
+}
+
+.render-chamber__stage {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: 520px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: calc(var(--radius) - 4px);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0)),
+    linear-gradient(120deg, rgba(196, 161, 90, 0.16), transparent 38%, rgba(12, 111, 125, 0.12)),
+    rgba(4, 9, 10, 0.76);
+}
+
+.render-chamber__stage img {
+  width: 100%;
+  height: 100%;
+  min-height: 520px;
+  object-fit: cover;
+  filter: contrast(1.04) saturate(1.08);
+  opacity: 0.86;
+  transform: scale(1);
+  transition: opacity 600ms var(--ease-luxe), transform 900ms var(--ease-luxe), filter 900ms var(--ease-luxe);
+}
+
+.render-chamber__stage::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(5, 12, 13, 0.06), rgba(5, 12, 13, 0.58)),
+    linear-gradient(90deg, rgba(196, 161, 90, 0.08), transparent 30%, transparent 70%, rgba(12, 111, 125, 0.08));
+  pointer-events: none;
+}
+
+.render-chamber__scan {
+  position: absolute;
+  inset: 8%;
+  z-index: 3;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.render-chamber__ring {
+  position: absolute;
+  z-index: 4;
+  width: min(58%, 280px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle, transparent 42%, rgba(255, 255, 255, 0.9) 43%, rgba(196, 161, 90, 0.58) 48%, transparent 50%),
+    conic-gradient(from 30deg, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.7), rgba(196, 161, 90, 0.96), rgba(12, 111, 125, 0.38), rgba(255, 255, 255, 0));
+  filter: drop-shadow(0 24px 44px rgba(0, 0, 0, 0.36));
+  opacity: 0;
+  transform: translateY(18px) rotate(-12deg) scale(0.82);
+  pointer-events: none;
+}
+
+.render-chamber__facet {
+  position: absolute;
+  z-index: 5;
+  width: 34px;
+  aspect-ratio: 1;
+  clip-path: polygon(50% 0, 92% 30%, 76% 86%, 24% 86%, 8% 30%);
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(161, 210, 220, 0.62) 45%, rgba(196, 161, 90, 0.76));
+  box-shadow: 0 16px 28px rgba(0, 0, 0, 0.28);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.render-chamber__facet--one {
+  top: 19%;
+  left: 16%;
+}
+
+.render-chamber__facet--two {
+  right: 13%;
+  top: 34%;
+  width: 26px;
+}
+
+.render-chamber__facet--three {
+  right: 26%;
+  bottom: 19%;
+  width: 30px;
+}
+
+.dream-generator.is-generating .render-chamber__stage img {
+  opacity: 0.42;
+  transform: scale(1.08);
+  filter: contrast(1.15) saturate(1.16) blur(1px);
+}
+
+.dream-generator.is-generating .render-chamber__scan {
+  animation: dreamScan 1.9s var(--ease-luxe) infinite;
+}
+
+.dream-generator.is-generating .render-chamber__ring {
+  opacity: 1;
+  animation: dreamRingForge 2.8s var(--ease-luxe) infinite alternate;
+}
+
+.dream-generator.is-generating .render-chamber__facet {
+  opacity: 1;
+  animation: dreamFacetFloat 2.4s var(--ease-luxe) infinite alternate;
+}
+
+.dream-generator.is-generating .render-chamber__facet--two {
+  animation-delay: 260ms;
+}
+
+.dream-generator.is-generating .render-chamber__facet--three {
+  animation-delay: 520ms;
+}
+
+.render-chamber__copy {
+  position: relative;
+  z-index: 6;
+  padding-top: 1rem;
+}
+
+.render-chamber__copy h2 {
+  margin-bottom: 0.4rem;
+  color: #ffffff;
+  font-size: clamp(1.7rem, 2.6vw, 2.2rem);
+}
+
+.render-chamber__copy p {
+  color: rgba(255, 255, 255, 0.72);
+}
+
+@keyframes dreamScan {
+  0% {
+    opacity: 0;
+    transform: scale(0.64);
+  }
+
+  38% {
+    opacity: 0.7;
+  }
+
+  100% {
+    opacity: 0;
+    transform: scale(1.18);
+  }
+}
+
+@keyframes dreamRingForge {
+  0% {
+    transform: translateY(20px) rotate(-18deg) scale(0.78);
+    filter: drop-shadow(0 18px 34px rgba(0, 0, 0, 0.32));
+  }
+
+  100% {
+    transform: translateY(-10px) rotate(16deg) scale(1);
+    filter: drop-shadow(0 28px 54px rgba(196, 161, 90, 0.32));
+  }
+}
+
+@keyframes dreamFacetFloat {
+  0% {
+    transform: translate3d(0, 16px, 0) rotate(-12deg) scale(0.86);
+  }
+
+  100% {
+    transform: translate3d(0, -18px, 0) rotate(18deg) scale(1.08);
+  }
+}
+
+@media (max-width: 980px) {
+  .dream-generator__workspace {
+    grid-template-columns: 1fr;
+  }
+
+  .render-chamber {
+    position: relative;
+    top: auto;
+  }
+
+  .render-chamber__stage,
+  .render-chamber__stage img {
+    min-height: 430px;
+  }
+}
+
+@media (max-width: 640px) {
+  .dream-design-form fieldset {
+    grid-template-columns: 1fr;
+  }
+
+  .dream-step__heading {
+    align-items: center;
+  }
+
+  .render-chamber__header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .render-chamber__stage,
+  .render-chamber__stage img {
+    min-height: 360px;
+  }
+}

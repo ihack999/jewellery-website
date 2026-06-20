@@ -7,6 +7,7 @@ Minimal static site scaffold for a jewellery brand concept inspired by a white, 
 - `shop.html` - curated collection grid with category filtering
 - `product.html` - reusable product detail page powered by a `slug` query parameter
 - `customs.html` - bespoke consultation-style custom request page
+- `dream-design.html` - minimal contact-gated AI image generator request page
 - `about.html` - brand story and direction
 - `contact.html` - direct contact and inquiry form
 
@@ -61,10 +62,12 @@ assets/
 	images/*.svg
 netlify/
 	functions/send-sms.js
+	functions/generate-dream-design.js
 index.html
 shop.html
 product.html
 customs.html
+dream-design.html
 about.html
 contact.html
 ```
@@ -74,5 +77,6 @@ contact.html
 - The site uses local SVG artwork as polished placeholders for product and editorial imagery.
 - Replace the placeholder SVG files in `assets/images/` with final photography and brand assets when available.
 - The forms submit to Netlify and can email notifications through Netlify form hooks.
+- The dream design generator expects `DREAM_IMAGE_API_URL`, `DREAM_IMAGE_API_KEY`, and optionally `DREAM_IMAGE_API_MODEL` in Netlify environment variables.
 - SMS alerts require Twilio credentials in Netlify environment variables.
 - Cart interactions are still UI-only and need a checkout integration if you want live purchasing.
