@@ -1,5 +1,4 @@
 const OPENAI_RESPONSES_URL = "https://api.openai.com/v1/responses";
-const OPENAI_IMAGES_URL = "https://api.openai.com/v1/images/generations";
 
 const NEGATIVE_PROMPT = [
   "blurry image",
@@ -80,71 +79,27 @@ function buildPromptTemplate(brief) {
     "The image should be ultra realistic, 4K detail, natural contrast, high dynamic range, tasteful colour grading, and no visible AI artifacts.",
     "",
     "STRICT AVOIDANCES:",
-    `Avoid: ${NEGATIVE_PROMPT}.`,
-    "",
-    "Return only the final image prompt text. Do not add explanation, markdown, title, quotes, captions, or notes."
+    `Avoid: ${NEGATIVE_PROMPT}.`
   ].join("\n");
 }
 
-function extractResponseText(data) {
-  if (typeof data?.output_text === "string" && data.output_text.trim()) {
-    return data.output_text.trim();
-  }
-
-  if (Array.isArray(data?.output)) {
-    const text = data.output
-      .flatMap((item) => Array.isArray(item.content) ? item.content : [])
-      .map((content) => content.text || content.output_text || "")
-      .filter(Boolean)
-      .join("\n")
-      .trim();
-
-    if (text) {
-      return text;
-    }
-  }
-
-  return "";
-}
-
-function normalizeBase64(value) {
-  if (!value) {
-    return null;
-  }
-
-  const dataUrl = value.match(/^data:([^;]+);base64,(.+)$/u);
-
-  if (dataUrl) {
-    return {
-      imageBase64: dataUrl[2],
-      mimeType: dataUrl[1]
-    };
-  }
-
-  return {
-    imageBase64: value,
-    mimeType: "image/png"
+function createImageTool() {
+  const tool = {
+    type: "image_generation",
+    quality: process.env.OPENAI_IMAGE_QUALITY || "high",
+    size: process.env.OPENAI_IMAGE_SIZE || "1024x1024"
   };
-}
+  const model = process.env.OPENAI_IMAGE_TOOL_MODEL || process.env.DREAM_IMAGE_TOOL_MODEL;
 
-function normalizeOpenAIImage(data) {
-  const image = Array.isArray(data?.data) ? data.data[0] : null;
-  const base64 = image?.b64_json || data?.imageBase64 || data?.base64;
-  const normalized = normalizeBase64(base64);
-
-  if (normalized) {
-    return normalized;
+  if (model) {
+    tool.model = model;
   }
 
-  if (image?.url) {
-    return { imageUrl: image.url };
-  }
-
-  return null;
+  return tool;
 }
 
-async function createPromptWithOpenAI(apiKey, templatePrompt, brief) {
-  const model = process.env.OPENAI_PROMPT_MODEL || process.env.DREAM_PROMPT_MODEL || "gpt-4.1-mini";
+async function startBackgroundImageWithOpenAI(apiKey, templatePrompt, brief) {
+  const model = process.env.OPENAI_RESPONSE_IMAGE_MODEL || process.env.OPENAI_PROMPT_MODEL || process.env.DREAM_PROMPT_MODEL || "gpt-5.5";
   const response = await fetch(OPENAI_RESPONSES_URL, {
     method: "POST",
     headers: {
@@ -153,15 +108,23 @@ async function createPromptWithOpenAI(apiKey, templatePrompt, brief) {
     },
     body: JSON.stringify({
       model,
+      background: true,
+      store: true,
       input: [
         {
           role: "developer",
-          content: "You are a luxury fine-jewellery prompt director. Expand simple customer jewellery preferences into one very detailed, photorealistic image-generation prompt. Preserve all customer specifications exactly when provided. Return only the image prompt."
+          content: [
+            "You are a luxury fine-jewellery image director for Toronto Jewels Curation.",
+            "You must generate exactly one photorealistic jewellery image using the image_generation tool.",
+            "Do not return a text-only prompt instead of the image.",
+            "Preserve all customer specifications exactly when provided and prioritize realistic jewellery construction."
+          ].join(" ")
         },
         {
           role: "user",
           content: [
-            "Use this template as the source of truth and make the final prompt even more precise, luxurious, physically realistic, and suitable for high-end jewellery image generation.",
+            "Generate the final high-quality jewellery image from this brief.",
+            "Use the brief below as the image direction, not as an instruction to return text.",
             "",
             templatePrompt,
             "",
@@ -169,61 +132,32 @@ async function createPromptWithOpenAI(apiKey, templatePrompt, brief) {
           ].join("\n")
         }
       ],
-      max_output_tokens: 1200
+      tools: [createImageTool()],
+      tool_choice: { type: "image_generation" }
     })
   });
-
-  const text = await response.text();
-
-  if (!response.ok) {
-    throw new Error(text.slice(0, 500) || "Prompt creator failed");
-  }
-
-  const data = text ? JSON.parse(text) : {};
-  const generatedPrompt = extractResponseText(data);
-
-  if (!generatedPrompt) {
-    throw new Error("Prompt creator returned no prompt");
-  }
-
-  return generatedPrompt;
-}
-
-async function generateImageWithOpenAI(apiKey, prompt) {
-  const model = process.env.OPENAI_IMAGE_MODEL || process.env.DREAM_IMAGE_API_MODEL || "gpt-image-1";
-  const size = process.env.OPENAI_IMAGE_SIZE || "1024x1024";
-  const quality = process.env.OPENAI_IMAGE_QUALITY || "high";
-  const response = await fetch(OPENAI_IMAGES_URL, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      model,
-      prompt,
-      size,
-      quality,
-      output_format: "png"
-    })
-  });
-
   const text = await response.text();
 
   if (!response.ok) {
     return {
       ok: false,
-      details: text.slice(0, 700)
+      details: text.slice(0, 900) || "OpenAI background image request failed"
     };
   }
 
   const data = text ? JSON.parse(text) : {};
-  const image = normalizeOpenAIImage(data);
+
+  if (!data.id) {
+    return {
+      ok: false,
+      details: "OpenAI accepted the request but did not return a response id."
+    };
+  }
 
   return {
-    ok: Boolean(image),
-    image,
-    details: image ? "" : "OpenAI responded without an image."
+    ok: true,
+    responseId: data.id,
+    status: data.status || "queued"
   };
 }
 
@@ -263,41 +197,34 @@ exports.handler = async (event) => {
     };
   }
 
-  let finalPrompt = templatePrompt;
-  let promptCreatedBy = "template";
-
   try {
-    finalPrompt = await createPromptWithOpenAI(apiKey, templatePrompt, brief);
-    promptCreatedBy = "openai-responses";
-  } catch (error) {
-    finalPrompt = templatePrompt;
-  }
+    const imageJob = await startBackgroundImageWithOpenAI(apiKey, templatePrompt, brief);
 
-  try {
-    const imageResult = await generateImageWithOpenAI(apiKey, finalPrompt);
-
-    if (!imageResult.ok) {
+    if (!imageJob.ok) {
       return {
         statusCode: 502,
         body: JSON.stringify({
           error: "provider_error",
-          message: "The image generator could not complete this request.",
-          details: imageResult.details,
-          prompt: finalPrompt,
+          message: "The high-quality image generator could not start.",
+          details: imageJob.details,
+          prompt: templatePrompt,
           templatePrompt,
-          promptCreatedBy,
+          promptCreatedBy: "openai-background-responses",
           negativePrompt: NEGATIVE_PROMPT
         })
       };
     }
 
     return {
-      statusCode: 200,
+      statusCode: 202,
       body: JSON.stringify({
-        ...imageResult.image,
-        prompt: finalPrompt,
+        status: imageJob.status,
+        responseId: imageJob.responseId,
+        pollUrl: `/.netlify/functions/generate-dream-design-status?id=${encodeURIComponent(imageJob.responseId)}`,
+        message: "Your high-quality design is rendering.",
+        prompt: templatePrompt,
         templatePrompt,
-        promptCreatedBy,
+        promptCreatedBy: "openai-background-responses",
         negativePrompt: NEGATIVE_PROMPT
       })
     };
@@ -306,10 +233,11 @@ exports.handler = async (event) => {
       statusCode: 502,
       body: JSON.stringify({
         error: "generation_failed",
-        message: "The image generator could not be reached.",
-        prompt: finalPrompt,
+        message: "The high-quality image generator could not be reached.",
+        details: error?.message || "Unknown error",
+        prompt: templatePrompt,
         templatePrompt,
-        promptCreatedBy,
+        promptCreatedBy: "openai-background-responses",
         negativePrompt: NEGATIVE_PROMPT
       })
     };

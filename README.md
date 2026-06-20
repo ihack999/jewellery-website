@@ -59,10 +59,12 @@ After adding the variables, redeploy the site from Netlify or with the Netlify C
 assets/
 	css/styles.css
 	js/main.js
+	js/dream-generator-high.js
 	images/*.svg
 netlify/
 	functions/send-sms.js
 	functions/generate-dream-design.js
+	functions/generate-dream-design-status.js
 index.html
 shop.html
 product.html
@@ -77,6 +79,6 @@ contact.html
 - The site uses local SVG artwork as polished placeholders for product and editorial imagery.
 - Replace the placeholder SVG files in `assets/images/` with final photography and brand assets when available.
 - The forms submit to Netlify and can email notifications through Netlify form hooks.
-- The dream design generator expects `OPENAI_API_KEY` in Netlify environment variables. Optional overrides: `OPENAI_IMAGE_MODEL`, `OPENAI_PROMPT_MODEL`, `OPENAI_IMAGE_SIZE`, and `OPENAI_IMAGE_QUALITY`.
+- The dream design generator expects `OPENAI_API_KEY` in Netlify environment variables. It starts high-quality OpenAI Responses jobs asynchronously, then polls `generate-dream-design-status` so Netlify does not time out. Optional overrides: `OPENAI_RESPONSE_IMAGE_MODEL`, `OPENAI_IMAGE_TOOL_MODEL`, `OPENAI_PROMPT_MODEL`, `OPENAI_IMAGE_SIZE`, and `OPENAI_IMAGE_QUALITY`.
 - SMS alerts require Twilio credentials in Netlify environment variables.
 - Cart interactions are still UI-only and need a checkout integration if you want live purchasing.
