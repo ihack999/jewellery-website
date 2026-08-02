@@ -3,3 +3,138 @@
 
 [functions]
   directory = "netlify/functions"
+
+[[redirects]]
+  from = "/dream-design.html"
+  to = "/customs.html"
+  status = 301
+
+[[redirects]]
+  from = "/jewellery-editor/*"
+  to = "/customs.html"
+  status = 301
+
+[[redirects]]
+  from = "/product.html"
+  to = "/products/rare-blue-diamond-ring/"
+  status = 301
+  force = true
+  query = { slug = "pear-halo-ring" }
+
+[[redirects]]
+  from = "/product.html"
+  to = "/products/diamond-tennis-necklace/"
+  status = 301
+  force = true
+  query = { slug = "diamond-tennis-necklace" }
+
+[[redirects]]
+  from = "/product.html"
+  to = "/products/diamond-tennis-bracelet/"
+  status = 301
+  force = true
+  query = { slug = "diamond-bracelet-stack" }
+
+[[redirects]]
+  from = "/product.html"
+  to = "/products/yellow-diamond-oval-stud-earrings/"
+  status = 301
+  force = true
+  query = { slug = "vintage-halo-stud-earrings" }
+
+[[redirects]]
+  from = "/product.html"
+  to = "/products/diamond-hand-chain-bracelet/"
+  status = 301
+  force = true
+  query = { slug = "gold-bezel-hand-chain" }
+
+[[redirects]]
+  from = "/product.html"
+  to = "/products/cushion-cut-diamond-ring/"
+  status = 301
+  force = true
+  query = { slug = "cushion-diamond-ring" }
+
+[[redirects]]
+  from = "/product.html"
+  to = "/shop.html"
+  status = 301
+  force = true
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    X-Frame-Options = "SAMEORIGIN"
+    Permissions-Policy = "camera=(self), microphone=(), geolocation=()"
+
+[[headers]]
+  for = "/*.html"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+    Netlify-CDN-Cache-Control = "public, s-maxage=3600, stale-while-revalidate=86400"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    X-Frame-Options = "SAMEORIGIN"
+
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=2592000, stale-while-revalidate=86400"
+    X-Content-Type-Options = "nosniff"
+
+[[headers]]
+  for = "/products/*"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+    Netlify-CDN-Cache-Control = "public, s-maxage=3600, stale-while-revalidate=86400"
+
+[[headers]]
+  for = "/rings/*"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+    Netlify-CDN-Cache-Control = "public, s-maxage=3600, stale-while-revalidate=86400"
+
+[[headers]]
+  for = "/necklaces/*"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+    Netlify-CDN-Cache-Control = "public, s-maxage=3600, stale-while-revalidate=86400"
+
+[[headers]]
+  for = "/bracelets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+    Netlify-CDN-Cache-Control = "public, s-maxage=3600, stale-while-revalidate=86400"
+
+[[headers]]
+  for = "/earrings/*"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+    Netlify-CDN-Cache-Control = "public, s-maxage=3600, stale-while-revalidate=86400"
+
+[[headers]]
+  for = "/custom-jewellery-toronto/*"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+    Netlify-CDN-Cache-Control = "public, s-maxage=3600, stale-while-revalidate=86400"
+
+[[headers]]
+  for = "/custom-engagement-rings-toronto/*"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+    Netlify-CDN-Cache-Control = "public, s-maxage=3600, stale-while-revalidate=86400"
+
+[[headers]]
+  for = "/estate-jewellery-toronto/*"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+    Netlify-CDN-Cache-Control = "public, s-maxage=3600, stale-while-revalidate=86400"
+
+[[headers]]
+  for = "/guides/*"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+    Netlify-CDN-Cache-Control = "public, s-maxage=3600, stale-while-revalidate=86400"

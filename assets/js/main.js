@@ -1,9 +1,64 @@
-const DESIGN_STUDIO_PUBLIC = false;
+const DESIGN_STUDIO_PUBLIC = true;
 const CUSTOMS_PREFORM_PUBLIC = false;
 
 const products = [
   {
+    slug: "estate-cushion-halo-diamond-ring",
+    urlSlug: "estate-cushion-halo-diamond-ring",
+    name: "Cushion Halo Estate Ring",
+    category: "rings",
+    materials: "Cushion-cut diamond with a layered diamond halo",
+    price: 60000,
+    priceLabel: "$60,000 CAD",
+    shortDescription: "A distinctive estate ring with a warm-toned cushion-cut diamond centre and layered diamond halo, offered through private appointment in Toronto.",
+    description:
+      "A distinctive estate ring with a warm-toned cushion-cut diamond centre and layered diamond halo. The piece is offered through private appointment, where condition, measurements, documentation, and current availability can be discussed before purchase.",
+    specs: [
+      ["Category", "Estate diamond ring"],
+      ["Centre", "Cushion-cut diamond"],
+      ["Setting", "Layered diamond halo"],
+      ["Price", "$60,000 CAD"],
+      ["Viewing", "Private appointment in Toronto"]
+    ],
+    care: "Care recommendations will be confirmed after the setting and current condition have been reviewed.",
+    shipping: "Viewing, final availability, payment, and delivery details are confirmed directly before purchase.",
+    heroImage: "/assets/images/estate-luxuries/estate-cushion-halo-ring-source.png",
+    gallery: [
+      "/assets/images/estate-luxuries/estate-cushion-halo-ring-source.png"
+    ],
+    estate: true
+  },
+  {
+    slug: "15-carat-graduated-diamond-tennis-necklace",
+    urlSlug: "15-carat-graduated-diamond-tennis-necklace",
+    name: "15 Carat Graduated Diamond Tennis Necklace",
+    category: "necklaces",
+    materials: "15 carats total of natural diamonds in a graduated setting",
+    price: 35000,
+    priceLabel: "$35,000 CAD",
+    shortDescription: "An estate graduated tennis necklace featuring 15 carats total of natural diamonds, offered through private appointment in Toronto.",
+    description:
+      "An estate graduated tennis necklace featuring 15 carats total of natural diamonds. Larger diamonds create a defined centre line and taper gradually toward the sides for a balanced, classic silhouette.",
+    specs: [
+      ["Category", "Estate diamond necklace"],
+      ["Diamonds", "15 carats total, natural"],
+      ["Design", "Graduated tennis necklace"],
+      ["Price", "$35,000 CAD"],
+      ["Viewing", "Private appointment in Toronto"]
+    ],
+    care: "Store the necklace flat and separate from other pieces. Setting and cleaning guidance will be confirmed during the appointment.",
+    shipping: "Viewing, final availability, payment, and delivery details are confirmed directly before purchase.",
+    heroImage: "/assets/images/optimized/graduated-tennis-necklace-editorial-1600.jpg",
+    gallery: [
+      "/assets/images/optimized/graduated-tennis-necklace-editorial-1600.jpg",
+      "/assets/images/optimized/graduated-tennis-necklace-detail-1600.jpg",
+      "/assets/images/optimized/graduated-tennis-necklace-worn-1600.jpg"
+    ],
+    estate: true
+  },
+  {
     slug: "pear-halo-ring",
+    urlSlug: "rare-blue-diamond-ring",
     name: "Rare Blue Diamond Ring",
     category: "rings",
     materials: "18K white gold with 1.00 ct pear-shaped blue diamond",
@@ -20,16 +75,17 @@ const products = [
     ],
     care: "Professional care guidance is provided with the final stone and setting selection.",
     shipping: "Made to order; timeline and delivery details are confirmed during inquiry.",
-    heroImage: "assets/images/products/rare-blue-diamond-ring-1.jpeg",
+    heroImage: "/assets/images/products/rare-blue-diamond-ring-1.jpeg",
     gallery: [
-      "assets/images/products/rare-blue-diamond-ring-1.jpeg",
-      "assets/images/products/rare-blue-diamond-ring-2.jpeg",
-      "assets/images/products/rare-blue-diamond-ring-3.jpeg"
+      "/assets/images/products/rare-blue-diamond-ring-1.jpeg",
+      "/assets/images/products/rare-blue-diamond-ring-2.jpeg",
+      "/assets/images/products/rare-blue-diamond-ring-3.jpeg"
     ],
     featured: true
   },
   {
     slug: "diamond-tennis-necklace",
+    urlSlug: "diamond-tennis-necklace",
     name: "The She’s Unstoppable Tennis Necklace",
     category: "necklaces",
     materials: "10.00 ct total carat weight diamonds in 14K white or yellow gold",
@@ -47,17 +103,18 @@ const products = [
     ],
     care: "Store flat, avoid fragrance contact, and clean gently to protect the diamond setting.",
     shipping: "Made to order with timing confirmed after diamond and metal selection.",
-    heroImage: "assets/images/drive/img-4403.jpg",
+    heroImage: "/assets/images/optimized/diamond-tennis-necklace-1600.jpg",
     gallery: [
-      "assets/images/drive/img-4403.jpg",
-      "assets/images/drive/img-2897.jpg",
-      "assets/images/drive/img-9576.jpg",
-      "assets/images/drive/img-1784.jpg"
+      "/assets/images/optimized/diamond-tennis-necklace-1600.jpg",
+      "/assets/images/drive/img-2897.jpg",
+      "/assets/images/drive/img-9576.jpg",
+      "/assets/images/drive/img-1784.jpg"
     ],
     featured: true
   },
   {
     slug: "diamond-bracelet-stack",
+    urlSlug: "diamond-tennis-bracelet",
     name: "The Quiet Power Tennis Bracelet",
     category: "bracelets",
     materials: "1.50 ct total carat weight lab-grown diamonds in 14K gold",
@@ -76,17 +133,18 @@ const products = [
     ],
     care: "Store flat and separate from harder pieces to protect the tennis setting.",
     shipping: "Made to order with timing confirmed during inquiry.",
-    heroImage: "assets/images/products/quiet-power-tennis-bracelet-1.jpeg",
+    heroImage: "/assets/images/products/quiet-power-tennis-bracelet-1.jpeg",
     gallery: [
-      "assets/images/products/quiet-power-tennis-bracelet-1.jpeg",
-      "assets/images/products/quiet-power-tennis-bracelet-2.jpeg",
-      "assets/images/products/quiet-power-tennis-bracelet-3.jpeg",
-      "assets/images/products/quiet-power-tennis-bracelet-4.jpeg"
+      "/assets/images/products/quiet-power-tennis-bracelet-1.jpeg",
+      "/assets/images/products/quiet-power-tennis-bracelet-2.jpeg",
+      "/assets/images/products/quiet-power-tennis-bracelet-3.jpeg",
+      "/assets/images/products/quiet-power-tennis-bracelet-4.jpeg"
     ],
     featured: true
   },
   {
     slug: "vintage-halo-stud-earrings",
+    urlSlug: "yellow-diamond-oval-stud-earrings",
     name: "Yellow Diamond Oval Stud Earrings",
     category: "earrings",
     materials: "14K gold with oval-shaped yellow diamond centre stones",
@@ -103,16 +161,17 @@ const products = [
     ],
     care: "Store separately and clean gently around the double halo setting.",
     shipping: "Made to order; timeline and delivery details are confirmed during inquiry.",
-    heroImage: "assets/images/drive/img-9576.jpg",
+    heroImage: "/assets/images/optimized/yellow-diamond-earrings-1600.jpg",
     gallery: [
-      "assets/images/drive/img-9576.jpg",
-      "assets/images/drive/img-4403.jpg",
-      "assets/images/drive/img-1784.jpg",
-      "assets/images/drive/img-2897.jpg"
+      "/assets/images/optimized/yellow-diamond-earrings-1600.jpg",
+      "/assets/images/drive/img-4403.jpg",
+      "/assets/images/drive/img-1784.jpg",
+      "/assets/images/drive/img-2897.jpg"
     ]
   },
   {
     slug: "gold-bezel-hand-chain",
+    urlSlug: "diamond-hand-chain-bracelet",
     name: "14K Gold Diamond Hand Chain Bracelet",
     category: "bracelets",
     materials: "14K yellow gold with three tiny natural bezel-set diamonds",
@@ -130,16 +189,17 @@ const products = [
     ],
     care: "Store flat, avoid moisture, and fasten before placing in its pouch.",
     shipping: "Made to order with delivery details confirmed during inquiry.",
-    heroImage: "assets/images/products/diamond-hand-chain-1.jpeg",
+    heroImage: "/assets/images/products/diamond-hand-chain-1.jpeg",
     gallery: [
-      "assets/images/products/diamond-hand-chain-1.jpeg",
-      "assets/images/drive/hand-chain-2.png",
-      "assets/images/drive/hand-chain-3.png",
-      "assets/images/drive/hand-chain-1.png"
+      "/assets/images/products/diamond-hand-chain-1.jpeg",
+      "/assets/images/drive/hand-chain-2.png",
+      "/assets/images/drive/hand-chain-3.png",
+      "/assets/images/drive/hand-chain-1.png"
     ]
   },
   {
     slug: "cushion-diamond-ring",
+    urlSlug: "cushion-cut-diamond-ring",
     name: "1 Carat Cushion Cut Diamond Ring",
     category: "rings",
     materials: "14K yellow or white gold with 1.00 ct cushion cut lab-grown diamond",
@@ -157,11 +217,11 @@ const products = [
     ],
     care: "Store separately and clean with a soft jewellery cloth after wear.",
     shipping: "Made to order with timing confirmed during inquiry.",
-    heroImage: "assets/images/products/cushion-diamond-ring-1.jpeg",
+    heroImage: "/assets/images/products/cushion-diamond-ring-1.jpeg",
     gallery: [
-      "assets/images/products/cushion-diamond-ring-1.jpeg",
-      "assets/images/products/cushion-diamond-ring-2.jpeg",
-      "assets/images/products/cushion-diamond-ring-3.jpeg"
+      "/assets/images/products/cushion-diamond-ring-1.jpeg",
+      "/assets/images/products/cushion-diamond-ring-2.jpeg",
+      "/assets/images/products/cushion-diamond-ring-3.jpeg"
     ]
   }
 ];
@@ -182,6 +242,10 @@ function productPriceLabel(product) {
     : "Please inquire for pricing";
 }
 
+function productUrl(product) {
+  return `/products/${product.urlSlug || product.slug}/`;
+}
+
 function productPieceType(product) {
   return {
     rings: "Ring",
@@ -196,6 +260,11 @@ function productSpecValue(product, label) {
 }
 
 function productInquiryHref(product) {
+  if (product.estate) {
+    const interest = encodeURIComponent(product.name);
+    return `/contact.html?interest=${interest}#contact-form`;
+  }
+
   const params = new URLSearchParams({
     piece: productPieceType(product),
     inquire: product.slug
@@ -208,6 +277,13 @@ const FAVORITES_KEY = "tj-favorite-products";
 const RECENTLY_VIEWED_KEY = "tj-recently-viewed-products";
 const COMPARE_PRODUCTS_KEY = "tj-compare-products";
 const CUSTOM_FORM_DRAFT_KEY = "tj-custom-request-draft";
+const SHOP_VIEW_KEY = "tj-shop-view";
+
+const shopState = {
+  filter: "all",
+  sort: "recommended",
+  view: "grid"
+};
 
 const gemstoneGuides = {
   "Clear Diamond": {
@@ -425,7 +501,7 @@ function renderFavoritesShelf() {
     </div>
     <div class="favorites-shelf__track">
       ${favoriteProducts.map((product) => `
-        <a class="favorite-chip" href="product.html?slug=${product.slug}">
+        <a class="favorite-chip" href="${productUrl(product)}">
           <img src="${product.heroImage}" alt="${product.name}" loading="lazy">
           <span>${product.name}</span>
           <small>${productPriceLabel(product)}</small>
@@ -479,7 +555,7 @@ function renderRecentlyViewedShelf(anchorSelector, excludeSlug = "") {
     </div>
     <div class="favorites-shelf__track">
       ${recentProducts.map((product) => `
-        <a class="favorite-chip" href="product.html?slug=${product.slug}">
+        <a class="favorite-chip" href="${productUrl(product)}">
           <img src="${product.heroImage}" alt="${product.name}" loading="lazy">
           <span>${product.name}</span>
           <small>${productPriceLabel(product)}</small>
@@ -614,7 +690,7 @@ function renderCompareModal() {
         <div class="compare-table__row compare-table__row--media" style="--compare-count:${comparedProducts.length}">
           <span></span>
           ${comparedProducts.map((product) => `
-            <a href="product.html?slug=${product.slug}">
+            <a href="${productUrl(product)}">
               <img src="${product.heroImage}" alt="${product.name}" loading="lazy">
               <strong>${product.name}</strong>
             </a>
@@ -670,6 +746,178 @@ function setupCompareButtons(scope = document) {
   renderCompareBar();
 }
 
+function keepFocusInDialog(event, panel) {
+  if (event.key !== "Tab" || !panel) {
+    return;
+  }
+
+  const focusable = Array.from(
+    panel.querySelectorAll('a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])')
+  ).filter((element) => !element.hidden && element.getClientRects().length);
+
+  if (!focusable.length) {
+    event.preventDefault();
+    panel.focus();
+    return;
+  }
+
+  const first = focusable[0];
+  const last = focusable[focusable.length - 1];
+  if (event.shiftKey && document.activeElement === first) {
+    event.preventDefault();
+    last.focus();
+  } else if (!event.shiftKey && document.activeElement === last) {
+    event.preventDefault();
+    first.focus();
+  }
+}
+
+let closeActiveQuickView = null;
+
+function openProductQuickView(product, trigger) {
+  if (!product) {
+    return;
+  }
+
+  closeActiveQuickView?.(false);
+
+  let modal = document.querySelector("[data-quick-view-modal]");
+  if (!modal) {
+    modal = document.createElement("div");
+    modal.className = "quick-view-modal";
+    modal.dataset.quickViewModal = "";
+    document.body.appendChild(modal);
+  }
+
+  modal.hidden = false;
+  modal.removeAttribute("aria-hidden");
+  const gallery = [...new Set([product.heroImage, ...(product.gallery || [])])].filter(Boolean);
+  const headingId = `quick-view-${product.slug}`;
+  const isSaved = isProductFavorite(product.slug);
+  const isCompared = isProductCompared(product.slug);
+  modal.setAttribute("role", "dialog");
+  modal.setAttribute("aria-modal", "true");
+  modal.setAttribute("aria-labelledby", headingId);
+  modal.innerHTML = `
+    <div class="quick-view-modal__scrim" data-quick-view-close></div>
+    <div class="quick-view-modal__panel" tabindex="-1">
+      <button class="quick-view-modal__close icon-button" type="button" data-quick-view-close aria-label="Close quick view">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M6 6L18 18M18 6L6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+        </svg>
+      </button>
+      <div class="quick-view-modal__media">
+        <div class="quick-view-modal__stage">
+          <img src="${gallery[0]}" alt="${escapeHtml(product.name)}" data-quick-view-image>
+        </div>
+        ${gallery.length > 1 ? `
+          <div class="quick-view-modal__thumbs" aria-label="Choose a product view">
+            ${gallery.map((image, index) => `
+              <button class="quick-view-modal__thumb${index === 0 ? " is-active" : ""}" type="button" data-quick-view-image-choice="${image}" aria-label="Show view ${index + 1}" aria-pressed="${index === 0}">
+                <img src="${image}" alt="" loading="lazy">
+              </button>
+            `).join("")}
+          </div>
+        ` : ""}
+      </div>
+      <div class="quick-view-modal__content">
+        <span class="eyebrow">${escapeHtml(product.category)}</span>
+        <h2 id="${headingId}">${escapeHtml(product.name)}</h2>
+        <strong class="quick-view-modal__price">${escapeHtml(productPriceLabel(product))}</strong>
+        <p class="quick-view-modal__materials">${escapeHtml(product.materials)}</p>
+        <p>${escapeHtml(product.shortDescription)}</p>
+        <dl class="quick-view-modal__facts">
+          ${(product.specs || []).slice(0, 4).map(([label, value]) => `
+            <div><dt>${escapeHtml(label)}</dt><dd>${escapeHtml(value)}</dd></div>
+          `).join("")}
+        </dl>
+        <div class="quick-view-modal__actions">
+          <a class="button" href="${productUrl(product)}">View full details</a>
+          <a class="button-secondary" href="${productInquiryHref(product)}">Ask about this piece</a>
+        </div>
+        <div class="quick-view-modal__utility">
+          <button class="button-secondary" type="button" data-favorite-toggle="${product.slug}" aria-pressed="${isSaved}">
+            <span data-favorite-label>${isSaved ? "Saved" : "Save"}</span>
+          </button>
+          <button class="button-secondary" type="button" data-compare-toggle="${product.slug}" aria-pressed="${isCompared}">
+            <span data-compare-label>${isCompared ? "Comparing" : "Compare"}</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+
+  const panel = modal.querySelector(".quick-view-modal__panel");
+  const mainImage = modal.querySelector("[data-quick-view-image]");
+  const previousFocus = trigger || document.activeElement;
+
+  modal.querySelectorAll("[data-quick-view-image-choice]").forEach((button) => {
+    button.addEventListener("click", () => {
+      if (!mainImage) return;
+      mainImage.src = button.dataset.quickViewImageChoice;
+      modal.querySelectorAll("[data-quick-view-image-choice]").forEach((item) => {
+        const active = item === button;
+        item.classList.toggle("is-active", active);
+        item.setAttribute("aria-pressed", String(active));
+      });
+    });
+  });
+
+  const close = (restoreFocus = true) => {
+    modal.classList.remove("is-open");
+    modal.setAttribute("aria-hidden", "true");
+    document.body.classList.remove("modal-open");
+    document.removeEventListener("keydown", onKeydown);
+    closeActiveQuickView = null;
+    window.setTimeout(() => {
+      if (!modal.classList.contains("is-open")) modal.hidden = true;
+    }, 220);
+    if (restoreFocus && previousFocus?.focus) {
+      previousFocus.focus();
+    }
+  };
+
+  const onKeydown = (event) => {
+    if (event.key === "Escape") {
+      close();
+      return;
+    }
+    keepFocusInDialog(event, panel);
+  };
+
+  modal.querySelectorAll("[data-quick-view-close]").forEach((button) => {
+    button.addEventListener("click", () => close());
+  });
+  setupFavoriteButtons(modal);
+  setupCompareButtons(modal);
+  document.addEventListener("keydown", onKeydown);
+  document.body.classList.add("modal-open");
+  modal.classList.add("is-open");
+  panel?.focus();
+  closeActiveQuickView = close;
+}
+
+function setupProductQuickViewButtons(scope = document) {
+  const buttons = [];
+  if (scope.matches?.("[data-quick-view-trigger]")) {
+    buttons.push(scope);
+  }
+  if (scope.querySelectorAll) {
+    buttons.push(...scope.querySelectorAll("[data-quick-view-trigger]"));
+  }
+
+  buttons.forEach((button) => {
+    if (button.dataset.quickViewReady === "true") return;
+    button.dataset.quickViewReady = "true";
+    button.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      const product = products.find((item) => item.slug === button.dataset.quickViewTrigger);
+      openProductQuickView(product, button);
+    });
+  });
+}
+
 function productCardMarkup(product) {
   const isSaved = isProductFavorite(product.slug);
   const isCompared = isProductCompared(product.slug);
@@ -692,7 +940,13 @@ function productCardMarkup(product) {
       <button class="compare-button ${isCompared ? "is-active" : ""}" type="button" data-compare-toggle="${product.slug}" aria-label="Compare ${product.name}" aria-pressed="${isCompared}">
         <span data-compare-label>${isCompared ? "Comparing" : "Compare"}</span>
       </button>
-      <a class="product-card__link" href="product.html?slug=${product.slug}">
+      <button class="quick-view-button" type="button" data-quick-view-trigger="${product.slug}" aria-label="Quick view ${product.name}" title="Quick view">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M2.5 12S6 6.5 12 6.5S21.5 12 21.5 12S18 17.5 12 17.5S2.5 12 2.5 12Z" stroke="currentColor" stroke-width="1.6"/>
+          <circle cx="12" cy="12" r="2.4" stroke="currentColor" stroke-width="1.6"/>
+        </svg>
+      </button>
+      <a class="product-card__link" href="${productUrl(product)}">
         <div class="product-card__media">
           <img src="${product.heroImage}" alt="${product.name}" loading="lazy">
         </div>
@@ -754,6 +1008,7 @@ function renderProductCollection(container, items) {
   setupFavoriteButtons(container);
   setupCompareButtons(container);
   setupProductCardImageChoosers(container);
+  setupProductQuickViewButtons(container);
   renderFavoritesShelf();
 }
 
@@ -802,17 +1057,118 @@ function renderFeaturedProducts() {
   renderProductCollection(container, featured);
 }
 
-function renderShopProducts(filter = "all") {
+function readShopViewPreference() {
+  try {
+    return window.localStorage.getItem(SHOP_VIEW_KEY) === "list" ? "list" : "grid";
+  } catch (error) {
+    return "grid";
+  }
+}
+
+function sortShopProducts(items, sort) {
+  const sorted = [...items];
+  if (sort === "name") {
+    return sorted.sort((first, second) => first.name.localeCompare(second.name));
+  }
+  if (sort === "price-low" || sort === "price-high") {
+    return sorted.sort((first, second) => {
+      const firstPrice = Number.isFinite(Number(first.price)) ? Number(first.price) : null;
+      const secondPrice = Number.isFinite(Number(second.price)) ? Number(second.price) : null;
+      if (firstPrice === null) return secondPrice === null ? 0 : 1;
+      if (secondPrice === null) return -1;
+      return sort === "price-low" ? firstPrice - secondPrice : secondPrice - firstPrice;
+    });
+  }
+  return sorted;
+}
+
+function setupShopDiscoveryControls() {
+  const container = document.querySelector("[data-shop-products]");
+  if (!container || document.querySelector("[data-shop-toolbar]")) {
+    return;
+  }
+
+  shopState.view = readShopViewPreference();
+  const collectionEyebrow = container.parentElement?.querySelector(".collection-heading .eyebrow");
+  if (collectionEyebrow) {
+    collectionEyebrow.textContent = `${products.length} curated designs`;
+  }
+  const toolbar = document.createElement("div");
+  toolbar.className = "shop-toolbar";
+  toolbar.dataset.shopToolbar = "";
+  toolbar.innerHTML = `
+    <p class="shop-toolbar__count" data-shop-result-count aria-live="polite"></p>
+    <div class="shop-toolbar__controls">
+      <label class="shop-toolbar__sort">
+        <span>Sort</span>
+        <select data-shop-sort aria-label="Sort pieces">
+          <option value="recommended">Recommended</option>
+          <option value="price-low">Price: low to high</option>
+          <option value="price-high">Price: high to low</option>
+          <option value="name">Name: A to Z</option>
+        </select>
+      </label>
+      <div class="shop-view-toggle" role="group" aria-label="Collection layout">
+        <button type="button" data-shop-view="grid" aria-label="Grid view" title="Grid view">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <rect x="4" y="4" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.6"/>
+            <rect x="14" y="4" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.6"/>
+            <rect x="4" y="14" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.6"/>
+            <rect x="14" y="14" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.6"/>
+          </svg>
+        </button>
+        <button type="button" data-shop-view="list" aria-label="List view" title="List view">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M9 6H20M9 12H20M9 18H20" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+            <circle cx="5" cy="6" r="1" fill="currentColor"/>
+            <circle cx="5" cy="12" r="1" fill="currentColor"/>
+            <circle cx="5" cy="18" r="1" fill="currentColor"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  `;
+  container.parentNode.insertBefore(toolbar, container);
+
+  toolbar.querySelector("[data-shop-sort]")?.addEventListener("change", (event) => {
+    shopState.sort = event.target.value;
+    renderShopProducts();
+  });
+  toolbar.querySelectorAll("[data-shop-view]").forEach((button) => {
+    button.addEventListener("click", () => {
+      shopState.view = button.dataset.shopView === "list" ? "list" : "grid";
+      try {
+        window.localStorage.setItem(SHOP_VIEW_KEY, shopState.view);
+      } catch (error) {
+        // Layout preference is progressive enhancement only.
+      }
+      renderShopProducts();
+    });
+  });
+}
+
+function renderShopProducts(filter = shopState.filter) {
   const container = document.querySelector("[data-shop-products]");
   if (!container) {
     return;
   }
 
-  const items = filter === "all"
+  shopState.filter = filter;
+  const filteredItems = filter === "all"
     ? products
     : products.filter((product) => product.category === filter);
+  const items = sortShopProducts(filteredItems, shopState.sort);
 
+  container.classList.toggle("product-grid--list", shopState.view === "list");
   renderProductCollection(container, items);
+  document.querySelector("[data-shop-result-count]")?.replaceChildren(
+    document.createTextNode(`${items.length} ${items.length === 1 ? "piece" : "pieces"}`)
+  );
+  document.querySelectorAll("[data-shop-view]").forEach((button) => {
+    const active = button.dataset.shopView === shopState.view;
+    button.classList.toggle("is-active", active);
+    button.setAttribute("aria-pressed", String(active));
+  });
   renderRecentlyViewedShelf("[data-shop-products]");
   revealVisible();
 }
@@ -823,8 +1179,11 @@ function setupShopFilters() {
     return;
   }
 
+  setupShopDiscoveryControls();
+
   chips.forEach((chip) => {
-    chip.addEventListener("click", () => {
+    chip.addEventListener("click", (event) => {
+      event.preventDefault();
       chips.forEach((item) => item.classList.remove("is-active"));
       chip.classList.add("is-active");
       renderShopProducts(chip.dataset.filter || "all");
@@ -834,6 +1193,172 @@ function setupShopFilters() {
   renderShopProducts("all");
 }
 
+let closeActiveLightbox = null;
+
+function openProductLightbox(product, startIndex = 0, trigger = null) {
+  const gallery = [...new Set(product.gallery || [product.heroImage])].filter(Boolean);
+  if (!gallery.length) return;
+
+  closeActiveLightbox?.(false);
+  let activeIndex = Math.max(0, Math.min(startIndex, gallery.length - 1));
+  let modal = document.querySelector("[data-product-lightbox]");
+  if (!modal) {
+    modal = document.createElement("div");
+    modal.className = "product-lightbox";
+    modal.dataset.productLightbox = "";
+    document.body.appendChild(modal);
+  }
+
+  modal.hidden = false;
+  modal.removeAttribute("aria-hidden");
+  modal.setAttribute("role", "dialog");
+  modal.setAttribute("aria-modal", "true");
+  modal.setAttribute("aria-label", `${product.name} image gallery`);
+  modal.innerHTML = `
+    <div class="product-lightbox__scrim" data-lightbox-close></div>
+    <div class="product-lightbox__panel" tabindex="-1">
+      <div class="product-lightbox__header">
+        <div>
+          <span class="eyebrow">Image gallery</span>
+          <strong>${escapeHtml(product.name)}</strong>
+        </div>
+        <button class="icon-button" type="button" data-lightbox-close aria-label="Close image gallery">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M6 6L18 18M18 6L6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </div>
+      <div class="product-lightbox__stage" data-lightbox-stage>
+        <img src="${gallery[activeIndex]}" alt="${escapeHtml(product.name)} view ${activeIndex + 1}" data-lightbox-image>
+        ${gallery.length > 1 ? `
+          <button class="product-lightbox__nav product-lightbox__nav--prev" type="button" data-lightbox-prev aria-label="Previous image">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M15 5L8 12L15 19" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <button class="product-lightbox__nav product-lightbox__nav--next" type="button" data-lightbox-next aria-label="Next image">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 5L16 12L9 19" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+        ` : ""}
+        <span class="product-lightbox__counter" data-lightbox-counter aria-live="polite"></span>
+      </div>
+      ${gallery.length > 1 ? `
+        <div class="product-lightbox__thumbs" aria-label="Gallery views">
+          ${gallery.map((image, index) => `
+            <button type="button" data-lightbox-thumb="${index}" aria-label="Show image ${index + 1}" aria-current="${index === activeIndex ? "true" : "false"}">
+              <img src="${image}" alt="" loading="lazy">
+            </button>
+          `).join("")}
+        </div>
+      ` : ""}
+    </div>
+  `;
+
+  const panel = modal.querySelector(".product-lightbox__panel");
+  const image = modal.querySelector("[data-lightbox-image]");
+  const counter = modal.querySelector("[data-lightbox-counter]");
+  const previousFocus = trigger || document.activeElement;
+
+  const showImage = (nextIndex) => {
+    activeIndex = (nextIndex + gallery.length) % gallery.length;
+    if (image) {
+      image.src = gallery[activeIndex];
+      image.alt = `${product.name} view ${activeIndex + 1}`;
+    }
+    if (counter) counter.textContent = `${activeIndex + 1} / ${gallery.length}`;
+    modal.querySelectorAll("[data-lightbox-thumb]").forEach((button) => {
+      const active = Number(button.dataset.lightboxThumb) === activeIndex;
+      button.classList.toggle("is-active", active);
+      button.setAttribute("aria-current", String(active));
+      if (active) button.scrollIntoView({ block: "nearest", inline: "center" });
+    });
+  };
+
+  const close = (restoreFocus = true) => {
+    modal.classList.remove("is-open");
+    modal.setAttribute("aria-hidden", "true");
+    document.body.classList.remove("modal-open");
+    document.removeEventListener("keydown", onKeydown);
+    closeActiveLightbox = null;
+    window.setTimeout(() => {
+      if (!modal.classList.contains("is-open")) modal.hidden = true;
+    }, 220);
+    if (restoreFocus && previousFocus?.focus) previousFocus.focus();
+  };
+
+  const onKeydown = (event) => {
+    if (event.key === "Escape") {
+      close();
+    } else if (event.key === "ArrowLeft") {
+      event.preventDefault();
+      showImage(activeIndex - 1);
+    } else if (event.key === "ArrowRight") {
+      event.preventDefault();
+      showImage(activeIndex + 1);
+    } else {
+      keepFocusInDialog(event, panel);
+    }
+  };
+
+  modal.querySelectorAll("[data-lightbox-close]").forEach((button) => button.addEventListener("click", () => close()));
+  modal.querySelector("[data-lightbox-prev]")?.addEventListener("click", () => showImage(activeIndex - 1));
+  modal.querySelector("[data-lightbox-next]")?.addEventListener("click", () => showImage(activeIndex + 1));
+  modal.querySelectorAll("[data-lightbox-thumb]").forEach((button) => {
+    button.addEventListener("click", () => showImage(Number(button.dataset.lightboxThumb)));
+  });
+
+  let pointerStartX = null;
+  const stage = modal.querySelector("[data-lightbox-stage]");
+  stage?.addEventListener("pointerdown", (event) => {
+    pointerStartX = event.clientX;
+  });
+  stage?.addEventListener("pointerup", (event) => {
+    if (pointerStartX === null) return;
+    const distance = event.clientX - pointerStartX;
+    pointerStartX = null;
+    if (Math.abs(distance) > 48) showImage(activeIndex + (distance < 0 ? 1 : -1));
+  });
+
+  document.addEventListener("keydown", onKeydown);
+  document.body.classList.add("modal-open");
+  showImage(activeIndex);
+  modal.classList.add("is-open");
+  panel?.focus();
+  closeActiveLightbox = close;
+}
+
+async function shareProduct(product) {
+  const shareData = {
+    title: product.name,
+    text: product.shortDescription,
+    url: new URL(productUrl(product), window.location.origin).href
+  };
+
+  if (navigator.share) {
+    try {
+      await navigator.share(shareData);
+      recordSiteEvent("product_share", { product_name: product.name, method: "native" });
+      return;
+    } catch (error) {
+      if (error.name === "AbortError") return;
+    }
+  }
+
+  try {
+    await navigator.clipboard.writeText(shareData.url);
+  } catch (error) {
+    const textArea = document.createElement("textarea");
+    textArea.value = shareData.url;
+    textArea.setAttribute("readonly", "");
+    textArea.style.position = "fixed";
+    textArea.style.opacity = "0";
+    document.body.appendChild(textArea);
+    textArea.select();
+    document.execCommand("copy");
+    textArea.remove();
+  }
+  window.tjToast?.("Product link copied");
+  recordSiteEvent("product_share", { product_name: product.name, method: "copy" });
+}
+
 function renderProductPage() {
   const page = document.querySelector("[data-product-page]");
   if (!page) {
@@ -841,8 +1366,18 @@ function renderProductPage() {
   }
 
   const params = new URLSearchParams(window.location.search);
-  const slug = params.get("slug");
-  const product = products.find((item) => item.slug === slug) || products[0];
+  const pathSlug = window.location.pathname.split("/").filter(Boolean).at(-1) || "";
+  const slug = page.dataset.productSlug || params.get("slug") || pathSlug;
+  const product = products.find((item) => item.slug === slug || item.urlSlug === slug);
+
+  if (!product) {
+    return;
+  }
+
+  if (window.location.pathname.endsWith("/product.html")) {
+    window.location.replace(productUrl(product));
+    return;
+  }
 
   rememberRecentlyViewed(product.slug);
 
@@ -891,6 +1426,7 @@ function renderProductPage() {
     }, 140);
   };
 
+  let activeGalleryIndex = 0;
   updateMainImage(product.gallery[0]);
 
   if (thumbnailGrid) {
@@ -906,11 +1442,44 @@ function renderProductPage() {
 
     thumbnailGrid.querySelectorAll("[data-gallery-thumb]").forEach((button, index) => {
       button.addEventListener("click", () => {
+        activeGalleryIndex = index;
         thumbnailGrid.querySelectorAll("[data-gallery-thumb]").forEach((item) => item.classList.remove("is-active"));
         button.classList.add("is-active");
         updateMainImage(product.gallery[index], true);
       });
     });
+  }
+
+  if (mainImage) {
+    mainImage.classList.add("is-zoomable");
+    mainImage.tabIndex = 0;
+    mainImage.setAttribute("role", "button");
+    mainImage.setAttribute("aria-label", `Open ${product.name} image gallery`);
+    const galleryMain = mainImage.closest(".gallery-main");
+    let zoomButton = galleryMain?.querySelector("[data-gallery-zoom]");
+    if (galleryMain && !zoomButton) {
+      zoomButton = document.createElement("button");
+      zoomButton.className = "gallery-zoom-button";
+      zoomButton.type = "button";
+      zoomButton.dataset.galleryZoom = "";
+      zoomButton.setAttribute("aria-label", "Open full-screen image gallery");
+      zoomButton.title = "View full screen";
+      zoomButton.innerHTML = `
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M9 4H4V9M15 4H20V9M9 20H4V15M15 20H20V15" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      `;
+      galleryMain.appendChild(zoomButton);
+    }
+    const openLightbox = () => openProductLightbox(product, activeGalleryIndex, zoomButton || mainImage);
+    mainImage.addEventListener("click", openLightbox);
+    mainImage.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        openLightbox();
+      }
+    });
+    zoomButton?.addEventListener("click", openLightbox);
   }
 
   if (detailList) {
@@ -962,6 +1531,25 @@ function renderProductPage() {
     compareButton.innerHTML = '<span data-compare-label>Compare</span>';
     actionGroup.appendChild(compareButton);
     setupCompareButtons(actionGroup);
+  }
+
+  if (actionGroup && !actionGroup.querySelector("[data-product-share]")) {
+    const shareButton = document.createElement("button");
+    shareButton.className = "button-secondary product-share-button";
+    shareButton.type = "button";
+    shareButton.dataset.productShare = "";
+    shareButton.setAttribute("aria-label", `Share ${product.name}`);
+    shareButton.innerHTML = `
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <circle cx="18" cy="5" r="2.5" stroke="currentColor" stroke-width="1.6"/>
+        <circle cx="6" cy="12" r="2.5" stroke="currentColor" stroke-width="1.6"/>
+        <circle cx="18" cy="19" r="2.5" stroke="currentColor" stroke-width="1.6"/>
+        <path d="M8.2 10.8L15.8 6.2M8.2 13.2L15.8 17.8" stroke="currentColor" stroke-width="1.6"/>
+      </svg>
+      <span>Share</span>
+    `;
+    shareButton.addEventListener("click", () => shareProduct(product));
+    actionGroup.appendChild(shareButton);
   }
 }
 
@@ -1136,6 +1724,84 @@ function syncCustomsPreformSections() {
   document.querySelectorAll("[data-customs-preform]").forEach((section) => {
     section.hidden = !CUSTOMS_PREFORM_PUBLIC;
   });
+}
+
+let designerModulePromise;
+let arModulePromise;
+
+function loadDesignerModule() {
+  if (!designerModulePromise) {
+    designerModulePromise = import("/assets/js/designer.js");
+  }
+
+  return designerModulePromise;
+}
+
+function loadArModule() {
+  if (!arModulePromise) {
+    arModulePromise = import("/assets/js/ar-tryon.js");
+  }
+
+  return arModulePromise;
+}
+
+function setupLazyFeatureModules() {
+  document.addEventListener("click", async (event) => {
+    const target = event.target instanceof Element ? event.target : null;
+    const designerTrigger = target?.closest("[data-design-studio-entry]");
+    const arTrigger = target?.closest("[data-ar-tryon]");
+
+    if (designerTrigger && !designerModulePromise) {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      await loadDesignerModule();
+      designerTrigger.click();
+      return;
+    }
+
+    if (arTrigger && !arModulePromise) {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      await loadArModule();
+      arTrigger.click();
+    }
+  }, true);
+
+  if (window.location.hash === "#design-studio") {
+    loadDesignerModule();
+  }
+}
+
+function setupViewportVideos() {
+  const videos = [...document.querySelectorAll("video[muted][loop]")];
+
+  if (!videos.length) {
+    return;
+  }
+
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    videos.forEach((video) => video.pause());
+    return;
+  }
+
+  if (!("IntersectionObserver" in window)) {
+    videos.slice(0, 1).forEach((video) => video.play().catch(() => {}));
+    return;
+  }
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      const video = entry.target;
+
+      if (entry.isIntersecting) {
+        video.play().catch(() => {});
+      } else {
+        video.pause();
+      }
+    });
+  }, { rootMargin: "240px 0px", threshold: 0.01 });
+
+  videos.forEach((video) => observer.observe(video));
 }
 
 function createGuideContext(answers) {
@@ -2905,7 +3571,7 @@ function setupSearchModal() {
 
     resultList.innerHTML = matches.map((p, i) => `
       <li role="option" class="search-result${i === 0 ? " is-active" : ""}" data-slug="${p.slug}">
-        <a href="product.html?slug=${p.slug}">
+        <a href="${productUrl(p)}">
           <img src="${p.heroImage}" alt="" loading="lazy">
           <span class="search-result__body">
             <strong>${highlight(p.name, q)}</strong>
@@ -3323,10 +3989,65 @@ function setupCustomFormProgress() {
   } catch (e) { /* noop */ }
 }
 
+function recordSiteEvent(eventName, details = {}) {
+  const payload = {
+    event: eventName,
+    page_path: window.location.pathname,
+    ...details
+  };
+
+  window.dataLayer = window.dataLayer || [];
+  window.dataLayer.push(payload);
+  document.dispatchEvent(new CustomEvent("tj:analytics", { detail: payload }));
+}
+
+function setupConversionTracking() {
+  document.addEventListener("click", (event) => {
+    const target = event.target.closest("a, button");
+    if (!target) return;
+
+    const explicitEvent = target.dataset.track;
+    const href = target.getAttribute("href") || "";
+    let eventName = explicitEvent;
+
+    if (!eventName && href.startsWith("mailto:")) eventName = "email_click";
+    if (!eventName && href.startsWith("tel:")) eventName = "phone_click";
+    if (!eventName && target.matches("[data-product-inquiry]")) eventName = "product_inquiry_click";
+    if (!eventName && target.matches("[data-appointment-trigger]")) eventName = "appointment_start";
+    if (!eventName) return;
+
+    recordSiteEvent(eventName, {
+      link_url: href || undefined,
+      link_text: target.textContent.trim().replace(/\s+/g, " ").slice(0, 100) || undefined
+    });
+  });
+
+  document.querySelectorAll("form").forEach((form) => {
+    if (form.hidden) return;
+    form.addEventListener("submit", () => {
+      recordSiteEvent("form_submit", {
+        form_name: form.getAttribute("name") || form.id || "site_form"
+      });
+    });
+  });
+}
+
+function setupContactInterestPrefill() {
+  const message = document.querySelector("#contact-message");
+  if (!message || message.value.trim()) return;
+
+  const interest = new URLSearchParams(window.location.search).get("interest");
+  if (interest) {
+    message.value = `I'm interested in ${interest}. Please share the available details and next appointment options.`;
+  }
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   setupSkipLink();
   syncCustomsPreformSections();
   syncDesignStudioPublicEntries();
+  setupLazyFeatureModules();
+  setupViewportVideos();
   setupToasts();
   setupScrollProgress();
   setupHeader();
@@ -3350,6 +4071,8 @@ document.addEventListener("DOMContentLoaded", () => {
   setupDreamGenerator();
   setupCustomsSectionRail();
   setupCustomFormProgress();
+  setupContactInterestPrefill();
+  setupConversionTracking();
   setYear();
   setupHeroMotion();
   setupDepthCards();

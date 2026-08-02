@@ -1,18 +1,50 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en-CA">
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Start a custom jewellery request with Toronto Jewels Curation.">
-    <title>Custom Orders | Toronto Jewels Curation</title>
+    <meta name="description" content="Create bespoke engagement rings and custom jewellery in Toronto through a private design consultation tailored to your style and budget.">
+    <meta name="robots" content="index, follow, max-image-preview:large">
+    <meta name="theme-color" content="#0a3941">
+    <title>Custom Jewellery Design Toronto | Private Consultation</title>
+    <link rel="canonical" href="https://torontojewelscuration.com/customs.html">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Toronto Jewels Curation">
+    <meta property="og:title" content="Custom Jewellery Design Toronto | Private Consultation">
+    <meta property="og:description" content="Begin a bespoke ring or fine jewellery design through a private Toronto consultation.">
+    <meta property="og:url" content="https://torontojewelscuration.com/customs.html">
+    <meta property="og:image" content="https://torontojewelscuration.com/assets/images/seo/toronto-jewels-curation-og.jpg">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="https://torontojewelscuration.com/assets/images/seo/toronto-jewels-curation-og.jpg">
     <link rel="icon" type="image/svg+xml" href="assets/images/logo-emblem.svg">
+    <link rel="manifest" href="site.webmanifest">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="assets/css/styles.css?v=re16">
     <script src="assets/js/main.js" defer></script>
-    <script src="assets/js/designer.js" type="module"></script>
-    <script src="assets/js/ar-tryon.js" type="module"></script>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Service",
+            "name": "Custom Jewellery Design in Toronto",
+            "serviceType": "Bespoke jewellery design and consultation",
+            "provider": { "@id": "https://torontojewelscuration.com/#organization" },
+            "areaServed": { "@type": "City", "name": "Toronto" },
+            "url": "https://torontojewelscuration.com/customs.html"
+          },
+          {
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+              { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://torontojewelscuration.com/" },
+              { "@type": "ListItem", "position": 2, "name": "Custom Jewellery", "item": "https://torontojewelscuration.com/customs.html" }
+            ]
+          }
+        ]
+      }
+    </script>
   </head>
   <body data-page="customs">
     <div class="page-shell">
@@ -31,10 +63,10 @@
           <nav class="primary-nav" aria-label="Primary navigation">
             <ul class="primary-nav__list">
               <li><a href="index.html" data-page="home">Home</a></li>
-              <li><a href="customs.html" data-page="customs">Customs</a></li>
-              <li><a href="dream-design.html" data-page="dream-design">Dream Design</a></li>
+              <li><a href="customs.html" data-page="customs">Custom Made</a></li>
+
               <li><a href="shop.html" data-page="shop">Shop</a></li>
-              <li><a href="curated-luxuries.html" data-page="luxuries">Luxuries</a></li>
+              <li><a href="curated-luxuries.html" data-page="luxuries">Estate Luxuries</a></li>
               <li><a href="about.html" data-page="about">About</a></li>
               <li><a href="contact.html" data-page="contact">Contact</a></li>
             </ul>
@@ -67,7 +99,7 @@
         <section class="section section--surface">
           <div class="container split-grid">
             <div class="split-copy" data-reveal>
-              <span class="eyebrow">Custom orders</span>
+              <span class="eyebrow">Custom made jewellery</span>
               <div class="accent-rule"></div>
               <h1>Design your custom jewellery pieces</h1>
               <p>
@@ -76,12 +108,12 @@
               </p>
               <div class="button-row">
                 <a class="button" href="#request-form">Start Your Custom Request</a>
-                <a class="button-secondary" href="dream-design.html">Dream Design Generator</a>
+                <a class="button-secondary" href="#design-studio" data-design-studio-entry>Preview Your Design</a>
               </div>
             </div>
 
             <div class="editorial-panel" data-reveal>
-              <video class="media-video" autoplay muted loop playsinline preload="metadata" poster="assets/images/video-posters/custom-ring-sunlight.png" aria-label="Custom diamond ring inspiration worn on hand">
+              <video class="media-video" muted loop playsinline preload="none" poster="assets/images/optimized/poster-custom-ring-sunlight.jpg" aria-label="Custom diamond ring inspiration worn on hand">
                 <source src="assets/videos/custom-ring-sunlight.mp4" type="video/mp4">
               </video>
             </div>
@@ -246,7 +278,11 @@
             </div>
 
             <form class="designer-panel" data-designer-controls data-reveal>
+              <details class="designer-step" open>
+                <summary><strong>Start with a look</strong><small>tap a style · everything below updates</small></summary>
+                <div class="designer-step__body">
               <div class="designer-presets" aria-label="Design presets">
+                <button class="designer-preset designer-preset--accent" type="button" data-randomize-design>Surprise Me</button>
                 <button class="designer-preset" type="button" data-designer-preset="classic">Classic Engagement</button>
                 <button class="designer-preset" type="button" data-designer-preset="cocktail">Bold Cocktail</button>
                 <button class="designer-preset" type="button" data-designer-preset="pendant">Minimal Pendant</button>
@@ -259,8 +295,12 @@
                 <button class="designer-preset" type="button" data-designer-preset="neonCyber">Neon Cyber</button>
                 <button class="designer-preset" type="button" data-designer-preset="punkSpike">Onyx Punk</button>
                 <button class="designer-preset" type="button" data-designer-preset="sunsetGlow">Sunset Glow</button>
-                <button class="designer-preset designer-preset--accent" type="button" data-randomize-design>Surprise Me</button>
+                <button class="designer-preset" type="button" data-designer-preset="alexandrite">Alexandrite Night</button>
+                <button class="designer-preset" type="button" data-designer-preset="paraibaHalo">Paraiba Glow</button>
+                <button class="designer-preset" type="button" data-designer-preset="moonlitDrop">Moonlit Drop</button>
               </div>
+                </div>
+              </details>
 
               <div class="designer-smart-summary" aria-label="Current design snapshot">
                 <span><small>Piece</small><strong data-designer-smart-piece>Ring</strong></span>
@@ -268,6 +308,9 @@
                 <span><small>Stone</small><strong data-designer-smart-stone>Clear Diamond</strong></span>
               </div>
 
+              <details class="designer-step" open>
+                <summary><strong>The essentials</strong><small>piece · metal · stone</small></summary>
+                <div class="designer-step__body">
               <div class="designer-panel__split">
                 <div class="designer-panel__group">
                   <label for="designer-piece">Piece</label>
@@ -364,10 +407,19 @@
                     <option title="Romantic peachy-pink, soft warmth">Morganite Peach</option>
                     <option title="Vivid violet-blue with strong fire">Tanzanite Violet</option>
                     <option title="Smoky diamond with characterful inclusions — one-of-a-kind">Salt &amp; Pepper</option>
+                    <option title="Colour-change chrysoberyl — teal green in daylight, raspberry red under candlelight">Alexandrite Shift</option>
+                    <option title="Neon copper-bearing tourmaline with an electric glow">Paraiba Tourmaline</option>
+                    <option title="Billowy blue adularescence floating over a milky body">Moonstone Glow</option>
+                    <option title="Rare lotus sapphire balancing pink and orange">Padparadscha</option>
                   </select>
                 </div>
               </div>
+                </div>
+              </details>
 
+              <details class="designer-step">
+                <summary><strong>Fit &amp; detail</strong><small>karat · band · chain</small></summary>
+                <div class="designer-step__body">
               <div class="designer-panel__split">
                 <div class="designer-panel__group">
                   <label for="designer-karat">Karat</label>
@@ -423,7 +475,12 @@
                   </select>
                 </div>
               </div>
+                </div>
+              </details>
 
+              <details class="designer-step">
+                <summary><strong>Scene &amp; lighting</strong><small>light · backdrop · camera</small></summary>
+                <div class="designer-step__body">
               <fieldset class="designer-panel__group">
                 <legend>Sparkle</legend>
                 <div class="lighting-row">
@@ -435,6 +492,7 @@
                   <label class="light-option"><input type="radio" name="designer-lighting" value="Moonlight" data-designer-field="lighting"><span>Moonlight</span></label>
                   <label class="light-option"><input type="radio" name="designer-lighting" value="Neon" data-designer-field="lighting"><span>Neon</span></label>
                   <label class="light-option"><input type="radio" name="designer-lighting" value="Softbox" data-designer-field="lighting" checked><span>Softbox</span></label>
+                  <label class="light-option"><input type="radio" name="designer-lighting" value="Gallery" data-designer-field="lighting"><span>Gallery</span></label>
                 </div>
               </fieldset>
 
@@ -464,7 +522,12 @@
                   <label class="light-option"><input type="radio" name="designer-view" value="Profile" data-designer-field="view"><span>Profile</span></label>
                 </div>
               </fieldset>
+                </div>
+              </details>
 
+              <details class="designer-step" open>
+                <summary><strong>Size &amp; presence</strong><small>carat · weight · accents</small></summary>
+                <div class="designer-step__body">
               <div class="designer-panel__group">
                 <label for="designer-size">Stone Size <span data-designer-size-label>1.2 ct feel</span></label>
                 <input id="designer-size" type="range" min="0.8" max="2.4" step="0.1" value="1.2" data-designer-field="size">
@@ -481,7 +544,12 @@
                 <label class="toggle-option" data-piece-only="Ring"><input type="checkbox" data-designer-field="hiddenHalo"><span>Hidden halo</span></label>
                 <label class="toggle-option" data-piece-only="Ring"><input type="checkbox" data-designer-field="milgrain"><span>Milgrain edges</span></label>
               </div>
+                </div>
+              </details>
 
+              <details class="designer-step">
+                <summary><strong>Extras &amp; precision</strong><small>wild mode · engraving · millimetres</small></summary>
+                <div class="designer-step__body">
               <fieldset class="designer-panel__group">
                 <legend>Wild mode <small style="font-weight:normal;opacity:0.7;">— push the look</small></legend>
                 <div class="designer-panel__split">
@@ -547,6 +615,10 @@
                 <p class="designer-fine-tune__hint">Only applies to rings. Resets when you load a preset.</p>
               </details>
 
+              <div data-physical-slot></div>
+                </div>
+              </details>
+
               <div class="designer-summary" data-designer-summary></div>
 
               <div class="designer-saved-card" data-designer-saved-card hidden>
@@ -561,13 +633,18 @@
             <div class="button-row">
               <button class="button" type="button" data-send-design>Send Design to Request Form</button>
               <button class="button-secondary" type="button" data-ar-tryon title="Try the piece on with your camera">Try On (AR)</button>
-              <button class="button-secondary" type="button" data-undo-design title="Undo (⌘Z / Ctrl+Z)" disabled>Undo</button>
-              <button class="button-secondary" type="button" data-redo-design title="Redo (⌘⇧Z / Ctrl+Shift+Z)" disabled>Redo</button>
-              <button class="button-secondary" type="button" data-save-design>Save Design</button>
-              <button class="button-secondary" type="button" data-share-design>Share Link</button>
-              <button class="button-secondary" type="button" data-compare-design>Compare Saved</button>
-              <button class="button-secondary" type="button" data-download-design title="Download a PNG of the current view">Download PNG</button>
-              <a class="button-secondary" href="#request-form">Skip to Form</a>
+              <details class="designer-more-actions">
+                <summary>More actions</summary>
+                <div class="button-row designer-more-actions__row">
+                  <button class="button-secondary" type="button" data-undo-design title="Undo (⌘Z / Ctrl+Z)" disabled>Undo</button>
+                  <button class="button-secondary" type="button" data-redo-design title="Redo (⌘⇧Z / Ctrl+Shift+Z)" disabled>Redo</button>
+                  <button class="button-secondary" type="button" data-save-design>Save Design</button>
+                  <button class="button-secondary" type="button" data-share-design>Share Link</button>
+                  <button class="button-secondary" type="button" data-compare-design>Compare Saved</button>
+                  <button class="button-secondary" type="button" data-download-design title="Download a PNG of the current view">Download PNG</button>
+                  <a class="button-secondary" href="#request-form">Skip to Form</a>
+                </div>
+              </details>
             </div>
             <p class="designer-action-status" data-designer-share-status aria-live="polite"></p>
           </div>
@@ -595,7 +672,7 @@
             <div class="gemstone-grid" data-reveal>
               <button class="gemstone-card is-active" type="button" data-gemstone="Clear Diamond">
                 <span class="gemstone-photo">
-                  <img src="assets/images/gemstones/clear-diamond.jpg" alt="Clear diamond gemstone">
+                  <img src="assets/images/gemstones/clear-diamond.jpg" alt="Clear diamond gemstone" loading="lazy">
                 </span>
                 <strong>Clear Diamond</strong>
                 <small>Bright, timeless, highest sparkle</small>
@@ -606,7 +683,7 @@
               </button>
               <button class="gemstone-card" type="button" data-gemstone="Blush Sapphire">
                 <span class="gemstone-photo">
-                  <img src="assets/images/gemstones/blush-sapphire.jpg" alt="Blush sapphire gemstone">
+                  <img src="assets/images/gemstones/blush-sapphire.jpg" alt="Blush sapphire gemstone" loading="lazy">
                 </span>
                 <strong>Blush Sapphire</strong>
                 <small>Soft colour, romantic warmth</small>
@@ -617,7 +694,7 @@
               </button>
               <button class="gemstone-card" type="button" data-gemstone="Blue Sapphire">
                 <span class="gemstone-photo">
-                  <img src="assets/images/gemstones/blue-sapphire.jpg" alt="Blue sapphire gemstone">
+                  <img src="assets/images/gemstones/blue-sapphire.jpg" alt="Blue sapphire gemstone" loading="lazy">
                 </span>
                 <strong>Blue Sapphire</strong>
                 <small>Deep colour, polished contrast</small>
@@ -628,7 +705,7 @@
               </button>
               <button class="gemstone-card" type="button" data-gemstone="Emerald Green">
                 <span class="gemstone-photo">
-                  <img src="assets/images/gemstones/emerald-green.jpg" alt="Emerald green gemstone">
+                  <img src="assets/images/gemstones/emerald-green.jpg" alt="Emerald green gemstone" loading="lazy">
                 </span>
                 <strong>Emerald Green</strong>
                 <small>Rich tone, vintage character</small>
@@ -682,7 +759,7 @@
         <section class="section section--surface" id="request-form">
           <div class="container form-shell custom-request-shell" data-reveal>
             <div class="form-header custom-request-panel">
-              <span class="eyebrow">Custom Request Form</span>
+                <span class="eyebrow">Custom Made Request Form</span>
               <div class="accent-rule"></div>
               <h2>Tell us what you are imagining</h2>
               <p>
@@ -707,9 +784,9 @@
                 </article>
               </div>
               <div class="button-row">
-                <a class="button-secondary" href="dream-design.html">Generate a Dream Design</a>
+                <a class="button-secondary" href="#design-studio" data-design-studio-entry>Preview Your Design</a>
               </div>
-              <video class="custom-request-panel__image media-video" autoplay muted loop playsinline preload="metadata" poster="assets/images/video-posters/custom-ring-vanity.png" aria-label="Diamond ring detail for custom jewellery inspiration">
+              <video class="custom-request-panel__image media-video" muted loop playsinline preload="none" poster="assets/images/optimized/poster-custom-ring-vanity.jpg" aria-label="Diamond ring detail for custom jewellery inspiration">
                 <source src="assets/videos/custom-ring-vanity.mp4" type="video/mp4">
               </video>
             </div>
@@ -1033,7 +1110,7 @@
         <section class="section section--surface" id="faq">
           <div class="content-width">
             <div class="faq-heading" data-reveal>
-              <span class="eyebrow">Custom Order FAQ</span>
+              <span class="eyebrow">Custom Made FAQ</span>
               <div class="accent-rule"></div>
               <h2>Questions before you begin</h2>
             </div>
@@ -1096,33 +1173,36 @@
               <h3>Shop</h3>
               <ul>
                 <li><a href="shop.html">All Pieces</a></li>
-                <li><a href="curated-luxuries.html">Curated Luxuries</a></li>
-                <li><a href="shop.html">Rings</a></li>
-                <li><a href="shop.html">Necklaces</a></li>
-                <li><a href="shop.html">Bracelets</a></li>
+                <li><a href="curated-luxuries.html">Estate Luxuries</a></li>
+                <li><a href="/rings/">Rings</a></li>
+                <li><a href="/necklaces/">Necklaces</a></li>
+                <li><a href="/bracelets/">Bracelets</a></li>
+                <li><a href="/earrings/">Earrings</a></li>
               </ul>
             </div>
             <div class="footer-column">
-              <h3>Customs</h3>
+              <h3>Custom Made</h3>
               <ul>
                 <li><a href="customs.html">Start a Request</a></li>
-                <li><a href="dream-design.html">Dream Design Generator</a></li>
-                <li><a href="#process">Process</a></li>
-                <li><a href="#faq">FAQ</a></li>
+
+                <li><a href="/custom-jewellery-toronto/">Custom Jewellery Toronto</a></li>
+                <li><a href="/custom-engagement-rings-toronto/">Custom Engagement Rings</a></li>
               </ul>
             </div>
             <div class="footer-column">
               <h3>Contact</h3>
               <ul>
                 <li><a href="mailto:info@torontojewelscuration.com">info@torontojewelscuration.com</a></li>
-                <li><a href="https://instagram.com" target="_blank" rel="noreferrer">Instagram</a></li>
+                <li><a href="https://www.instagram.com/torontojewelscuration/" target="_blank" rel="noreferrer">Instagram</a></li>
                 <li><a href="contact.html">Toronto, Ontario</a></li>
               </ul>
             </div>
           </div>
           <div class="footer-bottom">
             <span>Copyright <span data-year></span> Toronto Jewels Curation</span>
-            <span>Privacy Policy</span>
+            <a href="shipping-returns.html">Shipping &amp; Returns</a>
+            <a href="jewellery-care.html">Jewellery Care</a>
+            <a href="privacy.html">Privacy Policy</a>
           </div>
         </div>
       </footer>

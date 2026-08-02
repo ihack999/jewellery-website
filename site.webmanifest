@@ -1,0 +1,17 @@
+{
+  "name": "Toronto Jewels Curation",
+  "short_name": "TJC",
+  "description": "Custom jewellery, fine diamond pieces, and estate luxuries in Toronto.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f7f5f1",
+  "theme_color": "#0a3941",
+  "icons": [
+    {
+      "src": "/assets/images/logo-emblem.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

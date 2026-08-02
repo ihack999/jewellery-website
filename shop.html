@@ -1,16 +1,38 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en-CA">
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Shop a curated collection of refined jewellery pieces from Toronto Jewels Curation.">
-    <title>Shop | Toronto Jewels Curation</title>
+    <meta name="description" content="Explore fine diamond rings, tennis necklaces, bracelets, earrings, and made-to-order jewellery from Toronto Jewels Curation.">
+    <meta name="robots" content="index, follow, max-image-preview:large">
+    <meta name="theme-color" content="#0a3941">
+    <title>Fine Jewellery &amp; Diamond Pieces | Toronto Jewels Curation</title>
+    <link rel="canonical" href="https://torontojewelscuration.com/shop.html">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Toronto Jewels Curation">
+    <meta property="og:title" content="Fine Jewellery &amp; Diamond Pieces | Toronto Jewels Curation">
+    <meta property="og:description" content="Explore diamond rings, necklaces, bracelets, earrings, and made-to-order fine jewellery.">
+    <meta property="og:url" content="https://torontojewelscuration.com/shop.html">
+    <meta property="og:image" content="https://torontojewelscuration.com/assets/images/seo/toronto-jewels-curation-og.jpg">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="https://torontojewelscuration.com/assets/images/seo/toronto-jewels-curation-og.jpg">
     <link rel="icon" type="image/svg+xml" href="assets/images/logo-emblem.svg">
+    <link rel="manifest" href="site.webmanifest">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="assets/css/styles.css">
     <script src="assets/js/main.js" defer></script>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://torontojewelscuration.com/" },
+          { "@type": "ListItem", "position": 2, "name": "Shop", "item": "https://torontojewelscuration.com/shop.html" }
+        ]
+      }
+    </script>
   </head>
   <body data-page="shop">
     <div class="page-shell">
@@ -29,10 +51,10 @@
           <nav class="primary-nav" aria-label="Primary navigation">
             <ul class="primary-nav__list">
               <li><a href="index.html" data-page="home">Home</a></li>
-              <li><a href="customs.html" data-page="customs">Customs</a></li>
-              <li><a href="dream-design.html" data-page="dream-design">Dream Design</a></li>
+              <li><a href="customs.html" data-page="customs">Custom Made</a></li>
+
               <li><a href="shop.html" data-page="shop">Shop</a></li>
-              <li><a href="curated-luxuries.html" data-page="luxuries">Luxuries</a></li>
+              <li><a href="curated-luxuries.html" data-page="luxuries">Estate Luxuries</a></li>
               <li><a href="about.html" data-page="about">About</a></li>
               <li><a href="contact.html" data-page="contact">Contact</a></li>
             </ul>
@@ -68,11 +90,10 @@
               <span class="eyebrow">Shop</span>
               <div class="accent-rule"></div>
               <h1>Shop the Collection</h1>
+              <p>Explore diamond rings, tennis necklaces, bracelets, earrings, and made-to-order fine jewellery curated in Toronto. Each piece can be refined through a personal consultation.</p>
             </div>
             <div class="page-banner" data-reveal>
-              <video class="media-video" autoplay muted loop playsinline preload="metadata" poster="assets/images/video-posters/diamond-hoop-earrings.png" aria-label="Shop banner featuring diamond hoop earrings">
-                <source src="assets/videos/diamond-hoop-earrings.mp4" type="video/mp4">
-              </video>
+              <img src="assets/images/customer-stories/diamond-jewellery-portrait.jpeg" alt="Diamond ring, bracelet, and earrings styled together" width="1068" height="1600" fetchpriority="high">
             </div>
           </div>
         </section>
@@ -80,18 +101,63 @@
         <section class="section section--surface section--tight">
           <div class="container">
             <div class="filter-bar" aria-label="Shop filters" data-reveal>
-              <button class="filter-chip is-active" type="button" data-filter="all">All</button>
-              <button class="filter-chip" type="button" data-filter="rings">Rings</button>
-              <button class="filter-chip" type="button" data-filter="necklaces">Necklaces</button>
-              <button class="filter-chip" type="button" data-filter="bracelets">Bracelets</button>
-              <button class="filter-chip" type="button" data-filter="earrings">Earrings</button>
+              <a class="filter-chip is-active" href="/shop.html" data-filter="all">All</a>
+              <a class="filter-chip" href="/rings/" data-filter="rings">Rings</a>
+              <a class="filter-chip" href="/necklaces/" data-filter="necklaces">Necklaces</a>
+              <a class="filter-chip" href="/bracelets/" data-filter="bracelets">Bracelets</a>
+              <a class="filter-chip" href="/earrings/" data-filter="earrings">Earrings</a>
             </div>
           </div>
         </section>
 
         <section class="section section--surface">
           <div class="container">
-            <div class="product-grid" data-shop-products></div>
+            <div class="collection-heading" data-reveal>
+              <div class="collection-heading__copy">
+                <span class="eyebrow">Six curated designs</span>
+                <h2>Fine jewellery selected for presence, versatility, and longevity</h2>
+                <p>Every piece is available through personal consultation, with guidance on sizing, stones, materials, and custom refinements.</p>
+              </div>
+              <a class="button-secondary" href="/custom-jewellery-toronto/">Create something custom</a>
+            </div>
+            <div class="product-grid" data-shop-products>
+              <article class="product-card">
+                <a class="product-card__link" href="/products/rare-blue-diamond-ring/">
+                  <div class="product-card__media"><img src="/assets/images/products/rare-blue-diamond-ring-1.jpeg" alt="Rare pear-shaped blue diamond double halo ring" width="1069" height="1600" loading="lazy"></div>
+                  <div class="product-card__body"><h3>Rare Blue Diamond Ring</h3><p class="product-card__materials">18K white gold with 1.00 ct pear-shaped blue diamond</p><span class="product-card__price">Please inquire for pricing</span></div>
+                </a>
+              </article>
+              <article class="product-card">
+                <a class="product-card__link" href="/products/diamond-tennis-necklace/">
+                  <div class="product-card__media"><img src="/assets/images/optimized/diamond-tennis-necklace-1600.jpg" alt="Diamond tennis necklace worn at the neckline" width="1173" height="1600" loading="lazy"></div>
+                  <div class="product-card__body"><h3>The She’s Unstoppable Tennis Necklace</h3><p class="product-card__materials">10.00 ct total carat weight diamonds in 14K gold</p><span class="product-card__price">Starting at $11,000 CAD</span></div>
+                </a>
+              </article>
+              <article class="product-card">
+                <a class="product-card__link" href="/products/diamond-tennis-bracelet/">
+                  <div class="product-card__media"><img src="/assets/images/products/quiet-power-tennis-bracelet-1.jpeg" alt="Diamond tennis bracelet in 14K gold" width="900" height="1600" loading="lazy"></div>
+                  <div class="product-card__body"><h3>The Quiet Power Tennis Bracelet</h3><p class="product-card__materials">1.50 ct lab-grown diamonds in 14K gold</p><span class="product-card__price">Starting at $2,500 CAD</span></div>
+                </a>
+              </article>
+              <article class="product-card">
+                <a class="product-card__link" href="/products/yellow-diamond-oval-stud-earrings/">
+                  <div class="product-card__media"><img src="/assets/images/optimized/yellow-diamond-earrings-1600.jpg" alt="Yellow diamond oval stud earrings" width="1401" height="1600" loading="lazy"></div>
+                  <div class="product-card__body"><h3>Yellow Diamond Oval Stud Earrings</h3><p class="product-card__materials">14K gold with oval yellow diamond centre stones</p><span class="product-card__price">Please inquire for pricing</span></div>
+                </a>
+              </article>
+              <article class="product-card">
+                <a class="product-card__link" href="/products/diamond-hand-chain-bracelet/">
+                  <div class="product-card__media"><img src="/assets/images/products/diamond-hand-chain-1.jpeg" alt="14K yellow gold diamond hand chain bracelet" width="1038" height="1470" loading="lazy"></div>
+                  <div class="product-card__body"><h3>14K Gold Diamond Hand Chain Bracelet</h3><p class="product-card__materials">14K yellow gold with three natural bezel-set diamonds</p><span class="product-card__price">Starting at $750 USD</span></div>
+                </a>
+              </article>
+              <article class="product-card">
+                <a class="product-card__link" href="/products/cushion-cut-diamond-ring/">
+                  <div class="product-card__media"><img src="/assets/images/products/cushion-diamond-ring-1.jpeg" alt="One carat cushion cut diamond ring" width="1050" height="1600" loading="lazy"></div>
+                  <div class="product-card__body"><h3>1 Carat Cushion Cut Diamond Ring</h3><p class="product-card__materials">14K gold with 1.00 ct cushion cut lab-grown diamond</p><span class="product-card__price">Starting at $2,500 CAD</span></div>
+                </a>
+              </article>
+            </div>
           </div>
         </section>
 
@@ -122,32 +188,36 @@
               <h3>Shop</h3>
               <ul>
                 <li><a href="shop.html">All Pieces</a></li>
-                <li><a href="curated-luxuries.html">Curated Luxuries</a></li>
-                <li><a href="shop.html">Rings</a></li>
-                <li><a href="shop.html">Necklaces</a></li>
-                <li><a href="shop.html">Bracelets</a></li>
+                <li><a href="curated-luxuries.html">Estate Luxuries</a></li>
+                <li><a href="/rings/">Rings</a></li>
+                <li><a href="/necklaces/">Necklaces</a></li>
+                <li><a href="/bracelets/">Bracelets</a></li>
+                <li><a href="/earrings/">Earrings</a></li>
               </ul>
             </div>
             <div class="footer-column">
-              <h3>Customs</h3>
+              <h3>Custom Made</h3>
               <ul>
                 <li><a href="customs.html">Start a Request</a></li>
-                <li><a href="customs.html#process">Process</a></li>
-                <li><a href="customs.html#faq">FAQ</a></li>
+                <li><a href="/custom-jewellery-toronto/">Custom Jewellery Toronto</a></li>
+                <li><a href="/custom-engagement-rings-toronto/">Custom Engagement Rings</a></li>
+
               </ul>
             </div>
             <div class="footer-column">
               <h3>Contact</h3>
               <ul>
                 <li><a href="mailto:info@torontojewelscuration.com">info@torontojewelscuration.com</a></li>
-                <li><a href="https://instagram.com" target="_blank" rel="noreferrer">Instagram</a></li>
+                <li><a href="https://www.instagram.com/torontojewelscuration/" target="_blank" rel="noreferrer">Instagram</a></li>
                 <li><a href="contact.html">Toronto, Ontario</a></li>
               </ul>
             </div>
           </div>
           <div class="footer-bottom">
             <span>Copyright <span data-year></span> Toronto Jewels Curation</span>
-            <span>Privacy Policy</span>
+            <a href="shipping-returns.html">Shipping &amp; Returns</a>
+            <a href="jewellery-care.html">Jewellery Care</a>
+            <a href="privacy.html">Privacy Policy</a>
           </div>
         </div>
       </footer>

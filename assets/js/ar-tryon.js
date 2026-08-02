@@ -23,6 +23,12 @@
 
 import * as THREE from "./three.module.js";
 import { RGBELoader } from "./RGBELoader.js";
+import {
+  WORLD_UNITS_PER_MM,
+  METERS_PER_MM,
+  buildJewellerySpec,
+  mmToWorld
+} from "./jewellery-spec.js";
 
 const HDR_URL = "assets/textures/studio_small_08_1k.hdr";
 
@@ -54,6 +60,15 @@ const EARLOBE_DROP_RATIO = 0.22;
  * hanging point sits exactly at (±0.76, 0). The renderer scales the pair
  * so the inter-lobe screen distance equals 1.52 × scale. */
 const EARRING_PAIR_LOCAL_HALF_SPAN = 0.76;
+/* Average adult bitragion (ear-to-ear) breadth in metres. Converts the
+ * detected inter-ear pixel span into a px-per-metre estimate so earrings
+ * can be rendered at their TRUE physical size instead of being stretched
+ * to fit the face. */
+const EAR_SPAN_M = 0.150;
+/* Average adult biacromial (shoulder-to-shoulder) breadth in metres — the
+ * same honest-scale trick for necklaces: chain length stays true-to-spec
+ * rather than being force-fitted to a fraction of shoulder width. */
+const SHOULDER_SPAN_M = 0.365;
 
 /* MediaPipe Pose Landmarker body landmarks (33-point model).
  *   0  = nose
@@ -166,7 +181,27 @@ const METAL_COLORS = {
   "Two-Tone Mix": 0xe2c79a
 };
 const STONE_COLORS = {
+  // Designer STONE_PROFILES names (the state written by designer.js) —
+  // previously only "Clear Diamond"/"Aquamarine" matched and every other
+  // designed stone silently fell back to white in AR.
   "Clear Diamond": 0xffffff,
+  "Blush Sapphire": 0xf4c2cf,
+  "Blue Sapphire": 0x1f3b9a,
+  "Emerald Green": 0x1b8b4e,
+  "Ruby Red": 0xb1112c,
+  "Amethyst Purple": 0x8a4fc8,
+  "Aquamarine": 0x8ad6ea,
+  "Black Onyx": 0x111111,
+  "Fire Opal": 0xff7a3c,
+  "Citrine Yellow": 0xe6b73a,
+  "Morganite Peach": 0xf3b8a4,
+  "Tanzanite Violet": 0x4a3aa6,
+  "Salt & Pepper": 0x9aa0a6,
+  "Alexandrite Shift": 0x2fae7a,
+  "Paraiba Tourmaline": 0x19e0d6,
+  "Moonstone Glow": 0xdfe8fb,
+  "Padparadscha": 0xff8a5c,
+  // Legacy short names kept for older saved states.
   "Sapphire": 0x1f3b9a,
   "Ruby": 0xb1112c,
   "Emerald": 0x1b8b4e,
@@ -174,7 +209,6 @@ const STONE_COLORS = {
   "Yellow Sapphire": 0xe6b73a,
   "Garnet": 0x7a1620,
   "Zircon": 0xc6e4f0,
-  "Aquamarine": 0x8ad6ea,
   "Tanzanite": 0x4a3aa6,
   "Onyx": 0x111111
 };
@@ -197,17 +231,38 @@ function landmarkPresence(point) {
 }
 
 function readCalibration() {
+  const defaults = {
+    fit: 1,
+    lift: 0,
+    side: 0,
+    roll: 0,
+    fovUser: 50,
+    fovEnvironment: 58,
+    earDrop: 0,
+    earSpan: 1,
+    facingMode: "user"
+  };
   try {
     const raw = JSON.parse(localStorage.getItem(CALIBRATION_KEY) || "{}");
     return {
-      fit: clamp(Number(raw.fit) || 1, 0.78, 1.26),
-      lift: clamp(Number(raw.lift) || 0, -48, 48),
-      side: clamp(Number(raw.side) || 0, -48, 48),
-      roll: clamp(Number(raw.roll) || 0, -35, 35),
+      fit: clamp(Number(raw.fit) || defaults.fit, 0.78, 1.26),
+      lift: clamp(Number(raw.lift) || defaults.lift, -48, 48),
+      side: clamp(Number(raw.side) || defaults.side, -48, 48),
+      roll: clamp(Number(raw.roll) || defaults.roll, -35, 35),
+      // Browser camera APIs do not expose reliable intrinsics on every phone.
+      // Persist a per-facing-mode vertical FOV calibration rather than baking
+      // one device-independent number into the perspective projection.
+      fovUser: clamp(Number(raw.fovUser) || defaults.fovUser, 38, 76),
+      fovEnvironment: clamp(Number(raw.fovEnvironment) || defaults.fovEnvironment, 42, 88),
+      // Face Landmarker exposes ear-adjacent points, not the piercing itself.
+      // These two saved controls let the wearer calibrate the inferred lobe
+      // drop and inter-piercing span once, then reuse it on later sessions.
+      earDrop: clamp(Number(raw.earDrop) || defaults.earDrop, -40, 40),
+      earSpan: clamp(Number(raw.earSpan) || defaults.earSpan, 0.82, 1.18),
       facingMode: raw.facingMode === "environment" ? "environment" : "user"
     };
   } catch {
-    return { fit: 1, lift: 0, side: 0, roll: 0, facingMode: "user" };
+    return defaults;
   }
 }
 
@@ -264,6 +319,42 @@ function makeShadowTexture() {
   tex.needsUpdate = true;
   _shadowTexCache = tex;
   return tex;
+}
+
+/**
+ * Rounded, tapered, elliptical proxy for a finger or wrist. It is rendered
+ * depth-only, so it need not reproduce skin colour; it only needs a plausible
+ * local surface for front/back ordering. Compared with the former open-ended
+ * cylinder this removes hard clipping at the proxy ends and acknowledges that
+ * a digit is wider side-to-side than it is deep.
+ */
+function makeAnatomicalOccluderGeometry({
+  radius,
+  length,
+  distal = 0.94,
+  proximal = 1.10,
+  depthRatio = 0.82
+}) {
+  const safeRadius = Math.max(1e-4, radius);
+  const totalLength = Math.max(length, safeRadius * 4);
+  const bodyLength = Math.max(safeRadius * 2, totalLength - safeRadius * 2);
+  const geometry = new THREE.CapsuleGeometry(safeRadius, bodyLength, 8, 48);
+  geometry.rotateX(Math.PI / 2); // capsule axis: local +Z (MCP → PIP)
+
+  const position = geometry.getAttribute("position");
+  for (let i = 0; i < position.count; i++) {
+    const x = position.getX(i);
+    const y = position.getY(i);
+    const z = position.getZ(i);
+    const t = clamp((z + totalLength * 0.5) / totalLength, 0, 1);
+    const taper = lerp(proximal, distal, t);
+    position.setXYZ(i, x * taper, y * taper * depthRatio, z);
+  }
+  position.needsUpdate = true;
+  geometry.computeVertexNormals();
+  geometry.computeBoundingBox();
+  geometry.computeBoundingSphere();
+  return geometry;
 }
 
 function readDesignState() {
@@ -361,7 +452,7 @@ function injectStyles() {
       z-index: 2;
       transform: translateX(-50%);
 	      display: grid;
-	      grid-template-columns: repeat(4, minmax(96px, 1fr)) auto;
+	      grid-template-columns: repeat(5, minmax(88px, 1fr)) auto;
       gap: 8px;
       width: min(720px, calc(100vw - 28px));
       padding: 8px;
@@ -553,6 +644,9 @@ function buildModal() {
 	        <label>Lift <output data-ar-lift-value>0px</output><input type="range" min="-48" max="48" step="1" value="0" data-ar-lift></label>
 	        <label>Side <output data-ar-side-value>0px</output><input type="range" min="-48" max="48" step="1" value="0" data-ar-side></label>
 	        <label>Tilt <output data-ar-roll-value>0°</output><input type="range" min="-35" max="35" step="1" value="0" data-ar-roll></label>
+	        <label>Camera <output data-ar-fov-value>50°</output><input type="range" min="38" max="88" step="1" value="50" data-ar-fov></label>
+	        <label data-ar-ear-calibration hidden>Lobe <output data-ar-ear-drop-value>0px</output><input type="range" min="-40" max="40" step="1" value="0" data-ar-ear-drop></label>
+	        <label data-ar-ear-calibration hidden>Ear span <output data-ar-ear-span-value>100%</output><input type="range" min="82" max="118" step="1" value="100" data-ar-ear-span></label>
 	        <button type="button" class="ar-tryon-btn ar-tryon-reset" data-ar-reset-fit>Reset</button>
 	      </div>
       <div class="ar-tryon-finger-select" role="group" aria-label="Choose finger">
@@ -579,23 +673,35 @@ function buildModal() {
 }
 
 // Build a lightweight ring matching the designed metal + stone + halo + side stones.
+// Fallback used when the full designer builder (window.__tjcDesigner.buildPiece)
+// is not on the page. Reads the REAL designer state fields (shape / halo /
+// accent / finish / setting / band) with legacy fallbacks for old saves.
 function buildRing(state) {
   const group = new THREE.Group();
 
   const metalName = state?.metal || "Yellow Gold";
   const stoneName = state?.stone || "Clear Diamond";
-  const cut = state?.cut || "Round";
-  const halo = state?.halo && state.halo !== "None" ? state.halo : null;
-  const sideStones = !!state?.sideStones;
+  const cut = state?.shape || state?.cut || "Round";
+  const setting = state?.setting || "Prong";
+  const finish = state?.finish || "High Polish";
+  const halo = state?.halo === true || (state?.halo && state.halo !== "None");
+  const sideStones = !!(state?.accent ?? state?.sideStones)
+    || state?.band === "Pavé" || state?.band === "Eternity";
   const metalColor = METAL_COLORS[metalName] ?? METAL_COLORS["Yellow Gold"];
   const stoneColor = STONE_COLORS[stoneName] ?? STONE_COLORS["Clear Diamond"];
 
+  // §3 BRDF: polished metal must NOT carry a clearcoat — the white
+  // dielectric coat layer sits on top of the metal F0 and washes gold
+  // toward silver. Finish drives microfacet roughness instead.
+  const FINISH_ROUGHNESS = {
+    "High Polish": 0.10, "Soft Satin": 0.34, "Milgrain Edge": 0.16,
+    "Hammered": 0.30, "Sandblast": 0.62, "Brushed": 0.38, "Stardust": 0.5
+  };
   const metalMat = new THREE.MeshPhysicalMaterial({
     color: metalColor,
     metalness: 1.0,
-    roughness: 0.16,
-    clearcoat: 0.55,
-    clearcoatRoughness: 0.18
+    roughness: FINISH_ROUGHNESS[finish] ?? 0.16,
+    clearcoat: 0.0
   });
 
   // Band — TorusGeometry; local +Y is "up" (toward setting), torus axis = Z (the finger).
@@ -618,119 +724,133 @@ function buildRing(state) {
   collet.position.y = 0.07;
   headGroup.add(collet);
 
-  // Prongs — 4 for Round/Princess/Oval, 4 corner for emerald-cut
-  const prongCount = (cut === "Emerald") ? 4 : 4;
-  const prongOffset = (cut === "Emerald" || cut === "Princess") ? Math.PI / 4 : Math.PI / 4;
-  for (let i = 0; i < prongCount; i++) {
-    const ang = (i / prongCount) * Math.PI * 2 + prongOffset;
-    const prong = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.035, 0.05, 0.32, 12),
-      metalMat
-    );
-    prong.position.set(Math.cos(ang) * 0.27, 0.22, Math.sin(ang) * 0.27);
-    // tip bead
-    const bead = new THREE.Mesh(new THREE.SphereGeometry(0.05, 12, 10), metalMat);
-    bead.position.y = 0.16;
-    bead.scale.set(1, 0.7, 1);
-    prong.add(bead);
-    headGroup.add(prong);
-  }
-
-  // Center stone — geometry varies by cut.
-  let stoneGeo;
-  let stoneScale = [1, 0.85, 1];
-  switch (cut) {
-    case "Princess":
-      stoneGeo = new THREE.BoxGeometry(0.5, 0.42, 0.5);
-      stoneScale = [1, 1, 1];
-      break;
-    case "Emerald":
-      stoneGeo = new THREE.BoxGeometry(0.55, 0.32, 0.42);
-      stoneScale = [1, 1, 1];
-      break;
-    case "Oval":
-      stoneGeo = new THREE.SphereGeometry(0.30, 32, 24);
-      stoneScale = [1.4, 0.78, 1];
-      break;
-    case "Pear":
-      stoneGeo = new THREE.ConeGeometry(0.34, 0.7, 32);
-      stoneScale = [1, 0.62, 1];
-      break;
-    case "Cushion":
-      stoneGeo = new THREE.BoxGeometry(0.48, 0.4, 0.48);
-      stoneScale = [1, 1, 1];
-      break;
-    case "Marquise":
-      stoneGeo = new THREE.SphereGeometry(0.32, 32, 24);
-      stoneScale = [1.6, 0.65, 0.85];
-      break;
-    case "Round":
-    default:
-      stoneGeo = new THREE.OctahedronGeometry(0.34, 2);
-      stoneScale = [1, 0.85, 1];
-  }
-  const isClear = stoneName === "Clear Diamond";
-  const stone = new THREE.Mesh(
-    stoneGeo,
-    new THREE.MeshPhysicalMaterial({
-      color: stoneColor,
-      metalness: 0.0,
-      roughness: 0.02,
-      transmission: isClear ? 0.9 : 0.55,
-      ior: isClear ? 2.4 : 1.74,
-      thickness: 0.5,
-      clearcoat: 1.0,
-      clearcoatRoughness: 0.02,
-      attenuationDistance: 1.4,
-      attenuationColor: new THREE.Color(stoneColor).lerp(new THREE.Color(0xffffff), 0.5),
-      reflectivity: 0.95,
-      dispersion: isClear ? 0.06 : 0.02
-    })
+  // ── §3/§11 brilliant-cut stone geometry ─────────────────────────────
+  // Flat-shaded crown / girdle / pavilion stack. Sixteen segments gives
+  // real planar facets whose normals snap the env-map — the "gem look" —
+  // instead of the smooth-blob octahedron the old fallback used.
+  const R = 0.34;                      // girdle radius
+  const elongate =
+    cut === "Oval"     ? [1.0, 1.0, 1.35] :
+    cut === "Marquise" ? [1.0, 1.0, 1.7]  :
+    cut === "Pear"     ? [1.0, 1.0, 1.3]  :
+    cut === "Emerald"  ? [1.15, 1.0, 0.85] :
+    cut === "Baguette" ? [1.3, 1.0, 0.7]  : [1, 1, 1];
+  const seg =
+    (cut === "Princess" || cut === "Cushion" || cut === "Asscher") ? 4 :
+    cut === "Emerald" || cut === "Baguette" ? 8 :
+    cut === "Hexagon" ? 6 :
+    cut === "Trillion" ? 3 : 16;
+  const stoneMat = new THREE.MeshPhysicalMaterial({
+    color: stoneColor,
+    metalness: 0.0,
+    roughness: 0.02,
+    flatShading: true,
+    transmission: stoneName === "Black Onyx" ? 0 : 0.86,
+    ior: stoneName === "Clear Diamond" ? 2.42 : 1.74,
+    thickness: 0.5,
+    attenuationDistance: 1.2,
+    attenuationColor: new THREE.Color(stoneColor).lerp(new THREE.Color(0xffffff), 0.4),
+    reflectivity: 0.95,
+    dispersion: stoneName === "Clear Diamond" ? 0.9 : 0.35,
+    envMapIntensity: 1.4
+  });
+  const stone = new THREE.Group();
+  // Crown: table (53% of girdle) up top, flaring to the girdle.
+  const crown = new THREE.Mesh(
+    new THREE.CylinderGeometry(R * 0.53, R, R * 0.42, seg, 1),
+    stoneMat
   );
-  stone.position.y = 0.32;
-  stone.scale.set(...stoneScale);
-  if (cut === "Princess" || cut === "Cushion") stone.rotation.y = Math.PI / 4;
+  crown.position.y = R * 0.21;
+  stone.add(crown);
+  // Thin girdle band.
+  const girdle = new THREE.Mesh(
+    new THREE.CylinderGeometry(R, R, R * 0.08, seg, 1),
+    stoneMat
+  );
+  girdle.position.y = -R * 0.04;
+  stone.add(girdle);
+  // Pavilion tapering to a near-point culet.
+  const pavilion = new THREE.Mesh(
+    new THREE.CylinderGeometry(R, R * 0.04, R * 0.9, seg, 1),
+    stoneMat
+  );
+  pavilion.position.y = -R * 0.53;
+  stone.add(pavilion);
+  stone.scale.set(elongate[0], elongate[1], elongate[2]);
+  if (seg === 4) stone.rotation.y = Math.PI / 4;
+  stone.position.y = 0.36;
   headGroup.add(stone);
 
-  // Halo — small ring of diamonds around the center stone.
+  // Setting hardware — bezel wraps the girdle; every other style gets prongs.
+  if (setting === "Bezel") {
+    const bezel = new THREE.Mesh(
+      new THREE.CylinderGeometry(R * 1.12, R * 1.05, R * 0.34, 32, 1, true),
+      metalMat
+    );
+    bezel.material = metalMat.clone();
+    bezel.material.side = THREE.DoubleSide;
+    bezel.position.y = 0.34;
+    bezel.scale.set(elongate[0], 1, elongate[2]);
+    headGroup.add(bezel);
+  } else {
+    const prongCount = setting === "Trellis" ? 6 : 4;
+    for (let i = 0; i < prongCount; i++) {
+      const ang = (i / prongCount) * Math.PI * 2 + Math.PI / 4;
+      const prong = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.035, 0.05, 0.36, 12),
+        metalMat
+      );
+      prong.position.set(
+        Math.cos(ang) * R * 0.86 * elongate[0],
+        0.24,
+        Math.sin(ang) * R * 0.86 * elongate[2]
+      );
+      const bead = new THREE.Mesh(new THREE.SphereGeometry(0.05, 12, 10), metalMat);
+      bead.position.y = 0.18;
+      bead.scale.set(1, 0.7, 1);
+      prong.add(bead);
+      headGroup.add(prong);
+    }
+  }
+
+  // Halo — flat-shaded melee ring around the center stone.
   if (halo) {
-    const haloRadius = Math.max(stoneScale[0], stoneScale[2]) * 0.32 + 0.12;
+    const haloRadius = R * Math.max(elongate[0], elongate[2]) + 0.14;
     const haloMat = new THREE.MeshPhysicalMaterial({
       color: 0xffffff,
       metalness: 0,
       roughness: 0.02,
+      flatShading: true,
       transmission: 0.85,
-      ior: 2.4,
+      ior: 2.42,
       thickness: 0.18,
-      clearcoat: 1.0,
-      dispersion: 0.05
+      dispersion: 0.7
     });
     const haloCount = 16;
     for (let i = 0; i < haloCount; i++) {
       const a = (i / haloCount) * Math.PI * 2;
-      const tiny = new THREE.Mesh(new THREE.OctahedronGeometry(0.075, 1), haloMat);
-      tiny.position.set(Math.cos(a) * haloRadius, 0.30, Math.sin(a) * haloRadius);
-      tiny.scale.setScalar(1);
+      const tiny = new THREE.Mesh(new THREE.OctahedronGeometry(0.075, 0), haloMat);
+      tiny.position.set(Math.cos(a) * haloRadius, 0.32, Math.sin(a) * haloRadius);
       headGroup.add(tiny);
     }
   }
 
-  // Side stones — tiny diamonds set along the band's shoulders.
+  // Side stones — tiny flat-shaded diamonds set along the band's shoulders.
   if (sideStones) {
     const sideMat = new THREE.MeshPhysicalMaterial({
       color: 0xffffff,
       metalness: 0,
       roughness: 0.04,
+      flatShading: true,
       transmission: 0.8,
-      ior: 2.4,
-      thickness: 0.15,
-      clearcoat: 1.0
+      ior: 2.42,
+      thickness: 0.15
     });
     const positions = [-0.6, -0.45, -0.3, 0.3, 0.45, 0.6];
     for (const a of positions) {
       const angle = (Math.PI / 2) - a;  // span from top toward sides
       const r = 1.0;
-      const stoneSide = new THREE.Mesh(new THREE.OctahedronGeometry(0.07, 1), sideMat);
+      const stoneSide = new THREE.Mesh(new THREE.OctahedronGeometry(0.07, 0), sideMat);
       stoneSide.position.set(Math.cos(angle) * r, Math.sin(angle) * r, 0);
       // tip toward outside
       stoneSide.lookAt(stoneSide.position.clone().multiplyScalar(2));
@@ -741,6 +861,16 @@ function buildRing(state) {
   // Cache a reference to swap finger/scale base later.
   group.userData.metalColor = metalColor;
   group.userData.stoneColor = stoneColor;
+  const physicalSpec = buildJewellerySpec(state || {});
+  const localOuterR = 1.13; // Torus outer radius: major 1.0 + tube 0.13.
+  const physicalOuterRadiusMm = physicalSpec.ring.innerRadiusMm + physicalSpec.ring.shankThicknessMm;
+  group.userData.jewellerySpec = physicalSpec;
+  group.userData.unitsPerMm = localOuterR / Math.max(physicalOuterRadiusMm, 0.001);
+  group.userData.physical = {
+    units: "mm",
+    ringInnerDiameterMm: physicalSpec.ring.innerDiameterMm,
+    ringOuterDiameterMm: physicalOuterRadiusMm * 2
+  };
   return group;
 }
 
@@ -797,6 +927,11 @@ class ARTryOn {
     this.handLandmarker = null;
     this.faceLandmarker = null;
     this.poseLandmarker = null;
+    this._trackingWorker = null;
+    this._trackingWorkerReady = false;
+    this._trackingWorkerBusy = false;
+    this._trackingWorkerFallbackStarted = false;
+    this._trackingFrameId = 0;
     this.stream = null;
     this.rafId = null;
     this.lastVideoTime = -1;
@@ -810,8 +945,16 @@ class ARTryOn {
     this.detectInterval = 1000 / TARGET_DETECTION_FPS;
     this._lastLightSample = 0;
     this._lightProbe = null;
+    this._handMaskCanvas = null;
+    this._handMaskCtx = null;
+    this._handMaskTexture = null;
+    this._handMaskMesh = null;
     this._isRestartingCamera = false;
     this._designState = null;
+    this._physicalSpec = null;
+    this._unitsPerMm = WORLD_UNITS_PER_MM;
+    this._arPlaneZ = 0;
+    this._cameraFovDeg = this.facingMode === "environment" ? this.calibration.fovEnvironment : this.calibration.fovUser;
     this._detectCostEMA = 1000 / TARGET_DETECTION_FPS;
     this._poseConfidence = 0;
     this._poseConfidenceTarget = 0;
@@ -949,10 +1092,16 @@ class ARTryOn {
     this.liftInput = this.modal.querySelector("[data-ar-lift]");
     this.sideInput = this.modal.querySelector("[data-ar-side]");
     this.rollInput = this.modal.querySelector("[data-ar-roll]");
+    this.fovInput = this.modal.querySelector("[data-ar-fov]");
+    this.earDropInput = this.modal.querySelector("[data-ar-ear-drop]");
+    this.earSpanInput = this.modal.querySelector("[data-ar-ear-span]");
     this.fitValueEl = this.modal.querySelector("[data-ar-fit-value]");
     this.liftValueEl = this.modal.querySelector("[data-ar-lift-value]");
     this.sideValueEl = this.modal.querySelector("[data-ar-side-value]");
     this.rollValueEl = this.modal.querySelector("[data-ar-roll-value]");
+    this.fovValueEl = this.modal.querySelector("[data-ar-fov-value]");
+    this.earDropValueEl = this.modal.querySelector("[data-ar-ear-drop-value]");
+    this.earSpanValueEl = this.modal.querySelector("[data-ar-ear-span-value]");
     this.fingerSelectEl = this.modal.querySelector(".ar-tryon-finger-select");
     this.hintEl = this.modal.querySelector(".ar-tryon-hint");
 
@@ -974,6 +1123,7 @@ class ARTryOn {
       this.modal.setAttribute("aria-label", "AR earring try-on");
       if (this.fingerSelectEl) this.fingerSelectEl.hidden = true;
       if (this.sizeEl) this.sizeEl.hidden = true;
+      this.modal.querySelectorAll("[data-ar-ear-calibration]").forEach((label) => { label.hidden = false; });
       if (this.hintEl) this.hintEl.textContent = "Face the camera so both ears are visible";
     } else if (this.pieceType === "Necklace") {
       this.modal.setAttribute("aria-label", "AR necklace try-on");
@@ -993,17 +1143,27 @@ class ARTryOn {
       this.calibration.lift = 0;
       this.calibration.side = 0;
       this.calibration.roll = 0;
+      this.calibration.fovUser = 50;
+      this.calibration.fovEnvironment = 58;
+      this.calibration.earDrop = 0;
+      this.calibration.earSpan = 1;
       this.persistCalibration();
       this.syncCalibrationControls();
+      this.updateCameraProjection();
     });
-    [this.fitInput, this.liftInput, this.sideInput, this.rollInput].forEach((input) => {
+    [this.fitInput, this.liftInput, this.sideInput, this.rollInput, this.fovInput, this.earDropInput, this.earSpanInput].forEach((input) => {
       input?.addEventListener("input", () => {
         this.calibration.fit = Number(this.fitInput?.value || 100) / 100;
         this.calibration.lift = Number(this.liftInput?.value || 0);
         this.calibration.side = Number(this.sideInput?.value || 0);
         this.calibration.roll = Number(this.rollInput?.value || 0);
+        const activeFovKey = this.facingMode === "environment" ? "fovEnvironment" : "fovUser";
+        this.calibration[activeFovKey] = Number(this.fovInput?.value || this.currentCameraFov());
+        this.calibration.earDrop = Number(this.earDropInput?.value || 0);
+        this.calibration.earSpan = Number(this.earSpanInput?.value || 100) / 100;
         this.persistCalibration();
         this.syncCalibrationLabels();
+        this.updateCameraProjection();
       });
     });
     this.modal.querySelectorAll(".ar-tryon-finger-select button").forEach(btn => {
@@ -1064,11 +1224,31 @@ class ARTryOn {
     writeCalibration(this.calibration);
   }
 
+  currentCameraFov() {
+    return this.facingMode === "environment"
+      ? this.calibration.fovEnvironment
+      : this.calibration.fovUser;
+  }
+
+  updateCameraProjection() {
+    this._cameraFovDeg = clamp(Number(this.currentCameraFov()) || 50, 38, 88);
+    if (!this.camera) return;
+    this.camera.fov = this._cameraFovDeg;
+    const width = Math.max(this.canvas?.clientWidth || 1, 1);
+    const height = Math.max(this.canvas?.clientHeight || 1, 1);
+    this.camera.aspect = width / height;
+    this.camera.updateProjectionMatrix();
+    this.syncHandSilhouettePlane();
+  }
+
   syncCalibrationLabels() {
     if (this.fitValueEl) this.fitValueEl.textContent = `${Math.round(this.calibration.fit * 100)}%`;
     if (this.liftValueEl) this.liftValueEl.textContent = `${Math.round(this.calibration.lift)}px`;
     if (this.sideValueEl) this.sideValueEl.textContent = `${Math.round(this.calibration.side)}px`;
     if (this.rollValueEl) this.rollValueEl.textContent = `${Math.round(this.calibration.roll || 0)}°`;
+    if (this.fovValueEl) this.fovValueEl.textContent = `${Math.round(this.currentCameraFov())}°`;
+    if (this.earDropValueEl) this.earDropValueEl.textContent = `${Math.round(this.calibration.earDrop || 0)}px`;
+    if (this.earSpanValueEl) this.earSpanValueEl.textContent = `${Math.round((this.calibration.earSpan || 1) * 100)}%`;
   }
 
   syncCalibrationControls() {
@@ -1076,28 +1256,28 @@ class ARTryOn {
     if (this.liftInput) this.liftInput.value = String(Math.round(this.calibration.lift));
     if (this.sideInput) this.sideInput.value = String(Math.round(this.calibration.side));
     if (this.rollInput) this.rollInput.value = String(Math.round(this.calibration.roll || 0));
+    if (this.fovInput) this.fovInput.value = String(Math.round(this.currentCameraFov()));
+    if (this.earDropInput) this.earDropInput.value = String(Math.round(this.calibration.earDrop || 0));
+    if (this.earSpanInput) this.earSpanInput.value = String(Math.round((this.calibration.earSpan || 1) * 100));
     this.syncCalibrationLabels();
   }
 
-  /* §5 rebuild the depth-only finger occluder to the active finger's
-   * anatomical taper. Called on first occluder creation (from startThree)
-   * and again whenever the user picks a different finger. Disposes the
-   * old geometry to avoid GPU leaks. The base radius / length / material
-   * are reused — only the cylinder taper ratios change. */
+  /* Rebuild the depth-only anatomical proxy when the selected finger
+   * changes. The proxy has rounded caps, a side-to-depth ellipse and a
+   * per-finger MCP→PIP taper. */
   rebuildOccluderGeometry() {
     if (!this._occluder || !this._occluderBaseRadius || !this._occluderBaseLength) return;
-    const taper = this.pieceType === "Bracelet"
+    const isBracelet = this.pieceType === "Bracelet";
+    const taper = isBracelet
       ? { distal: 0.96, proximal: 1.00 }
       : (FINGER_OCCLUDER_TAPER[this.activeFinger] || FINGER_OCCLUDER_TAPER.ring);
-    const fingerR = this._occluderBaseRadius;
-    const fingerL = this._occluderBaseLength;
-    const next = new THREE.CylinderGeometry(
-      fingerR * taper.distal,
-      fingerR * taper.proximal,
-      fingerL,
-      48, 1, false
-    );
-    next.rotateX(Math.PI / 2);
+    const next = makeAnatomicalOccluderGeometry({
+      radius: this._occluderBaseRadius,
+      length: this._occluderBaseLength,
+      distal: taper.distal,
+      proximal: taper.proximal,
+      depthRatio: isBracelet ? 0.72 : 0.82
+    });
     this._occluder.geometry.dispose();
     this._occluder.geometry = next;
   }
@@ -1255,6 +1435,140 @@ class ARTryOn {
     if (this.qualityBarEl) this.qualityBarEl.style.setProperty("--ar-lock", `${pct}%`);
   }
 
+  setupHandSilhouetteOccluder() {
+    if (this._handMaskMesh || !this.scene || !this.camera) return;
+    if (this.pieceType !== "Ring" && this.pieceType !== "Bracelet") return;
+
+    const canvas = document.createElement("canvas");
+    canvas.width = 320;
+    canvas.height = 240;
+    const ctx = canvas.getContext("2d", { alpha: true });
+    if (!ctx) return;
+
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.colorSpace = THREE.SRGBColorSpace;
+    texture.minFilter = THREE.LinearFilter;
+    texture.magFilter = THREE.LinearFilter;
+    texture.generateMipmaps = false;
+
+    // A full camera-plane quad writes only depth where the generated hand mask
+    // is white. Ring geometry in front of the surface remains visible; back
+    // geometry and jewellery passing through neighbouring fingers are rejected.
+    const material = new THREE.MeshBasicMaterial({
+      alphaMap: texture,
+      alphaTest: 0.06,
+      colorWrite: false,
+      depthWrite: true,
+      depthTest: true,
+      transparent: false,
+      side: THREE.DoubleSide
+    });
+    const mesh = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), material);
+    mesh.renderOrder = -120;
+    mesh.frustumCulled = false;
+    mesh.visible = false;
+    this.scene.add(mesh);
+
+    this._handMaskCanvas = canvas;
+    this._handMaskCtx = ctx;
+    this._handMaskTexture = texture;
+    this._handMaskMesh = mesh;
+    this.syncHandSilhouettePlane();
+  }
+
+  syncHandSilhouettePlane() {
+    if (!this._handMaskMesh || !this.camera) return;
+    // Camera is at z=1 looking toward z=0. Put the inferred skin surface a
+    // fraction closer than the jewellery origin. The local anatomical proxy
+    // still supplies detailed cylindrical depth around the active digit.
+    const z = this._arPlaneZ + 0.00045;
+    const distance = Math.max(0.01, Math.abs(this.camera.position.z - z));
+    const height = 2 * Math.tan(THREE.MathUtils.degToRad(this.camera.fov * 0.5)) * distance;
+    const width = height * this.camera.aspect;
+    this._handMaskMesh.position.set(0, 0, z);
+    this._handMaskMesh.scale.set(width, height, 1);
+  }
+
+  hideHandSilhouetteOccluder() {
+    if (this._handMaskMesh) this._handMaskMesh.visible = false;
+  }
+
+  updateHandSilhouetteOccluder(landmarks, metrics, handWidthPx) {
+    if (!this._handMaskMesh || !this._handMaskCtx || !this._handMaskCanvas || !landmarks?.length) return;
+
+    const canvas = this._handMaskCanvas;
+    const targetWidth = 320;
+    const targetHeight = Math.max(180, Math.round(targetWidth * metrics.height / Math.max(metrics.width, 1)));
+    if (canvas.width !== targetWidth || canvas.height !== targetHeight) {
+      canvas.width = targetWidth;
+      canvas.height = targetHeight;
+    }
+    const ctx = this._handMaskCtx;
+    const sx = canvas.width / metrics.width;
+    const sy = canvas.height / metrics.height;
+    const strokeScale = (sx + sy) * 0.5;
+    const point = (index) => {
+      const stage = this.landmarkToStage(landmarks[index], metrics);
+      return {
+        x: (stage.x + metrics.width * 0.5) * sx,
+        y: (metrics.height * 0.5 - stage.y) * sy
+      };
+    };
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = "#ffffff";
+    ctx.strokeStyle = "#ffffff";
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+
+    // Palm hull. The central MCP points make the silhouette continuous even
+    // when fingers spread; the wrist closes the lower palm.
+    const palmIndices = [0, 1, 5, 9, 13, 17];
+    const palm = palmIndices.map(point);
+    ctx.beginPath();
+    ctx.moveTo(palm[0].x, palm[0].y);
+    for (let i = 1; i < palm.length; i += 1) ctx.lineTo(palm[i].x, palm[i].y);
+    ctx.closePath();
+    ctx.fill();
+
+    const drawBoneChain = (indices, proximalWidthRatio, distalRatio = 0.58) => {
+      for (let i = 0; i < indices.length - 1; i += 1) {
+        const a = point(indices[i]);
+        const b = point(indices[i + 1]);
+        const t = i / Math.max(1, indices.length - 2);
+        ctx.lineWidth = Math.max(3, handWidthPx * strokeScale * proximalWidthRatio * lerp(1, distalRatio, t));
+        ctx.beginPath();
+        ctx.moveTo(a.x, a.y);
+        ctx.lineTo(b.x, b.y);
+        ctx.stroke();
+      }
+    };
+
+    drawBoneChain([1, 2, 3, 4], 0.23, 0.62);
+    drawBoneChain([5, 6, 7, 8], 0.19, 0.56);
+    drawBoneChain([9, 10, 11, 12], 0.20, 0.57);
+    drawBoneChain([13, 14, 15, 16], 0.185, 0.55);
+    drawBoneChain([17, 18, 19, 20], 0.16, 0.52);
+
+    // Bracelet mode needs a short forearm continuation behind the wrist.
+    if (this.pieceType === "Bracelet") {
+      const wrist = point(0);
+      const middle = point(9);
+      const dx = wrist.x - middle.x;
+      const dy = wrist.y - middle.y;
+      const len = Math.hypot(dx, dy) || 1;
+      ctx.lineWidth = Math.max(4, handWidthPx * strokeScale * 0.62);
+      ctx.beginPath();
+      ctx.moveTo(wrist.x, wrist.y);
+      ctx.lineTo(wrist.x + dx / len * handWidthPx * strokeScale * 1.15,
+        wrist.y + dy / len * handWidthPx * strokeScale * 1.15);
+      ctx.stroke();
+    }
+
+    this._handMaskTexture.needsUpdate = true;
+    this._handMaskMesh.visible = true;
+  }
+
   videoMetrics() {
     const width = Math.max(this.canvas?.clientWidth || 1, 1);
     const height = Math.max(this.canvas?.clientHeight || 1, 1);
@@ -1272,6 +1586,28 @@ class ARTryOn {
       offsetX: (width - drawWidth) / 2,
       offsetY: (height - drawHeight) / 2
     };
+  }
+
+  worldUnitsPerPixelAtZ(z = this._arPlaneZ) {
+    if (!this.camera?.isPerspectiveCamera) return 1;
+    const metrics = this.videoMetrics();
+    const distance = Math.max(0.01, Math.abs(this.camera.position.z - z));
+    const worldHeight = 2 * distance * Math.tan(THREE.MathUtils.degToRad(this.camera.fov) * 0.5);
+    return worldHeight / Math.max(metrics.height, 1);
+  }
+
+  stageToWorld(xPx, yPx, z = this._arPlaneZ, target = new THREE.Vector3()) {
+    const unitsPerPixel = this.worldUnitsPerPixelAtZ(z);
+    return target.set(xPx * unitsPerPixel, yPx * unitsPerPixel, z);
+  }
+
+  pixelScaleToWorld(scalePxPerLocalUnit, z = this._arPlaneZ) {
+    return scalePxPerLocalUnit * this.worldUnitsPerPixelAtZ(z);
+  }
+
+  setTargetFromStage(xPx, yPx, scalePxPerLocalUnit, z = this._arPlaneZ) {
+    this.stageToWorld(xPx, yPx, z, this._tgtPos);
+    this._tgtScale = this.pixelScaleToWorld(scalePxPerLocalUnit, z);
   }
 
   landmarkToStage(point, metrics) {
@@ -1395,10 +1731,23 @@ class ARTryOn {
     // Clamp + round to nearest half-size; below 3 or above 13 is unusual.
     const usClamped = Math.max(3, Math.min(13, usRaw));
     const usHalf = Math.round(usClamped * 2) / 2;
-    const euRaw = Math.round(circMm - 40);
+    const euRaw = Math.round(circMm); // EU/ISO size is the inner circumference in mm.
+    const selectedUS = Number(this._physicalSpec?.ring?.sizeUS);
+    const selectedDia = Number(this._physicalSpec?.ring?.innerDiameterMm);
     this.sizeEl.hidden = false;
-    this.sizeValueEl.textContent = `US ${usHalf.toFixed(1)}`;
-    this.sizeSubEl.textContent = `${diaMm.toFixed(1)} mm \u00b7 EU ${euRaw}`;
+    if (Number.isFinite(selectedUS) && Number.isFinite(selectedDia)) {
+      const mismatchMm = selectedDia - diaMm;
+      const fitLabel = Math.abs(mismatchMm) < 0.45
+        ? "close fit"
+        : mismatchMm > 0
+          ? `${Math.abs(mismatchMm).toFixed(1)} mm loose`
+          : `${Math.abs(mismatchMm).toFixed(1)} mm tight`;
+      this.sizeValueEl.textContent = `Selected US ${selectedUS.toFixed(1)}`;
+      this.sizeSubEl.textContent = `Finger est. US ${usHalf.toFixed(1)} · EU ${euRaw} · ${fitLabel}`;
+    } else {
+      this.sizeValueEl.textContent = `Finger est. US ${usHalf.toFixed(1)}`;
+      this.sizeSubEl.textContent = `${diaMm.toFixed(1)} mm · EU ${euRaw}`;
+    }
     return dia;
   }
 
@@ -1443,6 +1792,8 @@ class ARTryOn {
     this.applyCameraClass();
     try {
       await this.startCamera();
+      this.syncCalibrationControls();
+      this.updateCameraProjection();
       this.resetTrackingFilters();
       if (this.ring) this.ring.visible = false;
       this.setStatus("");
@@ -1456,7 +1807,149 @@ class ARTryOn {
     }
   }
 
+  trackingMode() {
+    if (this.pieceType === "Earrings") return "face";
+    if (this.pieceType === "Necklace") return "pose";
+    return "hand";
+  }
+
+  applyTrackingResult(result, detectCost = 0) {
+    if (!result || !this.ring) return;
+    if (this.pieceType === "Bracelet") {
+      this.applyResultBracelet(result);
+    } else if (this.pieceType === "Earrings") {
+      this.applyResultEarrings(result);
+    } else if (this.pieceType === "Necklace") {
+      this.applyResultNecklace(result);
+    } else {
+      this.applyResult(result);
+    }
+    if (Number.isFinite(detectCost) && detectCost > 0) {
+      this.updateDeltaBudget(detectCost);
+    }
+  }
+
   async startMediaPipe() {
+    const canUseWorker = typeof Worker !== "undefined" && typeof createImageBitmap === "function";
+    if (canUseWorker) {
+      try {
+        await this.startTrackingWorker();
+        return;
+      } catch (error) {
+        console.warn("[AR] Tracking worker unavailable; using main-thread fallback:", error);
+      }
+    }
+    await this.startMediaPipeOnMainThread();
+  }
+
+  async startTrackingWorker() {
+    if (this._trackingWorkerReady) return;
+
+    const worker = new Worker(new URL("./ar-tracking-worker.js", import.meta.url), { type: "module" });
+    this._trackingWorker = worker;
+    this._trackingWorkerBusy = false;
+    this._trackingWorkerFallbackStarted = false;
+
+    await new Promise((resolve, reject) => {
+      let settled = false;
+      const finishReject = (error) => {
+        if (settled) return;
+        settled = true;
+        clearTimeout(timeoutId);
+        worker.terminate();
+        if (this._trackingWorker === worker) this._trackingWorker = null;
+        reject(error instanceof Error ? error : new Error(String(error)));
+      };
+      const timeoutId = setTimeout(() => finishReject(new Error("Tracking worker initialization timed out.")), 12000);
+
+      worker.onmessage = (event) => {
+        const message = event.data || {};
+        if (message.type === "ready") {
+          if (!settled) {
+            settled = true;
+            clearTimeout(timeoutId);
+            this._trackingWorkerReady = true;
+            resolve();
+          }
+          return;
+        }
+
+        if (message.type === "result") {
+          this._trackingWorkerBusy = false;
+          this.applyTrackingResult(message.result, Number(message.detectCost) || 0);
+          return;
+        }
+
+        if (message.type === "error") {
+          this._trackingWorkerBusy = false;
+          const error = new Error(message.message || "Tracking worker failed.");
+          if (!this._trackingWorkerReady) {
+            finishReject(error);
+          } else {
+            console.warn(`[AR] Tracking worker ${message.phase || "runtime"} failure:`, error);
+            this.fallbackToMainThreadTracking(error);
+          }
+        }
+      };
+
+      worker.onerror = (event) => {
+        const error = new Error(event?.message || "Tracking worker script failed.");
+        if (!this._trackingWorkerReady) finishReject(error);
+        else this.fallbackToMainThreadTracking(error);
+      };
+
+      worker.postMessage({
+        type: "init",
+        config: {
+          mode: this.trackingMode(),
+          mediaPipeBase: MEDIAPIPE_BASE,
+          wasmBase: WASM_BASE,
+          handModelUrl: MODEL_URL,
+          faceModelUrl: FACE_MODEL_URL,
+          poseModelUrl: POSE_MODEL_URL
+        }
+      });
+    });
+  }
+
+  async fallbackToMainThreadTracking(error) {
+    if (this._trackingWorkerFallbackStarted) return;
+    this._trackingWorkerFallbackStarted = true;
+    this._trackingWorkerReady = false;
+    this._trackingWorkerBusy = false;
+    this._trackingWorker?.terminate();
+    this._trackingWorker = null;
+
+    try {
+      await this.startMediaPipeOnMainThread();
+      this.setStatus("");
+    } catch (fallbackError) {
+      console.error("[AR] Tracking fallback failed:", fallbackError, error);
+      this.setStatus("Tracking could not restart on this device.");
+    }
+  }
+
+  sendFrameToTrackingWorker(now) {
+    if (!this._trackingWorkerReady || !this._trackingWorker || this._trackingWorkerBusy) return;
+    this._trackingWorkerBusy = true;
+    const worker = this._trackingWorker;
+    const frameId = ++this._trackingFrameId;
+
+    createImageBitmap(this.video).then((bitmap) => {
+      if (!this._trackingWorkerReady || this._trackingWorker !== worker) {
+        bitmap.close?.();
+        this._trackingWorkerBusy = false;
+        return;
+      }
+      worker.postMessage({ type: "frame", bitmap, timestamp: now, frameId }, [bitmap]);
+    }).catch((error) => {
+      this._trackingWorkerBusy = false;
+      console.warn("[AR] Could not transfer camera frame to tracking worker:", error);
+      this.fallbackToMainThreadTracking(error);
+    });
+  }
+
+  async startMediaPipeOnMainThread() {
     // Dynamically import to avoid blocking the customs page load.
     const vision = await import(/* @vite-ignore */ `${MEDIAPIPE_BASE}/vision_bundle.mjs`);
     const fileset = await vision.FilesetResolver.forVisionTasks(WASM_BASE);
@@ -1516,18 +2009,24 @@ class ARTryOn {
 
     this.scene = new THREE.Scene();
 
-    // Orthographic camera in pixel space (top-left origin, but three uses center;
-    // we'll map landmark x→canvas X (mirrored) and y→canvas Y).
-    this.camera = new THREE.OrthographicCamera(
-      -rect.width / 2, rect.width / 2,
-      rect.height / 2, -rect.height / 2,
-      -1000, 1000
+    // Perspective compositing camera. Landmark math remains in stage pixels,
+    // then stageToWorld() projects those pixels onto a stable AR plane. Unlike
+    // the old orthographic camera, near/far sides of a tilted ring now receive
+    // real perspective foreshortening.
+    this._cameraFovDeg = this.currentCameraFov();
+    this.camera = new THREE.PerspectiveCamera(
+      this._cameraFovDeg,
+      rect.width / Math.max(rect.height, 1),
+      0.01,
+      10
     );
-    this.camera.position.z = 100;
+    this.camera.position.set(0, 0, 1);
+    this.camera.lookAt(0, 0, this._arPlaneZ);
 
     // Lighting rig — acts as a fallback before the HDR env loads, and
     // adds shaped specular punch on top of the env's diffuse contribution.
-    // The sparkle light is animated each frame to make the gem scintillate.
+    // Static key/fill/rim lights cover the short interval before the room/HDR
+    // environment is ready. Motion-only facet accents are defined separately.
     this._hemi = new THREE.HemisphereLight(0xffffff, 0x404a55, 0.55);
     this.scene.add(this._hemi);
     this._key = new THREE.DirectionalLight(0xffffff, 1.4);
@@ -1539,26 +2038,26 @@ class ARTryOn {
     this._rim = new THREE.DirectionalLight(0xfff1d8, 0.7);
     this._rim.position.set(-0.2, 0.6, -1);
     this.scene.add(this._rim);
-    // §11 phase-memory sparkle rig — three small point lights with locked
-    // phase offsets. Intensity is driven by hand motion + local camera light,
-    // so scintillation appears when the hand moves, not as arbitrary blinking.
+    // Motion-only facet lights. They start at zero and are permitted to
+    // contribute only while the tracked piece is moving. A stationary gem
+    // is lit entirely by the captured room/HDR environment, so it never
+    // "twinkles on a timer".
     this._sparkleLights = [
-      new THREE.PointLight(0xffffff, 1.2, 0, 2),
-      new THREE.PointLight(0xdfe8ff, 0.55, 0, 2),
-      new THREE.PointLight(0xffefd0, 0.45, 0, 2)
+      new THREE.PointLight(0xffffff, 0, 0, 2),
+      new THREE.PointLight(0xdfe8ff, 0, 0, 2),
+      new THREE.PointLight(0xffefd0, 0, 0, 2)
     ];
     this._sparkleLight = this._sparkleLights[0];
-    this._sparkleLights.forEach((light, index) => {
-      light.position.set(index * 42 - 42, 30, 200);
-      this.scene.add(light);
-    });
+    this._sparkleLights.forEach((light) => this.scene.add(light));
     this._lightProbe = document.createElement("canvas");
     this._lightProbe.width = 28;
     this._lightProbe.height = 18;
     this._lightProbeCtx = this._lightProbe.getContext("2d", { willReadFrequently: true });
+    this.setupHandSilhouetteOccluder();
 
     const state = readDesignState();
     this._designState = state || {};
+    this._physicalSpec = buildJewellerySpec(this._designState);
     // Prefer the designer's full ring builder (halo, prongs, milgrain,
     // hallmark, pavé, channel, baguette flanks, etc.) when available.
     // Falls back to the simplified buildRing() if the designer module
@@ -1585,13 +2084,39 @@ class ARTryOn {
     const bb = new THREE.Box3().setFromObject(this.ring);
     const pieceSize = new THREE.Vector3();
     bb.getSize(pieceSize);
-    this._ringLocalOuterR = Math.max(bb.max.x, -bb.min.x, 1e-3);
+    this._physicalSpec = this.ring.userData?.jewellerySpec || this._physicalSpec;
+    this._unitsPerMm = Number(this.ring.userData?.unitsPerMm) || WORLD_UNITS_PER_MM;
+    if (this.pieceType === "Ring" && this._physicalSpec?.ring) {
+      this._ringLocalInnerR = this._physicalSpec.ring.innerRadiusMm * this._unitsPerMm;
+      this._ringLocalOuterR = (
+        this._physicalSpec.ring.innerRadiusMm + this._physicalSpec.ring.shankThicknessMm
+      ) * this._unitsPerMm;
+    } else {
+      this._ringLocalOuterR = Math.max(bb.max.x, -bb.min.x, 1e-3);
+      this._ringLocalInnerR = this._ringLocalOuterR * 0.84;
+    }
     if (this.pieceType === "Necklace") {
       this.prepareNecklaceSmartWrap(bb, pieceSize);
     } else {
       this._necklaceLocalVisibleSpan = Math.max(pieceSize.x * 0.94, NECKLACE_LOCAL_VISIBLE_SPAN * 0.72, 1e-3);
       this._necklaceLocalHeight = Math.max(pieceSize.y, 1);
       this._necklaceAnchorLocal.set(0, 0, 0);
+    }
+    if (this.pieceType === "Earrings") {
+      /* The studio builds the pair at a compositional spacing; AR keeps the
+       * mm-true per-earring geometry but re-spans the two sides so each
+       * earring lands on its own detected lobe. Cache every child's build
+       * position + which side of the pair it belongs to. */
+      this._earringBuildHalfSpan =
+        Number(this.ring.userData?.earringPairHalfSpanLocal) || EARRING_PAIR_LOCAL_HALF_SPAN;
+      const childBox = new THREE.Box3();
+      this._earringChildBase = this.ring.children.map((child) => {
+        childBox.setFromObject(child);
+        const cx = Number.isFinite(childBox.min.x) && Number.isFinite(childBox.max.x)
+          ? (childBox.min.x + childBox.max.x) * 0.5
+          : child.position.x;
+        return { node: child, baseX: child.position.x, side: cx >= 0 ? 1 : -1 };
+      });
     }
 
     /* Realism boost — crank env reflections on every PBR material under
@@ -1602,11 +2127,13 @@ class ARTryOn {
       if (!node.isMesh || !node.material) return;
       const mats = Array.isArray(node.material) ? node.material : [node.material];
       for (const m of mats) {
-        if ("envMapIntensity" in m) m.envMapIntensity = 1.6;
-        // Stones — sharpen the faceted look.
-        const isStone = m.transparent || (m.transmission !== undefined && m.transmission > 0) ||
+        if ("envMapIntensity" in m) m.envMapIntensity = Math.min(m.envMapIntensity ?? 1, 1.35);
+        const isStone = (m.transmission !== undefined && m.transmission > 0) ||
           /stone|gem|diamond|emerald|sapphire|ruby/i.test(m.name || "");
-        if (isStone && "roughness" in m) m.roughness = Math.min(m.roughness ?? 0.1, 0.05);
+        if (isStone && "roughness" in m) m.roughness = Math.max(0.008, Math.min(m.roughness ?? 0.04, 0.06));
+        // Do not add a synthetic coating in AR. The room reflection should
+        // match the camera feed, not a second white clearcoat lobe.
+        if (isStone && "clearcoat" in m) m.clearcoat = 0;
       }
     });
 
@@ -1661,8 +2188,13 @@ class ARTryOn {
     const taper = isBracelet
       ? { distal: 0.96, proximal: 1.00 }
       : (FINGER_OCCLUDER_TAPER[this.activeFinger] || FINGER_OCCLUDER_TAPER.ring);
-    const occluderGeom = new THREE.CylinderGeometry(fingerR * taper.distal, fingerR * taper.proximal, fingerL, 48, 1, false);
-    occluderGeom.rotateX(Math.PI / 2);  // align cylinder axis to local +Z
+    const occluderGeom = makeAnatomicalOccluderGeometry({
+      radius: fingerR,
+      length: fingerL,
+      distal: taper.distal,
+      proximal: taper.proximal,
+      depthRatio: isBracelet ? 0.72 : 0.82
+    });
     const occluderMat = new THREE.MeshBasicMaterial({
       colorWrite: false,
       depthWrite: true,
@@ -1752,11 +2284,9 @@ class ARTryOn {
       const r = stage.getBoundingClientRect();
       this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, MAX_PIXEL_RATIO));
       this.renderer.setSize(r.width, r.height, false);
-      this.camera.left = -r.width / 2;
-      this.camera.right = r.width / 2;
-      this.camera.top = r.height / 2;
-      this.camera.bottom = -r.height / 2;
+      this.camera.aspect = r.width / Math.max(r.height, 1);
       this.camera.updateProjectionMatrix();
+      this.syncHandSilhouettePlane();
     };
     window.addEventListener("resize", this._onResize);
   }
@@ -1768,13 +2298,83 @@ class ARTryOn {
         const pmrem = new THREE.PMREMGenerator(this.renderer);
         pmrem.compileEquirectangularShader();
         const envRT = pmrem.fromEquirectangular(tex);
-        this.scene.environment = envRT.texture;
+        // Only take over if the live camera environment hasn't already
+        // kicked in — HDR is the fallback, not the override.
+        if (!this._envLive?.rt) this.scene.environment = envRT.texture;
         this._envRT = envRT;
         tex.dispose();
         pmrem.dispose();
         resolve();
       }, undefined, reject);
     });
+  }
+
+  /* §3 live image-based lighting — rebuild the reflection environment from
+   * the actual camera feed every ~600 ms. The user's room tones (wall
+   * colours, windows, skin) show up IN the metal, which is the single
+   * strongest realism cue for polished gold. The previous implementation
+   * painted synthetic softboxes into this map; those highlights could not
+   * exist in the recorded room and made the overlay look composited. The
+   * live map now contains only measured camera colour plus a restrained
+   * lower-hemisphere falloff. Falls back to the static HDR on failure. */
+  updateLiveEnvironment(now) {
+    if (this._envLiveFailed || !this.renderer || !this.video || this.video.readyState < 2) return;
+    if (this._envLive && now - this._envLive.lastT < 600) return;
+    try {
+      if (!this._envLive) {
+        const canvas = document.createElement("canvas");
+        canvas.width = 64;
+        canvas.height = 32;
+        const small = document.createElement("canvas");
+        small.width = 8;
+        small.height = 4;
+        this._envLive = {
+          canvas,
+          ctx: canvas.getContext("2d"),
+          small,
+          smallCtx: small.getContext("2d"),
+          pmrem: new THREE.PMREMGenerator(this.renderer),
+          rt: null,
+          lastT: 0
+        };
+        this._envLive.pmrem.compileEquirectangularShader();
+      }
+      const env = this._envLive;
+      env.lastT = now;
+      const { canvas, ctx, small, smallCtx } = env;
+
+      // Cheap two-tap gaussian: downsample to 8×4 then stretch back up
+      // with smoothing — reflections should be soft room tone, not a
+      // sharp video billboard glued to the metal.
+      smallCtx.drawImage(this.video, 0, 0, small.width, small.height);
+      ctx.imageSmoothingEnabled = true;
+      ctx.drawImage(small, 0, 0, canvas.width, canvas.height);
+
+      // Floor: darken the lower hemisphere so the metal's underside stays
+      // grounded instead of reflecting bright video from below.
+      const floor = ctx.createLinearGradient(0, canvas.height * 0.55, 0, canvas.height);
+      floor.addColorStop(0, "rgba(8,8,10,0)");
+      floor.addColorStop(1, "rgba(8,8,10,0.85)");
+      ctx.fillStyle = floor;
+      ctx.fillRect(0, canvas.height * 0.55, canvas.width, canvas.height * 0.45);
+
+      const tex = new THREE.CanvasTexture(canvas);
+      tex.mapping = THREE.EquirectangularReflectionMapping;
+      tex.colorSpace = THREE.SRGBColorSpace;
+      const rt = env.pmrem.fromEquirectangular(tex);
+      tex.dispose();
+      this.scene.environment = rt.texture;
+      env.rt?.dispose();
+      env.rt = rt;
+    } catch {
+      // Canvas/PMREM failed (tainted feed, context loss…) — restore HDR
+      // and stop trying.
+      this._envLiveFailed = true;
+      this._envLive?.rt?.dispose();
+      this._envLive?.pmrem?.dispose();
+      this._envLive = null;
+      if (this._envRT) this.scene.environment = this._envRT.texture;
+    }
   }
 
   sampleVideoLighting(now) {
@@ -1934,49 +2534,39 @@ class ARTryOn {
 
   updateSparkle(now, dt) {
     if (!this._sparkleLights?.length || !this.ring || !this.ring.visible) return;
-    // §11 phase coherence: sparkle should respond to relative motion between
-    // camera, light, and gem facets. Motion energy raises amplitude; local
-    // brightness modulates it so gems do not flash absurdly in flat light.
-    //
-    // §11 view-aware gate: stone facets only catch the light when the table
-    // (≈ stone normal) is oriented toward both the camera and an inferred
-    // light direction. _stoneNormalZ ∈ [-1,1] is the +Z component of the
-    // stone-side basis vector (cos(pitch)·cos(roll) at first order). We
-    // build a soft-coherence factor:
-    //     C_view = 0.32 + 0.68 · max(0, _stoneNormalZ)^1.6
-    // and a light-alignment factor from the lighting-probe gradient — when
-    // the local light gradient points in the stone-side screen direction
-    // (-_vUp.xy), the gem is closer to the mirror reflection condition
-    // and we boost sparkle accordingly.
+
     const confidence = clamp(this._poseConfidence, 0, 1);
     const motion = clamp(this._motionEnergy, 0, 1);
-    const darknessBoost = clamp(1 - this._localBrightness, 0, 1);
+    const motionGate = smoothstep(0.07, 0.34, motion) * confidence;
     const stoneZ = clamp(this._stoneNormalZ ?? 1, -1, 1);
-    const viewGate = 0.32 + 0.68 * Math.pow(Math.max(0, stoneZ), 1.6);
-    // Light-alignment dot: stone-screen-up vs light gradient direction.
-    const sUpX = this._vUp ? this._vUp.x : 0;
-    const sUpY = this._vUp ? this._vUp.y : 1;
-    const sUpLen = Math.hypot(sUpX, sUpY) || 1;
-    const lgDot = (sUpX / sUpLen) * (-this._lightGradient.x)
-                + (sUpY / sUpLen) * (-this._lightGradient.y);
-    const lightAlign = 0.78 + 0.32 * clamp(lgDot, -1, 1);
-    const burst = clamp(motion * 1.35 + darknessBoost * 0.28, 0.08, 1) * viewGate * lightAlign;
-    this._sparklePhase += dt * (1.4 + motion * 5.6);
-    const baseR = 125 + motion * 95;
-    const t = now * 0.001;
+    const viewGate = 0.20 + 0.80 * Math.pow(Math.max(0, stoneZ), 1.8);
+
+    // Freeze phase when the hand is still. Phase therefore encodes relative
+    // motion instead of wall-clock time, which prevents autonomous blinking.
+    this._sparklePhase += dt * motionGate * (2.2 + motion * 5.0);
+
+    const unitsPerPixel = this.worldUnitsPerPixelAtZ(this.ring.position.z);
+    const orbitBase = (34 + motion * 26) * unitsPerPixel;
+    const depthBase = 0.055;
     const colour = this._localLightColor || new THREE.Color(1, 1, 1);
+    const lightX = clamp(-this._lightGradient.x, -1, 1);
+    const lightY = clamp(this._lightGradient.y, -1, 1);
 
     this._sparkleLights.forEach((light, index) => {
       const phase = this._sparklePhase + index * 2.094;
-      const orbit = baseR * (1 + index * 0.18);
+      const orbit = orbitBase * (1 + index * 0.16);
       light.position.set(
-        this.ring.position.x + Math.cos(phase * 1.13 + t * 0.23) * orbit + this._lightGradient.x * 36,
-        this.ring.position.y + Math.sin(phase * 0.91) * orbit * 0.42 + 62 - this._lightGradient.y * 30,
-        175 + Math.sin(phase * 0.67 + index) * 42
+        this.ring.position.x + lightX * orbitBase * 0.65 + Math.cos(phase) * orbit,
+        this.ring.position.y + lightY * orbitBase * 0.45 + Math.sin(phase * 0.83) * orbit * 0.50,
+        this.ring.position.z + depthBase + index * 0.012
       );
-      const wave = Math.pow(Math.max(0, Math.sin(phase * (1.7 + index * 0.23))), 3.0);
-      light.intensity = confidence * (0.12 + burst * (0.36 + wave * (index === 0 ? 1.35 : 0.72)));
-      light.color.lerp(colour, 0.12);
+
+      // Short, motion-driven facet events. No minimum intensity: at rest the
+      // lights fade completely and the environment alone determines sparkle.
+      const facetPulse = Math.pow(Math.max(0, Math.sin(phase * (1.43 + index * 0.17))), 5);
+      const target = motionGate * viewGate * (0.035 + facetPulse * (index === 0 ? 0.34 : 0.18));
+      light.intensity += (target - light.intensity) * (1 - Math.exp(-dt / 0.055));
+      light.color.lerp(colour, 0.10);
     });
   }
 
@@ -1995,26 +2585,24 @@ class ARTryOn {
     const landmarker = this.pieceType === "Earrings" ? this.faceLandmarker
                      : this.pieceType === "Necklace" ? this.poseLandmarker
                      : this.handLandmarker;
-    if (!landmarker || !this.video || this.video.readyState < 2) return;
+    if (!this.video || this.video.readyState < 2) return;
 
     const now = performance.now();
     const dt = this._lastRafTime ? Math.min(0.1, (now - this._lastRafTime) / 1000) : 0.016;
-    if (this.video.currentTime !== this.lastVideoTime && now - this.lastDetectMs >= this.detectInterval) {
+    const trackingAvailable = this._trackingWorkerReady || !!landmarker;
+    if (trackingAvailable
+        && this.video.currentTime !== this.lastVideoTime
+        && now - this.lastDetectMs >= this.detectInterval) {
       this.lastVideoTime = this.video.currentTime;
       this.lastDetectMs = now;
-      const detectStart = performance.now();
-      const result = landmarker.detectForVideo(this.video, now);
-      if (this.pieceType === "Bracelet") {
-        this.applyResultBracelet(result);
-      } else if (this.pieceType === "Earrings") {
-        this.applyResultEarrings(result);
-      } else if (this.pieceType === "Necklace") {
-        this.applyResultNecklace(result);
-      } else {
-        this.applyResult(result);
+
+      if (this._trackingWorkerReady) {
+        this.sendFrameToTrackingWorker(now);
+      } else if (landmarker) {
+        const detectStart = performance.now();
+        const result = landmarker.detectForVideo(this.video, now);
+        this.applyTrackingResult(result, performance.now() - detectStart);
       }
-      const detectCost = performance.now() - detectStart;
-      this.updateDeltaBudget(detectCost);
     }
 
     /* Per-rAF pose interpolation toward the latest target. Exponential
@@ -2063,6 +2651,7 @@ class ARTryOn {
     this.updateSparkle(now, dt);
     this.updateQualityReadout();
     this.sampleVideoLighting(now);
+    this.updateLiveEnvironment(now);
     this.renderer.render(this.scene, this.camera);
   };
 
@@ -2083,6 +2672,7 @@ class ARTryOn {
         if (this.sizeEl) this.sizeEl.hidden = true;
         if (this.qualityEl) this.qualityEl.hidden = true;
         if (this.handLostFrames === 9) this.setStatus("Show your hand to the camera");
+        this.hideHandSilhouetteOccluder();
       }
       return;
     }
@@ -2115,6 +2705,7 @@ class ARTryOn {
     const pkyW = world[PINKY_MCP];
     const handWidthM = Math.hypot(pkyW.x - idxW.x, pkyW.y - idxW.y, pkyW.z - idxW.z) || 0.08;
     const pxPerMeter = handWidthPx / handWidthM;
+    this.updateHandSilhouetteOccluder(landmarks, metrics, handWidthPx);
     const fingerDiameterM = this._updateSizeReadout(handWidthM, now);
 
     /* --- 2D position (mirrored: video is CSS-flipped, overlay is not) --- */
@@ -2250,6 +2841,7 @@ class ARTryOn {
       if (this._badPoseFrames > 5) {
         this.ring.visible = false;
         this._hasTarget = false;
+        this.hideHandSilhouetteOccluder();
         this.setStatus("Hold your hand steady in the camera");
       }
       return;
@@ -2264,11 +2856,15 @@ class ARTryOn {
      * That minimizes both collision (ring sinking into finger) and floating
      * (ring hovering larger than the finger) under the tracked hand body B.
      * Designer ring's local outer R varies, so divide it out. */
-    const weight = clamp(Number(this._designState?.weight) || 1, 0.55, 1.8);
-    const ringWallM = RING_WALL_THICKNESS_M * (0.82 + weight * 0.18);
-    const targetOuterMeters = fingerDiameterM * 0.5 + ringWallM + RING_CONTACT_CLEARANCE_M;
+    const ringWallM = (this._physicalSpec?.ring?.shankThicknessMm || 1.75) * METERS_PER_MM;
     const localOuterR = this._ringLocalOuterR || 1.0;
-    const rawScale = ((pxPerMeter * targetOuterMeters) / localOuterR) * this.calibration.fit;
+    const localInnerR = this._ringLocalInnerR || localOuterR * 0.84;
+    // The object already contains the selected physical ring dimensions. Scale
+    // local units to camera pixels using MediaPipe's px-per-metre estimate; do
+    // NOT resize the ring to force it onto every finger. A US 7 now remains a
+    // US 7 and visible looseness/tightness is honest.
+    const metersPerLocalUnit = METERS_PER_MM / Math.max(this._unitsPerMm, 1e-6);
+    const rawScale = pxPerMeter * metersPerLocalUnit * this.calibration.fit;
 
     /* --- smooth each scalar independently --- */
     const px = this.filtPx.filter(rawPx, now);
@@ -2363,10 +2959,13 @@ class ARTryOn {
     const fingerRadiusPx = Math.max(1, fingerDiameterM * 0.5 * pxPerMeter);
     const fingerLocalRadius = fingerRadiusPx / Math.max(1e-3, s);
     this._targetFingerLocalRadius = clamp(fingerLocalRadius, localOuterR * 0.48, localOuterR * 1.12);
-    const idealOuterPx = fingerRadiusPx + ringWallM * pxPerMeter;
-    const actualOuterPx = localOuterR * s;
-    const contactError = Math.abs(actualOuterPx - idealOuterPx) / Math.max(idealOuterPx, 1);
-    const contactScore = 1 - smoothstep(0.10, 0.34, contactError);
+    const selectedInnerRadiusPx = localInnerR * s;
+    const selectedOuterRadiusPx = localOuterR * s;
+    const fitError = (selectedInnerRadiusPx - fingerRadiusPx) / Math.max(fingerRadiusPx, 1);
+    const contactError = Math.abs(fitError);
+    const contactScore = 1 - smoothstep(0.035, 0.18, contactError);
+    this._ringFitError = fitError;
+    const actualOuterPx = selectedOuterRadiusPx;
     this._targetShadowOpacity = (this._shadowBaseOpacity || 0.85) * contactScore * clamp(0.50 + confidence * 0.55, 0, 1);
     const occluderBase = this._occluderBaseRadius || this._targetFingerLocalRadius;
     this._targetShadowScaleX = clamp(this._targetFingerLocalRadius / occluderBase, 0.72, 1.42);
@@ -2388,8 +2987,9 @@ class ARTryOn {
      *   • confidence  — don't dip during low-confidence frames
      *   • motionGate  — relax the dip during fast motion (finger flexes)
      *
-     * The dip is applied in SCREEN pixels (pxPerMeter conversion), in the
-     * 2D direction (vUp.x, vUp.y) since the orthographic camera collapses Z.
+     * The dip is measured in camera pixels for stable contact tuning, then
+     * stageToWorld() projects the displaced anchor through the calibrated
+     * perspective camera onto the AR plane.
      */
     const dipMeters = 0.00045; // ~0.45 mm flesh compression target
     const motionGate = 1 - smoothstep(0.18, 0.72, this._motionEnergy);
@@ -2397,13 +2997,12 @@ class ARTryOn {
       * clamp(contactScore, 0, 1)
       * clamp(confidence, 0, 1)
       * motionGate;
-    this._tgtPos.set(
+    this.setTargetFromStage(
       px - this._vUp.x * dipPx,
       py - this._vUp.y * dipPx,
-      0
+      s
     );
     this._tgtQuat.setFromRotationMatrix(this._mat);
-    this._tgtScale = s;
     // §11 stash stone normal Z so updateSparkle can apply view-aware gating
     // without recomputing the basis. _vUp.z is the stone direction's depth
     // component; |_vUp.z| ≈ 1 when stone faces camera, ≈ 0 at grazing.
@@ -2418,7 +3017,7 @@ class ARTryOn {
       const dtDet = Math.max(0.012, Math.min(0.20, (now - this._lastDetectionTime) / 1000));
       const instVx = (this._tgtPos.x - this._tgtPrevX) / dtDet;
       const instVy = (this._tgtPos.y - this._tgtPrevY) / dtDet;
-      const instVs = (s - this._tgtPrevScale) / dtDet;
+      const instVs = (this._tgtScale - this._tgtPrevScale) / dtDet;
       const velAlpha = 0.45;
       this._velPx += (instVx - this._velPx) * velAlpha;
       this._velPy += (instVy - this._velPy) * velAlpha;
@@ -2427,12 +3026,12 @@ class ARTryOn {
     this._lastDetectionTime = now;
     this._tgtPrevX = this._tgtPos.x;
     this._tgtPrevY = this._tgtPos.y;
-    this._tgtPrevScale = s;
+    this._tgtPrevScale = this._tgtScale;
 
     if (!this._hasTarget) {
       this.ring.position.copy(this._tgtPos);
       this.ring.quaternion.copy(this._tgtQuat);
-      this.ring.scale.setScalar(s);
+      this.ring.scale.setScalar(this._tgtScale);
       this._hasTarget = true;
       // First lock — no prior detection so velocity is meaningless.
       this._velPx = this._velPy = this._velScale = 0;
@@ -2482,6 +3081,7 @@ class ARTryOn {
         this._hasTarget = false;
         if (this.qualityEl) this.qualityEl.hidden = true;
         if (this.handLostFrames === 9) this.setStatus("Show your wrist to the camera");
+        this.hideHandSilhouetteOccluder();
       }
       return;
     }
@@ -2496,6 +3096,7 @@ class ARTryOn {
     const pkyW = world[PINKY_MCP];
     const handWidthM = Math.hypot(pkyW.x - idxW.x, pkyW.y - idxW.y, pkyW.z - idxW.z) || 0.085;
     const pxPerMeter = handWidthPx / handWidthM;
+    this.updateHandSilhouetteOccluder(landmarks, metrics, handWidthPx);
 
     // Stage-space wrist + palm centre.  Forearm axis (in screen) runs
     // from palm-centre → wrist; we extrapolate slightly past the wrist
@@ -2593,6 +3194,7 @@ class ARTryOn {
       if (this._badPoseFrames > 5) {
         this.ring.visible = false;
         this._hasTarget = false;
+        this.hideHandSilhouetteOccluder();
         this.setStatus("Hold your wrist steady in the camera");
       }
       return;
@@ -2600,15 +3202,24 @@ class ARTryOn {
     this._badPoseFrames = 0;
     this.setStatus("");
     this.ring.visible = true;
-    if (this.sizeEl) this.sizeEl.hidden = true;
 
-    // Scale: wrist diameter ≈ 0.62 × hand width.  Target band outer
-    // radius = wrist radius + wall + clearance.  Convert to local
-    // units via pxPerMeter / piece-local outer radius.
+    // Honest physical scale — identical maths to the ring pipeline: the
+    // bangle renders at its true spec size, never resized to the wrist.
     const wristDiameterM = handWidthM * WRIST_DIAMETER_RATIO;
-    const targetOuterM = wristDiameterM * 0.5 + BRACELET_WALL_THICKNESS_M + BRACELET_CONTACT_CLEARANCE_M;
-    const localOuterR = this._ringLocalOuterR || 1.42;
-    const rawScale = ((pxPerMeter * targetOuterM) / localOuterR) * this.calibration.fit;
+    const metersPerLocalUnit = METERS_PER_MM / Math.max(this._unitsPerMm, 1e-6);
+    const rawScale = pxPerMeter * metersPerLocalUnit * this.calibration.fit;
+
+    // Honest fit feedback instead of silent auto-resize.
+    const braceletInnerMm = Number(this._physicalSpec?.bracelet?.innerDiameterMm);
+    if (this.sizeEl && Number.isFinite(braceletInnerMm) && braceletInnerMm > 0) {
+      const wristMm = wristDiameterM * 1000;
+      const slackMm = braceletInnerMm - wristMm;
+      const fitWord = slackMm < 2 ? "snug" : slackMm > 14 ? "loose" : "comfortable";
+      this.sizeEl.textContent = `Ø ${braceletInnerMm.toFixed(0)} mm · ${fitWord} on this wrist`;
+      this.sizeEl.hidden = false;
+    } else if (this.sizeEl) {
+      this.sizeEl.hidden = true;
+    }
 
     // Filter all scalars (OneEuro).
     const px = this.filtPx.filter(rawPx, now);
@@ -2671,6 +3282,7 @@ class ARTryOn {
 
     // Contact + shadow targets — same scheme as ring path but sized
     // to the wrist (no flesh-compression dip; the wrist is mostly bone).
+    const localOuterR = this._ringLocalOuterR || 1.42;
     const wristRadiusPx = Math.max(1, wristDiameterM * 0.5 * pxPerMeter);
     const wristLocalRadius = wristRadiusPx / Math.max(1e-3, s);
     this._targetFingerLocalRadius = clamp(wristLocalRadius, localOuterR * 0.66, localOuterR * 1.02);
@@ -2686,9 +3298,8 @@ class ARTryOn {
     this._targetShadowScaleY = clamp(1 - Math.abs(roll) * 0.14, 0.82, 1.06);
     this._targetShadowScaleZ = clamp(0.98 + Math.abs(pitch) * 0.20 + this._motionEnergy * 0.14, 0.90, 1.36);
 
-    this._tgtPos.set(px, py, 0);
+    this.setTargetFromStage(px, py, s);
     this._tgtQuat.setFromRotationMatrix(this._mat);
-    this._tgtScale = s;
     this._stoneNormalZ = this._vUp.z;
 
     // Predictor velocity (drives forward extrapolation in loop()).
@@ -2696,7 +3307,7 @@ class ARTryOn {
       const dtDet = Math.max(0.012, Math.min(0.20, (now - this._lastDetectionTime) / 1000));
       const instVx = (this._tgtPos.x - this._tgtPrevX) / dtDet;
       const instVy = (this._tgtPos.y - this._tgtPrevY) / dtDet;
-      const instVs = (s - this._tgtPrevScale) / dtDet;
+      const instVs = (this._tgtScale - this._tgtPrevScale) / dtDet;
       const velAlpha = 0.45;
       this._velPx += (instVx - this._velPx) * velAlpha;
       this._velPy += (instVy - this._velPy) * velAlpha;
@@ -2705,12 +3316,12 @@ class ARTryOn {
     this._lastDetectionTime = now;
     this._tgtPrevX = this._tgtPos.x;
     this._tgtPrevY = this._tgtPos.y;
-    this._tgtPrevScale = s;
+    this._tgtPrevScale = this._tgtScale;
 
     if (!this._hasTarget) {
       this.ring.position.copy(this._tgtPos);
       this.ring.quaternion.copy(this._tgtQuat);
-      this.ring.scale.setScalar(s);
+      this.ring.scale.setScalar(this._tgtScale);
       this._hasTarget = true;
       this._velPx = this._velPy = this._velScale = 0;
     }
@@ -2730,6 +3341,18 @@ class ARTryOn {
    * with a mirror flip on the X axis when the selfie preview is on.
    * No occluder + no contact shadow (skipped in startThree).
    * ================================================================= */
+  /* Slide each earring child along local X so the pair spacing matches the
+   * wearer's detected lobe span while the per-earring geometry keeps its
+   * honest physical scale. Children were cached with their build-time
+   * positions and side signs in startThree(). */
+  updateEarringPairSpan() {
+    if (!this._earringChildBase || !Number.isFinite(this._earringTargetHalfSpanLocal)) return;
+    const delta = this._earringTargetHalfSpanLocal - (this._earringBuildHalfSpan || EARRING_PAIR_LOCAL_HALF_SPAN);
+    for (const item of this._earringChildBase) {
+      item.node.position.x = item.baseX + delta * item.side;
+    }
+  }
+
   applyResultEarrings(result) {
     const now = performance.now();
     const metrics = this.videoMetrics();
@@ -2771,17 +3394,37 @@ class ARTryOn {
       const foreDot = (forehead.x - midX) * perpAx + (forehead.y - midY) * perpAy;
       if (foreDot > 0) perpSign = -1;
     }
-    const dropPx = earPx * EARLOBE_DROP_RATIO;
-    const lobeRx = earR.x + perpAx * perpSign * dropPx;
-    const lobeRy = earR.y + perpAy * perpSign * dropPx;
-    const lobeLx = earL.x + perpAx * perpSign * dropPx;
-    const lobeLy = earL.y + perpAy * perpSign * dropPx;
-    const rawPx = (lobeRx + lobeLx) / 2 + (this.calibration.side || 0);
-    const rawPy = (lobeRy + lobeLy) / 2 + (this.calibration.lift || 0);
+    const dropPx = earPx * EARLOBE_DROP_RATIO + (this.calibration.earDrop || 0);
+    let lobeRx = earR.x + perpAx * perpSign * dropPx;
+    let lobeRy = earR.y + perpAy * perpSign * dropPx;
+    let lobeLx = earL.x + perpAx * perpSign * dropPx;
+    let lobeLy = earL.y + perpAy * perpSign * dropPx;
 
-    // Scale: inter-lobe pixel span \u2192 local pair span.
+    // Face landmarks sit near the tragus, while real piercing positions vary
+    // by anatomy and personal placement. Expand/contract the pair around its
+    // midpoint with the saved ear-span calibration instead of scaling the
+    // jewellery model alone; this keeps each earring on its own lobe.
+    const lobeMidX = (lobeRx + lobeLx) * 0.5;
+    const lobeMidY = (lobeRy + lobeLy) * 0.5;
+    const earSpanCalibration = this.calibration.earSpan || 1;
+    const halfSpanX = (lobeLx - lobeRx) * 0.5 * earSpanCalibration;
+    const halfSpanY = (lobeLy - lobeRy) * 0.5 * earSpanCalibration;
+    lobeRx = lobeMidX - halfSpanX;
+    lobeRy = lobeMidY - halfSpanY;
+    lobeLx = lobeMidX + halfSpanX;
+    lobeLy = lobeMidY + halfSpanY;
+
+    const rawPx = lobeMidX + (this.calibration.side || 0);
+    const rawPy = lobeMidY + (this.calibration.lift || 0);
+
+    // Scale: honest physical size. The inter-ear pixel span vs average
+    // bitragion breadth gives px-per-metre; each earring then renders at
+    // its true mm dimensions (same formula as the ring pipeline). The
+    // pair spacing is corrected separately in updateEarringPairSpan().
     const lobeSpanPx = Math.hypot(lobeLx - lobeRx, lobeLy - lobeRy);
-    const rawScale = (lobeSpanPx / (2 * EARRING_PAIR_LOCAL_HALF_SPAN)) * this.calibration.fit;
+    const earPxPerMeter = earPx / EAR_SPAN_M;
+    const earMetersPerLocalUnit = METERS_PER_MM / Math.max(this._unitsPerMm, 1e-6);
+    const rawScale = earPxPerMeter * earMetersPerLocalUnit * this.calibration.fit;
 
     // Confidence: presence-driven (FaceLandmarker presence is not exposed
     // per-landmark, so we score by ear span vs frame size + central
@@ -2809,11 +3452,15 @@ class ARTryOn {
     this.ring.visible = true;
     if (this.sizeEl) this.sizeEl.hidden = true;
 
-    // Filter scalars (position + scale only \u2014 rotation comes from the
+    // Filter scalars (position + scale only — rotation comes from the
     // matrix and is slerped target-side).
     const px = this.filtPx.filter(rawPx, now);
     const py = this.filtPy.filter(rawPy, now);
     const s = this.filtScale.filter(rawScale, now);
+
+    // Re-span the pair so each mm-true earring sits on its own lobe.
+    this._earringTargetHalfSpanLocal = (lobeSpanPx * 0.5) / Math.max(s, 1e-6);
+    this.updateEarringPairSpan();
 
     // Head rotation: prefer facialTransformationMatrixes when available,
     // fall back to a 2D roll from the inter-ear vector.
@@ -2884,15 +3531,14 @@ class ARTryOn {
     }
     this._lastFilteredPose = { px, py, fxN: 1, fyN: 0, pitch: 0, roll: 0, s };
 
-    this._tgtPos.set(px, py, 0);
-    this._tgtScale = s;
+    this.setTargetFromStage(px, py, s);
     this._stoneNormalZ = this._vFwd.z;
 
     if (this._lastDetectionTime) {
       const dtDet = Math.max(0.012, Math.min(0.20, (now - this._lastDetectionTime) / 1000));
       const instVx = (this._tgtPos.x - this._tgtPrevX) / dtDet;
       const instVy = (this._tgtPos.y - this._tgtPrevY) / dtDet;
-      const instVs = (s - this._tgtPrevScale) / dtDet;
+      const instVs = (this._tgtScale - this._tgtPrevScale) / dtDet;
       const velAlpha = 0.45;
       this._velPx += (instVx - this._velPx) * velAlpha;
       this._velPy += (instVy - this._velPy) * velAlpha;
@@ -2901,12 +3547,12 @@ class ARTryOn {
     this._lastDetectionTime = now;
     this._tgtPrevX = this._tgtPos.x;
     this._tgtPrevY = this._tgtPos.y;
-    this._tgtPrevScale = s;
+    this._tgtPrevScale = this._tgtScale;
 
     if (!this._hasTarget) {
       this.ring.position.copy(this._tgtPos);
       this.ring.quaternion.copy(this._tgtQuat);
-      this.ring.scale.setScalar(s);
+      this.ring.scale.setScalar(this._tgtScale);
       this._hasTarget = true;
       this._velPx = this._velPy = this._velScale = 0;
     }
@@ -3087,13 +3733,13 @@ class ARTryOn {
     const rawPy = anchorY + rightY * sidePx + upY * liftPx;
 
     const silhouette = this._designState?.silhouette || "Pendant";
-    const silhouetteFill = silhouette === "Choker" ? 0.62
-      : silhouette === "Lariat" ? 0.82
-      : silhouette === "Y-Drop" ? 0.78
-      : silhouette === "Station" ? 0.72
-      : NECKLACE_SHOULDER_FILL;
-    const localSpan = this._necklaceLocalVisibleSpan || NECKLACE_LOCAL_VISIBLE_SPAN;
-    const rawScale = (shoulderPx * silhouetteFill / localSpan) * this.calibration.fit;
+    // Honest physical scale: shoulder pixel span vs average biacromial
+    // breadth gives px-per-metre, so a 45 cm chain drapes like a 45 cm
+    // chain — the silhouette no longer force-fills a fixed fraction of
+    // the shoulders.
+    const shoulderPxPerMeter = shoulderPx / SHOULDER_SPAN_M;
+    const neckMetersPerLocalUnit = METERS_PER_MM / Math.max(this._unitsPerMm, 1e-6);
+    const rawScale = shoulderPxPerMeter * neckMetersPerLocalUnit * this.calibration.fit;
 
     const centerNX = (rawPx + metrics.width / 2) / metrics.width;
     const centerNY = (metrics.height / 2 - rawPy) / metrics.height;
@@ -3126,7 +3772,13 @@ class ARTryOn {
     this._badPoseFrames = 0;
     this.setStatus("");
     this.ring.visible = true;
-    if (this.sizeEl) this.sizeEl.hidden = true;
+    const chainLengthMm = Number(this._physicalSpec?.necklace?.chainLengthMm);
+    if (this.sizeEl && Number.isFinite(chainLengthMm) && chainLengthMm > 0) {
+      this.sizeEl.textContent = `${(chainLengthMm / 10).toFixed(0)} cm chain · true length`;
+      this.sizeEl.hidden = false;
+    } else if (this.sizeEl) {
+      this.sizeEl.hidden = true;
+    }
 
     const px = this.filtPx.filter(rawPx, now);
     const py = this.filtPy.filter(rawPy, now);
@@ -3217,8 +3869,7 @@ class ARTryOn {
       this._vUp.y * localAnchor.y +
       this._vFwd.y * localAnchor.z
     ) * s;
-    this._tgtPos.set(px - anchorOffsetX, py - anchorOffsetY, 0);
-    this._tgtScale = s;
+    this.setTargetFromStage(px - anchorOffsetX, py - anchorOffsetY, s);
     this._stoneNormalZ = this._vFwd.z;
     const motionGate = 1 - smoothstep(0.18, 0.72, this._motionEnergy);
     const contactScore = clamp(confidence * (0.64 + faceScore * 0.20 + axisScore * 0.16), 0, 1);
@@ -3230,7 +3881,7 @@ class ARTryOn {
       const dtDet = Math.max(0.012, Math.min(0.20, (now - this._lastDetectionTime) / 1000));
       const instVx = (this._tgtPos.x - this._tgtPrevX) / dtDet;
       const instVy = (this._tgtPos.y - this._tgtPrevY) / dtDet;
-      const instVs = (s - this._tgtPrevScale) / dtDet;
+      const instVs = (this._tgtScale - this._tgtPrevScale) / dtDet;
       const velAlpha = 0.45;
       this._velPx += (instVx - this._velPx) * velAlpha;
       this._velPy += (instVy - this._velPy) * velAlpha;
@@ -3239,12 +3890,12 @@ class ARTryOn {
     this._lastDetectionTime = now;
     this._tgtPrevX = this._tgtPos.x;
     this._tgtPrevY = this._tgtPos.y;
-    this._tgtPrevScale = s;
+    this._tgtPrevScale = this._tgtScale;
 
     if (!this._hasTarget) {
       this.ring.position.copy(this._tgtPos);
       this.ring.quaternion.copy(this._tgtQuat);
-      this.ring.scale.setScalar(s);
+      this.ring.scale.setScalar(this._tgtScale);
       this._hasTarget = true;
       this._velPx = this._velPy = this._velScale = 0;
     }
@@ -3299,6 +3950,13 @@ class ARTryOn {
     if (this.video) {
       this.video.srcObject = null;
     }
+    if (this._trackingWorker) {
+      try { this._trackingWorker.postMessage({ type: "close" }); } catch {}
+      this._trackingWorker.terminate();
+      this._trackingWorker = null;
+    }
+    this._trackingWorkerReady = false;
+    this._trackingWorkerBusy = false;
     if (this.handLandmarker) {
       try { this.handLandmarker.close(); } catch {}
       this.handLandmarker = null;
@@ -3311,6 +3969,16 @@ class ARTryOn {
       try { this.poseLandmarker.close(); } catch {}
       this.poseLandmarker = null;
     }
+    if (this._handMaskMesh) {
+      this.scene?.remove?.(this._handMaskMesh);
+      this._handMaskMesh.geometry?.dispose?.();
+      this._handMaskMesh.material?.dispose?.();
+      this._handMaskTexture?.dispose?.();
+      this._handMaskMesh = null;
+      this._handMaskTexture = null;
+      this._handMaskCanvas = null;
+      this._handMaskCtx = null;
+    }
     if (this.renderer) {
       disposeObjectTree(this.ring);
       this.renderer.dispose();
@@ -3321,6 +3989,12 @@ class ARTryOn {
       this._envRT.dispose();
       this._envRT = null;
     }
+    if (this._envLive) {
+      this._envLive.rt?.dispose();
+      this._envLive.pmrem?.dispose();
+      this._envLive = null;
+    }
+    this._envLiveFailed = false;
     if (this.modal && this.modal.parentNode) {
       this.modal.parentNode.removeChild(this.modal);
     }

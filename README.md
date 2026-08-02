@@ -1,15 +1,21 @@
-# Jewellery Website
+# Toronto Jewels Curation Website
 
-Minimal static site scaffold for a jewellery brand concept inspired by a white, silver, and deep-blue editorial luxury direction.
+Static, Netlify-ready website for Toronto Jewels Curation with crawlable collection, category, product, custom-service, and trust pages.
 
 ## Pages
 - `index.html` - homepage
-- `shop.html` - curated collection grid with category filtering
-- `product.html` - reusable product detail page powered by a `slug` query parameter
-- `customs.html` - bespoke consultation-style custom request page
-- `dream-design.html` - minimal contact-gated AI image generator request page
+- `shop.html` - crawlable collection grid with enhanced client-side filtering
+- `rings/`, `necklaces/`, `bracelets/`, `earrings/` - indexable category landing pages
+- `products/*/` - six static, indexable product detail pages with Product structured data
+- `customs.html` - custom-made consultation and jewellery editor page
+- `custom-jewellery-toronto/` - custom jewellery service landing page
+- `custom-engagement-rings-toronto/` - custom engagement ring landing page
+- `curated-luxuries.html` - Estate Luxuries appointment catalogue
 - `about.html` - brand story and direction
 - `contact.html` - direct contact and inquiry form
+- `jewellery-care.html`, `shipping-returns.html`, `privacy.html` - customer information and trust pages
+- `404.html` - custom not-found page
+- `robots.txt` and `sitemap.xml` - crawler discovery files
 
 ## Run Locally
 
@@ -59,47 +65,28 @@ After adding the variables, redeploy the site from Netlify or with the Netlify C
 assets/
 	css/styles.css
 	js/main.js
-	js/dream-generator-high.js
-	images/*.svg
+	js/designer.js
+	js/ar-tryon.js
+	images/
 netlify/
 	functions/send-sms.js
-	functions/send-dream-lead-sheet.js
-	functions/generate-dream-design.js
-	functions/generate-dream-design-status.js
 index.html
 shop.html
-product.html
 customs.html
-dream-design.html
+curated-luxuries.html
 about.html
 contact.html
+robots.txt
+sitemap.xml
 ```
-
-## Zapier Lead Webhook
-
-Create a Zap using **Webhooks by Zapier** with a **Catch Hook** trigger. Use the webhook URL as the Netlify environment variable `DREAM_LEAD_ZAPIER_WEBHOOK_URL`.
-
-The Dream Design lead webhook sends this JSON payload:
-
-```json
-{
-  "submittedAt": "2026-06-20T00:00:00.000Z",
-  "source": "dream-design",
-  "name": "Client Name",
-  "email": "client@example.com",
-  "phone": "555-555-5555",
-  "page": "Dream Design"
-}
-```
-
-In Zapier, add a Google Sheets action after the webhook trigger and map those fields into the sheet columns. The older `DREAM_LEAD_SHEET_WEBHOOK_URL` variable is still supported as a fallback.
 
 ## Notes
 
-- The site uses local SVG artwork as polished placeholders for product and editorial imagery.
-- Replace the placeholder SVG files in `assets/images/` with final photography and brand assets when available.
+- Canonical URLs, Open Graph URLs, structured data, `robots.txt`, and `sitemap.xml` currently use `https://torontojewelscuration.com`. Update them together if the production hostname changes.
+- Product pages are static so names, descriptions, images, pricing, and links remain available without JavaScript. `assets/js/main.js` progressively adds galleries, saved pieces, comparison, and recently viewed tools.
+- Legacy `product.html?slug=...` URLs are permanently redirected to clean `/products/.../` URLs in `netlify.toml`; the generic product shell is `noindex` as a fallback.
+- The large custom design preview and AR modules load only when a visitor opens those features.
+- Looping videos use poster images and begin loading near the viewport rather than on initial page load.
 - The forms submit to Netlify and can email notifications through Netlify form hooks.
-- The dream design generator expects `OPENAI_API_KEY` in Netlify environment variables. It starts high-quality OpenAI Responses jobs asynchronously, then polls `generate-dream-design-status` so Netlify does not time out. Optional overrides: `OPENAI_RESPONSE_IMAGE_MODEL`, `OPENAI_IMAGE_TOOL_MODEL`, `OPENAI_PROMPT_MODEL`, `OPENAI_IMAGE_SIZE`, and `OPENAI_IMAGE_QUALITY`.
-- Dream Design contact leads can also be sent to Zapier. Add the Zapier Catch Hook URL to Netlify as `DREAM_LEAD_ZAPIER_WEBHOOK_URL`, then map the webhook fields into Google Sheets inside Zapier.
 - SMS alerts require Twilio credentials in Netlify environment variables.
 - Cart interactions are still UI-only and need a checkout integration if you want live purchasing.

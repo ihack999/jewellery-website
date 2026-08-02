@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /.netlify/
+
+Sitemap: https://torontojewelscuration.com/sitemap.xml
+Sitemap: https://torontojewelscuration.com/image-sitemap.xml
