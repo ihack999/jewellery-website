@@ -4115,6 +4115,572 @@ body:has(.design-studio.is-inspecting) .site-header {
   }
 }
 
+/* Private consultation booking */
+.booking-section {
+  scroll-margin-top: 110px;
+}
+
+.booking-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 0.78fr) minmax(560px, 1.22fr);
+  gap: clamp(2.5rem, 6vw, 6rem);
+  align-items: start;
+}
+
+.booking-intro {
+  position: sticky;
+  top: 132px;
+}
+
+.booking-intro h2 {
+  max-width: 12ch;
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: clamp(2.7rem, 5vw, 5rem);
+  line-height: 0.94;
+}
+
+.booking-intro > p {
+  max-width: 52ch;
+  color: var(--muted);
+}
+
+.booking-hours {
+  margin: 2rem 0;
+  border-block: 1px solid var(--line);
+}
+
+.booking-hours div {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.85rem 0;
+}
+
+.booking-hours div + div {
+  border-top: 1px solid var(--line);
+}
+
+.booking-hours dt {
+  color: var(--heading);
+  font-weight: 700;
+}
+
+.booking-hours dd {
+  margin: 0;
+  color: var(--muted);
+  text-align: right;
+}
+
+.whatsapp-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-weight: 700;
+  color: var(--primary-deep);
+}
+
+.whatsapp-link span {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  border-radius: 50%;
+  color: #fff;
+  background: #197b63;
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+}
+
+.whatsapp-link:hover,
+.whatsapp-link:focus-visible {
+  color: var(--accent);
+}
+
+.booking-card {
+  padding: clamp(1.4rem, 3.5vw, 3rem);
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-luxe);
+}
+
+.booking-fieldset {
+  padding: 0;
+  margin: 0 0 1.5rem;
+  border: 0;
+}
+
+.booking-fieldset legend,
+.booking-time-field .fieldset-title {
+  display: block;
+  margin-bottom: 0.7rem;
+  color: var(--heading);
+  font-size: 0.84rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.booking-choice-grid,
+.booking-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.8rem;
+}
+
+.booking-choice {
+  position: relative;
+  display: block;
+  cursor: pointer;
+}
+
+.booking-choice input {
+  position: absolute;
+  opacity: 0;
+}
+
+.booking-choice > span {
+  display: flex;
+  min-height: 104px;
+  padding: 1rem;
+  flex-direction: column;
+  justify-content: center;
+  border: 1px solid var(--line);
+  background: var(--surface-muted);
+  transition: border-color var(--transition), background var(--transition), box-shadow var(--transition);
+}
+
+.booking-choice small,
+.evening-option small {
+  display: block;
+  margin-top: 0.2rem;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.booking-choice input:checked + span {
+  border-color: var(--primary);
+  background: rgba(12, 111, 125, 0.075);
+  box-shadow: inset 0 0 0 1px var(--primary);
+}
+
+.booking-choice input:focus-visible + span {
+  outline: 2px solid rgba(182, 63, 106, 0.72);
+  outline-offset: 3px;
+}
+
+.booking-fields {
+  margin-bottom: 1.4rem;
+}
+
+.booking-time-field {
+  margin-bottom: 1.2rem;
+}
+
+.booking-time-help {
+  min-height: 1.5em;
+  margin: -0.15rem 0 0.7rem;
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.booking-time-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0.55rem;
+}
+
+.booking-time {
+  min-height: 46px;
+  padding: 0.65rem 0.4rem;
+  border: 1px solid var(--line-strong);
+  color: var(--primary-deep);
+  background: #fff;
+  font-size: 0.8rem;
+  font-weight: 700;
+  transition: color var(--transition), background var(--transition), border-color var(--transition);
+}
+
+.booking-time:hover,
+.booking-time.is-selected {
+  color: #fff;
+  background: var(--primary-deep);
+  border-color: var(--primary-deep);
+}
+
+.booking-time:disabled {
+  opacity: 0.38;
+  cursor: not-allowed;
+}
+
+.evening-option {
+  display: flex;
+  gap: 0.8rem;
+  margin: 1.1rem 0 1.2rem;
+  padding: 1rem;
+  align-items: flex-start;
+  border: 1px solid var(--line);
+  background: var(--surface-muted);
+  cursor: pointer;
+}
+
+.evening-option input {
+  width: 18px;
+  height: 18px;
+  margin-top: 0.2rem;
+  accent-color: var(--primary);
+}
+
+.booking-submit-row {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1.35rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.booking-submit-row .status-note {
+  flex: 1 1 240px;
+  margin: 0;
+}
+
+.booking-confirmation-note {
+  margin: 0.9rem 0 0;
+  color: var(--muted);
+  font-size: 0.76rem;
+}
+
+/* Purchase assurances */
+.footer-assurances {
+  padding: clamp(1.6rem, 3vw, 2.5rem) 0;
+  color: rgba(255, 255, 255, 0.9);
+  background: var(--primary-deep);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.footer-assurances__grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.footer-assurances article {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.8rem;
+  padding: 0.35rem clamp(1rem, 2vw, 2rem);
+}
+
+.footer-assurances article + article {
+  border-left: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.footer-assurances article > span {
+  color: var(--gold);
+  font-family: "Cormorant Garamond", serif;
+  font-size: 1.4rem;
+  line-height: 1;
+}
+
+.footer-assurances strong {
+  display: block;
+  color: #fff;
+  font-family: "Cormorant Garamond", serif;
+  font-size: 1.25rem;
+  line-height: 1.1;
+}
+
+.footer-assurances p {
+  margin: 0.3rem 0 0;
+  color: rgba(255, 255, 255, 0.66);
+  font-size: 0.75rem;
+  line-height: 1.45;
+}
+
+.product-assurances__layout {
+  display: grid;
+  grid-template-columns: minmax(260px, 0.7fr) minmax(0, 1.3fr);
+  gap: clamp(2rem, 6vw, 6rem);
+  align-items: start;
+}
+
+.product-assurances__intro h2 {
+  max-width: 13ch;
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: clamp(2.4rem, 4vw, 4.25rem);
+  line-height: 0.98;
+}
+
+.product-assurances__intro p {
+  max-width: 44ch;
+  color: var(--muted);
+}
+
+.assurance-accordion {
+  border-top: 1px solid var(--line-strong);
+}
+
+.assurance-accordion details {
+  border-bottom: 1px solid var(--line-strong);
+}
+
+.assurance-accordion summary {
+  display: flex;
+  gap: 1rem;
+  padding: 1.25rem 0;
+  justify-content: space-between;
+  align-items: center;
+  color: var(--heading);
+  font-weight: 700;
+  cursor: pointer;
+  list-style: none;
+}
+
+.assurance-accordion summary::-webkit-details-marker {
+  display: none;
+}
+
+.assurance-accordion summary span {
+  color: var(--accent);
+  font-size: 1.4rem;
+  font-weight: 400;
+  transition: transform var(--transition);
+}
+
+.assurance-accordion details[open] summary span {
+  transform: rotate(45deg);
+}
+
+.assurance-accordion details p {
+  max-width: 65ch;
+  margin: -0.35rem 2.5rem 1.35rem 0;
+  color: var(--muted);
+}
+
+/* First-visit private welcome drawer */
+.vip-welcome {
+  position: fixed;
+  z-index: 120;
+  inset: 0;
+  pointer-events: none;
+}
+
+.vip-welcome.is-open {
+  pointer-events: auto;
+}
+
+.vip-welcome__scrim {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  background: rgba(4, 13, 14, 0.62);
+  backdrop-filter: blur(5px);
+  transition: opacity 360ms var(--ease-luxe);
+}
+
+.vip-welcome__drawer {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: min(520px, 100%);
+  height: 100%;
+  padding: clamp(2rem, 6vw, 4.5rem);
+  overflow-y: auto;
+  background:
+    radial-gradient(circle at 90% 4%, rgba(196, 161, 90, 0.2), transparent 30%),
+    #fbfdfc;
+  box-shadow: -30px 0 90px rgba(4, 13, 14, 0.24);
+  transform: translateX(104%);
+  transition: transform 500ms var(--ease-luxe);
+}
+
+.vip-welcome.is-open .vip-welcome__scrim {
+  opacity: 1;
+}
+
+.vip-welcome.is-open .vip-welcome__drawer {
+  transform: translateX(0);
+}
+
+.vip-welcome__close {
+  position: absolute;
+  top: 1.1rem;
+  right: 1.1rem;
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  color: var(--heading);
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.82);
+  font-size: 1.5rem;
+}
+
+.vip-welcome__offer {
+  display: flex;
+  gap: 0.3rem;
+  margin: 2.5rem 0 0;
+  align-items: flex-end;
+  color: var(--accent);
+  font-family: "Cormorant Garamond", serif;
+  font-size: clamp(4.5rem, 10vw, 6.5rem);
+  font-weight: 600;
+  line-height: 0.8;
+}
+
+.vip-welcome__offer span {
+  padding-bottom: 0.5rem;
+  color: var(--heading);
+  font-family: "Manrope", sans-serif;
+  font-size: 0.9rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.vip-welcome__drawer h2 {
+  margin-top: 1rem;
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: clamp(2.45rem, 4vw, 3.35rem);
+  line-height: 0.96;
+}
+
+.vip-welcome__drawer > p:not(.vip-welcome__offer) {
+  color: var(--muted);
+}
+
+.vip-welcome__drawer form {
+  display: grid;
+  gap: 0.8rem;
+  margin-top: 1.35rem;
+}
+
+.vip-welcome__drawer form[hidden],
+.vip-welcome__success[hidden],
+[data-evening-details][hidden] {
+  display: none !important;
+}
+
+.vip-welcome__drawer form .button {
+  width: 100%;
+}
+
+.vip-welcome__drawer form small {
+  color: var(--muted);
+  font-size: 0.7rem;
+  line-height: 1.5;
+}
+
+.vip-welcome__drawer form small a {
+  text-decoration: underline;
+}
+
+.vip-welcome__success {
+  margin-top: 3rem;
+  padding: 2rem;
+  border: 1px solid var(--line);
+  background: #fff;
+}
+
+.vip-welcome__success h3 {
+  margin: 0.5rem 0 1rem;
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: 2rem;
+}
+
+.vip-welcome__success strong {
+  color: var(--accent);
+  letter-spacing: 0.08em;
+}
+
+.vip-welcome__tab {
+  position: absolute;
+  right: 0;
+  bottom: 22%;
+  padding: 0.8rem 0.7rem;
+  color: #fff;
+  background: var(--accent);
+  box-shadow: var(--shadow-soft);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  writing-mode: vertical-rl;
+  pointer-events: auto;
+}
+
+.vip-welcome.is-open .vip-welcome__tab {
+  opacity: 0;
+  pointer-events: none;
+}
+
+body.vip-open {
+  overflow: hidden;
+}
+
+@media (max-width: 980px) {
+  .booking-layout,
+  .product-assurances__layout {
+    grid-template-columns: 1fr;
+  }
+
+  .booking-intro {
+    position: static;
+  }
+
+  .booking-intro h2,
+  .product-assurances__intro h2 {
+    max-width: 18ch;
+  }
+
+  .footer-assurances__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.5rem 0;
+  }
+
+  .footer-assurances article:nth-child(3) {
+    border-left: 0;
+  }
+}
+
+@media (max-width: 640px) {
+  .booking-choice-grid,
+  .booking-fields {
+    grid-template-columns: 1fr;
+  }
+
+  .booking-time-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .footer-assurances__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .footer-assurances article {
+    padding-inline: 0;
+  }
+
+  .footer-assurances article + article {
+    padding-top: 1.25rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.18);
+    border-left: 0;
+  }
+
+  .vip-welcome__drawer {
+    padding: 4.5rem 1.25rem 2rem;
+  }
+
+  .vip-welcome__offer {
+    margin-top: 0.5rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vip-welcome__scrim,
+  .vip-welcome__drawer,
+  .assurance-accordion summary span {
+    transition: none;
+  }
+}
+
 .form-grid {
   display: grid;
   gap: 1.2rem;
@@ -8563,5 +9129,58 @@ body.modal-open {
   .quick-view-button,
   .gallery-zoom-button {
     transition: none;
+  }
+}
+
+/* Keep every product image complete and at a natural viewing scale. */
+.quick-view-modal__stage {
+  display: grid;
+  place-items: center;
+  padding: clamp(0.4rem, 1.2vw, 0.9rem);
+}
+
+.quick-view-modal__stage img {
+  width: auto;
+  height: auto;
+  min-height: 0;
+  max-width: 100%;
+  max-height: min(68dvh, 660px);
+  object-fit: scale-down;
+  object-position: center;
+}
+
+.product-lightbox__stage {
+  padding: clamp(0.4rem, 1.5vw, 1.25rem) clamp(3.25rem, 6vw, 5.5rem);
+}
+
+.product-lightbox__stage > img {
+  width: auto;
+  height: auto;
+  min-width: 0;
+  min-height: 0;
+  max-width: min(100%, 1200px);
+  max-height: min(100%, calc(100dvh - 150px));
+  object-fit: scale-down;
+  object-position: center;
+}
+
+@media (max-width: 640px) {
+  .quick-view-modal__stage {
+    min-height: 360px;
+    padding: 0.5rem;
+  }
+
+  .quick-view-modal__stage img {
+    min-height: 0;
+    max-height: 62dvh;
+  }
+
+  .product-lightbox__stage {
+    padding: 0.35rem 0.25rem;
+  }
+
+  .product-lightbox__stage > img {
+    max-width: 100%;
+    max-height: calc(100dvh - 142px);
   }
 }

@@ -4042,6 +4042,288 @@ function setupContactInterestPrefill() {
   }
 }
 
+function localDateValue(date = new Date()) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function submitSimpleNetlifyForm(form) {
+  const formData = new FormData(form);
+  return fetch("/", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams(formData).toString()
+  });
+}
+
+function setupBookingCalendars() {
+  document.querySelectorAll("[data-booking-form]").forEach((form) => {
+    const dateInput = form.querySelector("[data-booking-date]");
+    const timeInput = form.querySelector("[data-booking-time]");
+    const slots = form.querySelector("[data-booking-slots]");
+    const timeHelp = form.querySelector("[data-booking-time-help]");
+    const eveningToggle = form.querySelector("[data-evening-request]");
+    const eveningDetails = form.querySelector("[data-evening-details]");
+    const eveningInput = eveningDetails?.querySelector("input");
+    const status = form.querySelector("[data-booking-status]");
+    const submitButton = form.querySelector('button[type="submit"]');
+
+    if (!dateInput || !timeInput || !slots) return;
+
+    dateInput.min = localDateValue();
+
+    const selectTime = (button) => {
+      slots.querySelectorAll("button").forEach((item) => {
+        item.classList.remove("is-selected");
+        item.setAttribute("aria-pressed", "false");
+      });
+      button.classList.add("is-selected");
+      button.setAttribute("aria-pressed", "true");
+      timeInput.value = button.dataset.time || "";
+      if (status) status.textContent = "";
+    };
+
+    const renderTimes = () => {
+      timeInput.value = "";
+      slots.innerHTML = "";
+
+      if (!dateInput.value) {
+        if (timeHelp) timeHelp.textContent = "Select a date to see the appointment hours.";
+        return;
+      }
+
+      const selectedDate = new Date(`${dateInput.value}T12:00:00`);
+      const weekend = selectedDate.getDay() === 0 || selectedDate.getDay() === 6;
+      const availableTimes = weekend
+        ? ["12:00 PM", "1:00 PM", "2:00 PM", "3:00 PM"]
+        : ["11:00 AM", "12:00 PM", "1:00 PM", "2:00 PM", "3:00 PM"];
+
+      if (timeHelp) {
+        timeHelp.textContent = weekend
+          ? "Weekend appointments are available from 12:00 PM to 3:00 PM."
+          : "Weekday appointments are available from 11:00 AM to 3:00 PM.";
+      }
+
+      availableTimes.forEach((time) => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "booking-time";
+        button.dataset.time = time;
+        button.setAttribute("aria-pressed", "false");
+        button.textContent = time;
+        button.addEventListener("click", () => selectTime(button));
+        slots.appendChild(button);
+      });
+    };
+
+    const syncEveningRequest = () => {
+      const requestingEvening = Boolean(eveningToggle?.checked);
+      if (eveningDetails) eveningDetails.hidden = !requestingEvening;
+      if (eveningInput) eveningInput.required = requestingEvening;
+      slots.querySelectorAll("button").forEach((button) => {
+        button.disabled = requestingEvening;
+      });
+      timeInput.value = requestingEvening ? "Evening appointment requested" : "";
+      if (!requestingEvening) renderTimes();
+      if (timeHelp) {
+        timeHelp.textContent = requestingEvening
+          ? "Tell us your preferred evening time below and we will reply with options."
+          : timeHelp.textContent;
+      }
+    };
+
+    dateInput.addEventListener("change", () => {
+      renderTimes();
+      if (eveningToggle?.checked) syncEveningRequest();
+    });
+    eveningToggle?.addEventListener("change", syncEveningRequest);
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+
+      if (!eveningToggle?.checked && !timeInput.value) {
+        if (status) status.textContent = "Please select an available time, or request an evening appointment.";
+        slots.querySelector("button")?.focus();
+        return;
+      }
+
+      const originalLabel = submitButton?.textContent || "Request This Appointment";
+      if (submitButton) {
+        submitButton.disabled = true;
+        submitButton.textContent = "Sending request…";
+      }
+      if (status) status.textContent = "Sending your appointment request…";
+
+      try {
+        const response = await submitSimpleNetlifyForm(form);
+        if (!response.ok) throw new Error("Appointment request failed");
+        const appointmentDate = dateInput.value;
+        form.reset();
+        renderTimes();
+        syncEveningRequest();
+        if (status) status.textContent = "Your request has been received. We’ll contact you to confirm the appointment.";
+        window.tjToast?.("Appointment request received");
+        recordSiteEvent("appointment_request_success", { appointment_date: appointmentDate });
+      } catch (error) {
+        if (status) status.textContent = "We couldn’t send the request. Please try again or WhatsApp 416-451-8578.";
+      } finally {
+        if (submitButton) {
+          submitButton.disabled = false;
+          submitButton.textContent = originalLabel;
+        }
+      }
+    });
+  });
+}
+
+function setupVipWelcome() {
+  if (document.querySelector("[data-vip-drawer]")) return;
+
+  const wrapper = document.createElement("div");
+  wrapper.className = "vip-welcome";
+  wrapper.dataset.vipDrawer = "";
+  wrapper.innerHTML = `
+    <button class="vip-welcome__scrim" type="button" aria-label="Close welcome offer" data-vip-close></button>
+    <aside class="vip-welcome__drawer" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="vip-welcome-title" tabindex="-1">
+      <button class="vip-welcome__close" type="button" aria-label="Close welcome offer" data-vip-close>×</button>
+      <span class="eyebrow">A private welcome</span>
+      <div class="accent-rule"></div>
+      <p class="vip-welcome__offer">5% <span>off</span></p>
+      <h2 id="vip-welcome-title">Your first Toronto Jewels purchase</h2>
+      <p>Join our private atelier list for your 5% first-purchase welcome offer, bespoke preview invitations, and early access to selected estate luxuries.</p>
+      <form name="vip-welcome" method="POST" action="/" data-netlify="true" data-vip-form>
+        <input type="hidden" name="form-name" value="vip-welcome">
+        <input type="hidden" name="offer" value="5% first-purchase welcome offer">
+        <div class="form-field"><label for="vip-email">Email Address</label><input id="vip-email" name="email-address" type="email" autocomplete="email" required></div>
+        <div class="form-field"><label for="vip-phone">Phone Number</label><input id="vip-phone" name="phone-number" type="tel" autocomplete="tel" required></div>
+        <button class="button" type="submit">Unlock My 5% Welcome Offer</button>
+        <p class="status-note" data-vip-status aria-live="polite"></p>
+        <small>By submitting, you agree to receive atelier updates by email or phone. You may unsubscribe at any time. View our <a href="/privacy.html">Privacy Policy</a>.</small>
+      </form>
+      <div class="vip-welcome__success" data-vip-success hidden>
+        <span class="eyebrow">Welcome to the atelier</span>
+        <h3>Your 5% welcome privilege is reserved.</h3>
+        <p>Use code <strong>WELCOME5</strong> when beginning your first order. We have also sent your details to the atelier.</p>
+        <button class="button" type="button" data-vip-close>Continue Exploring</button>
+      </div>
+    </aside>
+    <button class="vip-welcome__tab" type="button" data-vip-open>5% Welcome</button>
+  `;
+  document.body.appendChild(wrapper);
+
+  const drawer = wrapper.querySelector(".vip-welcome__drawer");
+  const form = wrapper.querySelector("[data-vip-form]");
+  const status = wrapper.querySelector("[data-vip-status]");
+  const success = wrapper.querySelector("[data-vip-success]");
+
+  const remember = () => {
+    try { window.localStorage.setItem("tj-vip-welcome-seen-v1", "true"); } catch (error) { /* storage is optional */ }
+  };
+  const open = () => {
+    wrapper.classList.add("is-open");
+    drawer?.setAttribute("aria-hidden", "false");
+    document.body.classList.add("vip-open");
+    window.setTimeout(() => drawer?.focus(), 80);
+    recordSiteEvent("vip_offer_view");
+  };
+  const close = () => {
+    wrapper.classList.remove("is-open");
+    drawer?.setAttribute("aria-hidden", "true");
+    document.body.classList.remove("vip-open");
+    remember();
+  };
+
+  wrapper.querySelectorAll("[data-vip-close]").forEach((button) => button.addEventListener("click", close));
+  wrapper.querySelector("[data-vip-open]")?.addEventListener("click", open);
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && wrapper.classList.contains("is-open")) close();
+  });
+
+  form?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const button = form.querySelector('button[type="submit"]');
+    if (button) {
+      button.disabled = true;
+      button.textContent = "Reserving…";
+    }
+    if (status) status.textContent = "Reserving your welcome offer…";
+    try {
+      const response = await submitSimpleNetlifyForm(form);
+      if (!response.ok) throw new Error("VIP form failed");
+      form.hidden = true;
+      if (success) success.hidden = false;
+      remember();
+      recordSiteEvent("vip_offer_signup_success");
+    } catch (error) {
+      if (status) status.textContent = "We couldn’t reserve the offer. Please try again in a moment.";
+      if (button) {
+        button.disabled = false;
+        button.textContent = "Unlock My 5% Welcome Offer";
+      }
+    }
+  });
+
+  let hasSeen = false;
+  try { hasSeen = window.localStorage.getItem("tj-vip-welcome-seen-v1") === "true"; } catch (error) { /* storage is optional */ }
+  if (!hasSeen) window.setTimeout(open, 900);
+}
+
+function setupTrustAssurances() {
+  const footer = document.querySelector(".footer");
+  const contactColumn = [...document.querySelectorAll(".footer-column")].find(
+    (column) => column.querySelector("h3")?.textContent.trim().toLowerCase() === "contact"
+  );
+  const contactList = contactColumn?.querySelector("ul");
+  if (contactList && !contactList.querySelector('a[href*="wa.me/14164518578"]')) {
+    const item = document.createElement("li");
+    item.innerHTML = '<a href="https://wa.me/14164518578?text=Hello%20Toronto%20Jewels%20Curation%2C%20I%27d%20like%20to%20ask%20about%20a%20private%20consultation." target="_blank" rel="noreferrer" data-track="whatsapp_footer_click">WhatsApp 416-451-8578</a>';
+    contactList.appendChild(item);
+  }
+
+  if (footer && !document.querySelector("[data-footer-assurances]")) {
+    const strip = document.createElement("section");
+    strip.className = "footer-assurances";
+    strip.dataset.footerAssurances = "";
+    strip.setAttribute("aria-label", "Purchase assurances");
+    strip.innerHTML = `
+      <div class="container footer-assurances__grid">
+        <article><span>01</span><div><strong>GIA / IGI</strong><p>Certification available for all diamonds.</p></div></article>
+        <article><span>02</span><div><strong>Appraisal Certificate</strong><p>Documentation prepared for your completed piece.</p></div></article>
+        <article><span>03</span><div><strong>Complimentary Resizing</strong><p>First ring resize included where the design permits.</p></div></article>
+        <article><span>04</span><div><strong>Lifetime Warranty</strong><p>Craftsmanship warranty with written order coverage.</p></div></article>
+      </div>
+    `;
+    footer.parentNode.insertBefore(strip, footer);
+  }
+
+  const productPage = document.querySelector("[data-product-page]");
+  if (productPage && !document.querySelector("[data-product-assurances]")) {
+    const section = document.createElement("section");
+    section.className = "section section--soft product-assurances";
+    section.dataset.productAssurances = "";
+    section.innerHTML = `
+      <div class="container product-assurances__layout">
+        <div class="product-assurances__intro">
+          <span class="eyebrow">Purchase with confidence</span>
+          <div class="accent-rule"></div>
+          <h2>Documentation, fit, and lasting care</h2>
+          <p>Every important detail is reviewed with you before your order is confirmed.</p>
+        </div>
+        <div class="assurance-accordion">
+          <details open><summary>GIA or IGI diamond certification <span>+</span></summary><p>All diamonds are available with a GIA or IGI certificate, as applicable to the selected stone. We will match the documentation to your diamond and review it with you.</p></details>
+          <details><summary>Authenticity and appraisal certificate <span>+</span></summary><p>Diamond details, materials, and available authenticity documentation are confirmed before purchase. Appraisal documentation is prepared for the completed jewellery order.</p></details>
+          <details><summary>Complimentary ring resizing <span>+</span></summary><p>Your first ring resize is complimentary where the construction and setting permit resizing. We will confirm the available sizing range for the specific design.</p></details>
+          <details><summary>Lifetime craftsmanship warranty <span>+</span></summary><p>Your piece includes a lifetime craftsmanship warranty for manufacturing workmanship. Written coverage and care details are supplied with your completed order.</p></details>
+        </div>
+      </div>
+    `;
+    const detailsSection = productPage.nextElementSibling;
+    (detailsSection || productPage).insertAdjacentElement("afterend", section);
+  }
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   setupSkipLink();
   syncCustomsPreformSections();
@@ -4072,6 +4354,9 @@ document.addEventListener("DOMContentLoaded", () => {
   setupCustomsSectionRail();
   setupCustomFormProgress();
   setupContactInterestPrefill();
+  setupBookingCalendars();
+  setupTrustAssurances();
+  setupVipWelcome();
   setupConversionTracking();
   setYear();
   setupHeroMotion();

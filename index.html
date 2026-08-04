@@ -41,12 +41,14 @@
             "logo": "https://torontojewelscuration.com/assets/images/logo-emblem.svg",
             "image": "https://torontojewelscuration.com/assets/images/seo/toronto-jewels-curation-og.jpg",
             "email": "info@torontojewelscuration.com",
+            "telephone": "+1-416-451-8578",
             "description": "A Toronto-based, women-led custom jewellery and estate luxury curation business.",
             "areaServed": { "@type": "AdministrativeArea", "name": "Toronto, Ontario" },
             "contactPoint": {
               "@type": "ContactPoint",
               "contactType": "sales and consultations",
               "email": "info@torontojewelscuration.com",
+              "telephone": "+1-416-451-8578",
               "availableLanguage": "English"
             },
             "sameAs": [
@@ -132,6 +134,7 @@
               <div class="button-row">
                 <a class="button" href="customs.html#request-form">Start a Custom Order</a>
                 <a class="button-secondary" href="shop.html">Shop Collection</a>
+                <a class="button-secondary" href="#book-consultation" data-track="home_booking_hero">Book a Consultation</a>
               </div>
             </div>
 
@@ -431,6 +434,61 @@
           </div>
         </section>
 
+        <section class="section section--soft booking-section" id="book-consultation" aria-labelledby="home-booking-heading">
+          <div class="container booking-layout">
+            <div class="booking-intro" data-reveal>
+              <span class="eyebrow">Private consultation</span>
+              <div class="accent-rule"></div>
+              <h2 id="home-booking-heading">Reserve time with the atelier</h2>
+              <p>Choose a virtual video consultation or request a private Toronto atelier appointment. Select a preferred date and time and we will personally confirm your appointment.</p>
+              <dl class="booking-hours">
+                <div><dt>Weekdays</dt><dd>11:00 AM–3:00 PM</dd></div>
+                <div><dt>Weekends</dt><dd>12:00 PM–3:00 PM</dd></div>
+                <div><dt>Evenings</dt><dd>Available by request</dd></div>
+              </dl>
+              <a class="whatsapp-link" href="https://wa.me/14164518578?text=Hello%20Toronto%20Jewels%20Curation%2C%20I%27d%20like%20to%20book%20a%20private%20consultation." target="_blank" rel="noreferrer" data-track="whatsapp_booking_click">
+                <span aria-hidden="true">WA</span>
+                WhatsApp 416-451-8578
+              </a>
+            </div>
+
+            <form class="booking-card" name="appointment-request" method="POST" action="/" data-netlify="true" data-netlify-honeypot="bot-field" data-booking-form data-reveal>
+              <input type="hidden" name="form-name" value="appointment-request">
+              <input type="hidden" name="appointment-time" data-booking-time>
+              <input type="hidden" name="booking-source" value="Homepage">
+              <p class="sr-only"><label>Do not fill this out if you're human: <input name="bot-field"></label></p>
+
+              <fieldset class="booking-fieldset">
+                <legend>How would you like to meet?</legend>
+                <div class="booking-choice-grid">
+                  <label class="booking-choice"><input type="radio" name="appointment-type" value="Virtual Video Consultation" checked><span><strong>Virtual video</strong><small>Meet privately from anywhere</small></span></label>
+                  <label class="booking-choice"><input type="radio" name="appointment-type" value="Private Toronto Atelier Appointment"><span><strong>Toronto atelier</strong><small>An in-person private appointment</small></span></label>
+                </div>
+              </fieldset>
+
+              <div class="booking-fields">
+                <div class="form-field"><label for="home-booking-name">Full Name</label><input id="home-booking-name" name="full-name" type="text" autocomplete="name" required></div>
+                <div class="form-field"><label for="home-booking-email">Email Address</label><input id="home-booking-email" name="email-address" type="email" autocomplete="email" required></div>
+                <div class="form-field"><label for="home-booking-phone">Phone Number</label><input id="home-booking-phone" name="phone-number" type="tel" autocomplete="tel" required></div>
+                <div class="form-field"><label for="home-booking-date">Preferred Date</label><input id="home-booking-date" name="appointment-date" type="date" required data-booking-date></div>
+              </div>
+
+              <div class="booking-time-field" data-booking-time-field>
+                <span class="fieldset-title">Available times</span>
+                <p class="booking-time-help" data-booking-time-help>Select a date to see the appointment hours.</p>
+                <div class="booking-time-grid" data-booking-slots></div>
+              </div>
+
+              <label class="evening-option"><input type="checkbox" name="evening-request" value="yes" data-evening-request><span><strong>I need an evening appointment</strong><small>Evening times are available by request. Tell us what works for you.</small></span></label>
+              <div class="form-field" data-evening-details hidden><label for="home-evening-time">Preferred Evening Time</label><input id="home-evening-time" name="preferred-evening-time" type="text" placeholder="For example, Tuesday around 6:30 PM"></div>
+              <div class="form-field"><label for="home-booking-notes">What would you like to discuss? (optional)</label><textarea id="home-booking-notes" name="appointment-notes" placeholder="Custom piece, engagement ring, estate jewellery, or another request"></textarea></div>
+
+              <div class="booking-submit-row"><button class="button" type="submit">Request This Appointment</button><p class="status-note" data-booking-status aria-live="polite"></p></div>
+              <p class="booking-confirmation-note">Your appointment is held once our atelier confirms availability by email or phone.</p>
+            </form>
+          </div>
+        </section>
+
         <section class="section section--soft" aria-labelledby="jewellery-guides-heading">
           <div class="container">
             <div class="section-heading" data-reveal>
@@ -501,6 +559,14 @@
             </div>
           </div>
         </section>
+
+        <form name="vip-welcome" method="POST" action="/" data-netlify="true" data-netlify-honeypot="bot-field" hidden>
+          <input type="hidden" name="form-name" value="vip-welcome">
+          <input name="bot-field">
+          <input name="email-address">
+          <input name="phone-number">
+          <input name="offer" value="5% first-purchase welcome offer">
+        </form>
       </main>
 
       <footer class="footer">

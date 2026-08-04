@@ -108,6 +108,7 @@
               </p>
               <div class="button-row">
                 <a class="button" href="#request-form">Start Your Custom Request</a>
+                <a class="button-secondary" href="#book-consultation" data-track="custom_booking_hero">Book a Consultation</a>
                 <a class="button-secondary" href="#design-studio" data-design-studio-entry>Preview Your Design</a>
               </div>
             </div>
@@ -756,6 +757,58 @@
           </div>
         </section>
 
+        <section class="section section--soft booking-section" id="book-consultation" aria-labelledby="custom-booking-heading">
+          <div class="container booking-layout">
+            <div class="booking-intro" data-reveal>
+              <span class="eyebrow">Book directly</span>
+              <div class="accent-rule"></div>
+              <h2 id="custom-booking-heading">Your private jewellery consultation</h2>
+              <p>Choose a virtual video consultation or a private Toronto atelier appointment. Select the date and time that suits you, then we will personally confirm availability.</p>
+              <dl class="booking-hours">
+                <div><dt>Weekdays</dt><dd>11:00 AM–3:00 PM</dd></div>
+                <div><dt>Weekends</dt><dd>12:00 PM–3:00 PM</dd></div>
+                <div><dt>Evenings</dt><dd>Available by request</dd></div>
+              </dl>
+              <a class="whatsapp-link" href="https://wa.me/14164518578?text=Hello%20Toronto%20Jewels%20Curation%2C%20I%27d%20like%20to%20book%20a%20custom%20jewellery%20consultation." target="_blank" rel="noreferrer" data-track="whatsapp_booking_click"><span aria-hidden="true">WA</span>WhatsApp 416-451-8578</a>
+            </div>
+
+            <form class="booking-card" name="appointment-request" method="POST" action="/" data-netlify="true" data-netlify-honeypot="bot-field" data-booking-form data-reveal>
+              <input type="hidden" name="form-name" value="appointment-request">
+              <input type="hidden" name="appointment-time" data-booking-time>
+              <input type="hidden" name="booking-source" value="Custom Made page">
+              <p class="sr-only"><label>Do not fill this out if you're human: <input name="bot-field"></label></p>
+
+              <fieldset class="booking-fieldset">
+                <legend>How would you like to meet?</legend>
+                <div class="booking-choice-grid">
+                  <label class="booking-choice"><input type="radio" name="appointment-type" value="Virtual Video Consultation" checked><span><strong>Virtual video</strong><small>Meet privately from anywhere</small></span></label>
+                  <label class="booking-choice"><input type="radio" name="appointment-type" value="Private Toronto Atelier Appointment"><span><strong>Toronto atelier</strong><small>An in-person private appointment</small></span></label>
+                </div>
+              </fieldset>
+
+              <div class="booking-fields">
+                <div class="form-field"><label for="custom-booking-name">Full Name</label><input id="custom-booking-name" name="full-name" type="text" autocomplete="name" required></div>
+                <div class="form-field"><label for="custom-booking-email">Email Address</label><input id="custom-booking-email" name="email-address" type="email" autocomplete="email" required></div>
+                <div class="form-field"><label for="custom-booking-phone">Phone Number</label><input id="custom-booking-phone" name="phone-number" type="tel" autocomplete="tel" required></div>
+                <div class="form-field"><label for="custom-booking-date">Preferred Date</label><input id="custom-booking-date" name="appointment-date" type="date" required data-booking-date></div>
+              </div>
+
+              <div class="booking-time-field" data-booking-time-field>
+                <span class="fieldset-title">Available times</span>
+                <p class="booking-time-help" data-booking-time-help>Select a date to see the appointment hours.</p>
+                <div class="booking-time-grid" data-booking-slots></div>
+              </div>
+
+              <label class="evening-option"><input type="checkbox" name="evening-request" value="yes" data-evening-request><span><strong>I need an evening appointment</strong><small>Evening times are available by request. Tell us what works for you.</small></span></label>
+              <div class="form-field" data-evening-details hidden><label for="custom-evening-time">Preferred Evening Time</label><input id="custom-evening-time" name="preferred-evening-time" type="text" placeholder="For example, Thursday around 7:00 PM"></div>
+              <div class="form-field"><label for="custom-booking-notes">What would you like to discuss? (optional)</label><textarea id="custom-booking-notes" name="appointment-notes" placeholder="Tell us about the piece, occasion, or questions you have"></textarea></div>
+
+              <div class="booking-submit-row"><button class="button" type="submit">Request This Appointment</button><p class="status-note" data-booking-status aria-live="polite"></p></div>
+              <p class="booking-confirmation-note">Your appointment is held once our atelier confirms availability by email or phone.</p>
+            </form>
+          </div>
+        </section>
+
         <section class="section section--surface" id="request-form">
           <div class="container form-shell custom-request-shell" data-reveal>
             <div class="form-header custom-request-panel">
@@ -944,8 +997,8 @@
               </div>
 
               <div class="form-field">
-                <label for="stone-preference">Stone Preference</label>
-                <input id="stone-preference" name="stone-preference" type="text" placeholder="Diamond, crystal, sapphire, none">
+                <label for="stone-preference">Stone Preference (Natural or Lab)</label>
+                <input id="stone-preference" name="stone-preference" type="text" placeholder="Natural diamond, lab-grown diamond, sapphire, or other">
               </div>
 
               <div class="form-field">
