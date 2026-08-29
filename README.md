@@ -6,7 +6,7 @@ Static, Netlify-ready website for Toronto Jewels Curation with crawlable collect
 - `index.html` - homepage
 - `shop.html` - crawlable collection grid with enhanced client-side filtering
 - `rings/`, `necklaces/`, `bracelets/`, `earrings/` - indexable category landing pages
-- `products/*/` - six static, indexable product detail pages with Product structured data
+- `products/*/` - static, indexable product detail pages with Product structured data
 - `customs.html` - custom-made consultation and jewellery editor page
 - `custom-jewellery-toronto/` - custom jewellery service landing page
 - `custom-engagement-rings-toronto/` - custom engagement ring landing page

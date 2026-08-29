@@ -61,6 +61,36 @@ const products = [
     estate: true
   },
   {
+    slug: "rise-ring",
+    urlSlug: "the-rise-ring",
+    name: "The Rise Ring — 1 ct Lab-Grown Diamond",
+    category: "rings",
+    materials: "14K gold with a certified 1.00 ct oval lab-grown diamond",
+    price: 2200,
+    currency: "cad",
+    priceLabel: "$2,200 CAD",
+    shortDescription: "A bold pinky ring with a certified 1.00 ct oval lab-grown diamond set into a sculptural 14K gold profile — a reminder to rise, shine, and take up space.",
+    description:
+      "A bold reminder to rise, shine, and take up space. The Rise Ring pairs a certified 1.00 ct oval lab-grown diamond with a smooth, sculptural 14K gold setting designed for pinky-ring presence.",
+    specs: [
+      ["Stone", "Certified 1.00 ct oval lab-grown diamond"],
+      ["Design", "Sculptural bezel-set pinky ring"],
+      ["Metal", "14K gold"],
+      ["Other Stones", "Natural diamond and coloured gemstone options by request"],
+      ["Price", "$2,200 CAD for the featured lab-grown diamond design"]
+    ],
+    care: "Store separately and clean gently with a soft jewellery cloth to protect the polished gold and stone setting.",
+    shipping: "Made to order; ring size, gold colour, production timing, and insured delivery are confirmed after checkout.",
+    heroImage: "/assets/images/products/rise-ring/rise-ring-worn.jpeg",
+    gallery: [
+      "/assets/images/products/rise-ring/rise-ring-worn.jpeg",
+      "/assets/images/products/rise-ring/rise-ring-polished.jpeg",
+      "/assets/images/products/rise-ring/rise-ring-satin.jpeg",
+      "/assets/images/products/rise-ring/rise-ring-styled.jpeg"
+    ],
+    featured: true
+  },
+  {
     slug: "pear-halo-ring",
     urlSlug: "rare-blue-diamond-ring",
     name: "Rare Blue Diamond Ring",

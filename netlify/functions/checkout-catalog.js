@@ -1,4 +1,12 @@
 const CHECKOUT_CATALOG = Object.freeze({
+  "rise-ring": {
+    name: "The Rise Ring — 1 ct Lab-Grown Diamond",
+    description: "14K gold with a certified 1.00 ct oval lab-grown diamond",
+    unitAmount: 220000,
+    currency: "cad",
+    image: "/assets/images/products/rise-ring/rise-ring-worn.jpeg",
+    maxQuantity: 5
+  },
   "estate-cushion-halo-diamond-ring": {
     name: "Cushion Halo Estate Ring",
     description: "Cushion-cut diamond with a layered diamond halo",

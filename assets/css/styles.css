@@ -3396,6 +3396,62 @@ body:has(.design-studio.is-inspecting) .site-header {
   .inspect-chip { font-size: 0.62rem; padding: 0.45rem 0.7rem; letter-spacing: 0.07em; }
 }
 
+/* The Rise Ring editorial launch */
+.pinky-takeover {
+  overflow: hidden;
+  background: #183f43;
+  color: #f8f2e8;
+}
+
+.pinky-takeover__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 0.82fr) minmax(0, 1.18fr);
+  align-items: center;
+  gap: clamp(2.5rem, 7vw, 7rem);
+}
+
+.pinky-takeover__copy { max-width: 590px; }
+.pinky-takeover .eyebrow { color: #e9cdb7; }
+.pinky-takeover .accent-rule { background: #e9cdb7; }
+.pinky-takeover h2 { max-width: 8.8em; margin-bottom: 1rem; color: #fffaf2; font-size: clamp(3.2rem, 6vw, 6.8rem); line-height: 0.88; text-transform: uppercase; }
+.pinky-takeover h3 { margin: 1.5rem 0 0.65rem; color: #fffaf2; font-size: clamp(1.75rem, 2.4vw, 2.8rem); }
+.pinky-takeover p { color: rgba(255, 250, 242, 0.78); }
+.pinky-takeover__statement { max-width: 22em; color: #fffaf2 !important; font-family: "Cormorant Garamond", serif; font-size: clamp(1.35rem, 2vw, 2rem); font-style: italic; line-height: 1.25; }
+
+.pinky-takeover__facts {
+  display: grid;
+  margin: 1.5rem 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.pinky-takeover__facts div { display: grid; grid-template-columns: 90px 1fr; gap: 1rem; padding: 0.72rem 0; border-bottom: 1px solid rgba(255, 255, 255, 0.2); }
+.pinky-takeover__facts dt { color: #e9cdb7; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; }
+.pinky-takeover__facts dd { margin: 0; color: #fffaf2; }
+.pinky-takeover .button { background: #fffaf2; color: #123f45; }
+.pinky-takeover .button-secondary { border-color: rgba(255, 255, 255, 0.55); color: #fffaf2; }
+
+.pinky-takeover__media {
+  position: relative;
+  min-height: clamp(500px, 60vw, 760px);
+}
+
+.pinky-takeover__media img { position: absolute; object-fit: cover; box-shadow: 0 30px 70px rgba(0, 0, 0, 0.25); }
+.pinky-takeover__worn { inset: 0 0 8% 10%; width: 76%; height: 86%; }
+.pinky-takeover__detail { right: 0; bottom: 0; width: 39%; aspect-ratio: 1; border: 8px solid #183f43; }
+
+@media (max-width: 900px) {
+  .pinky-takeover__grid { grid-template-columns: 1fr; }
+  .pinky-takeover__copy { max-width: 680px; }
+  .pinky-takeover__media { min-height: min(760px, 112vw); }
+}
+
+@media (max-width: 540px) {
+  .pinky-takeover h2 { font-size: clamp(2.8rem, 15vw, 4.5rem); }
+  .pinky-takeover__media { min-height: 118vw; }
+  .pinky-takeover__worn { left: 0; width: 88%; }
+  .pinky-takeover__detail { width: 47%; border-width: 5px; }
+}
+
 .service-link-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
