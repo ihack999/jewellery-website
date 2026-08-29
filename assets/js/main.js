@@ -9,6 +9,8 @@ const products = [
     category: "rings",
     materials: "Cushion-cut diamond with a layered diamond halo",
     price: 60000,
+    currency: "cad",
+    maxQuantity: 1,
     priceLabel: "$60,000 CAD",
     shortDescription: "A distinctive estate ring with a warm-toned cushion-cut diamond centre and layered diamond halo, offered through private appointment in Toronto.",
     description:
@@ -35,6 +37,8 @@ const products = [
     category: "necklaces",
     materials: "15 carats total of natural diamonds in a graduated setting",
     price: 35000,
+    currency: "cad",
+    maxQuantity: 1,
     priceLabel: "$35,000 CAD",
     shortDescription: "An estate graduated tennis necklace featuring 15 carats total of natural diamonds, offered through private appointment in Toronto.",
     description:
@@ -90,6 +94,7 @@ const products = [
     category: "necklaces",
     materials: "10.00 ct total carat weight diamonds in 14K white or yellow gold",
     price: 11000,
+    currency: "cad",
     priceLabel: "Starting at $11,000",
     shortDescription: "A timeless and empowering tennis necklace featuring 10.00 ct total carat weight diamonds, designed to symbolize confidence, strength, and elegance. Available in 14K white gold or yellow gold, with natural or lab-grown diamond options. Lab diamond option starts at $11,000.",
     description:
@@ -119,6 +124,7 @@ const products = [
     category: "bracelets",
     materials: "1.50 ct total carat weight lab-grown diamonds in 14K gold",
     price: 2500,
+    currency: "cad",
     priceLabel: "Starting at $2,500",
     shortDescription: "A refined and elegant tennis bracelet featuring 1.50 ct total carat weight lab-grown diamonds in VS clarity and F–G colour. Set in 14K gold, this piece is designed to represent quiet confidence, strength, and effortless beauty. Lab diamond option starts at $2,500.",
     description:
@@ -176,6 +182,7 @@ const products = [
     category: "bracelets",
     materials: "14K yellow gold with three tiny natural bezel-set diamonds",
     price: 750,
+    currency: "usd",
     priceLabel: "Starting at $750 USD",
     shortDescription: "A delicate 14K yellow gold diamond hand chain bracelet featuring three tiny natural diamonds, each approximately 0.10–0.20 ct. This elegant piece connects beautifully from the wrist toward the hand, creating a soft, feminine, and eye-catching handpiece.",
     description:
@@ -204,6 +211,7 @@ const products = [
     category: "rings",
     materials: "14K yellow or white gold with 1.00 ct cushion cut lab-grown diamond",
     price: 2500,
+    currency: "cad",
     priceLabel: "Starting at $2,500",
     shortDescription: "A classic 1.00 ct cushion cut diamond ring featuring a four-prong setting and pavé diamonds set halfway down the band for added sparkle. Available in 14K yellow gold or 14K white gold with a lab-grown diamond centre stone.",
     description:
@@ -273,11 +281,116 @@ function productInquiryHref(product) {
   return `customs.html?${params.toString()}#request-form`;
 }
 
+function isPurchasable(product) {
+  return Number.isFinite(Number(product?.price)) && Boolean(product?.currency);
+}
+
+function checkoutPriceLabel(product, quantity = 1) {
+  const formatter = new Intl.NumberFormat(product.currency === "usd" ? "en-US" : "en-CA", {
+    style: "currency",
+    currency: product.currency.toUpperCase(),
+    maximumFractionDigits: 0
+  });
+  return `${formatter.format(Number(product.price) * quantity)} ${product.currency.toUpperCase()}`;
+}
+
+function readCart() {
+  try {
+    const stored = JSON.parse(window.localStorage.getItem(CART_KEY) || "[]");
+    if (!Array.isArray(stored)) return [];
+    return stored
+      .map((item) => {
+        const product = products.find((candidate) => candidate.slug === item?.slug);
+        if (!isPurchasable(product)) return null;
+        const max = product.maxQuantity || 5;
+        return { slug: product.slug, quantity: Math.min(max, Math.max(1, Number.parseInt(item.quantity, 10) || 1)) };
+      })
+      .filter(Boolean);
+  } catch (error) {
+    return [];
+  }
+}
+
+function writeCart(cart) {
+  try {
+    window.localStorage.setItem(CART_KEY, JSON.stringify(cart));
+  } catch (error) {
+    // Checkout still works for Buy now when browser storage is unavailable.
+  }
+  document.dispatchEvent(new CustomEvent("tj:cart-changed"));
+}
+
+function cartDetails() {
+  return readCart()
+    .map((item) => ({
+      ...item,
+      product: products.find((product) => product.slug === item.slug)
+    }))
+    .filter((item) => item.product);
+}
+
+function addProductToCart(product, quantity = 1) {
+  if (!isPurchasable(product)) return false;
+  const cart = readCart();
+  const existingProducts = cart
+    .map((item) => products.find((candidate) => candidate.slug === item.slug))
+    .filter(Boolean);
+
+  if (existingProducts.some((item) => item.currency !== product.currency)) {
+    window.tjToast?.(`Please check out your ${existingProducts[0].currency.toUpperCase()} items before adding a ${product.currency.toUpperCase()} item.`, { tone: "error", duration: 4200 });
+    return false;
+  }
+
+  const existing = cart.find((item) => item.slug === product.slug);
+  const max = product.maxQuantity || 5;
+  if (existing) {
+    existing.quantity = Math.min(max, existing.quantity + quantity);
+  } else {
+    cart.push({ slug: product.slug, quantity: Math.min(max, Math.max(1, quantity)) });
+  }
+  writeCart(cart);
+  window.tjToast?.(`${product.name} added to your bag.`);
+  return true;
+}
+
+async function startStripeCheckout(items, trigger) {
+  if (!items.length) return;
+  const originalText = trigger?.textContent;
+  if (trigger) {
+    trigger.disabled = true;
+    trigger.textContent = "Opening secure checkout…";
+  }
+
+  try {
+    const response = await fetch("/.netlify/functions/create-checkout-session", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ items: items.map(({ slug, quantity }) => ({ slug, quantity })) })
+    });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok || !result.url) {
+      throw new Error(result.message || "Checkout could not be started.");
+    }
+    const checkoutUrl = new URL(result.url);
+    if (checkoutUrl.protocol !== "https:" || !checkoutUrl.hostname.endsWith("stripe.com")) {
+      throw new Error("The checkout address was not valid.");
+    }
+    window.location.assign(checkoutUrl.href);
+  } catch (error) {
+    window.tjToast?.(error.message || "Checkout could not be started. Please try again.", { tone: "error", duration: 5000 });
+    if (trigger) {
+      trigger.disabled = false;
+      trigger.textContent = originalText;
+    }
+  }
+}
+
 const FAVORITES_KEY = "tj-favorite-products";
 const RECENTLY_VIEWED_KEY = "tj-recently-viewed-products";
 const COMPARE_PRODUCTS_KEY = "tj-compare-products";
 const CUSTOM_FORM_DRAFT_KEY = "tj-custom-request-draft";
 const SHOP_VIEW_KEY = "tj-shop-view";
+const CART_KEY = "tj-checkout-cart-v1";
 
 const shopState = {
   filter: "all",
@@ -832,7 +945,8 @@ function openProductQuickView(product, trigger) {
           `).join("")}
         </dl>
         <div class="quick-view-modal__actions">
-          <a class="button" href="${productUrl(product)}">View full details</a>
+          ${isPurchasable(product) ? `<button class="button" type="button" data-quick-add="${product.slug}">Add to bag</button>` : ""}
+          <a class="${isPurchasable(product) ? "button-secondary" : "button"}" href="${productUrl(product)}">View full details</a>
           <a class="button-secondary" href="${productInquiryHref(product)}">Ask about this piece</a>
         </div>
         <div class="quick-view-modal__utility">
@@ -850,6 +964,12 @@ function openProductQuickView(product, trigger) {
   const panel = modal.querySelector(".quick-view-modal__panel");
   const mainImage = modal.querySelector("[data-quick-view-image]");
   const previousFocus = trigger || document.activeElement;
+
+  modal.querySelector("[data-quick-add]")?.addEventListener("click", (event) => {
+    if (addProductToCart(product)) {
+      event.currentTarget.textContent = "Added to bag";
+    }
+  });
 
   modal.querySelectorAll("[data-quick-view-image-choice]").forEach((button) => {
     button.addEventListener("click", () => {
@@ -957,6 +1077,11 @@ function productCardMarkup(product) {
         </div>
       </a>
       ${cardGallery}
+      ${isPurchasable(product) ? `
+        <button class="product-card__checkout" type="button" data-card-add="${product.slug}">
+          Add to bag · ${escapeHtml(checkoutPriceLabel(product))}
+        </button>
+      ` : ""}
     </article>
   `;
 }
@@ -997,6 +1122,21 @@ function setupProductCardImageChoosers(scope = document) {
   });
 }
 
+function setupProductCardCheckout(scope = document) {
+  scope.querySelectorAll?.("[data-card-add]").forEach((button) => {
+    if (button.dataset.cardAddReady === "true") return;
+    button.dataset.cardAddReady = "true";
+    button.addEventListener("click", () => {
+      const product = products.find((item) => item.slug === button.dataset.cardAdd);
+      if (addProductToCart(product)) {
+        const original = button.textContent;
+        button.textContent = "Added to bag";
+        window.setTimeout(() => { button.textContent = original; }, 1800);
+      }
+    });
+  });
+}
+
 function renderProductCollection(container, items) {
   if (!container) {
     return;
@@ -1008,6 +1148,7 @@ function renderProductCollection(container, items) {
   setupFavoriteButtons(container);
   setupCompareButtons(container);
   setupProductCardImageChoosers(container);
+  setupProductCardCheckout(container);
   setupProductQuickViewButtons(container);
   renderFavoritesShelf();
 }
@@ -1501,14 +1642,32 @@ function renderProductPage() {
   );
   renderRecentlyViewedShelf("[data-related-products]", product.slug);
 
-  const cartButton = page.querySelector("[data-cart-button]");
-  const cartStatus = page.querySelector("[data-cart-status]");
   const actionGroup = page.querySelector(".product-action-group");
 
-  if (cartButton && cartStatus) {
-    cartButton.addEventListener("click", () => {
-      cartStatus.textContent = "Cart flow is staged for design review. Product details are ready to connect to checkout later.";
+  if (actionGroup && isPurchasable(product) && !actionGroup.querySelector("[data-buy-now]")) {
+    const inquiry = actionGroup.querySelector("[data-product-inquiry]");
+    inquiry?.classList.replace("button", "button-secondary");
+
+    const buyButton = document.createElement("button");
+    buyButton.className = "button";
+    buyButton.type = "button";
+    buyButton.dataset.buyNow = product.slug;
+    buyButton.textContent = `Buy now · ${checkoutPriceLabel(product)}`;
+    buyButton.addEventListener("click", () => startStripeCheckout([{ slug: product.slug, quantity: 1 }], buyButton));
+    actionGroup.insertBefore(buyButton, actionGroup.firstChild);
+
+    const addButton = document.createElement("button");
+    addButton.className = "button-secondary";
+    addButton.type = "button";
+    addButton.dataset.addToCart = product.slug;
+    addButton.textContent = "Add to bag";
+    addButton.addEventListener("click", () => {
+      if (addProductToCart(product)) {
+        addButton.textContent = "Added to bag";
+        window.setTimeout(() => { addButton.textContent = "Add to bag"; }, 1800);
+      }
     });
+    actionGroup.insertBefore(addButton, buyButton.nextSibling);
   }
 
   if (actionGroup && !actionGroup.querySelector("[data-product-page-favorite]")) {
@@ -3449,14 +3608,129 @@ function setupBackToTop() {
 }
 
 function setupCartIcon() {
-  const buttons = document.querySelectorAll('.icon-button[aria-label="View cart"]');
-  if (!buttons.length) {
-    return;
+  const headerActions = document.querySelector(".header-actions");
+  let buttons = [...document.querySelectorAll('.icon-button[aria-label="View cart"]')];
+  if (!buttons.length && headerActions) {
+    const button = document.createElement("button");
+    button.className = "icon-button";
+    button.type = "button";
+    button.setAttribute("aria-label", "View cart");
+    button.innerHTML = `
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M4 7H20L18.2 18H5.8L4 7Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+        <path d="M9 7V5.8C9 4.25 10.34 3 12 3C13.66 3 15 4.25 15 5.8V7" stroke="currentColor" stroke-width="1.6"/>
+      </svg>`;
+    const menuButton = headerActions.querySelector("[data-menu-toggle]");
+    headerActions.insertBefore(button, menuButton || null);
+    buttons = [button];
   }
+
+  if (!buttons.length) return;
+
+  let previousFocus = null;
+  const closeCart = () => {
+    const modal = document.querySelector("[data-cart-modal]");
+    if (!modal) return;
+    modal.classList.remove("is-open");
+    modal.setAttribute("aria-hidden", "true");
+    document.body.classList.remove("modal-open");
+    window.setTimeout(() => { modal.hidden = true; }, 180);
+    previousFocus?.focus?.();
+  };
+
+  const renderCart = () => {
+    const modal = document.querySelector("[data-cart-modal]");
+    if (!modal) return;
+    const items = cartDetails();
+    const content = modal.querySelector("[data-cart-content]");
+    const footer = modal.querySelector("[data-cart-footer]");
+
+    if (!items.length) {
+      content.innerHTML = '<div class="cart-empty"><p>Your bag is empty.</p><a class="button" href="/shop.html">Explore the collection</a></div>';
+      footer.hidden = true;
+      return;
+    }
+
+    content.innerHTML = items.map(({ product, quantity }) => `
+      <article class="cart-line" data-cart-line="${product.slug}">
+        <img src="${product.heroImage}" alt="">
+        <div class="cart-line__details">
+          <a href="${productUrl(product)}">${escapeHtml(product.name)}</a>
+          <span>${escapeHtml(checkoutPriceLabel(product, quantity))}</span>
+          <div class="cart-line__controls">
+            <label>Quantity
+              <select data-cart-quantity="${product.slug}" aria-label="Quantity for ${escapeHtml(product.name)}">
+                ${Array.from({ length: product.maxQuantity || 5 }, (_, index) => index + 1)
+                  .map((value) => `<option value="${value}"${value === quantity ? " selected" : ""}>${value}</option>`)
+                  .join("")}
+              </select>
+            </label>
+            <button type="button" data-cart-remove="${product.slug}">Remove</button>
+          </div>
+        </div>
+      </article>
+    `).join("");
+
+    const currency = items[0].product.currency;
+    const total = items.reduce((sum, item) => sum + Number(item.product.price) * item.quantity, 0);
+    footer.hidden = false;
+    footer.querySelector("[data-cart-total]").textContent = checkoutPriceLabel({ price: total, currency });
+
+    content.querySelectorAll("[data-cart-quantity]").forEach((select) => {
+      select.addEventListener("change", () => {
+        const cart = readCart();
+        const item = cart.find((entry) => entry.slug === select.dataset.cartQuantity);
+        if (item) item.quantity = Number.parseInt(select.value, 10) || 1;
+        writeCart(cart);
+      });
+    });
+    content.querySelectorAll("[data-cart-remove]").forEach((button) => {
+      button.addEventListener("click", () => {
+        writeCart(readCart().filter((item) => item.slug !== button.dataset.cartRemove));
+      });
+    });
+  };
+
+  const openCart = (trigger) => {
+    previousFocus = trigger;
+    let modal = document.querySelector("[data-cart-modal]");
+    if (!modal) {
+      modal = document.createElement("div");
+      modal.className = "cart-modal";
+      modal.dataset.cartModal = "";
+      modal.hidden = true;
+      modal.setAttribute("role", "dialog");
+      modal.setAttribute("aria-modal", "true");
+      modal.setAttribute("aria-labelledby", "cart-title");
+      modal.innerHTML = `
+        <button class="cart-modal__scrim" type="button" data-cart-close aria-label="Close shopping bag"></button>
+        <section class="cart-modal__panel">
+          <header class="cart-modal__header"><div><span class="eyebrow">Secure checkout</span><h2 id="cart-title">Your bag</h2></div><button class="icon-button" type="button" data-cart-close aria-label="Close shopping bag">×</button></header>
+          <div class="cart-modal__content" data-cart-content></div>
+          <footer class="cart-modal__footer" data-cart-footer>
+            <div><span>Subtotal</span><strong data-cart-total></strong></div>
+            <p>Shipping address is collected securely by Stripe. Taxes or delivery arrangements, where applicable, are confirmed with your order.</p>
+            <button class="button" type="button" data-cart-checkout>Continue to secure checkout</button>
+            <span class="cart-modal__secure">Payments securely processed by Stripe</span>
+          </footer>
+        </section>`;
+      document.body.appendChild(modal);
+      modal.querySelectorAll("[data-cart-close]").forEach((button) => button.addEventListener("click", closeCart));
+      modal.querySelector("[data-cart-checkout]").addEventListener("click", (event) => startStripeCheckout(readCart(), event.currentTarget));
+      modal.addEventListener("keydown", (event) => { if (event.key === "Escape") closeCart(); });
+    }
+    renderCart();
+    modal.hidden = false;
+    modal.removeAttribute("aria-hidden");
+    document.body.classList.add("modal-open");
+    requestAnimationFrame(() => modal.classList.add("is-open"));
+    modal.querySelector("[data-cart-close]")?.focus();
+  };
+
   buttons.forEach((button) => {
     if (button.dataset.cartReady === "true") return;
     button.dataset.cartReady = "true";
-    button.setAttribute("aria-label", "View saved pieces");
+    button.setAttribute("aria-label", "View shopping bag");
     button.classList.add("cart-icon");
 
     const badge = document.createElement("span");
@@ -3464,25 +3738,11 @@ function setupCartIcon() {
     badge.setAttribute("aria-hidden", "true");
     button.appendChild(badge);
 
-    button.addEventListener("click", () => {
-      const count = getFavoriteSlugs().size;
-      if (!count) {
-        window.tjToast?.("No saved pieces yet — tap the heart on any piece to save it.");
-        return;
-      }
-      const shelf = document.querySelector("[data-favorites-shelf]");
-      if (shelf && !shelf.hidden) {
-        shelf.scrollIntoView({ behavior: "smooth", block: "start" });
-        shelf.classList.add("is-pulsing");
-        window.setTimeout(() => shelf.classList.remove("is-pulsing"), 1200);
-      } else {
-        window.location.href = "shop.html";
-      }
-    });
+    button.addEventListener("click", () => openCart(button));
   });
 
   const syncBadges = () => {
-    const count = getFavoriteSlugs().size;
+    const count = readCart().reduce((sum, item) => sum + item.quantity, 0);
     document.querySelectorAll(".cart-badge").forEach((badge) => {
       badge.textContent = count > 0 ? String(count) : "";
       badge.classList.toggle("is-visible", count > 0);
@@ -3491,11 +3751,61 @@ function setupCartIcon() {
   syncBadges();
 
   window.addEventListener("storage", (event) => {
-    if (event.key === FAVORITES_KEY) {
+    if (event.key === CART_KEY) {
       syncBadges();
+      renderCart();
     }
   });
-  document.addEventListener("tj:favorites-changed", syncBadges);
+  document.addEventListener("tj:cart-changed", () => {
+    syncBadges();
+    renderCart();
+  });
+}
+
+async function setupCheckoutResult() {
+  const resultPanel = document.querySelector("[data-checkout-result]");
+  const params = new URLSearchParams(window.location.search);
+
+  if (!resultPanel) {
+    if (params.get("checkout") === "cancelled") {
+      window.tjToast?.("Checkout was cancelled. Your pieces are still in your bag.", { duration: 4200 });
+    }
+    return;
+  }
+
+  const sessionId = params.get("session_id");
+  const title = resultPanel.querySelector("[data-checkout-title]");
+  const message = resultPanel.querySelector("[data-checkout-message]");
+  const summary = resultPanel.querySelector("[data-checkout-summary]");
+  if (!sessionId || !/^cs_(test|live)_[A-Za-z0-9]+$/u.test(sessionId)) {
+    title.textContent = "We could not verify this checkout";
+    message.textContent = "The payment confirmation link is incomplete. Please check your Stripe receipt or contact us for help.";
+    return;
+  }
+
+  try {
+    const response = await fetch(`/.netlify/functions/checkout-session?id=${encodeURIComponent(sessionId)}`, {
+      headers: { Accept: "application/json" }
+    });
+    const session = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(session.message || "The checkout could not be verified.");
+
+    const paid = session.paymentStatus === "paid" || session.paymentStatus === "no_payment_required";
+    if (paid) {
+      title.textContent = "Thank you — your payment is confirmed";
+      message.textContent = `Your order${session.email ? ` for ${session.email}` : ""} is recorded securely. We’ll contact you to confirm delivery and any piece-specific details.`;
+      summary.innerHTML = `<span>Order total</span><strong>${escapeHtml(session.amountLabel)}</strong><span>Confirmation</span><strong>${escapeHtml(session.id)}</strong>`;
+      summary.hidden = false;
+      writeCart([]);
+      recordSiteEvent("checkout_payment_confirmed", { currency: session.currency, amount: session.amountTotal });
+    } else {
+      title.textContent = "Your payment is processing";
+      message.textContent = "Stripe has your order, but payment is not marked paid yet. Keep your receipt and refresh this page in a moment.";
+    }
+  } catch (error) {
+    title.textContent = "We could not verify this checkout yet";
+    message.textContent = `${error.message} If Stripe issued a receipt, your payment record is safe; contact us and include the confirmation from that receipt.`;
+  }
 }
 
 function setupSearchModal() {
@@ -4331,6 +4641,7 @@ document.addEventListener("DOMContentLoaded", () => {
   setupLazyFeatureModules();
   setupViewportVideos();
   setupToasts();
+  setupCheckoutResult();
   setupScrollProgress();
   setupHeader();
   setupSearchModal();

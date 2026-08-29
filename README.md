@@ -89,4 +89,10 @@ sitemap.xml
 - Looping videos use poster images and begin loading near the viewport rather than on initial page load.
 - The forms submit to Netlify and can email notifications through Netlify form hooks.
 - SMS alerts require Twilio credentials in Netlify environment variables.
-- Cart interactions are still UI-only and need a checkout integration if you want live purchasing.
+- Published-price pieces use a server-validated shopping bag and Stripe-hosted Checkout. Quote-only pieces continue to use the inquiry flow.
+
+## Stripe Checkout Setup
+
+Add `STRIPE_SECRET_KEY` to the Netlify site's environment variables with Functions scope, then redeploy. The browser never receives this secret. Test-mode keys create test-mode Checkout Sessions; use Stripe test card `4242 4242 4242 4242` with any future expiry and CVC when validating the flow.
+
+The checkout catalogue and prices are enforced in `netlify/functions/checkout-catalog.js`. Keep that file in sync with published prices in `assets/js/main.js` whenever a price changes. CAD and USD pieces are checked out separately because a single payment has one settlement currency.
