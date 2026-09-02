@@ -195,10 +195,7 @@ const products = [
     shipping: "Made to order with timing confirmed after diamond and metal selection.",
     heroImage: "/assets/images/optimized/diamond-tennis-necklace-1600.jpg",
     gallery: [
-      "/assets/images/optimized/diamond-tennis-necklace-1600.jpg",
-      "/assets/images/drive/img-2897.jpg",
-      "/assets/images/drive/img-9576.jpg",
-      "/assets/images/drive/img-1784.jpg"
+      "/assets/images/optimized/diamond-tennis-necklace-1600.jpg"
     ],
     featured: true
   },
