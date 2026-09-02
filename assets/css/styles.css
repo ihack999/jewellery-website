@@ -3413,7 +3413,7 @@ body:has(.design-studio.is-inspecting) .site-header {
 .pinky-takeover__copy { max-width: 590px; }
 .pinky-takeover .eyebrow { color: #e9cdb7; }
 .pinky-takeover .accent-rule { background: #e9cdb7; }
-.pinky-takeover h2 { max-width: 8.8em; margin-bottom: 1rem; color: #fffaf2; font-size: clamp(3.2rem, 6vw, 6.8rem); line-height: 0.88; text-transform: uppercase; }
+.pinky-takeover h2 { max-width: 8.8em; margin-bottom: 1rem; color: #ff4f9a; font-size: clamp(3.2rem, 6vw, 6.8rem); line-height: 0.88; text-shadow: 0 0 34px rgba(255, 79, 154, 0.18); text-transform: uppercase; }
 .pinky-takeover h3 { margin: 1.5rem 0 0.65rem; color: #fffaf2; font-size: clamp(1.75rem, 2.4vw, 2.8rem); }
 .pinky-takeover p { color: rgba(255, 250, 242, 0.78); }
 .pinky-takeover__statement { max-width: 22em; color: #fffaf2 !important; font-family: "Cormorant Garamond", serif; font-size: clamp(1.35rem, 2vw, 2rem); font-style: italic; line-height: 1.25; }
@@ -3439,10 +3439,43 @@ body:has(.design-studio.is-inspecting) .site-header {
 .pinky-takeover__worn { inset: 0 0 8% 10%; width: 76%; height: 86%; }
 .pinky-takeover__detail { right: 0; bottom: 0; width: 39%; aspect-ratio: 1; border: 8px solid #183f43; }
 
+.pinky-takeover__addition {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+  align-items: center;
+  gap: clamp(2rem, 6vw, 6rem);
+  margin-top: clamp(4rem, 9vw, 8rem);
+  padding-top: clamp(3rem, 6vw, 5rem);
+  border-top: 1px solid rgba(255, 255, 255, 0.22);
+}
+
+.pinky-takeover__addition-media {
+  display: grid;
+  grid-template-columns: minmax(0, 0.78fr) minmax(0, 1.22fr);
+  align-items: end;
+  gap: clamp(0.75rem, 2vw, 1.4rem);
+}
+
+.pinky-takeover__addition-media img {
+  width: 100%;
+  height: 100%;
+  max-height: 610px;
+  object-fit: cover;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.22);
+}
+
+.pinky-takeover__addition-media img:first-child { aspect-ratio: 9 / 14; }
+.pinky-takeover__addition-media img:last-child { aspect-ratio: 4 / 3; object-fit: contain; background: #fff; }
+.pinky-takeover__addition-copy { max-width: 570px; }
+.pinky-takeover__addition-copy h3 { margin-top: 0.55rem; font-size: clamp(2.5rem, 4.5vw, 5rem); line-height: 0.95; }
+.pinky-takeover__order-note { color: #e9cdb7 !important; font-size: 0.78rem; font-weight: 700; letter-spacing: 0.04em; }
+
 @media (max-width: 900px) {
   .pinky-takeover__grid { grid-template-columns: 1fr; }
   .pinky-takeover__copy { max-width: 680px; }
   .pinky-takeover__media { min-height: min(760px, 112vw); }
+  .pinky-takeover__addition { grid-template-columns: 1fr; }
+  .pinky-takeover__addition-copy { max-width: 680px; }
 }
 
 @media (max-width: 540px) {
@@ -9374,5 +9407,268 @@ body.modal-open {
   .product-lightbox__stage > img {
     max-width: 100%;
     max-height: calc(100dvh - 142px);
+  }
+}
+
+/* ============================================================
+   Responsive image integrity
+   Keep product photography proportional at every viewport size.
+   Editorial backgrounds still use cover where the crop is intentional.
+   ============================================================ */
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Product listing cards share a stable frame without cropping the piece. */
+.product-card__media {
+  display: grid;
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  place-items: center;
+  overflow: hidden;
+  background: #f8f6f1;
+}
+
+.product-card__media img,
+.luxury-card__media img {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  aspect-ratio: auto;
+  object-fit: contain;
+  object-position: center;
+}
+
+.product-card:hover .product-card__media img,
+.product-card:focus-within .product-card__media img {
+  transform: none;
+}
+
+.product-grid--list .product-card__media {
+  min-height: 0;
+  aspect-ratio: 4 / 3;
+}
+
+.product-grid--list .product-card__media img {
+  height: 100%;
+  min-height: 0;
+  object-fit: contain;
+}
+
+/* Main product gallery and every supporting thumbnail show the full image. */
+.gallery-main {
+  display: grid;
+  width: 100%;
+  min-height: 0;
+  aspect-ratio: 4 / 5;
+  place-items: center;
+  overflow: hidden;
+  background: #f8f6f1;
+}
+
+.gallery-main img {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  max-height: none;
+  aspect-ratio: auto;
+  object-fit: contain;
+  object-position: center;
+}
+
+.thumbnail-button,
+.product-card__thumb,
+.quick-view-modal__thumb,
+.product-lightbox__thumbs button {
+  display: grid;
+  place-items: center;
+  background: #f8f6f1;
+}
+
+.thumbnail-button img,
+.product-card__thumb img,
+.quick-view-modal__thumb img,
+.product-lightbox__thumbs img,
+.compare-bar__items img,
+.compare-table__row--media img,
+.favorite-chip img,
+.cart-line > img {
+  width: 100%;
+  height: 100%;
+  aspect-ratio: auto;
+  object-fit: contain;
+  object-position: center;
+}
+
+/* Responsive banners use their frame ratio instead of a fixed pixel height. */
+.page-banner {
+  width: 100%;
+  height: auto;
+  min-height: 0;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+}
+
+.page-banner img,
+.page-banner .media-video {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  max-height: none;
+  aspect-ratio: auto;
+  object-fit: cover;
+  object-position: center;
+}
+
+/* The pinky-ring launch uses intrinsic image heights, never fixed crops. */
+.pinky-takeover__media {
+  position: static;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(150px, 0.38fr);
+  align-items: center;
+  gap: clamp(0.75rem, 2vw, 1.4rem);
+  min-height: 0;
+}
+
+.pinky-takeover__media img {
+  position: static;
+  width: 100%;
+  height: auto;
+  max-height: none;
+  aspect-ratio: auto;
+  object-fit: contain;
+  object-position: center;
+}
+
+.pinky-takeover__worn {
+  inset: auto;
+  width: 100%;
+  height: auto;
+}
+
+.pinky-takeover__detail {
+  width: 100%;
+  height: auto;
+  aspect-ratio: auto;
+  border-width: clamp(4px, 0.65vw, 8px);
+}
+
+.pinky-takeover__addition-media {
+  align-items: center;
+}
+
+.pinky-takeover__addition-media img,
+.pinky-takeover__addition-media img:first-child,
+.pinky-takeover__addition-media img:last-child {
+  width: 100%;
+  height: auto;
+  max-height: none;
+  aspect-ratio: auto;
+  object-fit: contain;
+  object-position: center;
+}
+
+/* Paired editorial panels collapse their tall desktop minimums on phones. */
+@media (max-width: 900px) {
+  .product-layout {
+    grid-template-columns: minmax(0, 1fr);
+    gap: clamp(1.5rem, 6vw, 2.5rem);
+  }
+
+  .product-layout > *,
+  .product-info {
+    min-width: 0;
+  }
+
+  .product-info {
+    position: static;
+  }
+
+  .about-grid .editorial-panel,
+  .custom-entry__media {
+    min-height: 0;
+    aspect-ratio: 4 / 5;
+  }
+
+  .about-grid .editorial-panel img,
+  .about-grid .editorial-panel .media-video,
+  .custom-entry__media img,
+  .custom-entry__media .media-video {
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    aspect-ratio: auto;
+    object-fit: cover;
+  }
+}
+
+@media (max-width: 640px) {
+  :root {
+    --container: min(1360px, calc(100vw - 1.5rem));
+  }
+
+  .page-banner {
+    height: auto;
+    aspect-ratio: 4 / 3;
+  }
+
+  .page-banner img,
+  .page-banner .media-video {
+    height: 100%;
+  }
+
+  .product-card__media,
+  .product-grid--list .product-card__media {
+    min-height: 0;
+    aspect-ratio: 4 / 5;
+  }
+
+  .gallery-main {
+    min-height: 0;
+    aspect-ratio: 4 / 5;
+  }
+
+  .pinky-takeover__media {
+    grid-template-columns: 1fr;
+    min-height: 0;
+  }
+
+  .pinky-takeover__detail {
+    width: min(72%, 280px);
+    justify-self: end;
+  }
+
+  .pinky-takeover__addition-media {
+    grid-template-columns: 1fr;
+  }
+
+  .pinky-takeover__addition-media img:last-child {
+    width: min(82%, 420px);
+    justify-self: end;
+  }
+
+  .about-grid .editorial-panel,
+  .custom-entry__media {
+    min-height: 0;
+    aspect-ratio: 4 / 5;
+  }
+
+  .page-hero__copy,
+  .collection-heading__copy,
+  .product-card__body,
+  .product-info,
+  .breadcrumbs > * {
+    min-width: 0;
+  }
+
+  .page-hero__copy h1,
+  .collection-heading h2,
+  .product-card__body h2,
+  .product-card__body h3,
+  .product-info h1,
+  .breadcrumbs > * {
+    overflow-wrap: break-word;
   }
 }

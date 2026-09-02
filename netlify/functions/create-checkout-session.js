@@ -74,6 +74,16 @@ exports.handler = async (event) => {
     "payment_intent_data[metadata][source]": "website_checkout"
   });
 
+  if (items.some(({ product }) => product.requiresInitials)) {
+    params.set("custom_fields[0][key]", "monogram");
+    params.set("custom_fields[0][label][type]", "custom");
+    params.set("custom_fields[0][label][custom]", "Monogram initials (1–4 characters)");
+    params.set("custom_fields[0][type]", "text");
+    params.set("custom_fields[0][optional]", "false");
+    params.set("custom_fields[0][text][minimum_length]", "1");
+    params.set("custom_fields[0][text][maximum_length]", "4");
+  }
+
   items.forEach(({ slug, quantity, product }, index) => {
     const prefix = `line_items[${index}]`;
     params.set(`${prefix}[quantity]`, String(quantity));

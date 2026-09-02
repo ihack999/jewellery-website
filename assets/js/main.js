@@ -91,6 +91,61 @@ const products = [
     featured: true
   },
   {
+    slug: "signature-monogram-ring",
+    urlSlug: "signature-monogram-ring",
+    name: "The Signature Monogram Ring",
+    category: "rings",
+    materials: "Solid 9K yellow gold with custom monogram engraving",
+    price: 900,
+    currency: "cad",
+    priceLabel: "$900 CAD",
+    shortDescription: "A polished solid-gold pinky ring personalized with your own monogram — a timeless signature made wearable.",
+    description:
+      "A polished solid-gold pinky ring personalized with your own monogram — a timeless signature made wearable. Each ring is made to order in solid 9K yellow gold.",
+    specs: [
+      ["Metal", "Solid 9K yellow gold"],
+      ["Personalization", "Custom monogram engraving"],
+      ["Made to Order", "Provide the desired initials during secure checkout"],
+      ["Price", "$900 CAD"]
+    ],
+    care: "Store separately and polish gently with a soft jewellery cloth to preserve the gold finish and engraving.",
+    shipping: "Made to order; initials, ring size, production timing, and insured delivery are confirmed with the order.",
+    heroImage: "/assets/images/products/signature-monogram-ring/signature-monogram-ring-product-angled.jpeg",
+    gallery: [
+      "/assets/images/products/signature-monogram-ring/signature-monogram-ring-product-angled.jpeg",
+      "/assets/images/products/signature-monogram-ring/signature-monogram-ring-product-front.jpeg",
+      "/assets/images/products/signature-monogram-ring/signature-monogram-ring-worn-neutral.jpeg",
+      "/assets/images/products/signature-monogram-ring/signature-monogram-ring-stacked-closeup.jpeg",
+      "/assets/images/products/signature-monogram-ring/signature-monogram-ring-stacked-hand.jpeg"
+    ]
+  },
+  {
+    slug: "half-eternity-pinky-band",
+    urlSlug: "half-eternity-band-for-your-pinky",
+    name: "Half Eternity Band for Your Pinky",
+    category: "rings",
+    materials: "Lab-grown diamonds in a polished half-eternity setting",
+    price: 900,
+    currency: "cad",
+    priceLabel: "$900 CAD",
+    shortDescription: "A refined half-eternity band set with lab-grown diamonds and proportioned for effortless pinky-ring styling.",
+    description:
+      "A fine line of lab-grown diamonds brings light to the pinky in an easy half-eternity profile. Wear it alone for a clean sparkle or stack it alongside your signature rings.",
+    specs: [
+      ["Diamonds", "Lab-grown diamonds"],
+      ["Design", "Half-eternity pinky band"],
+      ["Style", "Wear alone or stack with other rings"],
+      ["Price", "$900 CAD"]
+    ],
+    care: "Store separately and clean gently with a soft jewellery cloth to protect the diamond setting and polished finish.",
+    shipping: "Made to order; ring size, production timing, and insured delivery are confirmed after checkout.",
+    heroImage: "/assets/images/products/half-eternity-pinky-band/half-eternity-pinky-band-product.jpeg",
+    gallery: [
+      "/assets/images/products/half-eternity-pinky-band/half-eternity-pinky-band-product.jpeg",
+      "/assets/images/products/half-eternity-pinky-band/half-eternity-pinky-band-worn.jpeg"
+    ]
+  },
+  {
     slug: "pear-halo-ring",
     urlSlug: "rare-blue-diamond-ring",
     name: "Rare Blue Diamond Ring",

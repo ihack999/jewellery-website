@@ -7,6 +7,23 @@ const CHECKOUT_CATALOG = Object.freeze({
     image: "/assets/images/products/rise-ring/rise-ring-worn.jpeg",
     maxQuantity: 5
   },
+  "signature-monogram-ring": {
+    name: "The Signature Monogram Ring",
+    description: "Solid 9K yellow gold with custom monogram engraving",
+    unitAmount: 90000,
+    currency: "cad",
+    image: "/assets/images/products/signature-monogram-ring/signature-monogram-ring-product-angled.jpeg",
+    maxQuantity: 5,
+    requiresInitials: true
+  },
+  "half-eternity-pinky-band": {
+    name: "Half Eternity Band for Your Pinky",
+    description: "Half-eternity pinky band with lab-grown diamonds",
+    unitAmount: 90000,
+    currency: "cad",
+    image: "/assets/images/products/half-eternity-pinky-band/half-eternity-pinky-band-product.jpeg",
+    maxQuantity: 5
+  },
   "estate-cushion-halo-diamond-ring": {
     name: "Cushion Halo Estate Ring",
     description: "Cushion-cut diamond with a layered diamond halo",
