@@ -7,6 +7,9 @@
  * ring size, shank dimensions and setting clearances cannot drift apart.
  */
 
+import { solveGemstoneCut } from "./gemstone-cut.js?v=20260911-construction-v32";
+import { GENERATOR_VERSION, MATERIAL_VERSION, normalizeSeed, designRevision } from "./design-session.js?v=20260911-construction-v32";
+
 export const WORLD_UNITS_PER_MM = 0.12;
 export const METERS_PER_MM = 0.001;
 
@@ -189,11 +192,11 @@ const NECKLACE_CHAIN_LENGTH_MM = Object.freeze({
 });
 
 function defaultChainWireMm(weight) {
-  return clamp(0.90 + (finite(weight, 1) - 1) * 0.55, 0.6, 2.2);
+  return clamp(0.34 + (finite(weight, 1) - 1) * 0.30, 0.22, 1.0);
 }
 
 function defaultBraceletTubeMm(weight) {
-  return clamp(3.30 + (finite(weight, 1) - 1) * 1.60, 2.0, 7.0);
+  return clamp(1.85 + (finite(weight, 1) - 1) * 0.85, 1.6, 4.0);
 }
 
 function defaultHoopTubeMm(weight) {
@@ -204,29 +207,28 @@ function defaultHoopTubeMm(weight) {
 export function estimateMetalMassGrams(spec) {
   const density = metalDensity(spec);
 
-  if (spec.piece === "Necklace") {
-    // Cable-family chain: torus links of wire radius r and outer radius R,
-    // pitch ≈ 1.7× link outer diameter after interlocking overlap.
-    const wireR = spec.necklace.wireDiameterMm * 0.5;
-    const linkR = Math.max(wireR * 1.2, spec.necklace.linkOuterDiameterMm * 0.5 - wireR);
-    const linkVolumeMm3 = 2 * Math.PI * Math.PI * linkR * wireR * wireR;
-    const pitch = Math.max(spec.necklace.linkOuterDiameterMm * 1.7, 0.8);
-    const linkCount = spec.necklace.chainLengthMm / pitch;
-    // Bail, jump rings and clasp hardware ≈ 12 links equivalent.
-    const volumeCm3 = (linkVolumeMm3 * (linkCount + 12)) / 1000;
-    return volumeCm3 * density;
+  if (spec.piece === "Necklace" || (spec.piece === "Bracelet" && spec.sourceState.silhouette === "Station")) {
+    const wire = spec.necklace.wireDiameterMm;
+    const major = wire * 2.6, minor = wire * 1.4;
+    const perimeter = Math.PI * (3 * (major + minor) - Math.sqrt((3 * major + minor) * (major + 3 * minor)));
+    const length = spec.piece === "Necklace" ? spec.necklace.chainLengthMm : spec.bracelet.lengthMm;
+    const count = length / (wire * 4.2);
+    return perimeter * Math.PI * (wire / 2) ** 2 * (count + 12) / 1000 * density;
   }
 
   if (spec.piece === "Bracelet") {
-    // Closed bangle torus; cuff ≈ 0.78× (open arc), tennis ≈ 0.85× (links
-    // replace the solid tube but add settings).
-    const centreR = spec.bracelet.innerDiameterMm * 0.5 + spec.bracelet.tubeDiameterMm * 0.5;
-    const tubeR = spec.bracelet.tubeDiameterMm * 0.5;
-    const torusVolumeMm3 = 2 * Math.PI * Math.PI * centreR * tubeR * tubeR;
-    const styleFactor = spec.sourceState.silhouette === "Cuff" ? 0.78
-      : spec.sourceState.silhouette === "Tennis" ? 0.85
-      : 1.0;
-    return (torusVolumeMm3 * styleFactor / 1000) * density;
+    if (spec.sourceState.silhouette === "Tennis") {
+      const diameter = spec.bracelet.stoneDiameterMm;
+      const count = Math.floor((spec.bracelet.lengthMm - Math.max(6, diameter * 2)) / (diameter + 0.55));
+      const basketVolume = Math.PI * (diameter * 0.048) ** 2 * diameter * 10;
+      return (count * basketVolume + diameter * diameter * 3) / 1000 * density;
+    }
+    const major = spec.bracelet.innerDiameterMm / 2 + spec.bracelet.tubeDiameterMm / 2;
+    const minor = major * spec.bracelet.ovalRatio;
+    const perimeter = Math.PI * (3 * (major + minor) - Math.sqrt((3 * major + minor) * (major + 3 * minor)));
+    const length = perimeter - (spec.sourceState.silhouette === "Cuff" ? spec.bracelet.cuffGapMm : 0);
+    const taper = spec.sourceState.silhouette === "Cuff" ? 0.89 : 1;
+    return length * spec.bracelet.widthMm * spec.bracelet.tubeDiameterMm * 0.94 * taper / 1000 * density;
   }
 
   if (spec.piece === "Earrings") {
@@ -268,10 +270,20 @@ export function estimateMetalMassGrams(spec) {
 }
 
 export function buildJewellerySpec(state = {}) {
+  const sourceRevision = designRevision(state);
   const piece = state.piece || "Ring";
+  if (piece === "Bracelet") {
+    const diameter = clamp(finite(state.braceletStoneDiameterMm, 2.8), 1.5, 5);
+    const materialScale = densityScaleForStone(state.stone || "Clear Diamond");
+    state = { ...state, shape: "Round", facetStyle: "Brilliant", carat: (diameter / (6.45 * materialScale)) ** 3,
+      stoneWidthMm: diameter, stoneLengthMm: diameter, stoneDepthMm: diameter * 0.615,
+      lengthWidthRatio: 1, tablePct: 57, totalDepthPct: 61.5, crownAngleDeg: "", pavilionAngleDeg: "",
+      girdlePct: 3.5, culetPct: 0, symmetryMode: "Precision", halo: false,
+      setting: state.silhouette === "Tennis" ? "Prong" : "Bezel" };
+  }
   const shape = state.shape || "Round";
   const cut = CUT_DEFAULTS[shape] || CUT_DEFAULTS.Round;
-  const carat = clamp(finite(state.carat ?? state.size, 1), 0.03, 50);
+  const carat = clamp(finite(state.carat ?? state.size, 1), piece === "Bracelet" ? 0.001 : 0.03, 50);
   const stoneDims = estimateStoneDimensionsMm({
     shape,
     stone: state.stone || "Clear Diamond",
@@ -291,6 +303,16 @@ export function buildJewellerySpec(state = {}) {
       35
     );
   }
+
+  const cutSolution = solveGemstoneCut({
+    ...stoneDims,
+    tablePct: clamp(finite(state.tablePct, cut.tablePct), 20, 90),
+    crownAngleDeg: clamp(finite(state.crownAngleDeg, cut.crownAngleDeg), 0, 60),
+    pavilionAngleDeg: clamp(finite(state.pavilionAngleDeg, cut.pavilionAngleDeg), 0, 60),
+    girdlePct: clamp(finite(state.girdlePct, cut.girdlePct), 0.5, 12),
+    culetPct: clamp(finite(state.culetPct, cut.culetPct), 0, 20)
+  }, state);
+  stoneDims.depthMm = cutSolution.depthMm;
 
   const hasRingSize = hasFiniteInput(state.ringSizeUS ?? state.ringSize);
   const hasInnerDiameter = hasFiniteInput(state.innerDiameterMm);
@@ -322,13 +344,19 @@ export function buildJewellerySpec(state = {}) {
 
   const weight = clamp(finite(state.weight, 1), 0.5, 2.5);
   const silhouette = state.silhouette || "Classic Round";
-  const chainWireMm = clamp(finite(state.chainWireMm, defaultChainWireMm(weight)), 0.5, 2.6);
+  const chainWireMm = clamp(finite(state.chainWireMm, defaultChainWireMm(weight)), 0.2, 2.6);
   const braceletTubeMm = clamp(finite(state.braceletTubeMm, defaultBraceletTubeMm(weight)), 1.6, 9);
   const hoopTubeMm = defaultHoopTubeMm(weight);
   const earringDropDefault = silhouette === "Chandelier" ? 38 : 22;
 
   const spec = {
-    version: 1,
+    version: 3,
+    representation: "visual-preview",
+    productionValidated: false,
+    generatorVersion: GENERATOR_VERSION,
+    materialVersion: MATERIAL_VERSION,
+    revision: sourceRevision,
+    seed: normalizeSeed(state.seed),
     units: "mm",
     piece,
     ring: {
@@ -346,12 +374,16 @@ export function buildJewellerySpec(state = {}) {
         1000
       ),
       wireDiameterMm: chainWireMm,
-      linkOuterDiameterMm: clamp(chainWireMm * 3.4, 1.7, 9),
+      linkOuterDiameterMm: chainWireMm * 3.8,
       dropLengthMm: clamp(finite(state.dropLengthMm, 42), 10, 140)
     },
     bracelet: {
       innerDiameterMm: clamp(finite(state.braceletInnerDiameterMm, 63), 50, 90),
       tubeDiameterMm: braceletTubeMm,
+      widthMm: clamp(finite(state.braceletWidthMm, 4), 2, 14),
+      lengthMm: clamp(finite(state.braceletLengthMm, 178), 140, 240),
+      stoneDiameterMm: clamp(finite(state.braceletStoneDiameterMm, 2.8), 1.5, 5),
+      cuffGapMm: clamp(finite(state.cuffGapMm, 26), 18, 38),
       ovalRatio: 0.80
     },
     earrings: {
@@ -369,12 +401,14 @@ export function buildJewellerySpec(state = {}) {
       facetStyle: state.facetStyle || (["Emerald", "Asscher", "Baguette"].includes(shape) ? "Step" : "Brilliant"),
       ...stoneDims,
       tablePct: clamp(finite(state.tablePct, cut.tablePct), 20, 90),
-      totalDepthPct: clamp(finite(state.totalDepthPct, cut.totalDepthPct), 25, 90),
-      crownAngleDeg: clamp(finite(state.crownAngleDeg, cut.crownAngleDeg), 0, 60),
-      pavilionAngleDeg: clamp(finite(state.pavilionAngleDeg, cut.pavilionAngleDeg), 0, 60),
+      totalDepthPct: cutSolution.totalDepthPct,
+      crownAngleDeg: cutSolution.crownAngleDeg,
+      pavilionAngleDeg: cutSolution.pavilionAngleDeg,
       girdlePct: clamp(finite(state.girdlePct, cut.girdlePct), 0.5, 12),
       culetPct: clamp(finite(state.culetPct, cut.culetPct), 0, 20),
-      symmetryMode: state.symmetryMode === "Antique" ? "Antique" : "Precision"
+      symmetryMode: state.symmetryMode === "Antique" ? "Antique" : "Precision",
+      seed: normalizeSeed(state.seed),
+      cutSolution
     },
     setting: {
       type: state.setting || "Prong",
@@ -441,7 +475,7 @@ export function buildJewellerySpec(state = {}) {
 }
 
 export function validateJewellerySpec(spec) {
-  const issues = [];
+  const issues = [...(spec.centerStone.cutSolution?.issues || [])];
   const add = (severity, code, message, field, recommendedValue) => {
     issues.push({ severity, code, message, field, recommendedValue });
   };
@@ -459,7 +493,7 @@ export function validateJewellerySpec(spec) {
     }
   }
 
-  if (spec.setting.type !== "Bezel" && spec.setting.type !== "Tension") {
+  if (spec.piece !== "Bracelet" && spec.setting.type !== "Bezel" && spec.setting.type !== "Tension") {
     if (spec.setting.prongBaseDiameterMm < 0.8) {
       add("error", "PRONG_BASE", "Prong base diameter leaves too little metal for a durable bearing.", "prongBaseDiameterMm", 0.9);
     }
@@ -472,7 +506,7 @@ export function validateJewellerySpec(spec) {
     }
   }
 
-  if (spec.setting.culetClearanceMm < 0.25) {
+  if (spec.piece !== "Bracelet" && spec.setting.culetClearanceMm < 0.25) {
     add("error", "CULET_CLEARANCE", "Culet clearance is too small; the stone can contact the finger or gallery.", "culetClearanceMm", 0.35);
   }
 
@@ -488,29 +522,28 @@ export function validateJewellerySpec(spec) {
   }
 
   if (spec.piece === "Necklace") {
-    if (spec.necklace.wireDiameterMm < 0.7) {
-      add("error", "CHAIN_WIRE", "Chain wire is below the daily-wear floor; the chain will stretch and snap.", "chainWireMm", 0.8);
+    if (spec.necklace.wireDiameterMm < 0.25) {
+      add("warning", "CHAIN_WIRE", "Fine chain wire: confirm alloy, link dimensions, soldering and intended wear with the maker.", "chainWireMm", 0.30);
     }
     // Pendant load: carat mass hanging on the wire cross-section.
     const wireArea = Math.PI * Math.pow(spec.necklace.wireDiameterMm * 0.5, 2);
-    if (spec.centerStone.carat / Math.max(wireArea, 0.05) > 3.2) {
-      add("warning", "PENDANT_LOAD", "Pendant is heavy for the selected chain gauge; a thicker wire is recommended.", "chainWireMm", Math.min(2.2, spec.necklace.wireDiameterMm + 0.4));
+    if (spec.centerStone.carat > 4 && wireArea < 0.1) {
+      add("warning", "PENDANT_LOAD", "Large pendant on fine chain: request a workshop load assessment including the setting and clasp.", "chainWireMm", 0.40);
     }
     if (spec.necklace.chainLengthMm < 340) {
       add("warning", "CHAIN_LENGTH", "Chain is shorter than a standard choker; confirm the neck measurement.", "chainLengthMm", 380);
     }
+    if (spec.sourceState.silhouette === "Lariat" && spec.necklace.chainLengthMm < 312 + spec.necklace.dropLengthMm * 2) {
+      add("error", "LARIAT_LENGTH", "The requested tails leave too little chain for the neck loop. Lengthen the chain or shorten the drop.", "chainLengthMm", 312 + spec.necklace.dropLengthMm * 2);
+    }
   }
 
-  if (spec.piece === "Bracelet") {
+  if (spec.piece === "Bracelet" && !["Tennis", "Station"].includes(spec.sourceState.silhouette)) {
     if (spec.bracelet.innerDiameterMm < 55) {
       add("warning", "BANGLE_FIT", "Inner diameter is below the common adult minimum; confirm the wrist measurement.", "braceletInnerDiameterMm", 58);
     }
-    if (spec.bracelet.tubeDiameterMm < 2.2) {
-      add("error", "BANGLE_WALL", "Bangle cross-section is too thin to survive daily knocks.", "braceletTubeMm", 2.6);
-    }
-    const braceletLoad = spec.centerStone.carat / Math.max(Math.pow(spec.bracelet.tubeDiameterMm, 2), 0.5);
-    if (braceletLoad > 0.55) {
-      add("warning", "BANGLE_HEAD", "Focal stone is heavy for the bangle section; reinforce the seat.", "braceletTubeMm", Math.min(7, spec.bracelet.tubeDiameterMm + 0.8));
+    if (spec.bracelet.tubeDiameterMm < 1.8 && spec.bracelet.widthMm < 3) {
+      add("warning", "BANGLE_WALL", "Slender bangle section: confirm stiffness and hinge construction with the maker.", "braceletTubeMm", 1.85);
     }
   }
 
@@ -544,6 +577,10 @@ export function physicalMetadata(spec) {
     chainWireDiameterMm: spec.necklace.wireDiameterMm,
     braceletInnerDiameterMm: spec.bracelet.innerDiameterMm,
     braceletTubeDiameterMm: spec.bracelet.tubeDiameterMm,
+    braceletWidthMm: spec.bracelet.widthMm,
+    braceletLengthMm: spec.bracelet.lengthMm,
+    braceletStoneDiameterMm: spec.bracelet.stoneDiameterMm,
+    cuffGapMm: spec.bracelet.cuffGapMm,
     postDiameterMm: spec.earrings.postDiameterMm,
     hoopInnerDiameterMm: spec.earrings.hoopInnerDiameterMm,
     stoneDimensionsMm: {

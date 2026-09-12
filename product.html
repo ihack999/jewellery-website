@@ -5,18 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Browse fine jewellery and diamond pieces from Toronto Jewels Curation.">
     <meta name="robots" content="noindex, follow">
-    <meta name="theme-color" content="#0a3941">
+    <meta name="theme-color" content="#272f26">
     <title>Jewellery Product Redirect | Toronto Jewels Curation</title>
     <link rel="canonical" href="https://torontojewelscuration.com/shop.html">
     <link rel="icon" type="image/svg+xml" href="assets/images/logo-emblem.svg">
     <link rel="manifest" href="site.webmanifest">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="assets/css/styles.css?v=20260831-responsive-images">
-    <script src="assets/js/main.js?v=20260902-necklace-gallery" defer></script>
+    <link rel="stylesheet" href="/assets/css/atelier.css?v=20260911-editorial-v1">
+    <link rel="stylesheet" href="/assets/css/curation.css?v=20260912-curation-v3">
+    <link rel="stylesheet" href="/assets/css/product-refinement.css?v=20260912-curation-v3">
+    <script src="assets/js/main.js?v=20260912-curation-v3" defer></script>
+    <script src="/assets/js/curation.js?v=20260912-curation-v3" defer></script>
   </head>
-  <body data-page="shop">
+  <body data-experience="atelier" data-page="shop">
     <div class="page-shell">
       <div class="announcement-bar">
         <div class="announcement-bar__inner">
@@ -66,7 +70,7 @@
       </header>
 
       <main>
-        <section class="section section--surface" data-product-page>
+        <section class="section section--surface" id="the-piece" data-product-page>
           <div class="container">
             <div class="breadcrumbs" data-reveal>
               <a href="index.html">Home</a>
@@ -77,11 +81,11 @@
             </div>
 
             <div class="product-layout">
-              <div data-reveal>
+              <div class="product-gallery"><div class="product-gallery__heading"><span>A closer look</span><span>The collection</span></div>
                 <div class="gallery-main">
                   <img src="assets/images/drive/img-8503.jpg" alt="Product image" data-product-main-image>
                 </div>
-                <div class="thumbnail-grid" data-product-thumbnails></div>
+                <div class="thumbnail-grid" data-product-thumbnails aria-label="Product image views"></div><p class="product-gallery__caption">The piece, in focus.</p>
               </div>
 
               <div class="product-info" data-reveal>
@@ -93,69 +97,42 @@
                 <p data-product-description>
                   A pear-cut halo ring designed to feel luminous, balanced, and easy to wear.
                 </p>
-
-                <div class="form-grid" style="margin-top: 2rem;">
-                  <div class="form-field">
-                    <label for="size">Size</label>
-                    <select id="size" name="size">
-                      <option>5</option>
-                      <option>6</option>
-                      <option>7</option>
-                      <option>8</option>
-                      <option>9</option>
-                    </select>
-                  </div>
-                  <div class="form-field">
-                    <label for="quantity">Quantity</label>
-                    <select id="quantity" name="quantity">
-                      <option>1</option>
-                      <option>2</option>
-                      <option>3</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div class="product-action-group">
+                <div class="product-action-group" id="product-actions">
                   <a class="button" href="customs.html#request-form" data-product-inquiry>Inquire on This Piece</a>
                   <a class="button-secondary" href="shop.html">Back to Shop</a>
                 </div>
-
                 <p class="status-note" data-cart-status></p>
-
                 <ul class="product-notes">
                   <li><strong>Shipping</strong><span data-product-shipping>Tracked delivery with gift-ready packaging.</span></li>
                   <li><strong>Packaging</strong><span>Presented in a structured keepsake box.</span></li>
                   <li><strong>Care</strong><span data-product-care>Store in a soft pouch and clean gently.</span></li>
                 </ul>
+                <nav class="product-detail-links" aria-label="About this piece">
+                  <a href="#piece-story">The story <span aria-hidden="true">↗</span></a>
+                  <a href="#piece-specifications">Specifications <span aria-hidden="true">↗</span></a>
+                  <a href="#piece-care">Care &amp; delivery <span aria-hidden="true">↗</span></a>
+                </nav>
               </div>
             </div>
           </div>
         </section>
 
-        <section class="section section--surface">
-          <div class="container details-stack">
-            <article class="info-panel" data-reveal>
+        <section class="section product-details-section" id="product-details"><div class="container"><div class="product-details__heading"><div><p class="product-section-label">Considered from every angle</p><h2>The finer <em>details.</em></h2></div><a class="product-return-link" href="#product-actions">Return to the piece <span aria-hidden="true">↑</span></a></div><div class="details-stack product-details__grid"><article class="info-panel product-detail-panel product-detail-panel--story" id="piece-story"><span class="product-detail-panel__number" aria-hidden="true">01</span><div>
               <h3>Description</h3>
               <p data-product-long-description>
                 Each piece in the collection is chosen for proportion, wearability, and a polished finish.
                 The styling stays intentional and clean so the design itself remains the focus.
               </p>
-            </article>
-
-            <article class="info-panel" data-reveal>
+            </div></article><article class="info-panel product-detail-panel product-detail-panel--specifications" id="piece-specifications"><span class="product-detail-panel__number" aria-hidden="true">02</span><div>
               <h3>Materials and Details</h3>
               <ul class="stacked-detail" data-product-specs></ul>
-            </article>
-
-            <article class="info-panel" data-reveal>
+            </div></article><article class="info-panel product-detail-panel product-detail-panel--care" id="piece-care"><span class="product-detail-panel__number" aria-hidden="true">03</span><div>
               <h3>Care and Shipping</h3>
               <p>
                 Each order is packed in a gift-ready keepsake box and shipped with tracking.
                 Care instructions are included so the finish stays bright over time.
               </p>
-            </article>
-          </div>
-        </section>
+            <div class="product-policy-links"><a href="/shipping-returns.html">Delivery &amp; return terms <span aria-hidden="true">↗</span></a><a href="/jewellery-care.html">Read the care guide <span aria-hidden="true">↗</span></a></div></div></article></div><a class="product-return-link product-return-link--mobile" href="#product-actions">Back to your piece <span aria-hidden="true">↑</span></a></div></section>
 
         <section class="section section--soft">
           <div class="container">

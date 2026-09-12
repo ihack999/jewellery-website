@@ -3,7 +3,18 @@ import {
   buildJewellerySpec,
   mmToWorld,
   physicalMetadata
-} from "./jewellery-spec.js";
+} from "./jewellery-spec.js?v=20260911-construction-v32";
+import { createSeededRandom, normalizeSeed, createDesignVariation, createDesignDocument, readDesignDocument, createDesignHistory, designRevision } from "./design-session.js?v=20260912-studio-session3";
+import { createGemstoneGeometry, gemstoneOutlinePoint } from "./gemstone-geometry.js?v=20260911-construction-v32";
+import { FINISH_PROFILES, gemOpticalParameters } from "./jewellery-materials.js?v=20260911-construction-v32";
+import { downloadBlob } from "./design-export.js?v=20260911-construction-v32";
+import { installGemRayMaterial, setGemRayBounces, disposeGemRayMaterial } from "./gem-ray-material.js?v=20260911-construction-v32";
+import { capSweepEnds } from "./sweep-geometry.js?v=20260911-construction-v32";
+import { resolvedGemProfile } from "./gem-appearance.js?v=20260911-construction-v32";
+import { createPatinaMaps } from "./patina-material.js?v=20260911-construction-v32";
+import { stepDampedSway } from "./jewellery-motion.js?v=20260911-construction-v32";
+import { fitProngsToGems } from "./setting-contact.js?v=20260911-construction-v32";
+import { createJewelleryAssemblies } from "./jewellery-assemblies.js?v=20260911-ar-live3";
 
 const METAL_COLORS = {
   "White Gold": "#e8eef1",
@@ -411,7 +422,23 @@ const DESIGN_DEFAULTS = {
   galleryRailDiameterMm: "",
   culetClearanceMm: "",
   haloMeleeDiameterMm: "",
-  symmetryMode: "Precision"
+  symmetryMode: "Precision",
+  accentStone: "Clear Diamond",
+  seed: "atelier-001",
+  variationIndex: "0",
+  designFamily: "Classic",
+  appearance: "Photographic",
+  opticsMode: "Ray Traced",
+  gemBounces: "12",
+  dispersionStrength: "1",
+  absorptionStrength: "1",
+  inclusionDensity: "1",
+  patinaCoverage: "0.45",
+  finishStrength: "1",
+  finishScaleMm: "1.5",
+  lockStone: false,
+  lockMetal: false,
+  lockStructure: false
 };
 
 // Per-piece sub-type catalogue. Each silhouette physically changes the
@@ -1199,7 +1226,7 @@ function normalizePiece(value) {
     return "";
   }
 
-  return PIECE_MAP[value.trim().toLowerCase().replace(/[^a-z]/g, "")] || "";
+  return PIECE_MAP[String(value).trim().toLowerCase().replace(/[^a-z]/g, "")] || "";
 }
 
 function matchOption(value, options, fallback) {
@@ -1213,6 +1240,7 @@ function matchOption(value, options, fallback) {
 }
 
 function normalizeRangeValue(value, min, max, fallback, decimals = 1) {
+  if (value === "" || value === null || value === undefined) return String(fallback);
   const number = Number(value);
 
   if (!Number.isFinite(number)) {
@@ -1260,13 +1288,29 @@ function sanitizeDesignState(input = {}) {
     : DESIGN_DEFAULTS.engraving;
 
   const piece = matchOption(normalizePiece(input.piece) || input.piece, DESIGN_OPTIONS.piece, DESIGN_DEFAULTS.piece);
+  const metal = matchOption(input.metal, DESIGN_OPTIONS.metal, DESIGN_DEFAULTS.metal);
 
   return {
     piece,
+    seed: normalizeSeed(input.seed),
+    variationIndex: normalizeRangeValue(input.variationIndex, 0, 1000000, 0, 0),
+    designFamily: ["Classic", "Art Deco", "Romantic", "Sculptural", "Vintage"].includes(input.designFamily) ? input.designFamily : "Classic",
+    appearance: input.appearance === "Expressive" ? "Expressive" : "Photographic",
+    opticsMode: input.opticsMode === "Fast" ? "Fast" : "Ray Traced",
+    gemBounces: ["8", "12", "20"].includes(String(input.gemBounces)) ? String(input.gemBounces) : "12",
+    dispersionStrength: normalizeRangeValue(input.dispersionStrength, 0, 2, 1, 2),
+    absorptionStrength: normalizeRangeValue(input.absorptionStrength, 0.1, 3, 1, 2),
+    inclusionDensity: normalizeRangeValue(input.inclusionDensity, 0, 2, 1, 2),
+    patinaCoverage: normalizeRangeValue(input.patinaCoverage, 0, 1, 0.45, 2),
+    finishStrength: normalizeRangeValue(input.finishStrength, 0, 2, 1, 2),
+    finishScaleMm: normalizeRangeValue(input.finishScaleMm, 0.25, 6, 1.5, 2),
+    lockStone: normalizeDesignBoolean(input.lockStone, false),
+    lockMetal: normalizeDesignBoolean(input.lockMetal, false),
+    lockStructure: normalizeDesignBoolean(input.lockStructure, false),
     silhouette: silhouetteFor(piece, input.silhouette),
-    metal: matchOption(input.metal, DESIGN_OPTIONS.metal, DESIGN_DEFAULTS.metal),
-    karat: matchOption(input.karat, DESIGN_OPTIONS.karat, DESIGN_DEFAULTS.karat),
-    setting: matchOption(input.setting, DESIGN_OPTIONS.setting, DESIGN_DEFAULTS.setting),
+    metal,
+    karat: metal === "Platinum" ? "950" : input.karat === "950" ? "18K" : matchOption(input.karat, DESIGN_OPTIONS.karat, DESIGN_DEFAULTS.karat),
+    setting: matchOption(input.setting, ["Necklace", "Bracelet"].includes(piece) ? ["Prong", "Bezel"] : DESIGN_OPTIONS.setting, DESIGN_DEFAULTS.setting),
     finish: matchOption(input.finish, DESIGN_OPTIONS.finish, DESIGN_DEFAULTS.finish),
     shape: matchOption(input.shape, DESIGN_OPTIONS.shape, DESIGN_DEFAULTS.shape),
     stone: matchOption(input.stone, DESIGN_OPTIONS.stone, DESIGN_DEFAULTS.stone),
@@ -1313,7 +1357,12 @@ function sanitizeDesignState(input = {}) {
     culetClearanceMm: normalizeOptionalRangeValue(input.culetClearanceMm, 0.1, 3, 2),
     haloMeleeDiameterMm: normalizeOptionalRangeValue(input.haloMeleeDiameterMm, 0.6, 4, 2),
     chainLengthMm: normalizeOptionalRangeValue(input.chainLengthMm, 300, 1000, 0),
-    chainWireMm: normalizeOptionalRangeValue(input.chainWireMm, 0.5, 2.6, 2),
+    chainWireMm: normalizeOptionalRangeValue(input.chainWireMm, 0.2, 2.6, 2),
+    accentStone: input.accentStone === "Match Center" ? "Match Center" : "Clear Diamond",
+    braceletLengthMm: normalizeOptionalRangeValue(input.braceletLengthMm, 140, 240, 1),
+    braceletWidthMm: normalizeOptionalRangeValue(input.braceletWidthMm, 2, 14, 2),
+    braceletStoneDiameterMm: normalizeOptionalRangeValue(input.braceletStoneDiameterMm, 1.5, 5, 2),
+    cuffGapMm: normalizeOptionalRangeValue(input.cuffGapMm, 18, 38, 1),
     braceletInnerDiameterMm: normalizeOptionalRangeValue(input.braceletInnerDiameterMm, 50, 90, 1),
     braceletTubeMm: normalizeOptionalRangeValue(input.braceletTubeMm, 1.6, 9, 2),
     postDiameterMm: normalizeOptionalRangeValue(input.postDiameterMm, 0.5, 1.6, 2),
@@ -1381,17 +1430,18 @@ function createDesignUrl(state) {
   return url.toString();
 }
 
-function setDesignerStatus(target, message) {
+function setDesignerStatus(target, message, duration = 2600) {
   if (!target) {
     return;
   }
 
   window.clearTimeout(Number(target.dataset.statusTimer || 0));
   target.textContent = message;
+  if (duration === 0) return;
 
   const timer = window.setTimeout(() => {
     target.textContent = "";
-  }, 2600);
+  }, duration);
 
   target.dataset.statusTimer = String(timer);
 }
@@ -1402,11 +1452,25 @@ function applyDesignState(root, state) {
     const field = root.querySelector(`[data-designer-field="${name}"]`);
 
     if (field) {
-      field.value = value;
+      const normalizedValue = value === undefined || value === null ? "" : String(value);
+      field.value = normalizedValue;
+      // Hidden inputs carry generator metadata that is not visible in the
+      // form. Keep their content attribute synchronized as well so browser
+      // restores and form snapshots do not lose the variation counter.
+      if (field.type === "hidden") field.setAttribute("value", normalizedValue);
     }
   };
 
   setField("piece", cleanState.piece);
+  const silhouette = root.querySelector('[data-designer-field="silhouette"]');
+  if (silhouette) {
+    silhouette.replaceChildren(...SILHOUETTES[cleanState.piece].map((value) => {
+      const option = document.createElement("option");
+      option.value = value;
+      option.textContent = value;
+      return option;
+    }));
+  }
   setField("silhouette", cleanState.silhouette);
   setField("setting", cleanState.setting);
   setField("finish", cleanState.finish);
@@ -1432,8 +1496,15 @@ function applyDesignState(root, state) {
     "bearingDepthMm", "galleryHeightMm", "galleryRailDiameterMm",
     "culetClearanceMm", "haloMeleeDiameterMm", "symmetryMode",
     "chainLengthMm", "chainWireMm", "braceletInnerDiameterMm", "braceletTubeMm",
-    "postDiameterMm", "hoopDiameterMm", "dropLengthMm"
+    "accentStone", "braceletLengthMm", "braceletWidthMm", "braceletStoneDiameterMm", "cuffGapMm",
+    "postDiameterMm", "hoopDiameterMm", "dropLengthMm",
+    "seed", "variationIndex", "designFamily", "appearance", "finishStrength", "finishScaleMm",
+    "opticsMode", "gemBounces", "dispersionStrength", "absorptionStrength", "inclusionDensity", "patinaCoverage"
   ].forEach((fieldName) => setField(fieldName, cleanState[fieldName]));
+  ["lockStone", "lockMetal", "lockStructure"].forEach((name) => {
+    const field = root.querySelector(`[data-designer-field="${name}"]`);
+    if (field) field.checked = cleanState[name];
+  });
   setField("chainType", cleanState.chainType);
   setField("clasp", cleanState.clasp);
 
@@ -1653,7 +1724,8 @@ function updateDesignerSmartDetails(root, state) {
   }
 
   if (stone) {
-    stone.textContent = `${state.shape} ${state.stone}`;
+    const roundStations = state.piece === "Bracelet" || (state.piece === "Necklace" && state.silhouette === "Station");
+    stone.textContent = `${roundStations ? "Round" : state.shape} ${state.stone}`;
   }
 
   if (savedCard && savedSummary) {
@@ -1663,22 +1735,8 @@ function updateDesignerSmartDetails(root, state) {
 }
 
 function createRandomDesignState(currentState) {
-  const pick = (items) => items[Math.floor(Math.random() * items.length)];
-
-  return sanitizeDesignState({
-    piece: currentState.piece || pick(DESIGN_OPTIONS.piece),
-    metal: pick(DESIGN_OPTIONS.metal),
-    setting: pick(DESIGN_OPTIONS.setting),
-    finish: pick(DESIGN_OPTIONS.finish),
-    shape: pick(DESIGN_OPTIONS.shape),
-    stone: pick(DESIGN_OPTIONS.stone),
-    lighting: pick(DESIGN_OPTIONS.lighting),
-    size: String((0.9 + Math.random() * 1.3).toFixed(1)),
-    weight: String((0.9 + Math.random() * 0.4).toFixed(2)),
-    halo: Math.random() > 0.28,
-    accent: Math.random() > 0.22,
-    engraving: currentState.engraving || ""
-  });
+  const locks = ["stone", "metal", "structure"].filter((name) => currentState[`lock${name[0].toUpperCase()}${name.slice(1)}`]);
+  return sanitizeDesignState(createDesignVariation(currentState, currentState.designFamily, locks));
 }
 
 function getWeightLabel(value) {
@@ -1697,9 +1755,20 @@ function getWeightLabel(value) {
 
 function createSummary(state) {
   const spec = physicalSpecForState(state);
+  const grade = state.metal === "Platinum" || state.metal.includes("Gold") ? ` ${state.karat}` : "";
+  if (state.piece === "Necklace" && state.silhouette === "Station") {
+    return `Station necklace | ${spec.necklace.chainLengthMm.toFixed(0)} mm nominal chain | ${state.metal}${grade} with ${state.finish} | five graduated round ${state.stone} bezels | ${state.chainType} chain · ${spec.necklace.wireDiameterMm.toFixed(2)} mm wire | ${state.clasp} clasp`;
+  }
+  if (state.piece === "Bracelet") {
+    const flexible = ["Tennis", "Station"].includes(state.silhouette);
+    const dimensions = flexible ? `${spec.bracelet.lengthMm.toFixed(0)} mm nominal length`
+      : `${spec.bracelet.innerDiameterMm.toFixed(1)} mm major opening · ${spec.bracelet.widthMm.toFixed(1)} × ${spec.bracelet.tubeDiameterMm.toFixed(2)} mm section`;
+    const stones = flexible || state.accent ? `${spec.bracelet.stoneDiameterMm.toFixed(1)} mm round ${state.stone} settings` : "plain metal";
+    return `${state.silhouette} bracelet | ${state.metal}${grade} with ${state.finish} | ${dimensions} | ${stones} | ${state.silhouette === "Tennis" ? "articulated baskets · box clasp with safety catches" : state.silhouette === "Cuff" ? `${spec.bracelet.cuffGapMm} mm arc opening` : "complete oval construction"}`;
+  }
   const details = [
     `${state.piece}`,
-    `${state.metal} ${state.karat} with ${state.finish}`,
+    `${state.metal}${grade} with ${state.finish}`,
     `${spec.centerStone.carat.toFixed(2)} ct ${state.shape} ${state.stone}`,
     formatStoneDimensions(spec),
     `${state.setting} setting`,
@@ -1711,6 +1780,12 @@ function createSummary(state) {
   if (spec.piece === "Ring") {
     details.splice(1, 0, `US ${spec.ring.sizeUS.toFixed(1)} ring`);
     details.splice(2, 0, `${spec.ring.shankWidthMm.toFixed(2)} × ${spec.ring.shankThicknessMm.toFixed(2)} mm shank`);
+  } else if (spec.piece === "Necklace") {
+    details.splice(1, 0, `${spec.necklace.chainLengthMm.toFixed(0)} mm chain · ${spec.necklace.wireDiameterMm.toFixed(2)} mm wire`);
+  } else if (spec.piece === "Bracelet") {
+    details.splice(1, 0, `${spec.bracelet.innerDiameterMm.toFixed(1)} mm opening · ${spec.bracelet.tubeDiameterMm.toFixed(2)} mm tube`);
+  } else if (spec.piece === "Earrings") {
+    details.splice(1, 0, `${spec.earrings.postDiameterMm.toFixed(2)} mm post`);
   }
 
   if (state.engraving) details.push(`engraving: ${state.engraving}`);
@@ -1759,6 +1834,21 @@ function getState(root) {
   const checked = (name) => root.querySelector(`[data-designer-field="${name}"]:checked`);
 
   return sanitizeDesignState({
+    seed: field("seed")?.value,
+    variationIndex: field("variationIndex")?.value,
+    designFamily: field("designFamily")?.value,
+    appearance: field("appearance")?.value,
+    opticsMode: field("opticsMode")?.value,
+    gemBounces: field("gemBounces")?.value,
+    dispersionStrength: field("dispersionStrength")?.value,
+    absorptionStrength: field("absorptionStrength")?.value,
+    inclusionDensity: field("inclusionDensity")?.value,
+    patinaCoverage: field("patinaCoverage")?.value,
+    finishStrength: field("finishStrength")?.value,
+    finishScaleMm: field("finishScaleMm")?.value,
+    lockStone: field("lockStone")?.checked,
+    lockMetal: field("lockMetal")?.checked,
+    lockStructure: field("lockStructure")?.checked,
     piece: field("piece")?.value,
     silhouette: field("silhouette")?.value,
     metal: checked("metal")?.value,
@@ -1806,6 +1896,18 @@ function getState(root) {
     galleryRailDiameterMm: field("galleryRailDiameterMm")?.value,
     culetClearanceMm: field("culetClearanceMm")?.value,
     haloMeleeDiameterMm: field("haloMeleeDiameterMm")?.value,
+    chainLengthMm: field("chainLengthMm")?.value,
+    chainWireMm: field("chainWireMm")?.value,
+    accentStone: field("accentStone")?.value,
+    braceletLengthMm: field("braceletLengthMm")?.value,
+    braceletWidthMm: field("braceletWidthMm")?.value,
+    braceletStoneDiameterMm: field("braceletStoneDiameterMm")?.value,
+    cuffGapMm: field("cuffGapMm")?.value,
+    braceletInnerDiameterMm: field("braceletInnerDiameterMm")?.value,
+    braceletTubeMm: field("braceletTubeMm")?.value,
+    postDiameterMm: field("postDiameterMm")?.value,
+    hoopDiameterMm: field("hoopDiameterMm")?.value,
+    dropLengthMm: field("dropLengthMm")?.value,
     symmetryMode: field("symmetryMode")?.value,
     chainType: field("chainType")?.value,
     clasp: field("clasp")?.value,
@@ -2607,8 +2709,8 @@ function updateRealityScore(root, state) {
   if (valueEl) valueEl.textContent = `${pct}%`;
   if (fillEl) fillEl.style.width = `${pct}%`;
   host.dataset.grade = pct >= 90 ? "high" : pct >= 70 ? "mid" : "low";
-  host.dataset.metric = "engineering-viability";
-  host.setAttribute("aria-label", `Engineering viability ${pct}%`);
+  host.dataset.metric = "parameter-checks";
+  host.setAttribute("aria-label", `Parameter checks ${pct}%, not manufacturing certification`);
 
   // The previous card placed a speculative retail cost in this slot. Replace
   // it with a physically derived metal-mass estimate until a watertight CAD
@@ -2625,9 +2727,9 @@ function updateRealityScore(root, state) {
   const brand = computeBrandAlignment(state);
   const issueText = issues.length
     ? issues.map((issue) => `[${issue.severity}] ${issue.code}: ${issue.message}`).join("\n  ")
-    : "No dimensional manufacturing failures detected.";
+    : "No failures detected by the implemented parameter rules; workshop review is still required.";
 
-  host.title = `Engineering viability — ${pct}%`
+  host.title = `Heuristic parameter checks — ${pct}% (not manufacturing certification)`
     + `\n\nPhysical specification:`
     + (spec.piece === "Ring"
       ? `\n  ring US ${spec.ring.sizeUS.toFixed(1)} / ${spec.ring.innerDiameterMm.toFixed(2)} mm ID`
@@ -2649,12 +2751,23 @@ function setSummary(root, state) {
   if (summary) {
     const guideLine = createGuideContextLine(readGuideContextFromUrl());
     const text = createSummary(state);
-    summary.innerHTML = `
-      <p class="designer-summary__text">${text}${guideLine ? ` <span class="designer-summary__guide">· ${guideLine}</span>` : ""}</p>
-    `;
+    const paragraph = document.createElement("p");
+    paragraph.className = "designer-summary__text";
+    paragraph.textContent = `${text}${guideLine ? ` · ${guideLine}` : ""}`;
+    summary.replaceChildren(paragraph);
   }
 
   const physicalSpec = physicalSpecForState(state);
+  const diagnostics = root.querySelector("[data-cut-diagnostics]");
+  if (diagnostics) {
+    const cut = physicalSpec.centerStone;
+    const report = cut.shape === "Heart"
+      ? "Heart uses a closed concave, planar-tier cut. Nominal section angles are not grading measurements."
+      : `Nominal width-section angles: ${cut.crownAngleDeg.toFixed(2)}° crown · ${cut.pavilionAngleDeg.toFixed(2)}° pavilion. Total depth: ${cut.totalDepthPct.toFixed(1)}%.`;
+    const issues = cut.cutSolution.issues;
+    diagnostics.textContent = `${report} ${issues.map((issue) => issue.message).join(" ")}`;
+    diagnostics.dataset.valid = String(!issues.some((issue) => issue.severity === "error"));
+  }
   if (sizeLabel) {
     sizeLabel.textContent = `${physicalSpec.centerStone.carat.toFixed(2)} ct · ${physicalSpec.centerStone.lengthMm.toFixed(2)} × ${physicalSpec.centerStone.widthMm.toFixed(2)} mm`;
   }
@@ -2685,10 +2798,9 @@ function setSummary(root, state) {
           + `${formatStoneDimensions(physicalSpec)} stone`
           + issueSuffix
         : physicalSpec.piece === "Bracelet"
-          ? `Ø ${physicalSpec.bracelet.innerDiameterMm.toFixed(1)} mm opening · `
-            + `${physicalSpec.bracelet.tubeDiameterMm.toFixed(2)} mm tube · `
-            + `${formatStoneDimensions(physicalSpec)} stone`
-            + issueSuffix
+          ? (["Tennis", "Station"].includes(state.silhouette)
+            ? `${physicalSpec.bracelet.lengthMm.toFixed(0)} mm length · ${physicalSpec.bracelet.stoneDiameterMm.toFixed(1)} mm round stones`
+            : `${physicalSpec.bracelet.innerDiameterMm.toFixed(1)} mm major opening · ${physicalSpec.bracelet.widthMm.toFixed(1)} × ${physicalSpec.bracelet.tubeDiameterMm.toFixed(2)} mm section`) + issueSuffix
           : `Ø ${physicalSpec.earrings.postDiameterMm.toFixed(2)} mm post × ${physicalSpec.earrings.postLengthMm.toFixed(1)} mm · `
             + `${formatStoneDimensions(physicalSpec)} stone each`
             + issueSuffix;
@@ -2736,13 +2848,17 @@ async function createThreeStudio(root, canvas) {
   // gem or orbit it independently.
   scene.add(microSparkleGroup);
   const runtimeTextures = {};
+  const patinaTextureCache = new Map();
+  const hallmarkTextures = new Map();
   const disposableTextures = [];
   const cameraHomeZ = 5.75;
   const cameraMinZ = 3.05;
   const cameraMaxZ = 7.4;
   let environmentTexture = null;
   let currentState = getState(root);
+  let wearableBuildOptions = null;
   let currentPhysicalSpec = buildJewellerySpec(currentState);
+  let random = createSeededRandom("tjc-surface-library-v2");
   let frameId = null;
   let isDragging = false;
   let isInspecting = false;
@@ -2781,12 +2897,9 @@ async function createThreeStudio(root, canvas) {
   // a ring is photographed for marketing. A ~22° forward tilt + ~10° yaw
   // shows the stone's table, the band's 3D profile, and the side gallery
   // all at once.
-  let targetRotationX = -0.38;
+  let targetRotationX = 0.62;
   let targetRotationY = -0.18;
-  // §5 + §11 dangle physics — driven damped pendulum for pieces that hang
-  // (necklace pendants, drop/chandelier earrings). The whole piece swings
-  // about its top anchor when the turntable accelerates, then settles with
-  // light underdamping:  θ'' = −ω₀²θ − 2ζω₀θ' − k·a_support.
+  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
   const dangleSim = {
     node: null,
     thetaX: 0, omegaX: 0,
@@ -2821,12 +2934,6 @@ async function createThreeStudio(root, canvas) {
   }
   // Modern physical lighting + sRGB output - critical for getting metal
   // colors to read as the goldsmith intends.
-  if ("useLegacyLights" in renderer) {
-    renderer.useLegacyLights = false;
-  }
-  if ("physicallyCorrectLights" in renderer) {
-    renderer.physicallyCorrectLights = true;
-  }
 
   if ("outputColorSpace" in renderer) {
     renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -2891,7 +2998,8 @@ async function createThreeStudio(root, canvas) {
   // gives a continuous engraving around the full circumference without
   // letter-stretching, since the cylinder UVs span [0,1] once around.
   function createHallmarkTexture(text) {
-    return createCanvasTexture(2048, 128, (ctx, w, h) => {
+    if (hallmarkTextures.has(text)) return hallmarkTextures.get(text);
+    const texture = createCanvasTexture(2048, 128, (ctx, w, h) => {
       ctx.fillStyle = "#808080";
       ctx.fillRect(0, 0, w, h);
       ctx.fillStyle = "#1a1a1a";
@@ -2904,6 +3012,8 @@ async function createThreeStudio(root, canvas) {
         ctx.fillText(text, segW * (i + 0.5), h * 0.5);
       }
     }, { repeat: 1 });
+    hallmarkTextures.set(text, texture);
+    return texture;
   }
 
   function createBrushedAnisotropyTexture() {
@@ -2922,10 +3032,10 @@ async function createThreeStudio(root, canvas) {
       context.strokeStyle = "rgb(172, 172, 255)";
 
       for (let index = 0; index < 120; index += 1) {
-        const y = Math.random() * height;
+        const y = random() * height;
         context.beginPath();
-        context.moveTo(Math.random() * width * 0.18, y);
-        context.lineTo(width - Math.random() * width * 0.18, y + Math.sin(index) * 5);
+        context.moveTo(random() * width * 0.18, y);
+        context.lineTo(width - random() * width * 0.18, y + Math.sin(index) * 5);
         context.stroke();
       }
     }, { repeat: 7 });
@@ -2939,9 +3049,9 @@ async function createThreeStudio(root, canvas) {
       context.fillRect(0, 0, width, height);
       const dimples = 110;
       for (let i = 0; i < dimples; i += 1) {
-        const cx = Math.random() * width;
-        const cy = Math.random() * height;
-        const r  = 18 + Math.random() * 48;
+        const cx = random() * width;
+        const cy = random() * height;
+        const r  = 18 + random() * 48;
         // Each dimple: bright rim (high Z) -> dark center (low Z) gradient.
         const grad = context.createRadialGradient(cx, cy, r * 0.05, cx, cy, r);
         grad.addColorStop(0,    "rgba( 96, 96,255,0.55)");
@@ -2956,9 +3066,9 @@ async function createThreeStudio(root, canvas) {
       // Light micro-noise for tooled surface grit.
       context.globalAlpha = 0.08;
       for (let i = 0; i < 1200; i += 1) {
-        const tone = 118 + Math.random() * 24;
+        const tone = 118 + random() * 24;
         context.fillStyle = `rgb(${tone},${tone},255)`;
-        context.fillRect(Math.random() * width, Math.random() * height, 1, 1);
+        context.fillRect(random() * width, random() * height, 1, 1);
       }
     }, { repeat: 3 });
   }
@@ -2969,8 +3079,8 @@ async function createThreeStudio(root, canvas) {
       const image = context.createImageData(width, height);
       for (let index = 0; index < image.data.length; index += 4) {
         // Random direction perturbation, weighted toward flat (B=255).
-        const ang  = Math.random() * Math.PI * 2;
-        const mag  = (Math.random() ** 2) * 0.55; // bias to small bumps
+        const ang  = random() * Math.PI * 2;
+        const mag  = (random() ** 2) * 0.55; // bias to small bumps
         image.data[index]     = Math.round(128 + Math.cos(ang) * mag * 60);
         image.data[index + 1] = Math.round(128 + Math.sin(ang) * mag * 60);
         image.data[index + 2] = 255;
@@ -2999,9 +3109,9 @@ async function createThreeStudio(root, canvas) {
       context.globalAlpha = 0.16;
 
       for (let index = 0; index < 2400; index += 1) {
-        const shade = 70 + Math.random() * 60;
+        const shade = 70 + random() * 60;
         context.fillStyle = `rgb(${shade}, ${shade + 18}, ${shade + 10})`;
-        context.fillRect(Math.random() * width, Math.random() * height, 1, 1);
+        context.fillRect(random() * width, random() * height, 1, 1);
       }
     }, { repeat: 2.4, colorSpace: THREE.SRGBColorSpace });
   }
@@ -3011,7 +3121,7 @@ async function createThreeStudio(root, canvas) {
       const image = context.createImageData(width, height);
 
       for (let index = 0; index < image.data.length; index += 4) {
-        const grain = 120 + Math.random() * 70;
+        const grain = 242 + random() * 13;
         image.data[index] = grain;
         image.data[index + 1] = grain;
         image.data[index + 2] = grain;
@@ -3019,7 +3129,7 @@ async function createThreeStudio(root, canvas) {
       }
 
       context.putImageData(image, 0, 0);
-      context.globalAlpha = 0.32;
+      context.globalAlpha = 0.04;
 
       for (let y = 0; y < height; y += 6) {
         context.fillStyle = y % 12 === 0 ? "#f2f2f2" : "#6e6e6e";
@@ -3038,26 +3148,26 @@ async function createThreeStudio(root, canvas) {
       // mathematical mirror sweep. Kept low-amplitude (alpha ≤ 0.22) so
       // they never read as actual damage — only as the soft sheen
       // discontinuity real macro photos show.
-      context.globalAlpha = 0.18;
+      context.globalAlpha = 0.035;
       context.lineCap = "round";
       // 220 long scratches, mostly horizontal-ish (real polishing wheel
       // direction is the dominant axis but never perfectly uniform).
       for (let i = 0; i < 220; i += 1) {
-        const cx = Math.random() * width;
-        const cy = Math.random() * height;
+        const cx = random() * width;
+        const cy = random() * height;
         // Bias angle toward 0 (horizontal) with ±18° spread; 12% of
         // scratches get a free angle so we don't read as a brush map.
-        const free = Math.random() < 0.12;
+        const free = random() < 0.12;
         const angle = free
-          ? Math.random() * Math.PI
-          : (Math.random() - 0.5) * 0.62; // ±~18°
+          ? random() * Math.PI
+          : (random() - 0.5) * 0.62; // ±~18°
         // Log-normal length: most are short, a few are long sweeps.
-        const len = Math.exp(Math.random() * 3.2 + 2.4); // ~11 .. 320 px
+        const len = Math.exp(random() * 3.2 + 2.4); // ~11 .. 320 px
         const dx = Math.cos(angle) * len * 0.5;
         const dy = Math.sin(angle) * len * 0.5;
-        const brightness = 180 + Math.random() * 60; // raise local roughness
+        const brightness = 180 + random() * 60; // raise local roughness
         context.strokeStyle = `rgb(${brightness},${brightness},${brightness})`;
-        context.lineWidth = Math.random() < 0.85 ? 0.6 : 1.2;
+        context.lineWidth = random() < 0.85 ? 0.6 : 1.2;
         context.beginPath();
         context.moveTo(cx - dx, cy - dy);
         context.lineTo(cx + dx, cy + dy);
@@ -3066,12 +3176,12 @@ async function createThreeStudio(root, canvas) {
       // 90 micro-pits (tiny dark points → locally smoother) — represent
       // micro-craters from polishing compound particles. Reads as
       // "pinpoint sparkles" on the metal in motion.
-      context.globalAlpha = 0.22;
+      context.globalAlpha = 0.025;
       for (let i = 0; i < 90; i += 1) {
-        const tone = 60 + Math.random() * 50; // dark = lower roughness
+        const tone = 60 + random() * 50; // dark = lower roughness
         context.fillStyle = `rgb(${tone},${tone},${tone})`;
-        const sz = Math.random() < 0.7 ? 1 : 2;
-        context.fillRect(Math.random() * width, Math.random() * height, sz, sz);
+        const sz = random() < 0.7 ? 1 : 2;
+        context.fillRect(random() * width, random() * height, sz, sz);
       }
     }, { repeat: 5 });
   }
@@ -3102,11 +3212,11 @@ async function createThreeStudio(root, canvas) {
       // falloff with no banding.
       context.globalCompositeOperation = "multiply";
       for (let i = 0; i < 14; i += 1) {
-        const cx = Math.random() * width;
-        const cy = Math.random() * height;
-        const r = 60 + Math.random() * 140; // large patches
+        const cx = random() * width;
+        const cy = random() * height;
+        const r = 60 + random() * 140; // large patches
         // Darkness 240..253 → metalness ×0.94..0.99.
-        const dark = 240 + Math.floor(Math.random() * 14);
+        const dark = 240 + Math.floor(random() * 14);
         const grad = context.createRadialGradient(cx, cy, 0, cx, cy, r);
         grad.addColorStop(0.0, `rgb(${dark},${dark},${dark})`);
         grad.addColorStop(1.0, "rgb(255,255,255)");
@@ -3118,7 +3228,7 @@ async function createThreeStudio(root, canvas) {
       // grain so the smudge field doesn't read as banding under tone-map.
       const image = context.getImageData(0, 0, width, height);
       for (let p = 0; p < image.data.length; p += 4) {
-        const jitter = (Math.random() - 0.5) * 4;
+        const jitter = (random() - 0.5) * 4;
         image.data[p]     = Math.max(237, Math.min(255, image.data[p]     + jitter));
         image.data[p + 1] = image.data[p];
         image.data[p + 2] = image.data[p];
@@ -3134,13 +3244,13 @@ async function createThreeStudio(root, canvas) {
       context.globalAlpha = 0.22;
 
       for (let index = 0; index < 190; index += 1) {
-        const x = Math.random() * width;
-        const y = Math.random() * height;
-        const length = 14 + Math.random() * 72;
-        const angle = (Math.random() - 0.5) * Math.PI;
+        const x = random() * width;
+        const y = random() * height;
+        const length = 14 + random() * 72;
+        const angle = (random() - 0.5) * Math.PI;
         const dx = Math.cos(angle) * length;
         const dy = Math.sin(angle) * length;
-        const tone = 122 + Math.random() * 34;
+        const tone = 122 + random() * 34;
 
         context.strokeStyle = `rgb(${tone}, ${tone}, 255)`;
         context.beginPath();
@@ -3152,9 +3262,9 @@ async function createThreeStudio(root, canvas) {
       context.globalAlpha = 0.16;
 
       for (let index = 0; index < 800; index += 1) {
-        const tone = 112 + Math.random() * 40;
+        const tone = 112 + random() * 40;
         context.fillStyle = `rgb(${tone}, ${tone}, 255)`;
-        context.fillRect(Math.random() * width, Math.random() * height, 1, 1);
+        context.fillRect(random() * width, random() * height, 1, 1);
       }
     }, { repeat: 4 });
   }
@@ -3170,9 +3280,9 @@ async function createThreeStudio(root, canvas) {
       context.globalAlpha = 0.2;
 
       for (let index = 0; index < 72; index += 1) {
-        const x = Math.random() * width;
-        const y = Math.random() * height;
-        const radius = 0.5 + Math.random() * 2.4;
+        const x = random() * width;
+        const y = random() * height;
+        const radius = 0.5 + random() * 2.4;
 
         context.fillStyle = index % 3 ? "#ffffff" : "#9fb5bf";
         context.beginPath();
@@ -3184,10 +3294,10 @@ async function createThreeStudio(root, canvas) {
       context.strokeStyle = "#ffffff";
 
       for (let index = 0; index < 36; index += 1) {
-        const y = Math.random() * height;
+        const y = random() * height;
         context.beginPath();
-        context.moveTo(Math.random() * width * 0.2, y);
-        context.bezierCurveTo(width * 0.35, y - 18, width * 0.68, y + 24, width - Math.random() * width * 0.2, y + Math.random() * 20);
+        context.moveTo(random() * width * 0.2, y);
+        context.bezierCurveTo(width * 0.35, y - 18, width * 0.68, y + 24, width - random() * width * 0.2, y + random() * 20);
         context.stroke();
       }
     }, { repeat: 1.8, colorSpace: THREE.SRGBColorSpace });
@@ -3232,10 +3342,10 @@ async function createThreeStudio(root, canvas) {
       context.lineWidth = 1;
 
       for (let index = 0; index < 70; index += 1) {
-        const x = Math.random() * width;
-        const y = Math.random() * height;
-        const length = 14 + Math.random() * (stoneName === "Emerald Green" ? 120 : 62);
-        const angle = stoneName === "Emerald Green" ? -0.2 + Math.random() * 0.4 : Math.random() * Math.PI;
+        const x = random() * width;
+        const y = random() * height;
+        const length = 14 + random() * (stoneName === "Emerald Green" ? 120 : 62);
+        const angle = stoneName === "Emerald Green" ? -0.2 + random() * 0.4 : random() * Math.PI;
 
         context.beginPath();
         context.moveTo(x, y);
@@ -3246,10 +3356,10 @@ async function createThreeStudio(root, canvas) {
       context.globalAlpha = stoneName === "Clear Diamond" ? 0.12 : 0.2;
 
       for (let index = 0; index < 140; index += 1) {
-        const radius = 0.35 + Math.random() * (stoneName === "Clear Diamond" ? 1.1 : 1.8);
+        const radius = 0.35 + random() * (stoneName === "Clear Diamond" ? 1.1 : 1.8);
         context.fillStyle = index % 4 === 0 ? "rgba(255,255,255,0.65)" : "rgba(0,0,0,0.16)";
         context.beginPath();
-        context.arc(Math.random() * width, Math.random() * height, radius, 0, Math.PI * 2);
+        context.arc(random() * width, random() * height, radius, 0, Math.PI * 2);
         context.fill();
       }
     }, { repeat: 1, colorSpace: THREE.SRGBColorSpace });
@@ -3273,17 +3383,17 @@ async function createThreeStudio(root, canvas) {
 
       for (let index = 0; index < 34; index += 1) {
         const angle = (Math.PI * 2 * index) / 34;
-        const radius = width * (0.08 + Math.random() * 0.34);
+        const radius = width * (0.08 + random() * 0.34);
         const x = centerX + Math.cos(angle) * radius * 0.9;
         const y = centerY + Math.sin(angle) * radius * 0.54;
-        const length = 70 + Math.random() * 160;
+        const length = 70 + random() * 160;
 
         context.save();
         context.translate(x, y);
-        context.rotate(angle + Math.PI / 2 + (Math.random() - 0.5) * 0.8);
-        context.globalAlpha = 0.12 + Math.random() * 0.2;
+        context.rotate(angle + Math.PI / 2 + (random() - 0.5) * 0.8);
+        context.globalAlpha = 0.12 + random() * 0.2;
         context.strokeStyle = index % 3 === 0 ? "#c9f4ff" : index % 3 === 1 ? "#ffe7b0" : "#ffffff";
-        context.lineWidth = 1 + Math.random() * 2.4;
+        context.lineWidth = 1 + random() * 2.4;
         context.beginPath();
         context.moveTo(-length * 0.48, 0);
         context.bezierCurveTo(-length * 0.2, -18, length * 0.18, 18, length * 0.48, 0);
@@ -3342,9 +3452,9 @@ async function createThreeStudio(root, canvas) {
       context.globalAlpha = 0.2;
 
       for (let index = 0; index < 1600; index += 1) {
-        const tone = 116 + Math.random() * 24;
+        const tone = 116 + random() * 24;
         context.fillStyle = `rgb(${tone}, ${tone}, 255)`;
-        context.fillRect(Math.random() * width, Math.random() * height, 1, 1);
+        context.fillRect(random() * width, random() * height, 1, 1);
       }
 
       context.globalAlpha = 0.16;
@@ -3426,6 +3536,8 @@ async function createThreeStudio(root, canvas) {
   runtimeTextures.hammeredNormal = createHammeredNormalTexture();
   runtimeTextures.sandblastNormal = createSandblastNormalTexture();
   runtimeTextures.microRoughness = createFineRoughnessTexture();
+  [runtimeTextures.brushNormal, runtimeTextures.hammeredNormal, runtimeTextures.sandblastNormal, runtimeTextures.microRoughness]
+    .forEach((texture) => texture.repeat.set(1, 1));
   runtimeTextures.metalSmudge = createMetalSmudgeTexture();
   runtimeTextures.velvet = createStudioVelvetTexture();
   runtimeTextures.gemNormal = createGemMicroNormalTexture();
@@ -3954,7 +4066,7 @@ async function createThreeStudio(root, canvas) {
     // pure white with only its contact shadow + planar reflection visible.
     plinth.visible = !isStudioWhite;
     glassPlate.visible = !isStudioWhite;
-    caustics.visible = !isStudioWhite;
+    caustics.visible = !isStudioWhite && currentState.appearance === "Expressive";
     // Solid white scene.background fills the void around the floor disc
     // and the cyclorama edges so the canvas reads as a clean seamless
     // sweep edge-to-edge. Cleared back to null for other backdrops so the
@@ -3976,16 +4088,21 @@ async function createThreeStudio(root, canvas) {
   }
 
   const VIEW_PRESETS = {
-    "Three-Quarter": { z: cameraHomeZ,            rx: 0.03,             ry: -0.18 },
-    "Macro":         { z: cameraMinZ + 0.2,       rx: 0.18,             ry: -0.12 },
-    "Top-Down":      { z: cameraHomeZ - 0.6,      rx: -Math.PI / 2.2,   ry: 0 },
+    "Three-Quarter": { z: cameraHomeZ,            rx: 0.62,             ry: -0.30 },
+    "Macro":         { z: cameraMinZ + 0.2,       rx: 0.92,             ry: -0.18 },
+    "Top-Down":      { z: cameraHomeZ - 0.6,      rx: Math.PI / 2.2,    ry: 0 },
     "Profile":       { z: cameraHomeZ - 0.3,      rx: 0,                ry: Math.PI / 2.1 }
   };
   function applyView(name) {
     const preset = VIEW_PRESETS[name] || VIEW_PRESETS["Three-Quarter"];
     targetCameraZ = preset.z;
-    targetRotationX = preset.rx;
+    targetRotationX = currentState.piece === "Bracelet" ? -preset.rx : currentState.piece === "Ring" ? preset.rx : preset.rx * 0.2;
     targetRotationY = preset.ry;
+    if (model.userData.overviewScale) {
+      const detail = name === "Macro" && currentState.piece === "Necklace";
+      model.scale.setScalar(model.userData.overviewScale * (detail ? model.userData.detailScale : 1));
+      model.userData.detailActive = detail;
+    }
   }
 
   // Hide ring-specific controls (Band Style, Hidden Halo) when the user is
@@ -3998,6 +4115,42 @@ async function createThreeStudio(root, canvas) {
       node.hidden = !show;
       node.style.display = show ? "" : "none";
     });
+
+    const bracelet = piece === "Bracelet";
+    const stations = currentState.silhouette === "Station";
+    const flexible = bracelet && ["Tennis", "Station"].includes(currentState.silhouette);
+    const setControl = (name, disabled) => {
+      const field = root.querySelector(`[data-designer-field="${name}"]`);
+      if (field) field.disabled = disabled;
+    };
+    const shapeGroup = root.querySelector('[data-designer-field="shape"]')?.closest(".designer-panel__group");
+    if (shapeGroup) {
+      shapeGroup.hidden = bracelet || (piece === "Necklace" && stations);
+      shapeGroup.style.display = shapeGroup.hidden ? "none" : "";
+    }
+    const sizeGroup = root.querySelector('[data-designer-field="size"]')?.closest(".designer-panel__group");
+    if (sizeGroup) { sizeGroup.hidden = bracelet; sizeGroup.style.display = bracelet ? "none" : ""; }
+    for (const name of ["shape", "size", "stoneLengthMm", "stoneWidthMm", "stoneDepthMm", "lengthWidthRatio"]) setControl(name, bracelet || (piece === "Necklace" && stations && name === "shape"));
+    for (const name of ["tablePct", "totalDepthPct", "crownAngleDeg", "pavilionAngleDeg", "girdlePct", "culetPct", "symmetryMode", "prongCount", "prongHeight", "prongBaseDiameterMm", "prongTipDiameterMm", "bearingDepthMm", "galleryHeightMm", "galleryRailDiameterMm", "culetClearanceMm", "haloMeleeDiameterMm", "setRotation", "stoneTilt"]) setControl(name, bracelet);
+    for (const name of ["braceletInnerDiameterMm", "braceletTubeMm", "braceletWidthMm"]) setControl(name, flexible);
+    setControl("braceletLengthMm", bracelet && !flexible);
+    setControl("cuffGapMm", currentState.silhouette !== "Cuff");
+    setControl("chainType", bracelet && currentState.silhouette !== "Station");
+    setControl("chainWireMm", bracelet && currentState.silhouette !== "Station");
+    setControl("clasp", (bracelet && currentState.silhouette !== "Station") || (piece === "Necklace" && currentState.silhouette === "Lariat"));
+    setControl("halo", bracelet || (piece === "Necklace" && stations));
+    setControl("accent", piece === "Necklace" || flexible);
+    const settingSelect = root.querySelector('[data-designer-field="setting"]');
+    if (settingSelect) {
+      for (const option of settingSelect.options) option.disabled = ["Necklace", "Bracelet"].includes(piece) && !["Prong", "Bezel"].includes(option.value);
+      settingSelect.value = currentState.setting;
+      settingSelect.disabled = bracelet || (piece === "Necklace" && stations);
+    }
+    const note = root.querySelector("[data-construction-report]");
+    if (note) note.textContent = bracelet
+      ? "Bracelets use calibrated round stones, not a ring-sized centre head. Set stone diameter, flexible length or bangle section under Extras & precision. Tennis has a box clasp; station bracelets use your chosen chain and clasp."
+      : piece === "Necklace" ? "Complete necklace at real chain proportions. Macro focuses on the pendant or a station. Station styles interrupt the chain with round bezels; lariats close through the front slider."
+      : piece === "Ring" ? "Side stones use full faceted diamonds by default. Choose Match Center under Fit & detail for coloured accents." : "";
 
     // Rebuild the silhouette dropdown with the chosen piece's sub-types so
     // the user can pick e.g. "Cigar Band" for rings or "Y-Drop" for
@@ -4024,14 +4177,18 @@ async function createThreeStudio(root, canvas) {
 
   function applyLightingMode(modeName) {
     const mode = LIGHTING_MODES[modeName] || LIGHTING_MODES.Daylight;
+    const photographic = currentState.appearance === "Photographic";
 
-    renderer.toneMappingExposure = mode.exposure;
-    hemi.intensity = mode.hemi;
-    key.intensity = mode.key;
-    fill.intensity = mode.fill;
-    rim.intensity = mode.rim;
-    gemPunch.intensity = mode.punch;
-    tableFlash.intensity = mode.table;
+    renderer.toneMappingExposure = mode.exposure * (photographic ? 0.9 : 1);
+    scene.environmentIntensity = photographic ? 0.85 : 1;
+    hemi.intensity = mode.hemi * (photographic ? 0.18 : 1);
+    key.intensity = mode.key * (photographic ? 0.42 : 1);
+    fill.intensity = mode.fill * (photographic ? 0.3 : 1);
+    rim.intensity = mode.rim * (photographic ? 0.3 : 1);
+    gemPunch.intensity = photographic ? 0 : mode.punch;
+    tableFlash.intensity = photographic ? 0 : mode.table;
+    underlight.intensity = photographic ? 0 : 0.85;
+    kicker.intensity = photographic ? 0.25 : 2.4;
     key.color.set(mode.keyColor);
     fill.color.set(mode.fillColor);
     rim.color.set(mode.rimColor);
@@ -4046,13 +4203,21 @@ async function createThreeStudio(root, canvas) {
     sparkle.children.forEach((gem) => {
       gem.material.opacity = mode.sparkleOpacity * (currentState && currentState.sparkleBurst ? 1.65 : 1);
     });
-    if (currentState && currentState.sparkleBurst) {
+    if (currentState?.appearance === "Expressive" && currentState.sparkleBurst) {
       renderer.toneMappingExposure = mode.exposure + 0.08;
     }
     root.dataset.designerLighting = modeName.toLowerCase();
   }
 
   const sparkleMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.5 });
+
+  function applyStageVisibility() {
+    const expressiveStage = !isInspecting && currentState.appearance === "Expressive";
+    for (const object of [plinth, glassPlate, reflection, reflectionMirror, undersideHalo, caustics, ...softboxes]) object.visible = expressiveStage;
+    floor.visible = !isInspecting;
+    contactShadow.visible = !isInspecting;
+    contactShadowHot.visible = !isInspecting;
+  }
 
   // The original code scattered 34 octahedron "sparkle gems" behind the
   // ring as bokeh fakes. With the Phase 1 post-chain (bloom + CA) and the
@@ -4079,8 +4244,10 @@ async function createThreeStudio(root, canvas) {
   // -------------------------------------------------------------------
   let post = null;
   function createPostChain() {
-    const rtOpts = { type: THREE.UnsignedByteType, depthBuffer: true, stencilBuffer: false };
-    const bloomRtOpts = { type: THREE.HalfFloatType, depthBuffer: false, stencilBuffer: false };
+    const targetType = renderer.extensions.has("EXT_color_buffer_float") ? THREE.HalfFloatType : THREE.UnsignedByteType;
+    root.dataset.designerDynamicRange = targetType === THREE.HalfFloatType ? "hdr" : "ldr";
+    const rtOpts = { type: targetType, depthBuffer: true, stencilBuffer: false };
+    const bloomRtOpts = { type: targetType, depthBuffer: false, stencilBuffer: false };
     const sceneRT = new THREE.WebGLRenderTarget(2, 2, rtOpts);
     // Phase 4 DOF: attach a DepthTexture so the composite pass can sample
     // per-pixel scene depth and compute a circle-of-confusion for bokeh.
@@ -4089,13 +4256,6 @@ async function createThreeStudio(root, canvas) {
     // float-depth extension cost.
     sceneRT.depthTexture = new THREE.DepthTexture(2, 2);
     sceneRT.depthTexture.type = THREE.UnsignedShortType;
-    // NOTE: UnsignedByteType is required here. HalfFloatType (which we tried
-    // first for HDR bloom precision) caused the entire jewelry model to
-    // render as solid black inside the RT — a three.js r164 quirk likely
-    // tied to the PBR material's specular pipeline emitting NaN/Inf into
-    // half-float when a depth buffer is attached. LDR after AgX still
-    // gives speculars >0.85, so the 0.72 bright-pass threshold still
-    // catches every gem flash and metal highlight.
     const bloomMips = [];
     for (let i = 0; i < 3; i += 1) {
       bloomMips.push([
@@ -4306,7 +4466,7 @@ async function createThreeStudio(root, canvas) {
         "  col.g = sceneSample.g;",
         "  col.b = texture2D(tScene, vUv + d * ca).b;",
         // Mix in hexagonal blur when out of focus.
-        "  if (coc > 0.01) {",
+        "  if (coc > 0.01 && bokehScale > 0.0) {",
         "    vec3 blurred = sceneSample.rgb;",
         "    for (int i = 0; i < 12; i++) {",
         "      blurred += texture2D(tScene, vUv + BOKEH[i] * radius).rgb;",
@@ -4323,9 +4483,11 @@ async function createThreeStudio(root, canvas) {
         "  col *= mix(1.0, vig, 0.9);",
         "  col += (rand(vUv * 2048.0 + vec2(time, -time)) - 0.5) * grain;",
         "  gl_FragColor = vec4(col, 1.0);",
+        "  #include <tonemapping_fragment>",
+        "  #include <colorspace_fragment>",
         "}"
       ].join("\n"),
-      toneMapped: false,
+      toneMapped: true,
       depthTest: false,
       depthWrite: false,
       transparent: false,
@@ -4356,15 +4518,12 @@ async function createThreeStudio(root, canvas) {
     }
 
     function renderFrame(timeMs) {
-      // 1. Scene → RT (renderer's AgX tone-mapping + sRGB conversion is
-      //    baked into each material's compiled shader; we cannot toggle it
-      //    at runtime without forcing a full shader recompile every frame.
-      //    So we let the scene render in tonemapped LDR into the RT, then
-      //    bloom + composite operate in LDR. Highlights above the bright-
-      //    pass threshold (0.72) still bloom convincingly because metal
-      //    speculars and gem table flashes reach ~0.9–1.0 after AgX. The
-      //    composite material has toneMapped:false to avoid a SECOND
-      //    AgX pass (which was making everything 2×-dark).
+      const photographic = currentState.appearance === "Photographic";
+      compositeMat.uniforms.chromatic.value = photographic ? 0 : 0.0009;
+      compositeMat.uniforms.grain.value = photographic ? 0 : 0.012;
+      compositeMat.uniforms.bloomStrength.value = photographic ? 0.005 : 0.14;
+      compositeMat.uniforms.vignette.value = photographic ? 0.12 : 0.5;
+      compositeMat.uniforms.bokehScale.value = photographic ? 0 : 0.016;
       renderer.setRenderTarget(sceneRT);
       renderer.clear();
       renderer.render(scene, camera);
@@ -4385,7 +4544,7 @@ async function createThreeStudio(root, canvas) {
       renderer.render(fsScene, fsCam);
       const starLighting = currentState?.lighting;
       compositeMat.uniforms.starStrength.value =
-        (currentState?.sparkleBurst ? 0.55 : 0.3)
+        (photographic ? 0 : currentState?.sparkleBurst ? 0.55 : 0.3)
         * (starLighting === "Gallery" || starLighting === "Flash" ? 1.2
           : starLighting === "Softbox" ? 0.45 : 1);
 
@@ -4416,8 +4575,6 @@ async function createThreeStudio(root, canvas) {
         renderer.render(fsScene, fsCam);
       }
 
-      // 4. Composite to canvas (no additional tonemap — scene RT is
-      //    already AgX tonemapped from the scene-render pass).
       fsQuad.material = compositeMat;
       compositeMat.uniforms.tScene.value = sceneRT.texture;
       compositeMat.uniforms.tDepth.value = sceneRT.depthTexture;
@@ -4465,6 +4622,7 @@ async function createThreeStudio(root, canvas) {
     reflectionRT.setSize(tier.reflectionSize, tier.reflectionSize);
     resize();
     root.dataset.designerQuality = tier.name;
+    model.traverse((mesh) => setGemRayBounces(mesh, Math.min(Number(currentState.gemBounces), qualityTier === 2 ? 8 : 20, mesh.userData.gemBounceLimit || 20)));
   }
 
   // Instantiate the post chain now that scene/camera/renderer/lights exist.
@@ -4570,151 +4728,45 @@ async function createThreeStudio(root, canvas) {
   }
 
   function materialForMetal(metalOverride = currentState.metal, karatOverride = currentState.karat) {
-    const isSatin     = currentState.finish === "Soft Satin";
-    const isMilgrain  = currentState.finish === "Milgrain Edge";
-    const isPolish    = currentState.finish === "High Polish";
-    const isHammered  = currentState.finish === "Hammered";
-    const isSandblast = currentState.finish === "Sandblast";
-    const isBrushed   = currentState.finish === "Brushed";
-    const isStardust  = currentState.finish === "Stardust";
-    const metal       = metalOverride || currentState.metal;
-    const karat       = karatOverride || currentState.karat;
-
-    // §3 BRDF — Bronze Patina is an oxide/carbonate film (verdigris, brown
-    // tarnish), not bare metal. Treating it as metalness = 1 like polished
-    // bronze gives an unrealistic mirror sheen the patina layer would have
-    // long since killed. We model it as a near-dielectric: low metalness,
-    // markedly higher roughness, and a tiny diffuse hue from the underlying
-    // copper-tin substrate. This is the single biggest realism win for the
-    // patina metal choice — without it the piece reads "freshly polished
-    // bronze" instead of "aged antique bronze".
-    const isPatina = metal === "Bronze Patina";
-
-    // For polished gold the *body* color is F0. A clearcoat layer (transparent
-    // lacquer over the metal) reflects environment light tinted toward WHITE,
-    // sitting on top of the gold and visually drowning the F0 hue. Real
-    // polished jewelry has no such coating, so clearcoat must be 0. Likewise a
-    // dark roughnessMap multiplied with a low base value drives the surface
-    // back toward a perfect mirror, also hiding F0. We keep polish uniform.
-    const baseRoughnessRaw = isPolish    ? 0.18
-      : isMilgrain  ? 0.20
-      : isHammered  ? 0.34
-      : isSandblast ? 0.68
-      : isBrushed   ? 0.32
-      : isStardust  ? 0.48
-      :               0.38;
-    // Patina pushes whichever finish is selected toward matte oxide territory
-    // (never below 0.6 roughness, even on "polished" patina — the polishing
-    // wheel cannot restore the oxide to a mirror).
-    const baseRoughness = isPatina ? Math.max(0.66, baseRoughnessRaw + 0.18) : baseRoughnessRaw;
-
-    // Brushed grain direction (Realism §3): with the band & prong tubes now
-    // carrying UVs whose U axis follows the surface flow (band circumference
-    // / prong axis), anisotropyRotation = 0 means highlights streak ALONG
-    // that flow — the diagnostic mark of a polishing wheel. Small per-metal
-    // offsets simulate the slightly different grain angles different alloys
-    // hold under polishing.
-    const anisoRotation = metal === "Rose Gold"   ?  0.18
-      :                   metal === "Yellow Gold" ?  0.08
-      :                                             -0.06;
-
-    // Pick a per-finish normal map. Hammered and Sandblast each have their own
-    // procedural normal so the surface relief is physically distinct, not just
-    // a roughness tweak. High Polish gets a *very* faint brushed normal so
-    // reflections aren't a perfect mathematical mirror — real polished gold
-    // carries imperceptible polish-wheel marks that scatter light just
-    // enough to read as a physical object instead of CGI.
-    const finishNormalMap =
-      isPolish      ? (runtimeTextures.brushNormal || runtimeTextures.metalNormal)
-      : isHammered  ? runtimeTextures.hammeredNormal
-      : isSandblast ? runtimeTextures.sandblastNormal
-      : isStardust  ? (runtimeTextures.sandblastNormal || runtimeTextures.metalNormal)
-      : (runtimeTextures.brushNormal || runtimeTextures.metalNormal);
-
-    const normalAmount =
-      isSatin       ? 0.16
-      : isMilgrain  ? 0.08
-      : isHammered  ? 0.42
-      : isSandblast ? 0.20
-      : isBrushed   ? 0.24
-      : isStardust  ? 0.16
-      : isPolish    ? 0.025
-      :               0.08;
-
+    const calibratedFinish = FINISH_PROFILES[currentState.finish] || FINISH_PROFILES["High Polish"];
+    const finishStrength = Number(currentState.finishStrength);
+    const metal = metalOverride || currentState.metal;
+    const karat = karatOverride || currentState.karat;
+    if (metal === "Bronze Patina") {
+      const key = `${currentState.seed}:${currentState.patinaCoverage}:${calibratedFinish.roughness}`;
+      if (!patinaTextureCache.has(key)) {
+        if (patinaTextureCache.size >= 8) {
+          const oldest = patinaTextureCache.keys().next().value;
+          Object.values(patinaTextureCache.get(oldest)).forEach((texture) => texture.dispose());
+          patinaTextureCache.delete(oldest);
+        }
+        patinaTextureCache.set(key, createPatinaMaps(THREE, Number(currentState.patinaCoverage), currentState.seed, calibratedFinish.roughness));
+      }
+      const maps = patinaTextureCache.get(key);
+      return new THREE.MeshPhysicalMaterial({
+        color: "#ffffff", map: maps.color,
+        metalness: 1, metalnessMap: maps.physical, roughness: 1, roughnessMap: maps.physical,
+        normalMap: maps.normal, normalScale: new THREE.Vector2(0.08 * finishStrength, 0.08 * finishStrength),
+        clearcoat: 0, envMapIntensity: 1
+      });
+    }
+    const finishNormalMap = currentState.finish === "Hammered" ? runtimeTextures.hammeredNormal
+      : ["Sandblast", "Stardust"].includes(currentState.finish) ? runtimeTextures.sandblastNormal || runtimeTextures.metalNormal
+      : runtimeTextures.brushNormal || runtimeTextures.metalNormal;
     return new THREE.MeshPhysicalMaterial({
       color: metalBaseColor(metal, karat),
-      // §3 metalness drop on patinated metal — the oxide film is a
-      // dielectric, so part of the reflection should follow Schlick on a
-      // refractive layer rather than the metallic F0 = color path.
-      metalness: isPatina ? 0.45 : 1,
-      roughness: baseRoughness,
-      // Real polished gold still has micro-roughness variation from the
-      // polishing wheel — perfectly uniform roughness reads as CGI plastic.
-      // The microRoughness map adds 1–2% surface variation that's invisible
-      // up close but breaks the mathematical mirror and gives the metal a
-      // "breathing" quality across the band's length.
-      roughnessMap: isPolish
-        ? (runtimeTextures.microRoughness || null)
-        : (runtimeTextures.metalRoughness || null),
-      // Keep conductor identity constant. Fingerprints and polishing residue
-      // change the surface micro-roughness/coating response; they do not turn
-      // patches of gold into a dielectric. The old metalness map produced
-      // milky grey islands, so metalness remains uniform across bare alloy.
-      metalnessMap: null,
+      metalness: 1, roughness: calibratedFinish.roughness,
+      roughnessMap: finishStrength > 0 ? runtimeTextures.microRoughness || null : null,
       normalMap: finishNormalMap,
-      normalScale: new THREE.Vector2(normalAmount, normalAmount),
-      // A trace of anisotropy on polished metal mimics the directional
-      // sweep of a jeweller's polishing wheel — with proper UVs now in
-      // place on the band & prong tubes this is no longer noise: the
-      // highlight elongates along the band's length / prong's axis.
-      // §11 anisotropy: patina kills directional polishing-wheel streaks,
-      // because the oxide film is randomly textured. Keep a hint on satin
-      // finish where the patina has been gently rubbed back, but no more.
-      anisotropy: isPatina ? (isBrushed ? 0.14 : 0)
-        : isBrushed ? 0.90
-        : isSatin ? 0.58
-        : isMilgrain ? 0.18
-        : isPolish ? 0.12
-        : 0,
-      anisotropyRotation: anisoRotation,
-      // Bare alloy has no lacquer layer. Plating/lacquer belongs in an
-      // explicit coating material, not an always-on clearcoat approximation.
-      clearcoat: 0,
-      clearcoatRoughness: 0,
-      // Energy-balanced env reflection. HDR studio is already bright; over 1.0
-      // the F0 hue starts to wash out at near-normal viewing angles. The
-      // envMul comes from the active lighting mode so bright presets
-      // (Flash, Showroom) automatically dial the metal reflection DOWN to
-      // keep the karat hue from clipping to white.
-      envMapIntensity: (isPolish ? 1.0 : isMilgrain ? 0.9 : isSandblast ? 0.72 : 0.85) * (LIGHTING_MODES[currentState.lighting]?.envMul ?? 1),
-      // Subtle satin sheen on satin finish — adds the cloth-like soft rim.
-      // For polished warm metals, a faint sheen layer recovers the F90
-      // grazing halo (§3). Bronze Patina kills sheen entirely — the oxide
-      // layer would absorb any soft rim before it left the surface.
-      sheen: isPatina ? 0
-        : isSatin ? 0.25
-        : (isPolish && /(Yellow|Rose|Champagne|Bronze)/.test(metal)) ? 0.07
-        : 0,
-      // Two-tone work is represented by separate meshes/material zones in
-      // buildRing(), never by a tinted sheen layered over one alloy.
-      sheenColor: METAL_SHEEN_TINT[metal] || 0xffffff,
-      sheenRoughness: 0.6,
-      // §3 F90 grazing halo — Real polished warm gold (yellow/rose/
-      // champagne/bronze, when not patinated) shows a soft warm rim glow
-      // at grazing angles. This is the Fresnel-conserved energy that the
-      // baseline Schlick BRDF under-represents because three.js does not
-      // tint F90 separately. A whisper of sheen with the karat-specific
-      // METAL_SHEEN_TINT recovers this rim glow without washing out F0
-      // (kept ≤0.08 so the body hue still dominates). Two-tone and satin
-      // overrides retain priority — they are explicit user choices.
-      // Bare jewellery metal has no thin-film rainbow layer. Any real plating
-      // or lacquer should be represented as an explicit coating mesh/material.
-      iridescence: 0
+      normalScale: new THREE.Vector2(calibratedFinish.normal * finishStrength, calibratedFinish.normal * finishStrength),
+      anisotropy: Math.min(1, calibratedFinish.anisotropy * finishStrength),
+      anisotropyRotation: metal === "Rose Gold" ? 0.18 : metal === "Yellow Gold" ? 0.08 : -0.06,
+      clearcoat: 0, envMapIntensity: 1, sheen: 0, iridescence: 0
     });
   }
 
   function stoneProfile() {
-    return STONE_PROFILES[currentState.stone] || STONE_PROFILES["Clear Diamond"];
+    return resolvedGemProfile(currentState.stone, STONE_PROFILES[currentState.stone] || STONE_PROFILES["Clear Diamond"]);
   }
 
   function scintillatingMaterial(parameters, speed = 0.0014) {
@@ -4722,113 +4774,43 @@ async function createThreeStudio(root, canvas) {
 
     material.userData.scintillation = {
       baseOpacity: parameters.opacity ?? 1,
-      phase: Math.random() * Math.PI * 2,
+      phase: random() * Math.PI * 2,
       speed
     };
 
     return material;
   }
 
-  function materialForStone(sizeScale = 1) {
-    const profile = stoneProfile();
-    const isDiamond = currentState.stone === "Clear Diamond";
-    const isOpaque = currentState.stone === "Black Onyx";
-    const isOpal = currentState.stone === "Fire Opal";
-    const isAdularescent = !!profile.adularescence;
-    const glow = !!(currentState && currentState.emissiveGlow);
-
-    // §3 pleochroic colour change (alexandrite effect). The Cr³⁺ absorption
-    // band at ~580 nm transmits both blue-green and red; the illuminant's
-    // spectral power distribution decides which dominates. We interpolate
-    // between the profile's daylight pole and its `colorChange` incandescent
-    // pole on the active lighting mode's CCT:
-    //   t = smoothstep(2200 K, 6200 K, CCT)  →  0 = full red, 1 = full green.
+  function materialForStone(sizeScale = 1, stoneName = currentState.stone) {
+    const profile = resolvedGemProfile(stoneName, STONE_PROFILES[stoneName] || STONE_PROFILES["Clear Diamond"]);
+    const isDiamond = stoneName === "Clear Diamond";
+    const isOpal = stoneName === "Fire Opal";
+    const artistic = currentState.appearance === "Expressive";
+    const glow = artistic && currentState.emissiveGlow;
     let bodyColor = profile.color;
     let bodyAbsorption = profile.absorption;
     if (profile.colorChange) {
-      const cct = LIGHTING_CCT[currentState.lighting] ?? 5200;
-      const u = Math.min(1, Math.max(0, (cct - 2200) / (6200 - 2200)));
-      const t = u * u * (3 - 2 * u);
-      bodyColor = new THREE.Color(profile.colorChange.color).lerp(new THREE.Color(profile.color), t);
-      bodyAbsorption = new THREE.Color(profile.colorChange.absorption).lerp(new THREE.Color(profile.absorption), t);
+      const temperature = LIGHTING_CCT[currentState.lighting] ?? 5200;
+      const fraction = Math.min(1, Math.max(0, (temperature - 2200) / 4000));
+      const blend = fraction * fraction * (3 - 2 * fraction);
+      bodyColor = new THREE.Color(profile.colorChange.color).lerp(new THREE.Color(profile.color), blend);
+      bodyAbsorption = new THREE.Color(profile.warmAbsorption || profile.colorChange.absorption).lerp(new THREE.Color(profile.absorption), blend);
     }
-
-    // Beer-Lambert transport must use the same physical depth as the mesh.
-    // The previous profile-only value could be several times larger than the
-    // rendered stone, making coloured stones unnaturally opaque. Three.js uses
-    // scene units here, so convert the canonical millimetre depth through the
-    // shared world scale and then apply the relative melee/side-stone scale.
-    const physicalDepth = currentPhysicalSpec?.world?.stoneDepth
-      ?? mmToWorld((currentPhysicalSpec?.centerStone?.depthMm) || 4);
-    const scaledThickness = Math.max(mmToWorld(0.12), physicalDepth * Math.max(0.08, sizeScale));
-
-    /* Dispersion (Realism §3 / §11):
-     * Profile stores PHYSICAL Abbe-equivalent values (diamond 0.044, etc).
-     * three.js MeshPhysicalMaterial.dispersion is a perceptual 0..~2
-     * strength knob — at 0.044 the chromatic split is invisible. Scale
-     * the physical value through the `fire` knob: stones cut for
-     * brilliance (high fire) get more visual dispersion than the raw
-     * Abbe number alone would give. Capped at 2.0 to stay artist-friendly.
-     *
-     *   dispersion_three = clamp( physical * fireGain , 0, 2 )
-     *   fireGain = 18 + 14·fire    →   diamond 0.044·(18+14·0.82) ≈ 1.3
-     *                                  emerald 0.018·(18+14·0.30) ≈ 0.40
-     *                                  onyx                       = 0     */
-    const fire = profile.fire || 0;
-    // Three.js dispersion is a visual strength control, not the physical
-    // dispersion coefficient stored in STONE_PROFILES. Keep the conversion
-    // restrained: excessive values create permanent rainbow fringes rather
-    // than motion-dependent fire.
-    const dispersionThree = Math.min(0.85, (profile.dispersion || 0) * 14);
-
-    // Thin-film iridescence is reserved for opal-like/adularescent
-    // materials. Diamond fire comes from refractive dispersion through the
-    // facet geometry, not an oil-film layer on the surface.
-    const iridescenceFromFire = isOpal ? 0.85
-      : isAdularescent ? 0.55
-      : 0;
-
-    // Keep IBL energy below clipping. Facet topology and refractive transport
-    // should create contrast; an over-bright environment makes every facet
-    // white and hides the cut.
-    const envIntensity = isDiamond ? 1.55 : isOpaque ? 1.10 : 1.30;
-
-    return new THREE.MeshPhysicalMaterial({
-      color: bodyColor,
-      metalness: isOpaque ? 0.15 : 0,
-      roughness: profile.roughness,
-      transparent: !isOpaque,
-      side: THREE.FrontSide,
-      opacity: 1,
-      transmission: profile.transmission,
-      thickness: scaledThickness,
-      ior: profile.ior,
-      dispersion: dispersionThree,
+    const physicalDepth = currentPhysicalSpec?.world?.stoneDepth ?? mmToWorld(4);
+    const thickness = Math.max(mmToWorld(0.12), physicalDepth * Math.max(0.08, sizeScale));
+    const material = new THREE.MeshPhysicalMaterial({
+      ...gemOpticalParameters(profile, thickness, currentState.appearance, currentState),
+      color: profile.kind === "crystal" ? "#ffffff" : profile.body || bodyColor,
       attenuationColor: bodyAbsorption,
-      attenuationDistance: profile.attenuationDistance,
-      // Emissive glow: stone self-illuminates with its absorption hue.
-      // Diamonds get a cooler white glow; coloreds get a saturated glow.
-      emissive: glow ? (isDiamond ? new THREE.Color(0xbfd6ff) : new THREE.Color(bodyAbsorption)) : new THREE.Color(0x000000),
+      side: THREE.FrontSide,
+      emissive: glow ? (isDiamond ? 0xbfd6ff : bodyAbsorption) : 0x000000,
       emissiveIntensity: glow ? (isDiamond ? 0.35 : 0.7) : 0,
-      specularIntensity: 1,
-      specularColor: 0xffffff,
-      reflectivity: 1,
-      // A cut gemstone is not covered by a clear lacquer layer. Clearcoat
-      // creates a second white dielectric reflection and makes diamonds read
-      // like coated glass.
-      clearcoat: 0,
-      clearcoatRoughness: 0,
-      envMapIntensity: envIntensity,
-      iridescence: iridescenceFromFire,
-      iridescenceIOR: isOpal ? 1.45 : isAdularescent ? 1.42 : 1.32,
-      ...(isOpal ? { iridescenceThicknessRange: [200, 800] } : {}),
-      ...(isAdularescent ? { iridescenceThicknessRange: [420, 1400] } : {}),
-      // Moonstone schiller: strong soft bluish sheen floating above the
-      // surface — the adularescence glow that defines the stone.
-      sheen: isAdularescent ? 0.65 : 0,
-      sheenColor: isAdularescent ? 0x9fc4ff : 0xbfd6ff,
-      ...(isAdularescent ? { sheenRoughness: 0.4 } : {})
+      iridescence: artistic ? (isOpal ? 0.85 : profile.adularescence ? 0.55 : 0) : 0,
+      iridescenceIOR: isOpal ? 1.45 : 1.42,
+      iridescenceThicknessRange: isOpal ? [200, 800] : [420, 1400]
     });
+    material.userData.gemMaterial = stoneName;
+    return material;
   }
 
   function weightValue() {
@@ -4859,6 +4841,7 @@ async function createThreeStudio(root, canvas) {
 
   function disposeObject(object) {
     object.traverse((child) => {
+      disposeGemRayMaterial(child);
       if (child.geometry) {
         child.geometry.dispose();
       }
@@ -4966,13 +4949,8 @@ async function createThreeStudio(root, canvas) {
   }
 
   function physicalOutlinePoint(shape, halfW, halfH, angle, rotation = 0) {
-    const [ux, uy] = shapeOutline(shape, Math.cos(angle), Math.sin(angle));
-    const ext = shapeUnitExtents(shape);
-    const x = (ux / ext.maxX) * halfW;
-    const y = (uy / ext.maxY) * halfH;
-    const cs = Math.cos(rotation);
-    const sn = Math.sin(rotation);
-    return new THREE.Vector2(x * cs - y * sn, x * sn + y * cs);
+    const [horizontal, vertical] = gemstoneOutlinePoint(shape, angle, halfW * 2, halfH * 2);
+    return new THREE.Vector2(horizontal * Math.cos(rotation) - vertical * Math.sin(rotation), horizontal * Math.sin(rotation) + vertical * Math.cos(rotation));
   }
 
   function samplePhysicalOutlineByArcLength(shape, halfW, halfH, count, rotation = 0) {
@@ -5020,6 +4998,16 @@ async function createThreeStudio(root, canvas) {
 
   function stoneDepthMetrics(size, shape = currentState.shape) {
     const cut = currentPhysicalSpec?.centerStone || buildJewellerySpec(currentState).centerStone;
+    if (shape === currentState.shape && cut.cutSolution) {
+      const relativeScale = size / Math.max(mmToWorld(cut.widthMm * 0.5), 1e-6);
+      const solution = cut.cutSolution;
+      return {
+        crownH: mmToWorld(solution.crownHeightMm + solution.girdleThicknessMm * 0.5) * relativeScale,
+        pavilionH: mmToWorld(solution.pavilionHeightMm + solution.girdleThicknessMm * 0.5) * relativeScale,
+        tableScale: cut.tablePct / 100, girdleScale: 1,
+        girdleHalf: mmToWorld(solution.girdleThicknessMm * 0.5) * relativeScale
+      };
+    }
     const tableScale = clamp((cut.tablePct || 57) / 100, 0.25, 0.88);
     const girdleHalf = size * clamp((cut.girdlePct || 3.5) / 100, 0.005, 0.12);
     const crownAngle = THREE.MathUtils.degToRad(clamp(cut.crownAngleDeg || 34.5, 0.5, 60));
@@ -5539,54 +5527,19 @@ async function createThreeStudio(root, canvas) {
     return finishGeometry(positions);
   }
 
-  function createCutStoneGeometry(size, shape = currentState.shape) {
-    switch (shape) {
-      case "Emerald":
-      case "Asscher":
-      case "Baguette":
-        return createStepCutGeometry(size, shape);
-      case "Princess":
-        return createPrincessGeometry(size);
-      default:
-        return createBrilliantGeometry(size, shape);
-    }
+  function createCutStoneGeometry(size, shape = currentState.shape, independent = false) {
+    const reference = !independent && shape === currentState.shape ? currentPhysicalSpec.centerStone
+      : buildJewellerySpec({ ...DESIGN_DEFAULTS, shape, seed: currentState.seed }).centerStone;
+    const geometry = createGemstoneGeometry(THREE, reference, WORLD_UNITS_PER_MM);
+    const scale = size / Math.max(mmToWorld(reference.widthMm * 0.5), 1e-6);
+    geometry.scale(scale, scale, scale);
+    geometry.userData.dimensionsMm = Object.fromEntries(Object.entries(geometry.userData.dimensionsMm).map(([key, value]) => [key, value * scale]));
+    geometry.userData.facets = geometry.userData.facets.map((facet) => ({ ...facet, offsetMm: facet.offsetMm * scale }));
+    return geometry;
   }
 
   function createPhysicalCutStoneGeometry(stoneSpec, shape = currentState.shape) {
-    // Build topology at a neutral size, then scale its complete bounding box
-    // to the certified L × W × D dimensions. This makes carat independent
-    // from ring size and allows a lab-report dimension override without
-    // rewriting every topology generator.
-    const geometry = createCutStoneGeometry(1, shape);
-    geometry.computeBoundingBox();
-    const box = geometry.boundingBox;
-    const sourceX = Math.max(1e-6, box.max.x - box.min.x);
-    const sourceY = Math.max(1e-6, box.max.y - box.min.y);
-    const sourceZ = Math.max(1e-6, box.max.z - box.min.z);
-    const targetX = mmToWorld(stoneSpec.widthMm);
-    const targetY = mmToWorld(stoneSpec.lengthMm);
-    const targetZ = mmToWorld(stoneSpec.depthMm);
-    geometry.scale(targetX / sourceX, targetY / sourceY, targetZ / sourceZ);
-    geometry.computeBoundingBox();
-    geometry.computeVertexNormals();
-    geometry.userData = {
-      units: "mm",
-      dimensionsMm: {
-        length: stoneSpec.lengthMm,
-        width: stoneSpec.widthMm,
-        depth: stoneSpec.depthMm
-      },
-      cut: {
-        tablePct: stoneSpec.tablePct,
-        totalDepthPct: stoneSpec.totalDepthPct,
-        crownAngleDeg: stoneSpec.crownAngleDeg,
-        pavilionAngleDeg: stoneSpec.pavilionAngleDeg,
-        girdlePct: stoneSpec.girdlePct,
-        culetPct: stoneSpec.culetPct
-      },
-      shape
-    };
-    return geometry;
+    return createGemstoneGeometry(THREE, { ...stoneSpec, shape }, WORLD_UNITS_PER_MM);
   }
 
   // Real-time contact approximation for the metal seat immediately beneath a
@@ -5622,6 +5575,7 @@ async function createThreeStudio(root, canvas) {
 
   function addStoneContactAO(stoneGroup, size) {
     if (currentState.setting === "Tension") return;
+    if (currentState.appearance === "Photographic") return;
     const disc = new THREE.Mesh(
       new THREE.CircleGeometry(size * 1.38, 32),
       new THREE.MeshBasicMaterial({
@@ -5669,7 +5623,7 @@ async function createThreeStudio(root, canvas) {
   function seededUnit(seed) {
     // Small deterministic PRNG so a design keeps the same inclusion pattern
     // across redraws, screenshots and AR. This avoids the visible "stone
-    // changes every frame" tell caused by Math.random().
+    // changes every frame" tell caused by random().
     let x = Math.sin(seed * 12.9898 + 78.233) * 43758.5453;
     return x - Math.floor(x);
   }
@@ -5686,7 +5640,7 @@ async function createThreeStudio(root, canvas) {
       : stoneName === "Emerald Green"
         ? { count: 8, blackRatio: 0.20, radiusMin: 0.006, radiusMax: 0.015, featherOpacity: 0.18 }
         : null;
-    if (!inclusionProfile) return;
+    if (!inclusionProfile || Number(currentState.inclusionDensity) === 0) return;
 
     const matBlack = new THREE.MeshBasicMaterial({
       color: stoneName === "Emerald Green" ? 0x17362a : 0x0a0c0f,
@@ -5702,10 +5656,10 @@ async function createThreeStudio(root, canvas) {
       depthWrite: false
     });
 
-    const seedBase = [...`${stoneName}|${currentState.shape}|${currentState.size}`]
+    const seedBase = [...`${currentState.seed}|${stoneName}|${currentState.shape}|${currentState.size}`]
       .reduce((sum, ch) => sum + ch.charCodeAt(0), 0);
 
-    for (let i = 0; i < inclusionProfile.count; i += 1) {
+    for (let i = 0; i < Math.round(inclusionProfile.count * Number(currentState.inclusionDensity)); i += 1) {
       const u0 = seededUnit(seedBase + i * 7 + 1);
       const u1 = seededUnit(seedBase + i * 7 + 2);
       const u2 = seededUnit(seedBase + i * 7 + 3);
@@ -5726,6 +5680,7 @@ async function createThreeStudio(root, canvas) {
         new THREE.SphereGeometry(radius, 7, 5),
         isBlack ? matBlack : matFeather
       );
+      speck.userData.isInclusion = true;
       speck.position.set(
         r * Math.sin(phi) * Math.cos(theta),
         r * Math.sin(phi) * Math.sin(theta),
@@ -5740,7 +5695,8 @@ async function createThreeStudio(root, canvas) {
   }
 
   function makeMeleeStone(size, material) {
-    const mesh = new THREE.Mesh(createBrilliantGeometry(size, "Round"), material);
+    const mesh = new THREE.Mesh(createCutStoneGeometry(size, "Round", true), material);
+    mesh.userData.isGem = true;
     mesh.castShadow = true;
     return mesh;
   }
@@ -5914,6 +5870,7 @@ async function createThreeStudio(root, canvas) {
   // double row). The bead radius is ~38% of the stone diameter.
   function makePaveBead(x, y, z, radius, material) {
     const bead = new THREE.Mesh(new THREE.SphereGeometry(radius, 20, 16), material);
+    bead.userData.isProng = true;
     bead.position.set(x, y, z);
     bead.castShadow = true;
     return bead;
@@ -6295,8 +6252,8 @@ async function createThreeStudio(root, canvas) {
     // gets fractionally heavier/lighter around the circumference) and a
     // very gentle profile-height wobble (slight ovalization).
     const geometryRelief = currentState.finish === "Hammered";
-    const macroAmpR = geometryRelief ? profileWidth * 0.0022 : 0;
-    const macroAmpH = geometryRelief ? profileHeight * 0.0016 : 0;
+    const macroAmpR = geometryRelief ? profileWidth * 0.0022 * Number(currentState.finishStrength) : 0;
+    const macroAmpH = geometryRelief ? profileHeight * 0.0016 * Number(currentState.finishStrength) : 0;
     // Irrational frequencies so the two modes never line up and the
     // pattern doesn't read as a designed symmetry.
     const fR1 = 2.0, fR2 = 3.0;
@@ -6351,8 +6308,8 @@ async function createThreeStudio(root, canvas) {
     for (let i = 0; i < cols; i += 1) {
       for (let j = 0; j < rows; j += 1) {
         const uvIdx = (i * rows + j) * 2;
-        uvs[uvIdx + 0] = i / cols;   // u: 0..1 around the finger
-        uvs[uvIdx + 1] = j / rows;   // v: 0..1 around the profile
+        uvs[uvIdx + 0] = i / cols * Math.PI * 2 * majorRadius / mmToWorld(Number(currentState.finishScaleMm));
+        uvs[uvIdx + 1] = j / rows * Math.PI * (profileWidth + profileHeight) / mmToWorld(Number(currentState.finishScaleMm));
       }
     }
     geometry.setAttribute("uv", new THREE.BufferAttribute(uvs, 2));
@@ -6363,7 +6320,7 @@ async function createThreeStudio(root, canvas) {
     // re-renders identically. Amplitude tuned down to ~0.28% — the old
     // 0.85% was enough to read as a faint "cast, not polished" graininess
     // on close-ups (visible noise across the highlight).
-    const microAmp = geometryRelief ? Math.min(profileWidth, profileHeight) * 0.0018 : 0;
+    const microAmp = geometryRelief ? Math.min(profileWidth, profileHeight) * 0.0018 * Number(currentState.finishStrength) : 0;
     for (let v = 0; v < cols * rows; v += 1) {
       const idx = v * 3;
       // Cheap deterministic hash → [-1, 1]
@@ -6387,6 +6344,7 @@ async function createThreeStudio(root, canvas) {
     const closed = Boolean(options.closed);
     const radius = Math.max(0.001, radialThickness * 0.5);
     const geometry = new THREE.TubeGeometry(curve, segments, radius, radialSegments, closed);
+    if (!closed) capSweepEnds(THREE, geometry, segments, radialSegments, true);
     // Curves used for shanks lie in the XY plane. Scaling world Z therefore
     // turns the circular tube into the same radial×axial ellipse as the main
     // comfort-fit shank without changing its inner diameter.
@@ -6431,7 +6389,7 @@ async function createThreeStudio(root, canvas) {
       material,
       { segments: 180, radialSegments: 22 }
     );
-    lowerShank.userData.manufacturing = { role: "bypass-lower-shank", closed: false };
+    lowerShank.userData.manufacturing = { role: "bypass-lower-shank", cappedEnds: true };
     assembly.add(lowerShank);
 
     for (const side of [-1, 1]) {
@@ -6681,8 +6639,8 @@ async function createThreeStudio(root, canvas) {
         const b = (i + 1) * radial + j;
         const c = (i + 1) * radial + jn;
         const d =  i      * radial + jn;
-        indices[k++] = a; indices[k++] = b; indices[k++] = c;
-        indices[k++] = a; indices[k++] = c; indices[k++] = d;
+        indices[k++] = a; indices[k++] = c; indices[k++] = b;
+        indices[k++] = a; indices[k++] = d; indices[k++] = c;
       }
     }
     const geom = new THREE.BufferGeometry();
@@ -6697,13 +6655,17 @@ async function createThreeStudio(root, canvas) {
         const u = i / axial;       // 0..1 base -> tip
         const v = j / radial;      // 0..1 around the tube
         const uvIdx = (i * radial + j) * 2;
-        uvs[uvIdx + 0] = u;
-        uvs[uvIdx + 1] = v;
+        uvs[uvIdx + 0] = u * curve.getLength() / mmToWorld(Number(currentState.finishScaleMm));
+        uvs[uvIdx + 1] = v * Math.PI * 2 * (baseRadius * (1 - u) + tipRadius * u) / mmToWorld(Number(currentState.finishScaleMm));
       }
     }
     geom.setAttribute("uv", new THREE.BufferAttribute(uvs, 2));
     geom.computeVertexNormals();
-    return new THREE.Mesh(geom, material);
+    capSweepEnds(THREE, geom, axial, radial);
+    geom.userData.contactSweep = { axial, radial };
+    const mesh = new THREE.Mesh(geom, material);
+    mesh.userData.isProng = true;
+    return mesh;
   }
 
   // Curved prong: a tapered tube from (baseR, baseZ) on the prong circle up
@@ -6782,6 +6744,7 @@ async function createThreeStudio(root, canvas) {
       material
     );
     claw.position.copy(clawCenter);
+    claw.userData.isProng = true;
     // Squash along the post direction so the claw reads as a wrap, not ball.
     claw.scale.set(1.05, 1.05, 0.62);
     claw.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), dir);
@@ -7431,75 +7394,6 @@ async function createThreeStudio(root, canvas) {
   //                 assembly that pierces the lobe instead of two
   //                 disconnected halves.
   //
-  //   [F20] Realism push — Phase 1: post-processing chain + underlight + contact shadow
-  //        Cause:   Scene rendered straight to the canvas at LDR through
-  //                 AgX. Bright gem specular highlights clipped at 1.0
-  //                 with no spill into surrounding metal — the dead
-  //                 giveaway of CGI versus real macro photography. No
-  //                 vignette, no chromatic dispersion at lens edges, no
-  //                 grain to break up perfectly clean gradients. Pavilion
-  //                 read as a dark dead zone because every light was
-  //                 placed above the piece. Ring also floated with no
-  //                 anchoring shadow tying it to the plinth.
-  //        Fix:     Added a custom inline post-processing chain:
-  //                 (1) Scene renders into an UnsignedByte (LDR-after-AgX)
-  //                     render target with depthBuffer. Three.js's AgX
-  //                     tone-mapping + sRGB conversion are baked into
-  //                     each material's compiled shader and cannot be
-  //                     toggled at runtime without forcing a full
-  //                     recompile every frame — so we let the scene
-  //                     render in tonemapped LDR into the RT and
-  //                     bloom/composite operate in LDR. Metal speculars
-  //                     and gem table flashes still reach ~0.95–1.0
-  //                     after AgX, so the 0.94 bright-pass threshold
-  //                     catches every real highlight.
-  //                 (2) Bright-pass with soft 0.28 knee.
-  //                 (3) Three-mip HalfFloat Gaussian pyramid (½, ¼, ⅛
-  //                     scale) with 9-tap separable H/V blur per mip.
-  //                 (4) Composite shader stacks scene + bloom (0.32×) +
-  //                     radial chromatic aberration (~0.22% scaled by
-  //                     r²) + radial vignette (0.5) + per-frame film
-  //                     grain (0.012). Composite has toneMapped:false
-  //                     and blending:NoBlending to avoid a SECOND AgX
-  //                     pass.
-  //                 Pixel-ratio cap dropped from 3× to 2× because the
-  //                 post chain reads every pixel 7× per frame.
-  //                 Added an "underlight" PointLight (warm 0xffeac8,
-  //                 intensity 1.6, range 2.4, decay 1.6) at
-  //                 (0, −0.55, 0.15) — below and slightly in front of
-  //                 the piece — to kick the gem's pavilion and prong
-  //                 undersides the way a tracing-paper diffuser does in
-  //                 a real jewelry photo booth.
-  //                 Added two contact-shadow planes at y=-1.1: a soft
-  //                 1.85² halo (opacity 0.7) and a tight 0.95² hot core
-  //                 (opacity 0.55), both with transparent radial-gradient
-  //                 alpha maps, to anchor the ring to the plinth.
-  //                 Specular highlights now bloom into the metal, gem
-  //                 facets show subtle prism fringes at high-contrast
-  //                 edges, pavilion reads as "lit from within", and the
-  //                 piece feels grounded instead of floating.
-  //
-  //   [F21] Phase 1 black-model regression — HalfFloat scene RT
-  //        Cause:   First implementation of the post chain (F20) used
-  //                 HalfFloatType for the scene RT to preserve HDR
-  //                 precision for bloom. With a depth buffer attached
-  //                 and AgX tonemap baked into the material shaders,
-  //                 three.js r164 emitted NaN/Inf into half-float
-  //                 channels for PBR metal materials, causing the
-  //                 entire jewelry model to render as solid RGB(0,0,0)
-  //                 while the plinth, sparkles, environment, and post
-  //                 chain itself all worked correctly. Symptom: a
-  //                 perfectly-silhouetted black model on an otherwise
-  //                 photoreal scene. Bypassing the post chain proved
-  //                 the geometry/materials were intact; the bug was
-  //                 specifically in the RT type.
-  //        Fix:     Switched sceneRT to UnsignedByteType. Bloom mips
-  //                 stay HalfFloat (no depth attached, no NaN path).
-  //                 Lost HDR threshold headroom but speculars still
-  //                 hit 0.95+ post-AgX so the 0.94 bright-pass catches
-  //                 every real highlight. Bonus: less bandwidth per
-  //                 frame, post chain now costs ~1.1ms instead of 1.4ms.
-  //
   //   [F22] Ring shank pavé / channel / accent stones on inner wall
   //        Cause:   makeBandGeometry sweeps the band cross-section from
   //                 radial offset 0..bandWidth, so raw bandMajorR is the
@@ -7807,7 +7701,7 @@ async function createThreeStudio(root, canvas) {
     const settingMetal = currentState.twoTone
       ? materialForMetal(contrastMetalName, currentState.karat === "950" ? "18K" : currentState.karat)
       : metal;
-    const meleeMaterial = materialForStone(0.3);  // §3/§11 melée-scale absorption
+    const meleeMaterial = materialForStone(0.3, currentState.accentStone === "Match Center" ? currentState.stone : "Clear Diamond");
     const group = new THREE.Group();
     const style = currentState.band || "Solitaire";
     const G = computeRingGeometry(currentState);
@@ -7870,7 +7764,8 @@ async function createThreeStudio(root, canvas) {
       const metalName = currentState.metal || "";
       const stamp = metalName === "Platinum"
         ? `PT ${karat} \u00b7 TJC`
-        : `${karat} \u00b7 TJC \u00b7 AU`;
+        : metalName.includes("Gold") ? `${karat} \u00b7 TJC \u00b7 AU`
+        : metalName === "Mirror Silver" ? "TJC \u00b7 AG" : "TJC";
       const hallmarkTex = createHallmarkTexture(stamp);
       const hallmarkMat = materialForMetal();
       hallmarkMat.bumpMap = hallmarkTex;
@@ -7960,6 +7855,7 @@ async function createThreeStudio(root, canvas) {
     // this for other settings is bypassed for Tension).
     stoneMesh.rotation.x = stoneTilt + (isTension ? -Math.PI / 2 : 0);
     stoneMesh.castShadow = true;
+    addMaterialInclusions(stoneMesh, mmToWorld(G.stoneSpec.widthMm / 2), currentState.stone);
     headGroup.add(stoneMesh);
 
     // ---- head: prongs + basket holding the center stone ----
@@ -8071,482 +7967,11 @@ async function createThreeStudio(root, canvas) {
       }
     }
 
-    // ---- band-style ornaments ----
-    if (style === "Pavé") {
-      // §13 + §5 — Aligned 2×N pavé grid.
-      //
-      // Real pavé is a STRICT rectangular grid: inner row stone i and outer
-      // row stone i share their two corner beads with the (i±1) stones in
-      // the OPPOSITE row, so every interior bead is shared between exactly
-      // 4 stones. This requires the two rows to occupy IDENTICAL angular
-      // positions α_i.
-      //
-      // The previous loop computed count_inner and count_outer INDEPENDENTLY
-      // from each row's own rowR, so count_inner < count_outer (smaller
-      // radius packs fewer stones at the same arc-spacing). Result: inner
-      // and outer stones at unrelated angles → no shared beads, no grid →
-      // visually scattered pavé that doesn't read as a continuous row.
-      //
-      // Fix: compute a single shared count N from the band CROWN radius
-      // (bandTopY), then both rows use α_i = α_start +
-      // (i/(N-1))·(α_end-α_start). Each gem is placed on the solved band
-      // surface X(α, lateral) and lifted along that surface normal, so
-      // the pavé cannot drift inside the finger hole or float above the
-      // shank when the band cross-section changes.
-      const N = G.paveCount;
-      const sharedAngles = new Array(N);
-      for (let i = 0; i < N; i += 1) {
-        const t = N === 1 ? 0.5 : i / (N - 1);
-        sharedAngles[i] = G.paveAngStart + (G.paveAngEnd - G.paveAngStart) * t;
-      }
-      // §5 — Stone girdle elevation: each stone's girdle center is lifted
-      // 0.10× its radius along the crown normal. The pavilion still drops
-      // into the drilled seat, but the table/crown facets remain visible.
-      const rowOffsets = [-G.paveRowGap * 0.5, +G.paveRowGap * 0.5];
-      rowOffsets.forEach((offset) => {
-        for (let i = 0; i < N; i += 1) {
-          const ang = sharedAngles[i];
-          addBandMelee(group, ang, G, style, offset, G.paveStoneSize * 0.98, meleeMaterial, 0.10);
-        }
-      });
-      // 3×(N+1) corner-bead grid: 3 radial rails (inner / centerline / outer)
-      // at the GAP angles (i+0.5) of the shared sequence. Every interior
-      // bead is shared between 4 stones (2 from each row), so this satisfies
-      // the §13 manufacturability invariant for corner-shared pavé.
-      const beadRails = [
-        -G.paveRowGap * 0.5 - G.paveStoneSize * 0.42, // inner edge
-        0,                                             // centerline between rows
-        G.paveRowGap * 0.5 + G.paveStoneSize * 0.42    // outer edge
-      ];
-      // N+1 gap positions (N-1 interior gaps + 2 endpoints extrapolated by
-      // half the local spacing) — gives a bead at every stone boundary.
-      for (let i = 0; i <= N; i += 1) {
-        const a = (i === 0)
-          ? sharedAngles[0] - (sharedAngles[1] - sharedAngles[0]) * 0.5
-          : (i === N)
-            ? sharedAngles[N - 1] + (sharedAngles[N - 1] - sharedAngles[N - 2]) * 0.5
-            : (sharedAngles[i - 1] + sharedAngles[i]) * 0.5;
-        beadRails.forEach((rr, idx) => {
-          // Center rail beads are slightly smaller (they're shared between
-          // 4 stones in real pavé, so less metal shows).
-          const r = idx === 1 ? G.paveBeadR * 0.82 : G.paveBeadR;
-          addBandBead(group, a, G, style, rr, r, metal);
-        });
-      }
-    } else if (style === "Channel") {
-      // Channel: a row of step-cut stones sits flush between two raised metal
-      // walls. Every stone is now solved from bandSurfaceAt(), not the raw
-      // inner-radius bandMajorR, so it follows the shank crown exactly.
-      const channelStoneSize = Math.min(G.paveStoneSize * 1.45, G.bandWidth * 0.48);
-      const count = Math.max(5, Math.floor((G.bandTopY * (G.paveAngEnd - G.paveAngStart)) / (channelStoneSize * 2.05)));
-      for (let i = 0; i < count; i += 1) {
-        const t = count === 1 ? 0.5 : i / (count - 1);
-        const ang = G.paveAngStart + (G.paveAngEnd - G.paveAngStart) * t;
-        addBandSurfaceSeat(group, ang, G, style, 0, channelStoneSize * 1.0, 0.001);
-        const channelLift = channelStoneSize * 0.035;
-        const surface = bandSurfaceAt(ang, G, style, 0, channelLift);
-        const gem = makeFlushSetStone(channelStoneSize * 0.92, meleeMaterial, "Princess");
-        gem.position.copy(surface.pos);
-        applyBandSurfaceFrame(gem, surface);
-        group.add(gem);
-      }
-      // Two raised walls (torus rings) flanking the row, set proud of the band
-      // top so they visibly clamp the row from both sides. They are no
-      // longer constant-z torus rings; each rail is a tube following the
-      // exact crown surface at its lateral offset.
-      const wallR = G.bandWidth * 0.16;
-      const wallOffset = Math.min(G.bandWidth * 0.42, channelStoneSize * 0.58 + wallR);
-      group.add(
-        makeBandSurfaceRail(G, style, -wallOffset, wallR * 0.55, wallR, metal),
-        makeBandSurfaceRail(G, style, wallOffset, wallR * 0.55, wallR, metal)
-      );
-    } else if (style === "Three-Stone") {
-      // §2 + §5 — Side stones MUST sit co-planar with the centre stone.
-      //
-      // The centre stone lives in `headGroup`, which is positioned at
-      // (0, bandTopY, 0) and rotated -π/2 about X, so the gem ends up at
-      // world (0, bandTopY + gemZ, 0) — i.e. raised by gemZ along the
-      // RADIAL direction r̂(π/2) = (0, 1, 0) (radially outward from the
-      // finger axis at the top of the band).
-      //
-      // The previous side-stone block placed the gems in WORLD space at
-      // (cos α · sideRingR, sin α · sideRingR, sideZ) where the Y was
-      // sin(α)·bandTopY ≈ cos(Δθ)·bandTopY ≈ bandTopY — i.e. NOT raised
-      // along the radial direction at all. Result: a gemZ-sized vertical
-      // drop in Y between the centre stone and the side stones, visible
-      // as "side stones hanging below the head". The forward push in Z
-      // compounded the error.
-      //
-      // Math fix. For each side stone at angle α = π/2 ± Δθ on the band's
-      // outer ridge:
-      //   1. Band ridge point in world:  p₀ = (cos α, sin α, 0) · bandTopY
-      //   2. Radial outward unit:        r̂  = (cos α, sin α, 0)
-      //   3. Stone girdle centre:        p₀ + sideGemZ · r̂
-      //                                = (cos α, sin α, 0) · (bandTopY + sideGemZ)
-      //      → identical raise to the centre stone, just at a different α.
-      //   4. Table normal must equal r̂ → rotation Rx(-π/2) Rz(α-π/2)
-      //      so the gem's local +Z aligns with r̂.
-      //   5. Stone Z (depth toward camera) = 0 (same plane as centre stone).
-      //
-      // Everything attached to the stone (prongs, under-bezel rail, seat
-      // pin, shoulder buttresses) is built inside a sub-group with that
-      // position+rotation, so in the sub-group's local frame:
-      //   local +Z = radial outward (= "up" toward stone table)
-      //   local +X = band tangent at angle α
-      //   local +Y = -depth toward camera
-      // and the geometry can be written exactly like the centre stone's
-      // head (gem at +Z, prongs growing along +Z) without any extra
-      // angular bookkeeping. §13 manufacturability: this is identical
-      // topology to the centre head, just rotated.
-      G.sideStones.forEach((side) => {
-        const dTheta = side.ang - Math.PI / 2;            // ±Δθ
-        const sideCulet  = Math.max(0.012, G.bandTopZ * 0.25);
-        const sideGemZ   = side.pavilionH + sideCulet;    // radial raise
-        const railZ_lc   = sideGemZ - side.pavilionH * 0.22;
-        const prongTipZL = sideGemZ + side.crownH * 0.55;
-        const sideDepth = stoneDepthMetrics(side.meshSize, currentState.shape);
-        const sideXExtent = stonePlanEnvelopeRadius(currentState.shape, 0, side.meshSize, sideDepth.girdleScale);
-        const sideYExtent = Math.abs(stonePlanExtentY(currentState.shape, side.meshSize, 1, sideDepth.girdleScale));
-
-        const sideAssembly = new THREE.Group();
-        // Pivot at band ridge point at angle α (world).
-        sideAssembly.position.set(
-          Math.cos(side.ang) * G.bandTopY,
-          Math.sin(side.ang) * G.bandTopY,
-          0
-        );
-        // R · (0,0,1) = (cos α, sin α, 0) = r̂  →  Euler(-π/2, 0, α-π/2) XYZ.
-        sideAssembly.rotation.set(-Math.PI / 2, 0, dTheta);
-
-        // ----- stone (girdle at local z = sideGemZ, table = local +Z)
-        const sideStoneGroup = new THREE.Group();
-        sideStoneGroup.position.set(0, 0, sideGemZ);
-        const sideMesh = new THREE.Mesh(
-          createCutStoneGeometry(side.meshSize, currentState.shape), meleeMaterial
-        );
-        sideMesh.castShadow = true;
-        sideMesh.userData.isGem = true;
-        sideStoneGroup.add(sideMesh);
-        addStoneContactAO(sideStoneGroup, side.meshSize);
-        addMaterialInclusions(sideMesh, side.meshSize, currentState.stone);
-        sideAssembly.add(sideStoneGroup);
-
-        // ----- embedded shoulder cup
-        // The old side-stone anatomy was mechanically correct but visually
-        // too isolated: a diamond head on a thin pin. Real three-stone rings
-        // blend side stones into a metal pocket grown out of the shank. This
-        // cup sits below/outside the pavilion envelope, with side rails and
-        // four ramp struts tying it back into the band shoulder.
-        const cupX = Math.max(sideXExtent * 1.14, side.gemR * 0.92);
-        const cupY = Math.max(sideYExtent * 1.12, side.gemR * 0.74);
-        const cupBaseZ = Math.max(sideCulet * 0.42, 0.004);
-        const cupRailZ = Math.max(cupBaseZ + G.galleryRadius * 1.8, sideGemZ - side.pavilionH * 0.08);
-        const cupRadius = Math.max(cupX, cupY) * 1.02;
-        const cupSeat = makePaveSeat(0, 0, cupBaseZ, cupRadius, 0);
-        cupSeat.scale.set(cupX / cupRadius, cupY / cupRadius, 1);
-        sideAssembly.add(cupSeat);
-        const cupLip = new THREE.Mesh(
-          new THREE.TorusGeometry(cupRadius, G.galleryRadius * 1.08, 16, 96),
-          metal
-        );
-        cupLip.position.set(0, 0, cupRailZ);
-        cupLip.scale.set(cupX / cupRadius, cupY / cupRadius, 1);
-        sideAssembly.add(cupLip);
-        for (const ySign of [-1, 1]) {
-          sideAssembly.add(makeCylinderBetween(
-            new THREE.Vector3(-cupX * 1.05, ySign * cupY, cupRailZ),
-            new THREE.Vector3( cupX * 1.05, ySign * cupY, cupRailZ),
-            G.galleryRadius * 0.95,
-            metal
-          ));
-          for (const xSign of [-1, 1]) {
-            sideAssembly.add(makeTaperedTube(
-              new THREE.Vector3(xSign * cupX * 1.46, ySign * cupY * 0.48, 0),
-              new THREE.Vector3(xSign * cupX * 1.22, ySign * cupY * 0.74, cupRailZ * 0.52),
-              new THREE.Vector3(xSign * cupX * 0.94, ySign * cupY, cupRailZ),
-              G.galleryRadius * 1.25,
-              G.galleryRadius * 0.76,
-              metal,
-              12,
-              10
-            ));
-          }
-        }
-
-        // ----- prongs around stone (identical topology to centre head)
-        for (let i = 0; i < side.prongCount; i += 1) {
-          const ang = (Math.PI * 2 * i) / side.prongCount + Math.PI / side.prongCount;
-          addCurvedProng(
-            sideAssembly, 0, 0, ang,
-            side.prongPostR, side.prongTipR,
-            railZ_lc, prongTipZL,
-            side.prongRadius, 1, metal,
-            { stoneSize: side.meshSize, stoneZ: sideGemZ, shape: currentState.shape }
-          );
-        }
-
-        // ----- under-bezel rail (torus in the girdle plane)
-        const bezel = new THREE.Mesh(
-          new THREE.TorusGeometry(side.gemR * 0.97, G.galleryRadius * 0.95, 12, 72), metal
-        );
-        bezel.position.set(0, 0, railZ_lc);
-        bezel.scale.y = G.prongScaleY;
-        sideAssembly.add(bezel);
-
-        // ----- seat pin: tapered tube from band ridge (local origin, on
-        // the band's outer surface) straight up the radial direction to
-        // the bezel underside. §5 d_G(seat_base, band_ridge) ≡ 0 by
-        // construction (base sits AT the ridge point).
-        const seatPin = makeTaperedTube(
-          new THREE.Vector3(0, 0, 0),
-          new THREE.Vector3(0, 0, railZ_lc * 0.5),
-          new THREE.Vector3(0, 0, railZ_lc - side.gemR * 0.04),
-          side.gemR * 0.34,
-          side.gemR * 0.22,
-          metal,
-          14, 10
-        );
-        seatPin.castShadow = true;
-        sideAssembly.add(seatPin);
-
-        // ----- shoulder buttresses: short tapered struts along the band
-        // tangent (local ±X) anchoring the bezel rail back into the band
-        // shoulder. Each strut runs from (±span, 0, 0) on the ridge up
-        // to (±span·0.78, 0, railZ_lc) on the rail, so its base satisfies
-        // §5 contact with the band ridge exactly.
-        const buttressSpan = side.gemR * 0.95;
-        const buttressR    = G.galleryRadius * 0.78;
-        for (const sign of [-1, 1]) {
-          const base = new THREE.Vector3(sign * buttressSpan, 0, 0);
-          const tip  = new THREE.Vector3(sign * buttressSpan * 0.62, 0, railZ_lc);
-          const strut = makeTaperedTube(
-            base,
-            new THREE.Vector3(sign * buttressSpan * 0.85, 0, railZ_lc * 0.5),
-            tip,
-            buttressR * 1.05, buttressR * 0.82,
-            metal, 12, 10
-          );
-          strut.castShadow = true;
-          sideAssembly.add(strut);
-        }
-
-        group.add(sideAssembly);
-      });
-    } else if (style === "Tapered Baguette") {
-      // Two trapezoidal step-cut side stones flanking the center, tables
-      // coplanar with the center table. Classic 1950s engagement silhouette.
-      // Baguette is created as a flat hexagonal step-cut with tapered outline.
-      const bgRatio = 0.42;                        // baguette : center linear ratio
-      const bgHalfDia = G.meshHalfDia * bgRatio;
-      const bgGap = Math.max(0.020, G.gemR * 0.08);
-      // Distance from center stone girdle center to baguette girdle center.
-      const bgChord = G.gemR + bgHalfDia * 0.92 + bgGap;
-      const bgΔθ = 2 * Math.asin(Math.min(0.92, bgChord / (2 * G.bandTopY)));
-      const bgAngles = [Math.PI / 2 + bgΔθ, Math.PI / 2 - bgΔθ];
-      bgAngles.forEach((ang, idx) => {
-        // §2 + §5 — Same radial-raise fix as Three-Stone. Build the
-        // baguette + its gallery frame + corner prongs inside a sub-group
-        // pivoted at the band ridge point at angle α, rotated so the
-        // sub-group's local +Z = r̂(α) (radial outward). Stone girdle then
-        // sits at local z = bgGemZ, raised radially identical to the
-        // centre stone (no Y-drop, no Z-forward push).
-        const dTheta = ang - Math.PI / 2;
-        const bgDepth = stoneDepthMetrics(bgHalfDia, "Emerald");
-        const bgPavilionH = bgDepth.pavilionH;
-        const bgCulet = Math.max(0.012, G.bandTopZ * 0.25);
-        const bgGemZ_lc = bgPavilionH + bgCulet;         // radial raise
-        const railZ_lc  = bgGemZ_lc - bgHalfDia * 0.34;
-
-        const bgAssembly = new THREE.Group();
-        bgAssembly.position.set(
-          Math.cos(ang) * G.bandTopY,
-          Math.sin(ang) * G.bandTopY,
-          0
-        );
-        // Same orientation construction as Three-Stone side stones.
-        // Add a tiny outward lean (±0.05 rad about local Y) so the long
-        // baguette edge tips a hair away from centre — period-accurate.
-        bgAssembly.rotation.set(-Math.PI / 2, (idx === 0 ? 1 : -1) * 0.05, dTheta);
-
-        // ----- baguette mesh (table = local +Z, girdle at local z = bgGemZ_lc)
-        const bgStoneGroup = new THREE.Group();
-        bgStoneGroup.position.set(0, 0, bgGemZ_lc);
-        const bgMesh = new THREE.Mesh(createStepCutGeometry(bgHalfDia, "Emerald"), meleeMaterial);
-        // Scale the outline narrow + long so it reads as a baguette, not square.
-        bgMesh.scale.set(0.55, 1.35, 1);
-        bgMesh.castShadow = true;
-        bgMesh.userData.isGem = true;
-        bgStoneGroup.add(bgMesh);
-        addStoneContactAO(bgStoneGroup, bgHalfDia);
-        addMaterialInclusions(bgMesh, bgHalfDia, currentState.stone);
-        bgAssembly.add(bgStoneGroup);
-
-        // ----- supported baguette gallery: rectangular rail under the
-        // stone, in the sub-group's local XY plane at z = railZ_lc.
-        const frameHalfW = bgHalfDia * 0.38;
-        const frameHalfH = bgHalfDia * 1.10;
-        const cornerOffsets = [
-          [-frameHalfW, frameHalfH],
-          [frameHalfW, frameHalfH],
-          [-frameHalfW, -frameHalfH],
-          [frameHalfW, -frameHalfH]
-        ];
-        const corners = cornerOffsets.map(([ox, oy]) => new THREE.Vector3(ox, oy, railZ_lc));
-        const galleryR = G.galleryRadius * 0.82;
-        for (let i = 0; i < corners.length; i += 1) {
-          bgAssembly.add(makeCylinderBetween(corners[i], corners[(i + 1) % corners.length], galleryR, metal));
-        }
-
-        // ----- embedded baguette channel
-        // Baguette side stones should look channel-set into the shoulder,
-        // not like loose rectangular gems. These long rails hug the two
-        // long edges outside the step-cut envelope and ramp into the shank.
-        const channelZ = Math.max(bgCulet * 0.44, bgGemZ_lc - bgPavilionH * 0.08);
-        const channelWallX = frameHalfW * 1.48;
-        const channelWallY = frameHalfH * 1.08;
-        const channelTube = G.galleryRadius * 1.05;
-        const channelRadius = Math.max(channelWallX, channelWallY);
-        const channelSeat = makePaveSeat(0, 0, Math.max(bgCulet * 0.36, 0.004), channelRadius, 0);
-        channelSeat.scale.set(channelWallX / channelRadius, channelWallY / channelRadius, 1);
-        bgAssembly.add(channelSeat);
-        for (const xSign of [-1, 1]) {
-          bgAssembly.add(makeCylinderBetween(
-            new THREE.Vector3(xSign * channelWallX, -channelWallY, channelZ),
-            new THREE.Vector3(xSign * channelWallX,  channelWallY, channelZ),
-            channelTube,
-            metal
-          ));
-          for (const ySign of [-1, 1]) {
-            bgAssembly.add(makeTaperedTube(
-              new THREE.Vector3(xSign * channelWallX * 1.32, ySign * channelWallY * 0.66, 0),
-              new THREE.Vector3(xSign * channelWallX * 1.12, ySign * channelWallY * 0.84, channelZ * 0.52),
-              new THREE.Vector3(xSign * channelWallX, ySign * channelWallY, channelZ),
-              G.galleryRadius * 1.18,
-              G.galleryRadius * 0.70,
-              metal,
-              12,
-              10
-            ));
-          }
-        }
-
-        // ----- seat pin from band ridge (local origin) straight up to
-        // gallery centre (railZ_lc). Same §5 d_G = 0 construction.
-        const seatPin = makeTaperedTube(
-          new THREE.Vector3(0, 0, 0),
-          new THREE.Vector3(0, 0, railZ_lc * 0.55),
-          new THREE.Vector3(0, 0, railZ_lc - bgHalfDia * 0.04),
-          bgHalfDia * 0.32, bgHalfDia * 0.22,
-          metal, 14, 10
-        );
-        seatPin.castShadow = true;
-        bgAssembly.add(seatPin);
-
-        // ----- shoulder buttresses (local ±X tangent struts).
-        const bgButtSpan = bgHalfDia * 0.95;
-        for (const sign of [-1, 1]) {
-          const base = new THREE.Vector3(sign * bgButtSpan, 0, 0);
-          const tip  = new THREE.Vector3(sign * bgButtSpan * 0.62, 0, railZ_lc);
-          bgAssembly.add(makeTaperedTube(
-            base,
-            new THREE.Vector3(sign * bgButtSpan * 0.85, 0, railZ_lc * 0.5),
-            tip,
-            G.galleryRadius * 0.82, G.galleryRadius * 0.62,
-            metal, 12, 10
-          ));
-        }
-
-        // ----- 4 micro-prongs at the baguette corners. Posts from the
-        // gallery frame corner up to a flattened claw bead over the
-        // crown.
-        cornerOffsets.forEach(([ox, oy]) => {
-          const base = new THREE.Vector3(ox * 0.96, oy * 0.96, railZ_lc);
-          const tip  = new THREE.Vector3(
-            ox * 1.01,
-            oy * 1.01,
-            bgGemZ_lc + bgDepth.crownH * 0.72
-          );
-          bgAssembly.add(makeCylinderBetween(base, tip, G.prongRadius * 0.52, metal));
-          const prong = new THREE.Mesh(
-            new THREE.SphereGeometry(G.prongRadius * 0.92, 16, 12), metal
-          );
-          prong.position.copy(tip);
-          bgAssembly.add(prong);
-        });
-
-        group.add(bgAssembly);
-      });
-    } else if (style === "Twist") {
-      // Second entwined micro-band offset 180° in twist phase. The twist
-      // amplitude is taken from makeBandGeometry's `Math.sin(ang*3)*0.06`.
-      const twistBand = new THREE.Mesh(
-        makeBandGeometry(G.bandMajorR * 1.005, G.bandWidth * 0.55, G.bandHeight * 0.7, "Twist"),
-        metal
-      );
-      twistBand.rotation.z = Math.PI / 3; // phase shift so the two strands interleave
+    group.add(createAssemblies(metal).ringAccents(G));
+    if (style === "Twist") {
+      const twistBand = new THREE.Mesh(makeBandGeometry(G.bandMajorR * 1.005, G.bandWidth * 0.55, G.bandHeight * 0.7, "Twist"), metal);
+      twistBand.rotation.z = Math.PI / 3;
       group.add(twistBand);
-    } else if (style === "Eternity") {
-      // Full circumference of melee — a continuous ring of light. Same
-      // top-mount + corner-bead treatment as pavé but wrapping 360° with
-      // a single dense row (the eternity standard).
-      const eternityCount = Math.max(28, Math.floor((Math.PI * 2 * G.bandTopY) / (G.paveStoneSize * 1.95)));
-      const angles = [];
-      for (let i = 0; i < eternityCount; i += 1) {
-        const ang = (Math.PI * 2 * i) / eternityCount;
-        angles.push(ang);
-        addBandMelee(group, ang, G, style, 0, G.paveStoneSize * 1.02, meleeMaterial, 0.08);
-      }
-      // Two bead rails (inner + outer girdle line), one bead per stone gap.
-      const innerOffset = -G.paveStoneSize * 0.48;
-      const outerOffset = G.paveStoneSize * 0.48;
-      for (let i = 0; i < angles.length; i += 1) {
-        const next = (i + 1) % angles.length;
-        let a = (angles[i] + angles[next]) / 2;
-        if (next === 0) a += Math.PI;
-        addBandBead(group, a, G, style, innerOffset, G.paveBeadR, metal);
-        addBandBead(group, a, G, style, outerOffset, G.paveBeadR, metal);
-      }
-    } else if (style === "Bypass") {
-      // The structural bypass shank is emitted in the primary band phase by
-      // makeBypassShankAssembly(). No decorative second full ring is added.
-    }
-
-    // Accent (small scattered melee on the shank shoulders) — skip for
-    // styles that already cover the shoulder.
-    if (currentState.accent && style !== "Pavé" && style !== "Channel" && style !== "Three-Stone" && style !== "Eternity" && style !== "Tapered Baguette") {
-      // Side-stone density: Sparse halves the row, Dense adds 50 %.
-      const densityFactor = currentState.accentDensity === "Sparse" ? 0.5
-        : currentState.accentDensity === "Dense" ? 1.5
-        : 1;
-      const accentCount = Math.max(3, Math.round(10 * densityFactor));
-      const accentSize = 0.034 + G.W * 0.003;
-      const accentBeadR = accentSize * 0.34;
-      // Accent rows sit on the band shoulders. When a halo is active push
-      // them further from the head so the outer halo bezel doesn't crowd
-      // the first accent stone.
-      const accentStart = G.sideΔθ + (currentState.halo ? 0.32 : 0.18);
-      const accentEnd = Math.PI - accentStart;
-      const innerOffset = -accentSize * 0.45;
-      const outerOffset = accentSize * 0.45;
-
-      [accentStart, -accentStart].forEach((shoulderStart) => {
-        const shoulderEnd = shoulderStart > 0 ? accentEnd : -accentEnd;
-        const angles = [];
-        for (let i = 0; i < accentCount; i += 1) {
-          const t = i / (accentCount - 1);
-          const ang = shoulderStart + (shoulderEnd - shoulderStart) * t;
-          angles.push(ang);
-          addBandMelee(group, ang, G, style, 0, accentSize, meleeMaterial, 0.08);
-        }
-        // Corner beads on inner + outer rails at every gap.
-        for (let i = 0; i <= angles.length; i += 1) {
-          const a = (i === 0) ? angles[0] - (angles[1] - angles[0]) * 0.5
-                  : (i === angles.length) ? angles[angles.length - 1] + (angles[angles.length - 1] - angles[angles.length - 2]) * 0.5
-                  : (angles[i - 1] + angles[i]) * 0.5;
-          addBandBead(group, a, G, style, innerOffset, accentBeadR, metal);
-          addBandBead(group, a, G, style, outerOffset, accentBeadR, metal);
-        }
-      });
     }
 
     // Hidden Halo: a ring of melee mounted UNDER the center stone's girdle,
@@ -8601,1168 +8026,24 @@ async function createThreeStudio(root, canvas) {
     return enableShadows(group);
   }
 
-  // ====================================================================
-  // NECKLACE — Chain link patterns & clasp closures
-  // --------------------------------------------------------------------
-  // Every emitter consumes a uniform arc-length sample table `chainPath`
-  // (array of {x, y} on the screen plane z = 0; spacing Δs ≈ 2·beadSize)
-  // and writes geometry into `group`. The §5 no-intersection /
-  // no-float invariants are enforced uniformly:
-  //   • Every link sits exactly on the centerline (no detached beads).
-  //   • Consecutive links touch tangentially — segment length equals
-  //     the arc-length step so links kiss.
-  //   • Helical / multi-strand patterns (Rope, Byzantine) bound their
-  //     cross-section offset inside the link envelope so the chain
-  //     never reads as two detached pieces drifting apart.
-  //   • Plate / box patterns (Herringbone, Box) project depth strictly
-  //     within ±beadSize·tube so they cannot poke through the pendant.
-  //   • Clasps anchor AT a curve endpoint with a jump-ring that
-  //     physically threads the last link — never floating.
-  // --------------------------------------------------------------------
-  function _chainTangentAt(chainPath, i) {
-    const a = chainPath[Math.max(0, i - 1)];
-    const b = chainPath[Math.min(chainPath.length - 1, i + 1)];
-    return Math.atan2(b.y - a.y, b.x - a.x);
-  }
-
-  function _emitChainCable(group, chainPath, beadSize, _weight, metal) {
-    // Bead-and-link cable: sphere bead at each sample + rolo jump-ring
-    // threading consecutive beads. Already verified §5-tight via the
-    // Δs = 2·R arc-length walk.
-    const sphereGeom = new THREE.SphereGeometry(beadSize, 18, 12);
-    for (let i = 0; i < chainPath.length; i += 1) {
-      const p = chainPath[i];
-      const bead = new THREE.Mesh(sphereGeom, metal);
-      bead.position.set(p.x, p.y, 0);
-      group.add(bead);
-    }
-    const linkTube = beadSize * 0.22;
-    const linkR    = beadSize * 0.78;
-    const torusGeom = new THREE.TorusGeometry(linkR, linkTube, 10, 22);
-    for (let i = 0; i < chainPath.length - 1; i += 1) {
-      const a = chainPath[i], b = chainPath[i + 1];
-      const link = new THREE.Mesh(torusGeom, metal);
-      link.position.set((a.x + b.x) * 0.5, (a.y + b.y) * 0.5, 0);
-      link.rotation.y = Math.PI / 2;
-      link.rotation.z = Math.atan2(b.y - a.y, b.x - a.x);
-      group.add(link);
-    }
-  }
-
-  function _emitChainCurb(group, chainPath, beadSize, _weight, metal) {
-    // Curb: flat oval links lying parallel to the screen plane, long
-    // axis along the local tangent. The torus default hole faces +Z
-    // (toward camera), which is exactly the "lay-flat" curb aesthetic.
-    // Scale Z compresses depth so plates never poke through the pendant.
-    const majorR = beadSize * 1.05;
-    const tubeR  = beadSize * 0.28;
-    const geom = new THREE.TorusGeometry(majorR, tubeR, 8, 30);
-    for (let i = 0; i < chainPath.length - 1; i += 1) {
-      const a = chainPath[i], b = chainPath[i + 1];
-      const ang = Math.atan2(b.y - a.y, b.x - a.x);
-      const link = new THREE.Mesh(geom, metal);
-      link.position.set((a.x + b.x) * 0.5, (a.y + b.y) * 0.5, 0);
-      link.scale.set(1.0, 0.62, 0.40);
-      link.rotation.z = ang;
-      group.add(link);
-    }
-  }
-
-  function _emitChainBox(group, chainPath, beadSize, _weight, metal) {
-    // Box (Venetian): cuboid links abutting along the tangent. Each
-    // box's long axis = tangent, side faces square so the chain reads
-    // as a sequence of small bricks. Depth is half a beadSize so no
-    // intersection with the pendant (which sits at z = pavilionH > 0).
-    const boxLen = beadSize * 1.95; // touch-along-tangent at Δs = 2R
-    const boxSide = beadSize * 0.95;
-    const geom = new THREE.BoxGeometry(boxLen, boxSide, boxSide);
-    for (let i = 0; i < chainPath.length - 1; i += 1) {
-      const a = chainPath[i], b = chainPath[i + 1];
-      const ang = Math.atan2(b.y - a.y, b.x - a.x);
-      const m = new THREE.Mesh(geom, metal);
-      m.position.set((a.x + b.x) * 0.5, (a.y + b.y) * 0.5, 0);
-      m.rotation.z = ang;
-      group.add(m);
-    }
-  }
-
-  function _emitChainRope(group, chainPath, beadSize, _weight, metal) {
-    // Rope: dual helical bead strands twisted around the centerline.
-    // Cross-section offset bounded by R = beadSize * 0.55 so the
-    // envelope is contained — never reads as two detached strands.
-    const R = beadSize * 0.55;
-    const beadR = beadSize * 0.62;
-    const turnsPerStep = 0.55; // ≈ 0.55 rad twist per arc-step
-    const geom = new THREE.SphereGeometry(beadR, 14, 10);
-    for (let i = 0; i < chainPath.length; i += 1) {
-      const p = chainPath[i];
-      const ang = _chainTangentAt(chainPath, i);
-      const nx = -Math.sin(ang), ny = Math.cos(ang); // in-plane normal
-      const phase = i * turnsPerStep;
-      for (let s = 0; s < 2; s += 1) {
-        const ph = phase + s * Math.PI;
-        const ox = nx * Math.cos(ph) * R;
-        const oy = ny * Math.cos(ph) * R;
-        const oz = Math.sin(ph) * R;
-        const b = new THREE.Mesh(geom, metal);
-        b.position.set(p.x + ox, p.y + oy, oz);
-        group.add(b);
+  function createAssemblies(metal = materialForMetal()) {
+    const spec = pieceSpec();
+    return createJewelleryAssemblies(THREE, {
+      spec, state: currentState, metal, wearable: wearableBuildOptions,
+      stoneMaterial: (stone) => {
+        const material = materialForStone(stone.depthMm / spec.centerStone.depthMm, stone.material);
+        material.thickness = stone.depthMm;
+        return material;
       }
-    }
+    });
   }
-
-  function _emitChainSnake(group, chainPath, beadSize, _weight, metal) {
-    // Snake: smooth flexible tube along the curve. TubeGeometry built
-    // from a Catmull-Rom interpolation of chainPath. Radius half a bead.
-    const pts = chainPath.map((p) => new THREE.Vector3(p.x, p.y, 0));
-    if (pts.length < 2) return;
-    const curve = new THREE.CatmullRomCurve3(pts, false, "catmullrom", 0.5);
-    const tubeR = beadSize * 0.55;
-    const segs = Math.max(64, chainPath.length * 4);
-    const tube = new THREE.Mesh(
-      new THREE.TubeGeometry(curve, segs, tubeR, 14, false), metal
-    );
-    group.add(tube);
-    // Subtle articulated rings every few steps — micro-bumps that read
-    // as snake-chain "vertebrae" without breaking the smooth silhouette.
-    const ringGeom = new THREE.TorusGeometry(tubeR * 1.08, tubeR * 0.18, 8, 16);
-    for (let i = 1; i < chainPath.length - 1; i += 2) {
-      const p = chainPath[i];
-      const ang = _chainTangentAt(chainPath, i);
-      const r = new THREE.Mesh(ringGeom, metal);
-      r.position.set(p.x, p.y, 0);
-      r.rotation.y = Math.PI / 2;
-      r.rotation.z = ang;
-      group.add(r);
-    }
-  }
-
-  function _emitChainFigaro(group, chainPath, beadSize, _weight, metal) {
-    // Figaro: 3 short + 1 long repeating, ALL rendered as flat ovals
-    // lying in the screen plane (curb-style orientation) so the chain
-    // visibly reads as a continuous flat-link strip. Long link spans
-    // 2 arc-length steps and its diameter is set to match that span so
-    // there are no visible gaps between consecutive links (the previous
-    // pass used cable-style (axis = tangent) rings which projected as
-    // detached bars at every midpoint — the "floating" artefact).
-    const tubeR = beadSize * 0.26;
-    const stepLen = beadSize * 2.0; // arc-length step ≈ 2·beadSize
-    const shortR = stepLen * 0.50;  // 1-step span
-    const longR  = stepLen * 1.00;  // 2-step span
-    const shortGeom = new THREE.TorusGeometry(shortR, tubeR, 8, 28);
-    const longGeom  = new THREE.TorusGeometry(longR,  tubeR, 8, 36);
-    let i = 0;
-    let count = 0;
-    while (i < chainPath.length - 1) {
-      const isLong = (count % 4) === 3;
-      const span = isLong ? 2 : 1;
-      const j = Math.min(chainPath.length - 1, i + span);
-      const a = chainPath[i], b = chainPath[j];
-      const ang = Math.atan2(b.y - a.y, b.x - a.x);
-      const link = new THREE.Mesh(isLong ? longGeom : shortGeom, metal);
-      link.position.set((a.x + b.x) * 0.5, (a.y + b.y) * 0.5, 0);
-      // Curb-style flat oval: hole faces camera, long axis along tangent.
-      link.scale.set(1, 0.55, 0.40);
-      link.rotation.z = ang;
-      group.add(link);
-      i += span;
-      count += 1;
-    }
-  }
-
-  function _emitChainWheat(group, chainPath, beadSize, _weight, metal) {
-    // Wheat (spiga): paired diagonal oval links alternating ±28° about
-    // the local tangent so the weave reads as overlapping chevrons.
-    const majorR = beadSize * 0.95;
-    const tubeR  = beadSize * 0.22;
-    const geom = new THREE.TorusGeometry(majorR, tubeR, 8, 24);
-    for (let i = 0; i < chainPath.length - 1; i += 1) {
-      const a = chainPath[i], b = chainPath[i + 1];
-      const ang = Math.atan2(b.y - a.y, b.x - a.x);
-      for (let s = 0; s < 2; s += 1) {
-        const sign = s === 0 ? 1 : -1;
-        const link = new THREE.Mesh(geom, metal);
-        link.position.set(
-          (a.x + b.x) * 0.5,
-          (a.y + b.y) * 0.5,
-          sign * tubeR * 0.6
-        );
-        link.scale.set(1, 0.65, 0.5);
-        link.rotation.z = ang + sign * 0.49; // ~28° chevron splay
-        group.add(link);
-      }
-    }
-  }
-
-  function _emitChainHerringbone(group, chainPath, beadSize, _weight, metal) {
-    // Herringbone: thin flat plates lying tangent to the curve, tilted
-    // alternately ±26° about the local tangent so they form a V-pattern.
-    // Plate depth = beadSize·0.18 → cannot poke through the pendant.
-    const plateW = beadSize * 1.95;
-    const plateH = beadSize * 0.40;
-    const plateD = beadSize * 0.18;
-    const geom = new THREE.BoxGeometry(plateW, plateH, plateD);
-    for (let i = 0; i < chainPath.length - 1; i += 1) {
-      const a = chainPath[i], b = chainPath[i + 1];
-      const ang = Math.atan2(b.y - a.y, b.x - a.x);
-      const plate = new THREE.Mesh(geom, metal);
-      plate.position.set((a.x + b.x) * 0.5, (a.y + b.y) * 0.5, 0);
-      // First rotate about Z to align plate length with tangent, then
-      // tilt about local-X (tangent direction) using a quaternion so
-      // the tilt is truly about the tangent and not world-X.
-      const tiltSign = (i % 2 === 0) ? 1 : -1;
-      const qZ = new THREE.Quaternion().setFromAxisAngle(
-        new THREE.Vector3(0, 0, 1), ang
-      );
-      const tangent = new THREE.Vector3(Math.cos(ang), Math.sin(ang), 0);
-      const qTilt = new THREE.Quaternion().setFromAxisAngle(tangent, tiltSign * 0.45);
-      plate.quaternion.copy(qTilt).multiply(qZ);
-      group.add(plate);
-    }
-  }
-
-  function _emitChainByzantine(group, chainPath, beadSize, _weight, metal) {
-    // Byzantine: every step gets a two-link cluster — one ring whose
-    // axis = tangent (link threads forward), one whose axis = in-plane
-    // normal (link threads sideways). The orthogonal pair is the
-    // signature woven look. Envelope bounded by R = beadSize so no
-    // pendant intersection.
-    const R = beadSize * 0.78;
-    const tube = beadSize * 0.20;
-    const geom = new THREE.TorusGeometry(R, tube, 10, 22);
-    for (let i = 0; i < chainPath.length; i += 1) {
-      const p = chainPath[i];
-      const ang = _chainTangentAt(chainPath, i);
-      // Ring A: axis = tangent direction (default torus axis +Z → rotate
-      // to +X then yaw to tangent angle).
-      const a1 = new THREE.Mesh(geom, metal);
-      a1.position.set(p.x, p.y, 0);
-      a1.rotation.y = Math.PI / 2;
-      a1.rotation.z = ang;
-      group.add(a1);
-      // Ring B: axis perpendicular to tangent in the plane (rotation
-      // about Z only). Default torus axis = +Z so its hole already
-      // faces camera; rotate to align hole with in-plane normal: keep
-      // axis +Z but rotate about X by π/2 then yaw — easier: rotate
-      // about world X by π/2 (hole points +Y), then yaw about Z.
-      const a2 = new THREE.Mesh(geom, metal);
-      a2.position.set(p.x, p.y, 0);
-      a2.rotation.x = Math.PI / 2;
-      a2.rotation.z = ang;
-      a2.scale.set(0.9, 0.9, 0.9);
-      group.add(a2);
-    }
-  }
-
-  function _emitChainMariner(group, chainPath, beadSize, _weight, metal) {
-    // Mariner / anchor: cable-style oval links each bisected by a small
-    // crossbar (the anchor crosspiece). Bar sits centered on the link
-    // along the tangent direction.
-    const majorR = beadSize * 0.95;
-    const tubeR  = beadSize * 0.22;
-    const linkGeom = new THREE.TorusGeometry(majorR, tubeR, 10, 26);
-    const barGeom  = new THREE.CylinderGeometry(tubeR * 0.85, tubeR * 0.85, majorR * 1.55, 10);
-    for (let i = 0; i < chainPath.length - 1; i += 1) {
-      const a = chainPath[i], b = chainPath[i + 1];
-      const ang = Math.atan2(b.y - a.y, b.x - a.x);
-      const mx = (a.x + b.x) * 0.5, my = (a.y + b.y) * 0.5;
-      const link = new THREE.Mesh(linkGeom, metal);
-      link.position.set(mx, my, 0);
-      link.scale.set(1, 0.62, 0.45); // flat oval like curb
-      link.rotation.z = ang;
-      group.add(link);
-      // Crossbar: cylinder default axis +Y → rotate Z by 90° to align
-      // with +X then yaw by tangent angle. Place across the oval's hole.
-      const bar = new THREE.Mesh(barGeom, metal);
-      bar.position.set(mx, my, 0);
-      bar.rotation.z = ang + Math.PI / 2;
-      group.add(bar);
-    }
-  }
-
-  const CHAIN_EMITTERS = {
-    Cable: _emitChainCable,
-    Curb: _emitChainCurb,
-    Box: _emitChainBox,
-    Rope: _emitChainRope,
-    Snake: _emitChainSnake,
-    Figaro: _emitChainFigaro,
-    Wheat: _emitChainWheat,
-    Herringbone: _emitChainHerringbone,
-    Byzantine: _emitChainByzantine,
-    Mariner: _emitChainMariner
-  };
-
-  // ------- Clasp emitters --------------------------------------------
-  // Each clasp anchors AT one chain endpoint and adds a matching jump-
-  // ring counterpart at the other endpoint so the closure reads as a
-  // complete manufactured part. Outward-tangent at the endpoint guides
-  // the clasp orientation so it never floats sideways off the curve.
-
-  function _endpointFrame(chainPath, atStart) {
-    const N = chainPath.length;
-    const p   = atStart ? chainPath[0] : chainPath[N - 1];
-    const ref = atStart ? chainPath[1] : chainPath[N - 2];
-    let dx = p.x - ref.x, dy = p.y - ref.y;
-    const len = Math.hypot(dx, dy) || 1;
-    dx /= len; dy /= len;
-    return { x: p.x, y: p.y, tx: dx, ty: dy, ang: Math.atan2(dy, dx) };
-  }
-
-  function _addJumpRing(group, frame, weight, metal, R) {
-    const ring = new THREE.Mesh(
-      new THREE.TorusGeometry(R, R * 0.22, 10, 24), metal
-    );
-    ring.position.set(frame.x + frame.tx * R * 0.85, frame.y + frame.ty * R * 0.85, 0);
-    ring.rotation.y = Math.PI / 2;
-    ring.rotation.z = frame.ang;
-    group.add(ring);
-    return ring;
-  }
-
-  function _emitClaspLobster(group, chainPath, weight, metal) {
-    // Lobster on RIGHT endpoint, plain jump-ring on LEFT endpoint.
-    const right = _endpointFrame(chainPath, false);
-    const left  = _endpointFrame(chainPath, true);
-    const jrR = 0.030 * weight;
-    _addJumpRing(group, right, weight, metal, jrR);
-    _addJumpRing(group, left,  weight, metal, jrR);
-    // Lobster body: capsule along tangent, with a small claw torus at
-    // the tip and a tiny lever box on the side.
-    const bodyLen  = 0.085 * weight;
-    const bodyR    = 0.022 * weight;
-    const body = new THREE.Mesh(
-      new THREE.CapsuleGeometry(bodyR, bodyLen, 6, 14), metal
-    );
-    const cx = right.x + right.tx * (jrR * 1.7 + bodyLen * 0.5);
-    const cy = right.y + right.ty * (jrR * 1.7 + bodyLen * 0.5);
-    body.position.set(cx, cy, 0);
-    // Capsule default axis = +Y → rotate Z by (ang - π/2) to align with tangent.
-    body.rotation.z = right.ang - Math.PI / 2;
-    group.add(body);
-    // Lever (small box on side of body)
-    const lever = new THREE.Mesh(
-      new THREE.BoxGeometry(bodyR * 0.7, bodyLen * 0.45, bodyR * 0.7), metal
-    );
-    lever.position.set(
-      cx - right.ty * bodyR * 0.9,
-      cy + right.tx * bodyR * 0.9,
-      0
-    );
-    lever.rotation.z = right.ang - Math.PI / 2;
-    group.add(lever);
-    // Claw opening: a small open torus at the far tip of the capsule
-    const tipX = cx + right.tx * (bodyLen * 0.55);
-    const tipY = cy + right.ty * (bodyLen * 0.55);
-    const claw = new THREE.Mesh(
-      new THREE.TorusGeometry(bodyR * 0.85, bodyR * 0.30, 10, 18, Math.PI * 1.4), metal
-    );
-    claw.position.set(tipX, tipY, 0);
-    claw.rotation.z = right.ang;
-    group.add(claw);
-  }
-
-  function _emitClaspSpringRing(group, chainPath, weight, metal) {
-    // Spring-ring: small ring with a slim lever protrusion, matched
-    // jump-ring opposite end.
-    const right = _endpointFrame(chainPath, false);
-    const left  = _endpointFrame(chainPath, true);
-    const jrR = 0.026 * weight;
-    _addJumpRing(group, left, weight, metal, jrR);
-    const ringR = 0.040 * weight;
-    const ringTube = ringR * 0.20;
-    const cx = right.x + right.tx * (ringR + jrR * 0.6);
-    const cy = right.y + right.ty * (ringR + jrR * 0.6);
-    const ring = new THREE.Mesh(
-      new THREE.TorusGeometry(ringR, ringTube, 10, 28), metal
-    );
-    ring.position.set(cx, cy, 0);
-    ring.rotation.y = Math.PI / 2;
-    ring.rotation.z = right.ang;
-    group.add(ring);
-    // Lever: thin bar tangent to ring
-    const lever = new THREE.Mesh(
-      new THREE.BoxGeometry(ringR * 0.65, ringTube * 1.8, ringTube * 1.6), metal
-    );
-    lever.position.set(
-      cx + right.tx * ringR * 0.6,
-      cy + right.ty * ringR * 0.6,
-      ringR * 0.45
-    );
-    lever.rotation.z = right.ang;
-    group.add(lever);
-    // Connector jump ring (the chain-end ring on the clasp itself)
-    _addJumpRing(group, right, weight, metal, jrR);
-  }
-
-  function _emitClaspToggle(group, chainPath, weight, metal) {
-    // Toggle: T-bar at LEFT endpoint, big O-ring at RIGHT endpoint.
-    const right = _endpointFrame(chainPath, false);
-    const left  = _endpointFrame(chainPath, true);
-    // Big O-ring
-    const oR = 0.060 * weight;
-    const oTube = oR * 0.18;
-    const ox = right.x + right.tx * (oR + 0.01);
-    const oy = right.y + right.ty * (oR + 0.01);
-    const oRing = new THREE.Mesh(
-      new THREE.TorusGeometry(oR, oTube, 10, 36), metal
-    );
-    oRing.position.set(ox, oy, 0);
-    oRing.rotation.y = Math.PI / 2;
-    oRing.rotation.z = right.ang;
-    group.add(oRing);
-    // T-bar: cylinder with a small loop at its midpoint where the chain
-    // joins. Length ≈ 1.7·oR so it cannot slip through the ring when
-    // perpendicular (real toggle geometry).
-    const barLen = oR * 1.7;
-    const barR = oTube * 1.1;
-    const bar = new THREE.Mesh(
-      new THREE.CylinderGeometry(barR, barR, barLen, 12), metal
-    );
-    const lx = left.x + left.tx * barR * 1.5;
-    const ly = left.y + left.ty * barR * 1.5;
-    bar.position.set(lx, ly, 0);
-    // Cylinder axis +Y → rotate to be perpendicular to tangent (so it
-    // visually crosses the O-ring). Perpendicular angle = ang + π/2 - π/2 = ang.
-    bar.rotation.z = left.ang;
-    group.add(bar);
-    // Small loop at bar midpoint connecting to chain end
-    const loop = new THREE.Mesh(
-      new THREE.TorusGeometry(barR * 1.6, barR * 0.35, 8, 14), metal
-    );
-    loop.position.set(left.x, left.y, 0);
-    loop.rotation.y = Math.PI / 2;
-    loop.rotation.z = left.ang;
-    group.add(loop);
-  }
-
-  function _emitClaspBox(group, chainPath, weight, metal) {
-    // Box clasp: small rectangular box with a tongue on one side,
-    // visible as two abutting boxes at the right endpoint. Plain jump
-    // ring at the other end.
-    const right = _endpointFrame(chainPath, false);
-    const left  = _endpointFrame(chainPath, true);
-    _addJumpRing(group, left, weight, metal, 0.026 * weight);
-    const w = 0.060 * weight, h = 0.038 * weight, d = 0.022 * weight;
-    const cx = right.x + right.tx * (w * 0.55 + 0.005);
-    const cy = right.y + right.ty * (w * 0.55 + 0.005);
-    const box = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), metal);
-    box.position.set(cx, cy, 0);
-    box.rotation.z = right.ang;
-    group.add(box);
-    // Tongue (thin protruding lip)
-    const tongueLen = w * 0.45;
-    const tongue = new THREE.Mesh(
-      new THREE.BoxGeometry(tongueLen, h * 0.4, d * 0.6), metal
-    );
-    const tx = cx + right.tx * (w * 0.5 + tongueLen * 0.5);
-    const ty = cy + right.ty * (w * 0.5 + tongueLen * 0.5);
-    tongue.position.set(tx, ty, 0);
-    tongue.rotation.z = right.ang;
-    group.add(tongue);
-    _addJumpRing(group, right, weight, metal, 0.020 * weight);
-  }
-
-  function _emitClaspSHook(group, chainPath, weight, metal) {
-    // S-hook: bent wire S, approximated as two half-torus arcs.
-    const right = _endpointFrame(chainPath, false);
-    const left  = _endpointFrame(chainPath, true);
-    _addJumpRing(group, left, weight, metal, 0.024 * weight);
-    const armR = 0.030 * weight;
-    const wire = armR * 0.18;
-    const arc = new THREE.TorusGeometry(armR, wire, 8, 18, Math.PI);
-    // First half: centered just outside right endpoint
-    const cx1 = right.x + right.tx * (armR + 0.006);
-    const cy1 = right.y + right.ty * (armR + 0.006);
-    const half1 = new THREE.Mesh(arc, metal);
-    half1.position.set(cx1, cy1, 0);
-    half1.rotation.y = Math.PI / 2;
-    half1.rotation.z = right.ang + Math.PI / 2;
-    group.add(half1);
-    // Second half: offset further out, mirrored
-    const cx2 = cx1 + right.tx * armR * 2;
-    const cy2 = cy1 + right.ty * armR * 2;
-    const half2 = new THREE.Mesh(arc, metal);
-    half2.position.set(cx2, cy2, 0);
-    half2.rotation.y = Math.PI / 2;
-    half2.rotation.z = right.ang - Math.PI / 2;
-    group.add(half2);
-  }
-
-  const CLASP_EMITTERS = {
-    Lobster: _emitClaspLobster,
-    "Spring Ring": _emitClaspSpringRing,
-    Toggle: _emitClaspToggle,
-    Box: _emitClaspBox,
-    "S-Hook": _emitClaspSHook,
-    Hidden: () => {}
-  };
 
   function buildNecklace() {
-    // ====================================================================
-    // NECKLACE — Physical anatomy & component index
-    // --------------------------------------------------------------------
-    // The necklace hangs from the wearer's neck and the front-facing side
-    // of every component faces the camera (+Z). Unlike the ring/bracelet,
-    // there is no body curvature to align to: every gem table just faces
-    // world +Z. Components:
-    //
-    //   group  (returned, scaled by 1.18)
-    //     ├── chain: row of `beadCount` SphereGeometry beads laid out along
-    //     │           a parametric curve `chainPath(t)` whose shape is
-    //     │           silhouette-driven (Choker = shallow arc, Y-Drop = arc
-    //     │           with a low cusp, Lariat = two crossing strands,
-    //     │           Pendant/Station = wide low arc). Bead size = beadSize.
-    //     ├── focal mount(s)  (placeFocalAt(x, y, scale, addBail))
-    //     │     • Bail: vertical TorusGeometry below the chain bead, axis
-    //     │       aligned to the chain so the bead passes through the hole
-    //     │       with clearance.
-    //     │     • Pendant: makeStone at z = true pavilion depth + clearance
-    //     │       so the stone back clears the chain/bail plane. A jump tab
-    //     │       sits above the outline boundary, never through the stone.
-    //     │     • Setting: addSetting at (x, focalY, pendantZ - R*0.18) so
-    //     │       prong bases sit just behind the pendant girdle and tips
-    //     │       grip the crown (centerZ→stoneZ convention, see addSetting).
-    //     │     • Halo + milgrain: coplanar with the pendant girdle, NOT
-    //     │       hardcoded z values (F8 fix).
-    //     └── silhouette-specific extras: Y-Drop's extra drop-chain ending
-    //         in the bail; Lariat's knot-bead + two terminal stones;
-    //         Station's 5 inline stones bezel-set ON the chain (no bail).
-    //
-    // Coordinate convention (matches earring/pendant front-facing pieces):
-    //     +Z = toward camera (table direction for every focal stone)
-    //     +Y = up (necklace top, where the chain anchors)
-    //     -Y = down (where the pendant hangs)
-    //     +X = wearer's left (the chain spans symmetrically around X = 0)
-    // ====================================================================
-    const metal = materialForMetal();
-    const meleeMat = materialForStone(0.3);  // §3/§11 necklace melée absorption
-    const group = new THREE.Group();
-    const weight = weightValue();
-    const spec = pieceSpec();
-    // Link outer radius from the true chain wire gauge — no more arbitrary
-    // bead size. `wEff` rescales legacy weight-based hardware constants
-    // (clasps, link tubes) to the physical link size.
-    const beadSize = spec.world.chainLinkRadius;
-    const wEff = beadSize / 0.052;
-    const silhouette = currentState.silhouette || "Pendant";
-
-    // ----- chain curve (silhouette controls span + droop) -----
-    // Each silhouette uses a different parametric curve so the chain
-    // physically reads as a Y-drop, lariat, choker, etc.
-    //
-    // §2 + §5 — Chain coherence.
-    //
-    // A real chain is a sequence of *interlocking* metal links: every
-    // link physically touches its neighbour, and the chain's apparent
-    // length along the curve equals the integral arc length, not the
-    // parameter span. The previous loop sampled the parametric curve at
-    // uniform parameter t and dropped a sphere at each sample, so:
-    //   – beads were unevenly spaced (denser at the cusp, sparser at the
-    //     ends) violating manufacturability (§13);
-    //   – nothing connected adjacent beads, so the chain read as a row
-    //     of floating ornaments.
-    //
-    // Fixed by:
-    //   1. Densely sample the parametric curve, then walk it by accumulated
-    //      arc length s = ∫₀ᵗ ‖dC/du‖ du, emitting a bead every Δs = 2·R
-    //      so consecutive beads kiss tangentially (§5 contact = 0 between
-    //      bead i and bead i+1 in arc-length parameterisation).
-    //   2. Connect every consecutive bead pair with a small rolo-chain
-    //      jump-ring (torus oriented perpendicular to the local tangent
-    //      so it visibly threads through both spheres). This is the
-    //      canonical "real chain" anatomy — bead-and-link cable chain.
-    const silhouetteSpan  = silhouette === "Choker" ? 2.6 : silhouette === "Lariat" ? 4.4 : 3.8;
-    const silhouetteDroop = silhouette === "Choker" ? 0.42
-                          : silhouette === "Lariat" ? 1.05
-                          : silhouette === "Y-Drop" ? 0.92
-                          : 0.82;
-    // Parametric curve y(t) — same family as before, just sampled densely
-    // here for arc-length integration.
-    const curveAt = (t) => {
-      const x = (t - 0.5) * silhouetteSpan;
-      const dipShape = silhouette === "Lariat"
-        ? -Math.cos((t - 0.42) * Math.PI * 1.05)
-        : -Math.cos((t - 0.5) * Math.PI);
-      const y = -0.48 + dipShape * silhouetteDroop;
-      return { x, y };
-    };
-    // Dense pre-sample for cumulative arc-length table.
-    const denseSamples = 800;
-    const dense = new Array(denseSamples + 1);
-    let totalArc = 0;
-    dense[0] = { ...curveAt(0), s: 0 };
-    for (let i = 1; i <= denseSamples; i += 1) {
-      const t = i / denseSamples;
-      const p = curveAt(t);
-      const prev = dense[i - 1];
-      totalArc += Math.hypot(p.x - prev.x, p.y - prev.y);
-      dense[i] = { ...p, s: totalArc };
-    }
-    // mm truth — rescale the parametric family so the visible front arc
-    // equals the worn drape of the real chain length (≈52% of the chain
-    // shows from the front; the rest passes behind the neck).
-    const targetArc = spec.world.chainLength * 0.52;
-    const arcScale = targetArc / Math.max(totalArc, 1e-6);
-    for (const p of dense) {
-      p.x *= arcScale;
-      p.y *= arcScale;
-      p.s *= arcScale;
-    }
-    totalArc *= arcScale;
-    // Walk the dense table at uniform arc-length step Δs = 2·R so adjacent
-    // beads kiss exactly (touching spheres condition).
-    const beadStep = beadSize * 2.0;
-    const beadCountActual = Math.max(8, Math.floor(totalArc / beadStep) + 1);
-    // §13 manufacturability: snap to an even count for symmetric layout.
-    const beadCount = beadCountActual % 2 === 0 ? beadCountActual : beadCountActual + 1;
-    const chainPath = [];
-    // Walk the dense table monotonically to map each target arc-length
-    // to an interpolated (x, y) position — O(N) total. We just build the
-    // centerline here; per-pattern link geometry is emitted below by the
-    // chainType dispatch so every chain style shares the SAME arc-length
-    // anchor points (Station/Y-Drop/Pendant placement is invariant).
-    let denseIdx = 0;
-    for (let i = 0; i < beadCount; i += 1) {
-      const targetS = (i / (beadCount - 1)) * totalArc;
-      while (denseIdx < denseSamples && dense[denseIdx + 1].s < targetS) {
-        denseIdx += 1;
-      }
-      const a = dense[denseIdx];
-      const b = dense[Math.min(denseSamples, denseIdx + 1)];
-      const span = (b.s - a.s) || 1;
-      const u = (targetS - a.s) / span;
-      const x = a.x + (b.x - a.x) * u;
-      const y = a.y + (b.y - a.y) * u;
-      chainPath.push({ x, y });
-    }
-    // §2 — emit per-pattern chain link geometry. Default Cable matches
-    // the original bead-and-link rolo construction; other patterns swap
-    // in their own link primitives along the same arc-length samples.
-    const chainType = currentState.chainType || "Cable";
-    const chainEmitter = CHAIN_EMITTERS[chainType] || CHAIN_EMITTERS.Cable;
-    chainEmitter(group, chainPath, beadSize, wEff, metal);
-
-    const lowest = chainPath.reduce((acc, p) => (p.y < acc.y ? p : acc), chainPath[0]);
-    // Real pendant assembly geometry:
-    //   chain bead (attachY) → bail (vertical loop, touches chain) → pendant
-    //   The bail must be a *vertical* torus (axis = local X) so you can see
-    //   THROUGH it; the previous flat-disc orientation read as a coin glued
-    //   between the chain and the gem. The pendant centre is derived from the
-    //   bail's actual outer rim so there's never a floating gap.
-    const placeFocalAt = (x, attachY, scale, addBail) => {
-      const focalScale = 1.08 * scale;
-      const stoneHalfDia = specStoneHalfWidth() * focalScale;
-      const pendantDepth = stoneDepthMetrics(stoneHalfDia, currentState.shape);
-      const pendantTopExtent = stonePlanExtentY(currentState.shape, stoneHalfDia, 1, pendantDepth.girdleScale);
-      const settingR = stoneHalfDia * 1.06;
-      const connectorRadius = spec.world.chainWireRadius * 0.8;
-      const pendantTabR = Math.max(mmToWorld(0.9), stoneHalfDia * 0.13);
-      const pendantTabTube = spec.world.chainWireRadius * 0.7;
-      let focalY;
-      let connectorTopY;
-      if (addBail) {
-        // Bail forged from slightly heavier wire than the chain links.
-        const bailR = Math.max(mmToWorld(2.2) * scale, beadSize * 1.35);
-        const bailTube = spec.world.chainWireRadius * 1.15;
-        const bail = new THREE.Mesh(new THREE.TorusGeometry(bailR, bailTube, 18, 64), metal);
-        // Bail axis is along X (chain direction) so the chain physically
-        // threads THROUGH the bail loop — anatomically correct. The bail
-        // is centred on the chain bead at the attach point, with the loop
-        // sitting in the YZ plane. Previously rotation.x = 0.35 left the
-        // bail's hole facing the camera (a coin pressed against the chain)
-        // which read as floating metal rather than a real jump ring.
-        bail.position.set(x, attachY, 0);
-        bail.rotation.y = Math.PI / 2;
-        group.add(bail);
-        // §5 contact/anchor: the pendant centre is solved from the bail's
-        // physical lower rim. The old 0.6R offset overlapped the gem into
-        // the jump ring on some shapes while still leaving visual gaps on
-        // others. We now keep a tiny solder tab between the bail and the
-        // pendant top so the assembly reads like one manufactured part.
-        connectorTopY = attachY - bailR - bailTube * 0.7;
-      } else {
-        // No bail: the pendant hangs from a soldered chain tab under the
-        // bead/link at the attachment point.
-        connectorTopY = attachY - beadSize * 0.82;
-      }
-      focalY = connectorTopY
-        - Math.max(spec.world.chainWireRadius * 1.6, stoneHalfDia * 0.08)
-        - pendantTabR * 2
-        - pendantTabTube
-        - pendantTopExtent;
-      const pendant = makeStone(focalScale);
-      // §5 no-collision: the chain and bail live in z=0. The pendant stone
-      // is lifted forward by its true pavilion depth, so the back of the
-      // stone clears the chain plane instead of slicing through it.
-      const pendantZ = pendantDepth.pavilionH + connectorRadius * 1.7;
-      pendant.position.set(x, focalY, pendantZ);
-      const pendantTopY = focalY + pendantTopExtent;
-      const pendantTabY = pendantTopY + pendantTabR + pendantTabTube + 0.003;
-      const pendantTabTopY = pendantTabY + pendantTabR;
-      if (connectorTopY - pendantTabTopY > 0.008) {
-        group.add(makeCylinderBetween(
-          new THREE.Vector3(x, connectorTopY, 0),
-          new THREE.Vector3(x, pendantTabTopY, pendantZ),
-          connectorRadius,
-          metal
-        ));
-      }
-      const solderTop = new THREE.Mesh(new THREE.SphereGeometry(spec.world.chainWireRadius * 1.2, 16, 10), metal);
-      solderTop.position.set(x, connectorTopY, 0);
-      group.add(solderTop);
-      const pendantTab = new THREE.Mesh(
-        new THREE.TorusGeometry(pendantTabR, pendantTabTube, 12, 34),
-        metal
-      );
-      pendantTab.position.set(x, pendantTabY, pendantZ);
-      pendantTab.rotation.y = Math.PI / 2;
-      group.add(pendantTab);
-      addSetting(group, x, focalY, pendantZ - stoneHalfDia * 0.18, settingR, {
-        scaleY: 0.92,
-        prongs: currentState.shape === "Pear" ? 5 : 6,
-        stoneSize: stoneHalfDia,
-        stoneZ: pendantZ
-      });
-      if (currentState.halo) {
-        // Halo girdle coplanar with pendant girdle (pendantZ). The old
-        // hardcoded z = 0.11 sat 0.05 BEHIND the pendant girdle (z = 0.16),
-        // which left the halo wrapping around the pavilion edge instead of
-        // ringing the table.
-        addHalo(group, x, focalY, settingR + 0.10 * scale, 18, pendantZ - stoneHalfDia * 0.04, 0.92);
-      }
-      addMilgrain(group, x, focalY, settingR + (currentState.halo ? 0.20 : 0.06), 32, pendantZ + stoneHalfDia * 0.02, 0.92);
-      group.add(pendant);
-    };
-
-    if (silhouette === "Choker") {
-      // Small centerpiece kissing the front of the chain, no bail.
-      placeFocalAt(lowest.x, lowest.y, 0.55, false);
-    } else if (silhouette === "Station") {
-      // Five accent stones evenly distributed across the chain, each
-      // bezel-set into the chain itself (no hanging). Each stone's pavilion
-      // is mounted on the bead's front face with no mesh interpenetration:
-      // stationZ = bead front + true pavilion depth + clearance. A thin
-      // bezel collar wraps the girdle to read as a true station set.
-      const stations = 5;
-      for (let i = 0; i < stations; i += 1) {
-        const t = (i + 1) / (stations + 1);
-        const idx = Math.floor(t * (chainPath.length - 1));
-        const p = chainPath[idx];
-        const stationScale = 0.32;
-        const stationHalfDia = specStoneHalfWidth() * stationScale;
-        const stationDepth = stoneDepthMetrics(stationHalfDia, currentState.shape);
-        const stationRailR = spec.world.chainWireRadius;
-        const stationZ = beadSize + stationDepth.pavilionH + stationRailR * 0.65 + 0.004;
-        const stone = makeStone(stationScale);
-        stone.position.set(p.x, p.y, stationZ);
-        group.add(makePaveSeat(p.x, p.y, stationZ - stationHalfDia * 0.20, stationHalfDia * 1.05, 0));
-        addSetting(group, p.x, p.y, stationZ - stationHalfDia * 0.18, stationHalfDia * 1.06, {
-          scaleY: 0.9, prongs: 4, stoneSize: stationHalfDia, stoneZ: stationZ
-        });
-        // Bezel collar bridging gem girdle to chain bead.
-        const collar = new THREE.Mesh(
-          new THREE.TorusGeometry(stationHalfDia * 1.10, spec.world.chainWireRadius * 0.8, 12, 36), metal
-        );
-        collar.position.set(p.x, p.y, stationZ - stationHalfDia * 0.05);
-        group.add(collar);
-        const beadR = stationHalfDia * 0.15;
-        for (let b = 0; b < 4; b += 1) {
-          const ang = Math.PI / 4 + (Math.PI * 2 * b) / 4;
-          group.add(makePaveBead(
-            p.x + Math.cos(ang) * stationHalfDia * 0.88,
-            p.y + Math.sin(ang) * stationHalfDia * 0.88,
-            stationZ + stationHalfDia * 0.08,
-            beadR,
-            metal
-          ));
-        }
-        group.add(stone);
-      }
-    } else if (silhouette === "Y-Drop") {
-      // Bail at the bottom of the main chain, then a SHORT drop-chain of
-      // beads ending in the pendant. The bail is attached to the LAST drop
-      // bead — not floating between drop and pendant as before.
-      //
-      // §2/§5 — Same kiss-and-link logic as the main chain: drop beads are
-      // arc-length-uniform (Δs = 2·R_drop so they kiss) and consecutive
-      // pairs are bridged by a torus jump-ring so the drop reads as a
-      // single continuous chain rather than a stack of floating spheres.
-      const dropLength = spec.world.necklaceDropLength;
-      const dropBeadR = beadSize * 0.78;
-      const dropStep = dropBeadR * 2.0;
-      const dropCount = Math.max(4, Math.floor(dropLength / dropStep));
-      const dropLinkTube = dropBeadR * 0.22;
-      const dropLinkR    = dropBeadR * 0.78;
-      const dropPositions = [];
-      for (let i = 0; i < dropCount; i += 1) {
-        const by = lowest.y - (i + 1) * dropStep;
-        dropPositions.push({ x: lowest.x, y: by });
-        const bead = new THREE.Mesh(new THREE.SphereGeometry(dropBeadR, 16, 10), metal);
-        bead.position.set(lowest.x, by, 0);
-        group.add(bead);
-      }
-      // Bridge from the actual lowest main-chain bead down to the first
-      // drop bead with a jump-ring, AND between every consecutive drop-bead
-      // pair, so the drop is physically continuous with the main chain.
-      const dropAnchor = [lowest, ...dropPositions];
-      for (let i = 0; i < dropAnchor.length - 1; i += 1) {
-        const a = dropAnchor[i];
-        const b = dropAnchor[i + 1];
-        const link = new THREE.Mesh(
-          new THREE.TorusGeometry(dropLinkR, dropLinkTube, 10, 22), metal
-        );
-        link.position.set((a.x + b.x) * 0.5, (a.y + b.y) * 0.5, 0);
-        // Drop runs along -Y so tangent is vertical → ring axis = +Y.
-        link.rotation.x = Math.PI / 2;
-        group.add(link);
-      }
-      const lastDrop = dropPositions[dropPositions.length - 1];
-      placeFocalAt(lastDrop.x, lastDrop.y - dropBeadR, 0.95, true);
-    } else if (silhouette === "Lariat") {
-      // Two pendants — one on each strand end, plus a knot-bead at the
-      // crossover point near the front. Stones hang DIRECTLY off the chain
-      // ends (no bail) like a real lariat.
-      const knot = new THREE.Mesh(new THREE.SphereGeometry(beadSize * 1.6, 18, 14), metal);
-      knot.position.set(lowest.x, lowest.y, 0.05);
-      group.add(knot);
-      const left  = chainPath[Math.floor(chainPath.length * 0.08)];
-      const right = chainPath[Math.floor(chainPath.length * 0.92)];
-      placeFocalAt(left.x,  left.y,  0.55, false);
-      placeFocalAt(right.x, right.y, 0.55, false);
-    } else {
-      // Pendant (default): bail at the lowest chain bead, gem hangs from bail.
-      placeFocalAt(lowest.x, lowest.y, 1.0, true);
-    }
-
-    // §13 manufacturability — add a physical closure at the curve
-    // endpoints. The clasp jump-rings thread the outermost chain links
-    // so the closure is never floating sideways off the curve.
-    const claspType = currentState.clasp || "Lobster";
-    const claspEmitter = CLASP_EMITTERS[claspType] || CLASP_EMITTERS.Lobster;
-    claspEmitter(group, chainPath, wEff, metal);
-
-    group.userData.jewellerySpec = spec;
-    group.userData.physical = physicalMetadata(spec);
-    group.userData.unitsPerMm = WORLD_UNITS_PER_MM;
-    return enableShadows(group);
+    return createAssemblies().necklace();
   }
 
   function buildBracelet() {
-    // ====================================================================
-    // BRACELET — Physical anatomy & component index
-    // --------------------------------------------------------------------
-    // A real bracelet wraps a cylinder (the wrist). To render one correctly
-    // we MUST work in a band-local frame, otherwise stones and settings sit
-    // in world XY while the band is tilted for the 3/4 view (this is the
-    // bug the previous renderer had: gem table faced world +Y instead of
-    // the band's outward normal; prongs extended toward the camera instead
-    // of DOWN INTO the band; accent stones sat on the un-tilted XY plane
-    // and floated above the tilted band).
-    //
-    // Component hierarchy (everything below `bandFrame` lives in band-local
-    // coordinates: wrist axis = local +Z (toward camera); band lies in
-    // local XY; +Y = "top of the band" where focal stones sit):
-    //
-    //   group (outer, gets a small `rotation.z` for studio framing)
-    //     └── bandFrame  (rotation.x = bandTiltX, the 3/4 view tilt)
-    //           ├── BAND
-    //           │     • Bangle / Station: TorusGeometry(majorR, tube)
-    //           │       with scale.y = scaleY (worn ovality)
-    //           │     • Cuff: TubeGeometry along a 3/4 elliptical arc + 2
-    //           │       sphere end-caps
-    //           │     • Tennis: NO continuous band — articulated chain of
-    //           │       per-link mounts joined by short cylindrical bars
-    //           │       along the same oval wrist surface
-    //           └── MOUNTS  (one Group per stone, made by `makeMount(a, R)`)
-    //                 • position: on the band's OUTER surface at angle `a`
-    //                   so the gem pavilion just kisses the band, never
-    //                   penetrating it (centerline + normal·(tube + true pavilion depth))
-    //                 • rotation: local +Z follows the oval wrist normal —
-    //                   the gem's table thus points OUTWARD (away from the
-    //                   wrist), exactly as a real bracelet stone does
-    //                 • children: stone (table = local +Z), setting
-    //                   (prongs/bezel extending in local -Z into the band),
-    //                   optional halo / milgrain / accent bezels — ALL
-    //                   built at the mount's local origin with the same
-    //                   convention as the ring head group
-    // ====================================================================
-    const metal = materialForMetal();
-    const group = new THREE.Group();
-    const weight = weightValue();
-    const spec = pieceSpec();
-    const silhouette = currentState.silhouette || "Bangle";
-
-    // mm truth: centreline radius = true inner radius + tube radius so the
-    // wrist opening matches the selected bangle size exactly.
-    const majorR = spec.world.braceletInnerRadius + spec.world.braceletTubeRadius;
-    const tube = spec.world.braceletTubeRadius;
-    const scaleY = spec.bracelet.ovalRatio; // oval-comfort profile
-    const bandTiltX = 0.24;          // 3/4-view tilt around X
-
-    const bandFrame = new THREE.Group();
-    bandFrame.rotation.x = bandTiltX;
-    group.add(bandFrame);
-
-    function braceletSurfaceAt(a, lift = 0) {
-      const center = new THREE.Vector3(
-        Math.cos(a) * majorR,
-        Math.sin(a) * majorR * scaleY,
-        0
-      );
-      const tangent = new THREE.Vector3(
-        -Math.sin(a) * majorR,
-        Math.cos(a) * majorR * scaleY,
-        0
-      ).normalize();
-      // Ellipse normal for x = R cosθ, y = R·scaleY sinθ.
-      const normal = new THREE.Vector3(Math.cos(a), Math.sin(a) / Math.max(scaleY, 0.001), 0).normalize();
-      return {
-        pos: center.addScaledVector(normal, tube + lift),
-        tangent,
-        normal
-      };
-    }
-
-    function braceletFrameAt(a, lift = 0) {
-      const surface = braceletSurfaceAt(a, lift);
-      return {
-        ...surface,
-        binormal: new THREE.Vector3().crossVectors(surface.normal, surface.tangent).normalize()
-      };
-    }
-
-    function applyBraceletFrame(object, surface) {
-      const zAxis = surface.normal.clone().normalize();
-      const xAxis = surface.tangent.clone().normalize();
-      const yAxis = new THREE.Vector3().crossVectors(zAxis, xAxis).normalize();
-      const basis = new THREE.Matrix4().makeBasis(xAxis, yAxis, zAxis);
-      object.quaternion.setFromRotationMatrix(basis);
-      return object;
-    }
-
-    // Build a mount group at band-angle `a` (0 = +X right, π/2 = +Y top).
-    // `stoneR` is the gem's half-diameter; the mount is positioned so the
-    // true pavilion depth below the gem centre sits flush on the band's
-    // outer surface without entering the metal volume.
-    function makeMount(a, stoneR, opts = {}) {
-      const pavilionDepth = opts.pavilionDepth ?? 0.72;
-      const seatInset = opts.seatInset ?? 0.004;
-      const physicalLift = stoneDepthMetrics(stoneR, currentState.shape).pavilionH + seatInset;
-      const requestedLift = stoneR * pavilionDepth + seatInset;
-      const surface = braceletSurfaceAt(a, Math.max(requestedLift, physicalLift));
-      const m = new THREE.Group();
-      m.position.copy(surface.pos);
-      applyBraceletFrame(m, surface);
-      return m;
-    }
-
-    function addBraceletMeleeSeat(mount, stoneR, stoneScale) {
-      // §2/§5 — local mount frame: +Z is the bracelet surface normal, so a
-      // negative-z recess is literally drilled down into the bangle tube.
-      mount.add(makePaveSeat(0, 0, -stoneR * 0.18, stoneR * 1.08, 0));
-      const underBezel = new THREE.Mesh(
-        new THREE.TorusGeometry(stoneR * 1.10, stoneR * 0.12, 10, 36),
-        metal
-      );
-      underBezel.position.z = -stoneR * 0.08;
-      mount.add(underBezel);
-      mount.add(makeStone(stoneScale));
-      const beadR = stoneR * 0.24;
-      for (let b = 0; b < 4; b += 1) {
-        const ang = Math.PI / 4 + (Math.PI * 2 * b) / 4;
-        mount.add(makePaveBead(
-          Math.cos(ang) * stoneR * 0.90,
-          Math.sin(ang) * stoneR * 0.90,
-          stoneR * 0.15,
-          beadR,
-          metal
-        ));
-      }
-    }
-
-    function addBraceletChannelRails(angles, stoneR) {
-      const railR = stoneR * 0.105;
-      const railOffset = stoneR * 1.17;
-      for (const side of [-1, 1]) {
-        for (let i = 0; i < angles.length - 1; i += 1) {
-          const a = angles[i];
-          const b = angles[i + 1];
-          const fa = braceletFrameAt(a, stoneR * 0.18);
-          const fb = braceletFrameAt(b, stoneR * 0.18);
-          const pa = fa.pos.clone().addScaledVector(fa.binormal, side * railOffset);
-          const pb = fb.pos.clone().addScaledVector(fb.binormal, side * railOffset);
-          bandFrame.add(makeCylinderBetween(pa, pb, railR, metal));
-        }
-      }
-    }
-
-    // Drop a focal stone + setting at band-angle `a` with the given scale.
-    function placeFocal(a, scale, opts = {}) {
-      const stoneR = specStoneHalfWidth() * scale;
-      const settingR = stoneR * 1.06;
-      const mount = makeMount(a, stoneR, opts.embedded ? { pavilionDepth: 0.62, seatInset: 0.002 } : {});
-      bandFrame.add(mount);
-      const stone = makeStone(scale);
-      if (opts.embedded) {
-        mount.add(makePaveSeat(0, 0, -stoneR * 0.18, settingR * 0.92, 0));
-      }
-      mount.add(stone);
-      addSetting(mount, 0, 0, -stoneR * 0.18, settingR, {
-        scaleY: 1,
-        prongs: opts.prongs || (currentState.shape === "Pear" ? 5 : 6),
-        stoneSize: stoneR,
-        stoneZ: 0
-      });
-      if (opts.halo && currentState.halo) {
-        addHalo(mount, 0, 0, settingR + 0.09, 16, -stoneR * 0.04, 1);
-      }
-      if (opts.milgrain) {
-        addMilgrain(mount, 0, 0,
-          settingR + (currentState.halo ? 0.18 : 0.05),
-          28, stoneR * 0.02, 1);
-      }
-      return { stoneR, settingR, mount };
-    }
-
-    if (silhouette === "Cuff") {
-      // Open cuff: 3/4-arc tube centred on the TOP of the band (the open
-      // gap is at the BACK of the wrist where the cuff slips on).
-      const arc = Math.PI * 1.55;
-      const curve = new THREE.Curve();
-      curve.getPoint = (t) => {
-        const ang = Math.PI / 2 - arc / 2 + t * arc;
-        return new THREE.Vector3(
-          Math.cos(ang) * majorR,
-          Math.sin(ang) * majorR * scaleY,
-          0
-        );
-      };
-      const band = new THREE.Mesh(
-        new THREE.TubeGeometry(curve, 140, tube * 1.1, 20, false), metal
-      );
-      bandFrame.add(band);
-      // Rounded end caps where the cuff opens at the back.
-      [0, 1].forEach((t) => {
-        const ang = Math.PI / 2 - arc / 2 + t * arc;
-        const cap = new THREE.Mesh(
-          new THREE.SphereGeometry(tube * 1.18, 20, 14), metal
-        );
-        cap.position.set(
-          Math.cos(ang) * majorR,
-          Math.sin(ang) * majorR * scaleY,
-          0
-        );
-        bandFrame.add(cap);
-      });
-      placeFocal(Math.PI / 2, 0.78, { halo: true, milgrain: true });
-
-    } else if (silhouette === "Tennis") {
-      // Articulated chain. Each link is a 4-prong mount; adjacent mounts
-      // are joined by short cylindrical bars at the basket-base height so
-      // the row reads as chain-jointed, not a row of floating settings.
-      // Link count solved from the real oval circumference at the true
-      // melee pitch (§13 manufacturability), clamped for mesh budget.
-      const stoneR = Math.max(specStoneHalfWidth() * 0.18, mmToWorld(1.6));
-      const tennisScale = stoneR / Math.max(specStoneHalfWidth(), 1e-6);
-      const settingR = stoneR * 1.10;
-      const ovalPerimeter = Math.PI * (majorR + majorR * scaleY);
-      const links = Math.max(24, Math.min(56, Math.floor(ovalPerimeter / (stoneR * 2 * 1.18))));
-      const angles = [];
-
-      for (let i = 0; i < links; i += 1) {
-        const a = (i / links) * Math.PI * 2;
-        angles.push(a);
-        const mount = makeMount(a, stoneR);
-        bandFrame.add(mount);
-        mount.add(makePaveSeat(0, 0, -stoneR * 0.18, settingR * 0.90, 0));
-        mount.add(makeStone(tennisScale));
-        addSetting(mount, 0, 0, -stoneR * 0.30, settingR, {
-          scaleY: 1, prongs: 4, stoneSize: stoneR, stoneZ: 0
-        });
-      }
-      for (let i = 0; i < links; i += 1) {
-        const a1 = angles[i];
-        const a2 = angles[(i + 1) % links];
-        const p1 = braceletSurfaceAt(a1, -stoneR * 0.18).pos;
-        const p2 = braceletSurfaceAt(a2, -stoneR * 0.18).pos;
-        bandFrame.add(makeCylinderBetween(p1, p2, mmToWorld(0.5), metal));
-      }
-
-    } else if (silhouette === "Station") {
-      // Continuous bangle band + 5 evenly-spaced stones along the front
-      // arc. Each station has its own 4-prong mount that grips the band.
-      const band = new THREE.Mesh(
-        new THREE.TorusGeometry(majorR, tube, 40, 220), metal
-      );
-      band.scale.y = scaleY;
-      bandFrame.add(band);
-      const stations = 5;
-      const startA = Math.PI * 0.22;
-      const endA = Math.PI * 0.78;
-      for (let i = 0; i < stations; i += 1) {
-        const t = i / (stations - 1);
-        placeFocal(startA + t * (endA - startA), 0.32, { prongs: 4, embedded: true });
-      }
-
-    } else {
-      // Bangle (default): single solid band, one focal stone on top.
-      const band = new THREE.Mesh(
-        new THREE.TorusGeometry(majorR, tube, 40, 220), metal
-      );
-      band.scale.y = scaleY;
-      bandFrame.add(band);
-      const focal = placeFocal(Math.PI / 2, 0.78, {
-        halo: true, milgrain: true
-      });
-
-      if (currentState.accent) {
-        // Side/accent stones — small bezel-set rounds running along the
-        // band on BOTH sides of the focal, each one a real mount on the
-        // band's outer surface (NOT floating in world XY like before). The
-        // bezel collar is attached to the mount, never hovering off it.
-        const accentR = mmToWorld(1.25); // true 2.5 mm melee
-        const accentScale = accentR / Math.max(specStoneHalfWidth(), 1e-6);
-        const perSide = 8;
-        const startGap = focal.stoneR * 1.4; // clearance from focal halo
-        const endGap = Math.PI * 0.42;       // stop before the side
-        // Convert clearance gap to an angular step from π/2.
-        const aMin = Math.PI / 2 + startGap / majorR;
-        const aMax = Math.PI / 2 + endGap;
-        for (let side = 0; side < 2; side += 1) {
-          const sign = side === 0 ? 1 : -1;
-          const railAngles = [];
-          for (let i = 0; i < perSide; i += 1) {
-            const t = (i + 1) / (perSide + 1);
-            const a = Math.PI / 2 + sign * (
-              (aMin - Math.PI / 2) + t * (aMax - aMin)
-            );
-            railAngles.push(a);
-            const m = makeMount(a, accentR, { pavilionDepth: 0.57, seatInset: 0.001 });
-            bandFrame.add(m);
-            addBraceletMeleeSeat(m, accentR, accentScale);
-            // Tiny bezel collar fastened to the recessed seat (NOT hovering
-            // off it) — sits just under the stone's girdle in local XY.
-            const bezel = new THREE.Mesh(
-              new THREE.TorusGeometry(accentR * 1.05, accentR * 0.14, 12, 36),
-              metal
-            );
-            // Default torus axis = local +Z, which aligns with the gem's
-            // outward direction → the bezel hole faces outward exactly
-            // like the gem table. ✓
-            bezel.position.z = -accentR * 0.02;
-            m.add(bezel);
-          }
-          addBraceletChannelRails(railAngles, accentR);
-        }
-      }
-    }
-
-    group.rotation.z = -0.18;
-    group.userData.jewellerySpec = spec;
-    group.userData.physical = physicalMetadata(spec);
-    group.userData.unitsPerMm = WORLD_UNITS_PER_MM;
-    return enableShadows(group);
+    return createAssemblies().bracelet();
   }
 
   function buildEarrings() {
@@ -9839,6 +8120,30 @@ async function createThreeStudio(root, canvas) {
     }
 
     [-pairHalfSpan, pairHalfSpan].forEach((x) => {
+      const firstChild = group.children.length;
+      const collectEar = (postDepth = 0) => {
+        const ear = new THREE.Group();
+        ear.name = x < 0 ? "right-earring" : "left-earring";
+        ear.userData.wearableEar = x < 0 ? "Right" : "Left";
+        ear.position.x = x;
+        for (const child of group.children.slice(firstChild)) {
+          child.position.x -= x;
+          ear.add(child);
+        }
+        if (wearableBuildOptions && ["Drop", "Chandelier"].includes(silhouette)) {
+          const joint = new THREE.Group();
+          joint.name = "earring-articulation";
+          joint.position.z = postDepth;
+          joint.userData.wearableHinge = { limit: 0.32 };
+          for (const child of [...ear.children]) {
+            if (child.userData.wearableFixed) continue;
+            child.position.z -= postDepth;
+            joint.add(child);
+          }
+          ear.add(joint);
+        }
+        group.add(ear);
+      };
       if (silhouette === "Huggie") {
         // A small hoop hugging the earlobe, with a single accent stone at
         // the bottom-front of the hoop (positioned ON the torus tube).
@@ -9874,6 +8179,7 @@ async function createThreeStudio(root, canvas) {
           ));
         }
         group.add(stone);
+        collectEar();
         return;
       }
 
@@ -9912,6 +8218,8 @@ async function createThreeStudio(root, canvas) {
       // which IS what we want for a back facing the post's Z-axis. Reset rot:
       backing.rotation.set(0, 0, 0);
       group.add(post, backing);
+      post.userData.wearableFixed = true;
+      backing.userData.wearableFixed = true;
 
       if (isDrop) {
         // Front decoration sits on a solved hardware plane in front of the
@@ -10015,6 +8323,7 @@ async function createThreeStudio(root, canvas) {
           group.add(makeCylinderBetween(linkStart, linkEnd, postRadius * 0.6, metal));
         });
       }
+      collectEar(postFrontZ);
     });
 
     group.userData.jewellerySpec = spec;
@@ -10024,9 +8333,59 @@ async function createThreeStudio(root, canvas) {
     return enableShadows(group);
   }
 
+  function configureGemOptics(piece) {
+    const candidates = [];
+    if (currentState.opticsMode !== "Fast" && environmentTexture) {
+      piece.traverse((mesh) => {
+        if (!mesh.userData.isGem || mesh.geometry?.userData.kind !== "gemstone" || mesh.material?.transmission < 0.55) return;
+        const width = mesh.geometry.userData.dimensionsMm.width;
+        const name = mesh.userData.gemMaterial || mesh.material.userData.gemMaterial || currentState.stone;
+        const profile = resolvedGemProfile(name, STONE_PROFILES[name] || STONE_PROFILES["Clear Diamond"]);
+        if (profile.kind === "crystal") candidates.push({ mesh, width, profile });
+      });
+    }
+    const originals = new Set();
+    let count = 0;
+    let unsupported = 0;
+    for (const { mesh, width, profile } of candidates.sort((first, second) => second.width - first.width).slice(0, 80)) {
+      try {
+        const smallGem = width < 4 || currentState.piece === "Bracelet";
+        mesh.userData.gemBounceLimit = smallGem ? 6 : 20;
+        const original = installGemRayMaterial(THREE, mesh, {
+          dispersion: profile.dispersion || 0,
+          strength: smallGem ? 0 : Number(currentState.dispersionStrength),
+          bounces: Math.min(Number(currentState.gemBounces), qualityTier === 2 ? 8 : 20, mesh.userData.gemBounceLimit)
+        });
+        if (original) { originals.add(original); count += 1; }
+        else unsupported += 1;
+      } catch {
+        unsupported += 1;
+      }
+    }
+    piece.traverse((mesh) => {
+      for (const material of Array.isArray(mesh.material) ? mesh.material : [mesh.material]) originals.delete(material);
+    });
+    originals.forEach((material) => material.dispose());
+    root.dataset.designerOptics = count ? "gem-bvh-rgb" : "raster";
+    const readout = root.querySelector("[data-optics-report]");
+    if (readout) readout.textContent = count
+      ? `${count} gems use internal BVH rays, including side stones. Small gems use 6 bounces without dispersion; larger gems use the requested adaptive budget. ${Math.max(0, candidates.length - count)} crystals use raster fallback. Rays do not trace setting geometry; use Cycles for scene-wide transport.`
+      : "Physical raster materials are active. Opal and moonstone use translucent body color, onyx is opaque; supported clear crystals can use internal ray tracing.";
+  }
+
   function rebuild(state) {
+    const nextState = sanitizeDesignState(state);
+    const changed = Object.keys(nextState).filter((key) => nextState[key] !== currentState[key]);
+    const presentationOnly = new Set(["view", "backdrop", "designFamily", "lockStone", "lockMetal", "lockStructure"]);
+    if (model.children.length && changed.every((key) => presentationOnly.has(key))) {
+      currentState = nextState;
+      if (changed.includes("view")) applyView(currentState.view);
+      if (changed.includes("backdrop")) applyBackdrop(currentState.backdrop);
+      return;
+    }
     currentState = sanitizeDesignState(state);
     currentPhysicalSpec = buildJewellerySpec(currentState);
+    random = createSeededRandom(`${currentState.seed}:construction`);
     clearModel();
     applyLightingMode(currentState.lighting);
     applyBackdrop(currentState.backdrop);
@@ -10041,11 +8400,28 @@ async function createThreeStudio(root, canvas) {
     };
 
     const pieceGroup = (builders[currentState.piece] || buildRing)();
+    const contacts = fitProngsToGems(THREE, pieceGroup, WORLD_UNITS_PER_MM);
+    root.dataset.designerProngIntersections = String(contacts.remainingIntersections);
+    const contactReadout = root.querySelector("[data-setting-contact-report]");
+    if (contactReadout) {
+      contactReadout.textContent = `Prong–gem geometry: ${contacts.testedProngs} checked, ${contacts.adjustedProngs} fitted to actual facets, ${contacts.remainingIntersections} unresolved intersections. This is visual clearance checking, not a bearing-seat or manufacturing approval.`;
+      contactReadout.dataset.valid = String(contacts.remainingIntersections === 0);
+    }
+    configureGemOptics(pieceGroup);
+    const physicalBox = new THREE.Box3().setFromObject(pieceGroup);
+    const physicalSize = physicalBox.getSize(new THREE.Vector3());
+    if (["Necklace", "Bracelet"].includes(currentState.piece)) pieceGroup.position.sub(physicalBox.getCenter(new THREE.Vector3()));
+    pieceGroup.updateMatrixWorld(true);
+    let largestGem = null;
+    pieceGroup.traverse((mesh) => {
+      if (mesh.userData.isGem && (!largestGem || (mesh.geometry.userData.dimensionsMm?.width || 0) > (largestGem.geometry.userData.dimensionsMm?.width || 0))) largestGem = mesh;
+    });
+    model.userData.detailFocus = largestGem ? new THREE.Box3().setFromObject(largestGem).getCenter(new THREE.Vector3()) : new THREE.Vector3();
+    model.userData.detailScale = clamp(Math.max(physicalSize.x, physicalSize.y) / Math.max(mmToWorld(12), mmToWorld(largestGem?.geometry.userData.dimensionsMm?.width || 6) * 4), 1, 18);
     // Hanging pieces get a sway pivot at their top anchor so the dangle
     // integrator can rotate them about the physically-correct hinge line
     // (chain top / earring posts) instead of the model centroid.
-    const isDangly = currentState.piece === "Necklace"
-      || (currentState.piece === "Earrings"
+    const isDangly = (currentState.piece === "Earrings"
         && (currentState.silhouette === "Drop" || currentState.silhouette === "Chandelier"));
     if (isDangly) {
       const preBox = new THREE.Box3().setFromObject(pieceGroup);
@@ -10063,10 +8439,8 @@ async function createThreeStudio(root, canvas) {
       dangleSim.freq = currentState.piece === "Earrings" ? 1.35 : 0.85;
       dangleSim.thetaX = 0;
       dangleSim.thetaZ = 0;
-      dangleSim.omegaX = 0.22;
-      // Settle-in impulse: the piece swings gently into rest when it first
-      // appears — the visual cue that it hangs rather than floats.
-      dangleSim.omegaZ = 0.85;
+      dangleSim.omegaX = 0;
+      dangleSim.omegaZ = 0;
       dangleSim.prevYaw = model.rotation.y;
       dangleSim.prevYawVel = 0;
       dangleSim.prevPitch = model.rotation.x;
@@ -10084,23 +8458,24 @@ async function createThreeStudio(root, canvas) {
       // 45 cm chain is ~28 world units wide. Normalise the DISPLAY scale to
       // the studio frame from the measured bounds; userData keeps mm truth.
       model.updateMatrixWorld(true);
-      const normBox = new THREE.Box3().setFromObject(model);
-      const normSize = normBox.getSize(new THREE.Vector3());
-      const targetWidth = currentState.piece === "Necklace" ? 3.05
+      const normSize = physicalSize;
+      const targetWidth = currentState.piece === "Necklace" ? 2.3
         : currentState.piece === "Bracelet" ? 2.55
         : 1.95;
-      const heightWeight = currentState.piece === "Necklace" ? 0.6 : 0.92;
+      const heightWeight = currentState.piece === "Necklace" ? 1 : 0.92;
       const dominant = Math.max(normSize.x, normSize.y * heightWeight, 1e-3);
       model.scale.setScalar(Math.min(1.4, Math.max(0.02, targetWidth / dominant)));
     }
+    model.userData.overviewScale = model.scale.x;
+    applyView(currentState.view);
     // Centre necklace in the viewer panel; other pieces retain the historic
     // slight left offset that lived alongside the older overlay editor.
-    const defaultX = currentState.piece === "Necklace" ? 0
+    const defaultX = currentState.piece === "Necklace" || currentState.piece === "Bracelet" ? 0
       : currentState.piece === "Earrings" ? -0.2
       : -0.58;
     // Necklace hangs from the top of the frame so the pendant floats free
     // above the plinth instead of resting on it.
-    const defaultY = currentState.piece === "Necklace" ? 1.45 : 0;
+    const defaultY = currentState.piece === "Necklace" ? 0.2 : 0;
     model.userData.defaultX = defaultX;
     model.userData.defaultY = defaultY;
     // In inspect mode keep the piece at its natural vertical position so a
@@ -10184,8 +8559,8 @@ async function createThreeStudio(root, canvas) {
   // opaques don't glow from within.
   function animateMicroSparkles() {
     const profile = STONE_PROFILES[currentState?.stone] || STONE_PROFILES["Clear Diamond"];
-    const fire = currentState?.stone === "Black Onyx" ? 0 : clamp(profile.fire || 0, 0, 1);
-    const burst = currentState?.sparkleBurst ? 1.8 : 1;
+    const fire = currentState.appearance === "Photographic" || currentState?.stone === "Black Onyx" ? 0 : clamp(profile.fire || 0, 0, 1);
+    const burst = currentState.appearance === "Expressive" && currentState.sparkleBurst ? 1.8 : 1;
     for (const light of microSparkles) {
       light.intensity = light.userData.baseIntensity * fire * burst;
       light.visible = fire > 0.04;
@@ -10218,13 +8593,9 @@ async function createThreeStudio(root, canvas) {
     targetCameraZ = isInspecting ? Math.min(targetCameraZ, 4.6) : cameraHomeZ;
     root.classList.toggle("is-inspecting", isInspecting);
     // Inspect mode gets a touch more punch — like a jeweller's loupe lamp.
-    renderer.toneMappingExposure = isInspecting ? 1.18 : 1.05;
+    applyLightingMode(currentState.lighting);
     // Hide stage fixtures so the piece floats in pure black during inspect.
-    floor.visible = !isInspecting;
-    plinth.visible = !isInspecting;
-    glassPlate.visible = !isInspecting;
-    softboxes.forEach((s) => { s.visible = !isInspecting; });
-    contactShadow.visible = true; // keep the soft grounding shadow
+    applyStageVisibility();
     // Resize on next frame so the canvas picks up the new (fullscreen or
     // normal) bounding box.
     window.requestAnimationFrame(() => {
@@ -10238,8 +8609,7 @@ async function createThreeStudio(root, canvas) {
   }
 
   function resetView() {
-    targetRotationX = 0.03;
-    targetRotationY = -0.18;
+    applyView("Three-Quarter");
     inspectPanX = 0;
     inspectPanY = 0;
     targetCameraZ = isInspecting ? 4.6 : cameraHomeZ;
@@ -10274,6 +8644,14 @@ async function createThreeStudio(root, canvas) {
   }
 
   function animate(time = 0) {
+    if (window.__arTryOn?.modal?.isConnected && !window.__arTryOn._closed) {
+      lastFrameTimestamp = time;
+      frameId = window.requestAnimationFrame(animate);
+      return;
+    }
+    const frameSeconds = lastFrameTimestamp > 0 ? clamp((time - lastFrameTimestamp) / 1000, 0.001, 0.05) : 1 / 60;
+    const rotationBlend = 1 - Math.exp(-5 * frameSeconds);
+    const positionBlend = 1 - Math.exp(-6.3 * frameSeconds);
     // ── Phase 6: adaptive quality sampling ──
     // Sample the wall-clock delta between rAF callbacks. After the ring
     // buffer fills, compare the rolling average against tier thresholds
@@ -10302,13 +8680,13 @@ async function createThreeStudio(root, canvas) {
     }
     lastFrameTimestamp = time;
 
-    if (!isDragging && (!isInspecting || isAutoOrbiting)) {
+    if (!reducedMotion.matches && !isDragging && (!isInspecting || isAutoOrbiting)) {
       // Faster orbit while inspect+auto, gentle drift otherwise.
-      targetRotationY += isAutoOrbiting ? 0.006 : (isInspecting ? 0 : 0.0016);
+      targetRotationY += (isAutoOrbiting ? 0.36 : (isInspecting ? 0 : 0.096)) * frameSeconds;
     }
 
-    const idleLift = (isInspecting && !isAutoOrbiting) ? 0 : Math.sin(time * 0.00028) * 0.035;
-    const idleTurn = (isInspecting && !isAutoOrbiting) ? 0 : Math.sin(time * 0.00035) * 0.08;
+    const idleLift = reducedMotion.matches || (isInspecting && !isAutoOrbiting) ? 0 : Math.sin(time * 0.00028) * 0.035;
+    const idleTurn = reducedMotion.matches || (isInspecting && !isAutoOrbiting) ? 0 : Math.sin(time * 0.00035) * 0.08;
 
     // Smoothly center the model in inspect mode; restore offset on exit.
     // Inspect mode uses the piece's natural Y (e.g. a necklace's hanging
@@ -10316,10 +8694,14 @@ async function createThreeStudio(root, canvas) {
     // inspect pan offsets ride on top of that baseline.
     const baseX = model.userData.defaultX ?? 0;
     const baseY = model.userData.defaultY ?? 0;
-    const targetX = isInspecting ? inspectPanX : baseX;
-    const targetY = isInspecting ? (baseY + inspectPanY) : baseY;
-    model.position.x += (targetX - model.position.x) * 0.1;
-    model.position.y += (targetY - model.position.y) * 0.1;
+    const focus = model.userData.detailActive
+      ? model.userData.detailFocus.clone().multiplyScalar(model.scale.x).applyQuaternion(model.quaternion)
+      : new THREE.Vector3();
+    const targetX = (isInspecting ? inspectPanX : baseX) - focus.x;
+    const targetY = (isInspecting ? baseY + inspectPanY : baseY) - focus.y;
+    model.position.x += (targetX - model.position.x) * positionBlend;
+    model.position.y += (targetY - model.position.y) * positionBlend;
+    model.position.z += (-focus.z - model.position.z) * positionBlend;
 
     // Push live camera/rotation readout to subscribers (HUD).
     if (onReadoutChange) {
@@ -10332,13 +8714,8 @@ async function createThreeStudio(root, canvas) {
         onReadoutChange({ rx: rxDeg, ry: ryDeg, zoom });
       }
     }
-    model.rotation.y += (targetRotationY + idleTurn - model.rotation.y) * 0.08;
-    model.rotation.x += (targetRotationX + idleLift - model.rotation.x) * 0.08;
-
-    // §5 dangle integrator — semi-implicit Euler on the driven damped
-    // pendulum. Support acceleration (yaw/pitch of the turntable) enters
-    // as the drive term; light underdamping (ζ = 0.12) gives the slow
-    // fade-out real hanging jewellery shows.
+    model.rotation.y += (targetRotationY + idleTurn - model.rotation.y) * rotationBlend;
+    model.rotation.x += (targetRotationX + idleLift - model.rotation.x) * rotationBlend;
     if (dangleSim.node) {
       const dtRaw = dangleSim.lastT > 0 ? (time - dangleSim.lastT) / 1000 : 0.016;
       const dt = clamp(dtRaw, 0.002, 0.05);
@@ -10353,28 +8730,29 @@ async function createThreeStudio(root, canvas) {
       const pitchAcc = (pitchVel - dangleSim.prevPitchVel) / dt;
       dangleSim.prevPitch = pitch;
       dangleSim.prevPitchVel = pitchVel;
-      const w0 = Math.PI * 2 * dangleSim.freq;
-      const zeta = 0.12;
-      const drive = 0.0016;
-      dangleSim.omegaZ += (-w0 * w0 * dangleSim.thetaZ - 2 * zeta * w0 * dangleSim.omegaZ - clamp(yawAcc, -80, 80) * drive) * dt;
-      dangleSim.thetaZ = clamp(dangleSim.thetaZ + dangleSim.omegaZ * dt, -0.32, 0.32);
-      dangleSim.omegaX += (-w0 * w0 * dangleSim.thetaX - 2 * zeta * w0 * dangleSim.omegaX - clamp(pitchAcc, -80, 80) * drive) * dt;
-      dangleSim.thetaX = clamp(dangleSim.thetaX + dangleSim.omegaX * dt, -0.26, 0.26);
+      const drive = reducedMotion.matches ? 0 : 0.0016;
+      const lateral = stepDampedSway(dangleSim.thetaZ, dangleSim.omegaZ, -clamp(yawAcc, -80, 80) * drive, dt, dangleSim.freq, 0.32);
+      const frontal = stepDampedSway(dangleSim.thetaX, dangleSim.omegaX, -clamp(pitchAcc, -80, 80) * drive, dt, dangleSim.freq, 0.26);
+      dangleSim.thetaZ = reducedMotion.matches ? 0 : lateral.angle;
+      dangleSim.omegaZ = reducedMotion.matches ? 0 : lateral.velocity;
+      dangleSim.thetaX = reducedMotion.matches ? 0 : frontal.angle;
+      dangleSim.omegaX = reducedMotion.matches ? 0 : frontal.velocity;
       dangleSim.node.rotation.z = dangleSim.thetaZ;
       dangleSim.node.rotation.x = dangleSim.thetaX;
     }
-    camera.position.z += (targetCameraZ - camera.position.z) * 0.1;
-    camera.position.y += ((isInspecting ? 0.5 : 0.62) - camera.position.y) * 0.08;
+    camera.position.z += (targetCameraZ - camera.position.z) * positionBlend;
+    camera.position.y += ((isInspecting ? 0.5 : 0.62) - camera.position.y) * rotationBlend;
     camera.lookAt(0, 0, 0);
     // Lighting remains fixed in world space. The model/turntable movement
     // alone changes reflection vectors, matching a real studio capture.
-    sparkle.visible = !!currentState?.sparkleBurst;
+    sparkle.visible = currentState.appearance === "Expressive" && !!currentState.sparkleBurst;
     animateScintillation(time);
     animateMicroSparkles();
     // Phase 4: refresh planar plinth reflection before the post pass. This
     // is one extra scene render at 512² — the post chain immediately after
     // samples the up-to-date reflectionRT through the mirror disc.
-    updateReflection();
+    applyStageVisibility();
+    if (reflectionMirror.visible) updateReflection();
     if (post) {
       post.render(time);
     } else {
@@ -10545,6 +8923,33 @@ async function createThreeStudio(root, canvas) {
     setAutoOrbit,
     resetView,
     takeScreenshot,
+    captureImage(width = 2400) {
+      const originalSize = renderer.getSize(new THREE.Vector2());
+      const originalRatio = renderer.getPixelRatio();
+      const maximum = Math.min(4096, renderer.capabilities.maxTextureSize);
+      const targetWidth = Math.max(1, Math.round(Math.min(maximum, Math.max(512, width), maximum * camera.aspect)));
+      const targetHeight = Math.max(1, Math.round(targetWidth / camera.aspect));
+      const snapshot = document.createElement("canvas");
+      snapshot.width = targetWidth;
+      snapshot.height = targetHeight;
+      try {
+        renderer.setPixelRatio(1);
+        renderer.setSize(targetWidth, targetHeight, false);
+        if (post) {
+          post.resize(targetWidth, targetHeight);
+          post.render(0);
+        } else {
+          renderer.render(scene, camera);
+        }
+        snapshot.getContext("2d").drawImage(canvas, 0, 0);
+      } finally {
+        renderer.setPixelRatio(originalRatio);
+        renderer.setSize(originalSize.x, originalSize.y, false);
+        if (post) post.resize(Math.round(originalSize.x * originalRatio), Math.round(originalSize.y * originalRatio));
+      }
+      return canvasToBlob(snapshot);
+    },
+    disposePiece: disposeObject,
     setReadoutListener,
     isAutoOrbiting: () => isAutoOrbiting,
     isInspecting: () => isInspecting,
@@ -10561,22 +8966,30 @@ async function createThreeStudio(root, canvas) {
      * adding the group to its scene and disposing of geometries when no
      * longer needed; materials are fresh per build so dispose is safe.
      */
-    buildPiece(state) {
+    buildPiece(state, options = null) {
       const prev = currentState;
       const prevSpec = currentPhysicalSpec;
+      const previousRandom = random;
+      const previousWearable = wearableBuildOptions;
       try {
+        wearableBuildOptions = options?.wearable ? options : null;
         currentState = sanitizeDesignState(state || prev);
         currentPhysicalSpec = buildJewellerySpec(currentState);
+        random = createSeededRandom(`${currentState.seed}:construction`);
         const builders = {
           Ring: buildRing,
           Necklace: buildNecklace,
           Bracelet: buildBracelet,
           Earrings: buildEarrings
         };
-        return (builders[currentState.piece] || buildRing)();
+        const piece = (builders[currentState.piece] || buildRing)();
+        fitProngsToGems(THREE, piece, WORLD_UNITS_PER_MM);
+        return piece;
       } finally {
         currentState = prev;
         currentPhysicalSpec = prevSpec;
+        random = previousRandom;
+        wearableBuildOptions = previousWearable;
       }
     },
     destroy() {
@@ -10591,6 +9004,7 @@ async function createThreeStudio(root, canvas) {
       window.removeEventListener("keydown", onKeyDown);
       window.removeEventListener("resize", resize);
       disposableTextures.forEach((texture) => texture.dispose());
+      patinaTextureCache.forEach((maps) => Object.values(maps).forEach((texture) => texture.dispose()));
       renderer.dispose();
     }
   };
@@ -10614,15 +9028,8 @@ function createFallbackStudio(root, fallback, mainCanvas) {
 }
 
 function recordCanvasState(root, canvas, rendererName) {
-  window.requestAnimationFrame(() => {
-    try {
-      root.dataset.designerRenderer = rendererName;
-      root.dataset.designerPixels = String(canvas.toDataURL("image/png").length);
-    } catch (error) {
-      root.dataset.designerRenderer = rendererName;
-      root.dataset.designerPixels = "0";
-    }
-  });
+  root.dataset.designerRenderer = rendererName;
+  root.dataset.designerPixels = String(canvas.width * canvas.height);
 }
 
 const PHYSICAL_CONTROL_DEFS = [
@@ -10630,9 +9037,13 @@ const PHYSICAL_CONTROL_DEFS = [
   { name: "bandWidthMm", label: "Shank width", min: 1.2, max: 12, step: 0.05, placeholder: "Auto", unit: "mm", pieceOnly: "Ring" },
   { name: "bandThicknessMm", label: "Shank thickness", min: 1.1, max: 8, step: 0.05, placeholder: "Auto", unit: "mm", pieceOnly: "Ring" },
   { name: "chainLengthMm", label: "Chain length", min: 300, max: 1000, step: 5, placeholder: "450", unit: "mm", pieceOnly: "Necklace" },
-  { name: "chainWireMm", label: "Chain wire Ø", min: 0.5, max: 2.6, step: 0.05, placeholder: "Auto", unit: "mm", pieceOnly: "Necklace" },
+  { name: "chainWireMm", label: "Chain wire Ø (not chain width)", min: 0.2, max: 2.6, step: 0.02, placeholder: "Auto", unit: "mm", pieceOnly: "Necklace,Bracelet" },
   { name: "braceletInnerDiameterMm", label: "Bangle inner Ø", min: 50, max: 90, step: 0.5, placeholder: "63", unit: "mm", pieceOnly: "Bracelet" },
-  { name: "braceletTubeMm", label: "Band tube Ø", min: 1.6, max: 9, step: 0.1, placeholder: "Auto", unit: "mm", pieceOnly: "Bracelet" },
+  { name: "braceletTubeMm", label: "Bangle / cuff thickness", min: 1.6, max: 9, step: 0.1, placeholder: "Auto", unit: "mm", pieceOnly: "Bracelet" },
+  { name: "braceletWidthMm", label: "Bangle / cuff width", min: 2, max: 14, step: 0.1, placeholder: "4", unit: "mm", pieceOnly: "Bracelet" },
+  { name: "braceletLengthMm", label: "Tennis / station length", min: 140, max: 240, step: 1, placeholder: "178", unit: "mm", pieceOnly: "Bracelet" },
+  { name: "braceletStoneDiameterMm", label: "Bracelet stone diameter", min: 1.5, max: 5, step: 0.1, placeholder: "2.8", unit: "mm", pieceOnly: "Bracelet" },
+  { name: "cuffGapMm", label: "Cuff opening (arc)", min: 18, max: 38, step: 1, placeholder: "26", unit: "mm", pieceOnly: "Bracelet" },
   { name: "postDiameterMm", label: "Post gauge Ø", min: 0.5, max: 1.6, step: 0.05, placeholder: "0.90", unit: "mm", pieceOnly: "Earrings" },
   { name: "hoopDiameterMm", label: "Hoop inner Ø", min: 8, max: 40, step: 0.5, placeholder: "13", unit: "mm", pieceOnly: "Earrings" },
   { name: "dropLengthMm", label: "Drop length", min: 8, max: 140, step: 1, placeholder: "Auto", unit: "mm", pieceOnly: "Earrings,Necklace" },
@@ -10776,72 +9187,78 @@ async function setupDesigner(root = document.querySelector("[data-design-studio]
   if (typeof studio.buildPiece === "function") {
     window.__tjcDesigner = window.__tjcDesigner || {};
     window.__tjcDesigner.buildPiece = studio.buildPiece;
+    window.__tjcDesigner.getState = () => sanitizeDesignState(getState(root));
   }
 
-  const update = () => {
-    const state = getState(root);
-    setSummary(root, state);
-    updateDesignerSmartDetails(root, state);
-    writeStoredDesignState(DESIGN_STORAGE_KEY, state);
-    studio.update(state);
-    recordCanvasState(root, canvas.hidden ? fallback.querySelector("[data-designer-fallback-canvas]") : canvas, studio.renderer);
-    pushHistory(state);
-  };
-
-  // ---- undo / redo history --------------------------------------------
-  // Snapshot every settled state so the user can reverse mistakes. We
-  // coalesce rapid slider input (last-write-wins within 280 ms) so we
-  // don't fill the stack with one entry per pixel of drag.
-  const history = [];
-  let historyIndex = -1;
-  let isRestoringHistory = false;
+  const history = createDesignHistory(getState(root));
+  let pendingHistory = null;
+  let pendingField = null;
   let coalesceTimer = null;
-  const HISTORY_MAX = 60;
+  let renderRequest = null;
+  let committedState = JSON.stringify(getState(root));
+  let latestState = "";
 
   const refreshHistoryButtons = () => {
-    if (undoButton) undoButton.disabled = historyIndex <= 0;
-    if (redoButton) redoButton.disabled = historyIndex >= history.length - 1;
+    const pending = pendingHistory && JSON.stringify(pendingHistory) !== committedState;
+    if (undoButton) undoButton.disabled = !(history.canUndo || pending);
+    if (redoButton) redoButton.disabled = !history.canRedo || Boolean(pending);
   };
 
-  const pushHistory = (state) => {
-    if (isRestoringHistory) return;
-    const serialized = JSON.stringify(state);
-    if (history[historyIndex] === serialized) return;
-    if (coalesceTimer) window.clearTimeout(coalesceTimer);
-    coalesceTimer = window.setTimeout(() => {
-      // Drop forward history when committing a new branch.
-      history.splice(historyIndex + 1);
-      history.push(serialized);
-      if (history.length > HISTORY_MAX) {
-        history.shift();
-      } else {
-        historyIndex += 1;
-      }
-      refreshHistoryButtons();
-    }, 280);
-  };
-
-  const restoreFromHistory = () => {
-    const serialized = history[historyIndex];
-    if (!serialized) return;
-    isRestoringHistory = true;
-    try {
-      applyDesignState(root, JSON.parse(serialized));
-      const state = getState(root);
-      setSummary(root, state);
-      updateDesignerSmartDetails(root, state);
-      writeStoredDesignState(DESIGN_STORAGE_KEY, state);
-      studio.update(state);
-    } finally {
-      isRestoringHistory = false;
-      refreshHistoryButtons();
+  const flushHistory = () => {
+    window.clearTimeout(coalesceTimer);
+    if (pendingHistory) {
+      history.commit(pendingHistory);
+      committedState = JSON.stringify(pendingHistory);
+      pendingHistory = null;
+      pendingField = null;
     }
+    refreshHistoryButtons();
   };
 
-  // Seed the stack with the initial state so the very first user change
-  // can be undone back to the starting point.
-  history.push(JSON.stringify(getState(root)));
-  historyIndex = 0;
+  const renderState = (state) => {
+    window.cancelAnimationFrame(renderRequest);
+    renderRequest = null;
+    studio.update(state);
+    recordCanvasState(root, canvas.hidden ? fallback.querySelector("[data-designer-fallback-canvas]") : canvas, studio.renderer);
+  };
+
+  const showState = (state, deferred = false) => {
+    latestState = JSON.stringify(state);
+    setSummary(root, state);
+    updateDesignerSmartDetails(root, state);
+    refreshLightingLabel();
+    refreshTitle();
+    writeStoredDesignState(DESIGN_STORAGE_KEY, state);
+    window.cancelAnimationFrame(renderRequest);
+    if (deferred) renderRequest = window.requestAnimationFrame(() => renderState(state));
+    else renderState(state);
+  };
+
+  const update = (event) => {
+    const state = getState(root);
+    const fieldName = event?.target?.dataset?.designerField;
+    if (pendingHistory && fieldName !== pendingField) flushHistory();
+    if (event?.type === "change") applyDesignState(root, state);
+    if (JSON.stringify(state) === latestState) {
+      if (event?.type === "change") flushHistory();
+      return;
+    }
+    showState(state, event?.type === "input");
+    pendingHistory = state;
+    pendingField = fieldName;
+    window.clearTimeout(coalesceTimer);
+    if (event?.type === "input") coalesceTimer = window.setTimeout(flushHistory, 280);
+    else flushHistory();
+    refreshHistoryButtons();
+  };
+
+  const restoreFromHistory = (state) => {
+    applyDesignState(root, state);
+    showState(getState(root));
+    committedState = JSON.stringify(getState(root));
+    refreshHistoryButtons();
+  };
+
   refreshHistoryButtons();
 
   designerUpdates.set(root, update);
@@ -10884,6 +9301,7 @@ async function setupDesigner(root = document.querySelector("[data-design-studio]
         return;
       }
 
+      flushHistory();
       applyDesignState(root, preset);
       setDesignerStatus(status, `${button.textContent.trim()} design loaded.`);
       update();
@@ -10891,8 +9309,10 @@ async function setupDesigner(root = document.querySelector("[data-design-studio]
   });
 
   randomizeButton?.addEventListener("click", () => {
-    applyDesignState(root, createRandomDesignState(getState(root)));
-    setDesignerStatus(status, "A fresh design direction is ready.");
+    flushHistory();
+    const nextState = createRandomDesignState(getState(root));
+    applyDesignState(root, nextState);
+    setDesignerStatus(status, `${nextState.designFamily} variation ${nextState.variationIndex} is ready. Locked choices were preserved.`);
     update();
   });
 
@@ -10988,10 +9408,7 @@ async function setupDesigner(root = document.querySelector("[data-design-studio]
     setDesignerStatus(status, "View reset.");
   });
 
-  screenshotChip?.addEventListener("click", () => {
-    const ok = studio.takeScreenshot?.(`tj-design-${Date.now()}.png`);
-    setDesignerStatus(status, ok ? "Image downloaded." : "Could not save image.");
-  });
+  screenshotChip?.addEventListener("click", () => saveDesignImage());
 
   viewChips.forEach((chip) => {
     chip.addEventListener("click", () => {
@@ -11066,42 +9483,142 @@ async function setupDesigner(root = document.querySelector("[data-design-studio]
   });
 
   undoButton?.addEventListener("click", () => {
-    if (historyIndex <= 0) return;
-    historyIndex -= 1;
-    restoreFromHistory();
+    flushHistory();
+    if (!history.canUndo) return;
+    restoreFromHistory(history.undo());
     setDesignerStatus(status, "Undid last change.");
   });
 
   redoButton?.addEventListener("click", () => {
-    if (historyIndex >= history.length - 1) return;
-    historyIndex += 1;
-    restoreFromHistory();
+    flushHistory();
+    if (!history.canRedo) return;
+    restoreFromHistory(history.redo());
     setDesignerStatus(status, "Redid change.");
   });
 
-  downloadButton?.addEventListener("click", () => {
-    const sourceCanvas = canvas.hidden ? fallback.querySelector("[data-designer-fallback-canvas]") : canvas;
-    if (!sourceCanvas) return;
+  const exportFilename = (state, extension) => `tjc-${fileSafeName(`${state.piece}-${state.shape}-${state.stone}`)}-${designRevision(state)}.${extension}`;
+
+  const saveDesignImage = async () => {
+    if (downloadButton?.disabled) return;
+    if (downloadButton) downloadButton.disabled = true;
     try {
-      sourceCanvas.toBlob((blob) => {
-        if (!blob) {
-          setDesignerStatus(status, "Could not capture the canvas.");
-          return;
-        }
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        const state = getState(root);
-        const safe = `${state.piece}-${state.shape}-${state.stone}`.replace(/[^a-z0-9-]+/gi, "-").toLowerCase();
-        link.href = url;
-        link.download = `tjc-design-${safe}.png`;
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-        window.setTimeout(() => URL.revokeObjectURL(url), 4000);
-        setDesignerStatus(status, "Design image downloaded.");
-      }, "image/png");
+      flushHistory();
+      renderState(getState(root));
+      const sourceCanvas = canvas.hidden ? fallback.querySelector("[data-designer-fallback-canvas]") : canvas;
+      const blob = studio.captureImage ? await studio.captureImage(2400) : await canvasToBlob(sourceCanvas);
+      downloadBlob(blob, exportFilename(getState(root), "png"));
+      setDesignerStatus(status, "Design image downloaded.");
     } catch (error) {
-      setDesignerStatus(status, "Download failed — try Save Image in Inspect mode.");
+      setDesignerStatus(status, "Image export failed. Try a smaller browser window or a WebGL-capable browser.");
+    } finally {
+      if (downloadButton) downloadButton.disabled = false;
+    }
+  };
+  downloadButton?.addEventListener("click", saveDesignImage);
+
+  root.querySelector("[data-export-design]")?.addEventListener("click", () => {
+    flushHistory();
+    const state = getState(root);
+    const document = createDesignDocument(state, buildJewellerySpec(state));
+    downloadBlob(new Blob([JSON.stringify(document, null, 2)], { type: "application/json" }), exportFilename(state, "json"));
+    setDesignerStatus(status, "Editable design file downloaded.");
+  });
+
+  const designFileInput = root.querySelector("[data-design-file]");
+  root.querySelector("[data-import-design]")?.addEventListener("click", () => designFileInput?.click());
+  designFileInput?.addEventListener("change", async () => {
+    const file = designFileInput.files?.[0];
+    if (!file) return;
+    try {
+      if (file.size > 1024 * 1024) throw new Error("Choose a design file smaller than 1 MB.");
+      const imported = readDesignDocument(await file.text());
+      flushHistory();
+      applyDesignState(root, imported);
+      update();
+      setDesignerStatus(status, "Design file opened. Undo returns to your previous design.");
+    } catch (error) {
+      setDesignerStatus(status, error instanceof Error ? error.message : "Unable to open this design file.");
+    } finally {
+      designFileInput.value = "";
+    }
+  });
+
+  const exportGlbButton = root.querySelector("[data-export-glb]");
+  if (exportGlbButton) exportGlbButton.disabled = !studio.buildPiece;
+  exportGlbButton?.addEventListener("click", async () => {
+    const state = getState(root);
+    const specification = buildJewellerySpec(state);
+    if (specification.validation.issues.some((issue) => issue.severity === "error")) {
+      setDesignerStatus(status, "Resolve the dimension errors in Extras & precision before exporting 3D.");
+      return;
+    }
+    exportGlbButton.disabled = true;
+    setDesignerStatus(status, "Preparing the 3D preview…");
+    let piece;
+    try {
+      const { exportPieceGlb } = await import("./design-export.js?v=20260911-construction-v32");
+      piece = studio.buildPiece(state);
+      const blob = await exportPieceGlb(piece, specification);
+      downloadBlob(blob, exportFilename(state, "glb"));
+      setDesignerStatus(status, "3D preview downloaded in metres. This is not a manufacturing CAD file.");
+    } catch (error) {
+      setDesignerStatus(status, error instanceof Error ? error.message : "3D export failed. Your editable design is unchanged.");
+      root.dataset.designerExportError = error instanceof Error ? error.message : "3D export unavailable";
+    } finally {
+      if (piece) studio.disposePiece(piece);
+      exportGlbButton.disabled = false;
+    }
+  });
+
+  const auditButton = root.querySelector("[data-audit-mesh]");
+  const renderJobButton = root.querySelector("[data-export-render-job]");
+  if (auditButton) auditButton.disabled = !studio.buildPiece;
+  if (renderJobButton) renderJobButton.disabled = !studio.buildPiece;
+  auditButton?.addEventListener("click", async () => {
+    if (auditButton.disabled) return;
+    auditButton.disabled = true;
+    const state = getState(root);
+    let piece;
+    setDesignerStatus(status, "Auditing mesh topology in a background worker…", 0);
+    try {
+      const { auditPiece } = await import("./mesh-audit.js?v=20260911-construction-v32");
+      piece = studio.buildPiece(state);
+      const report = await auditPiece(piece, buildJewellerySpec(state));
+      downloadBlob(new Blob([JSON.stringify(report, null, 2)], { type: "application/json" }), exportFilename(state, "audit.json"));
+      setDesignerStatus(status, `Audit downloaded: ${report.summary.closedOrientedMeshes}/${report.summary.meshes} meshes closed and consistently oriented; ${report.summary.flaggedMeshes} flagged. This does not certify manufacture.`, 0);
+    } catch (error) {
+      setDesignerStatus(status, error instanceof Error ? error.message : "Mesh audit failed.");
+    } finally {
+      if (piece) studio.disposePiece(piece);
+      auditButton.disabled = false;
+    }
+  });
+  renderJobButton?.addEventListener("click", async () => {
+    if (renderJobButton.disabled) return;
+    flushHistory();
+    const state = getState(root);
+    const specification = buildJewellerySpec(state);
+    if (specification.validation.issues.some((issue) => issue.severity === "error")) {
+      setDesignerStatus(status, "Resolve dimension errors before exporting a render job.");
+      return;
+    }
+    renderJobButton.disabled = true;
+    let piece;
+    setDesignerStatus(status, "Preparing the self-contained Cycles job…", 0);
+    try {
+      const [{ createRenderJob }, { exportPieceGlb }] = await Promise.all([import("./render-job.js?v=20260911-construction-v32"), import("./design-export.js?v=20260911-construction-v32")]);
+      const options = Object.fromEntries(["resolution", "samples", "transport", "view", "background", "aperture"].map((name) => [name, root.querySelector(`[data-render-${name}]`)?.value]));
+      const renderJob = createRenderJob(state, specification, STONE_PROFILES[state.stone] || STONE_PROFILES["Clear Diamond"], options);
+      piece = studio.buildPiece(state);
+      const blob = await exportPieceGlb(piece, specification, { renderJob });
+      downloadBlob(blob, exportFilename(state, "cycles.glb"));
+      setDesignerStatus(status, "Cycles job downloaded. Use the command in Advanced studio output to render it locally; no cloud job was submitted.", 0);
+    } catch (error) {
+      setDesignerStatus(status, error instanceof Error ? error.message : "Cycles job export failed. Your editable design is unchanged.");
+      root.dataset.designerExportError = error instanceof Error ? error.message : "Render job unavailable";
+    } finally {
+      if (piece) studio.disposePiece(piece);
+      renderJobButton.disabled = false;
     }
   });
 
@@ -11110,7 +9627,7 @@ async function setupDesigner(root = document.querySelector("[data-design-studio]
     if (root.hidden) return;
     const target = event.target;
     const isTyping = target instanceof HTMLElement && (
-      target.matches("input[type=text], textarea, [contenteditable=true]")
+      target.matches("input, select, textarea, [contenteditable=true]")
     );
     if (isTyping) return;
     const mod = event.metaKey || event.ctrlKey;
@@ -11160,6 +9677,14 @@ function ensureDesignerReady(root) {
   }
 
   return designerSetupPromise;
+}
+
+export async function prepareDesignerForAR() {
+  const root = document.querySelector("[data-design-studio]");
+  if (!root) throw new Error("Open the design studio before trying on jewellery.");
+  await ensureDesignerReady(root);
+  if (!window.__tjcDesigner?.buildPiece) throw new Error("The 3D designer is unavailable on this device.");
+  return window.__tjcDesigner;
 }
 
 function isSamePageDesignStudioLink(link) {

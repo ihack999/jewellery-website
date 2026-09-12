@@ -1,0 +1,87 @@
+# Website upgrade master plan
+
+## Starting point
+
+Keep the existing plum/ivory identity, photography, personal finder, product galleries, and functioning 3D studio. Do not restart the site or repeat completed upgrades.
+
+The last pass checked 33 static pages, core layouts at 320–1440px, shopping interactions, and studio rendering. Live payment/form delivery and real-device AR remain unqualified. See [current baseline](storefront-curation-upgrade.md).
+
+## Execution rules
+
+- Complete **one bounded ticket per session**, usually touching 1–3 implementation files. Split larger tickets before editing.
+- Read this plan and only the relevant files/notes. Use targeted searches instead of repeatedly reading large JavaScript files.
+- Inspect existing changes first; preserve unrelated work. Never reset the working tree.
+- Keep existing prices, product facts, policies, saved designs, and public URLs compatible. Ask for missing business decisions; do not invent them.
+- Run checks relevant to the change. Review UI changes in the browser, including a phone width. Fix regressions before continuing.
+- Finish with: files changed, checks passed, remaining issue, next ticket. Update the progress log below.
+- Deployment, external submissions, and camera use require authorization for those actions; ordinary local improvements can proceed.
+
+## Prioritized tickets
+
+| ID | Work | Starting files | Done when |
+|---|---|---|---|
+| 01 | Resolve order-policy contradictions. List which size, finish, timing, delivery, and return terms must be confirmed before payment; obtain the business decision, then align the journey. | `shipping-returns.html`, `assets/js/main.js`, checkout function | Product copy, policy, and actual checkout behavior agree. No undocumented promises. |
+| 02 | Verify commerce and enquiry delivery in an authorized test environment. Cover success, cancellation, failure, duplicate clicks, and retries. | `netlify/functions/`, contact/custom forms | Test payments and enquiries reach the expected destination; failures preserve useful user state. |
+| 03 | Prevent catalogue drift. First compare browser, static-page, and server data; then introduce a shared source or validation incrementally. | `assets/js/main.js`, `netlify/functions/checkout-catalog.js`, `products/` | Names, currency, prices, availability, and URLs agree; server validation remains authoritative. |
+| 04 | Establish durable regression checks. Preserve useful existing checks from temporary scripts; add only missing critical journeys. | `scripts/`, relevant feature files | One documented command checks links/schema and key shopping, finder, draft, and gallery behavior. |
+| 05 | Measure performance, then fix the largest measured bottleneck. Examine image sizes, fonts, initial JS, and lazy studio loading. | `index.html`, `assets/images/`, shared scripts | Before/after measurements show improvement without image degradation or interaction regressions. |
+| 06 | Complete accessibility and device QA. Keyboard, focus, screen reader, 200% zoom, reduced motion, iOS Safari, Android Chrome. | Shared CSS/JS; one affected page at a time | Recorded defects are fixed; navigation, dialogs, forms, and purchase controls remain usable. |
+| 07 | Refine remaining customer pages and photography. Prioritize Custom Made, Estate, About, Contact, then guides. | Relevant HTML, `assets/css/curation.css` | Each page has a clear primary action, readable copy, truthful imagery, and consistent mobile composition. |
+| 08 | Strengthen design-session reliability before adding studio features. Test save/reload, undo/redo, version migration, seeds, locks, and units. | `assets/js/design-session.js`, `jewellery-spec.js`, `designer.js` | Representative old and new designs round-trip without lost parameters or dimension changes. |
+| 09 | Improve studio usability, then geometry/rendering in separate tickets. Hide advanced complexity progressively; fix reproducible construction defects first. | Generator modules; [generator roadmap](jewellery-generator-upgrade-plan.md) | Each ticket has a reference design, measurable defect, and verified before/after result. Preview is never labelled manufacturing-ready. |
+| 10 | Qualify AR separately: permission lifecycle, fitting stability, occlusion, performance, and device coverage. | `assets/js/ar/`, `ar-tryon.js`; [AR roadmap](ar-tryon-upgrade-plan.md) | Authorized real-device tests document supported behavior and honest fitting limitations. |
+| 11 | Consolidate legacy code incrementally after coverage exists. Extract one responsibility or remove one proven obsolete style layer at a time. | `main.js`, `styles.css`, `atelier.css` | Smaller ownership boundaries, unchanged public behavior, passing regression checks. |
+| 12 | Prepare release and measure real outcomes. Verify SEO metadata, hosting, production integrations, rollback, then obtain deployment approval. | `netlify.toml`, sitemap/schema, release notes | Release checklist passes; monitor errors, performance, enquiry completion, and checkout completion. |
+
+Tickets 04–08 can proceed while business decisions or test credentials block 01–02. Read the latest generator/AR implementation notes before using their older roadmaps: some items are already implemented.
+
+## Reusable session prompt
+
+> Read `docs/upgrade-master-plan.md`. Complete ticket **[ID]** only. Inspect the current implementation before changing it. If too large, finish one clearly defined subtask. Preserve unrelated changes and existing contracts. Run focused checks and browser QA where applicable. Update the progress log with the result and next action. Keep explanations concise; do not start another ticket.
+
+## Progress log
+
+- Baseline: storefront redesign completed locally; launch qualification pending.
+- Ticket 01 inventory complete: [order-policy decisions](order-policy-decisions.md). Verified that the before-payment written-terms promise conflicts with direct checkout for nine products. Customer-facing policies and payment behavior remain unchanged; source inspection completed.
+- Ticket 01 server guard complete locally: owner approved written confirmation before payment for all orders. Public checkout returns 409 before contacting Stripe, including forged approval requests. Node syntax and five handler cases passed with no network calls.
+- Ticket 01 enquiry handoff complete locally: product and bag actions now open a prefilled order enquiry, preserving quantities, the bag, and existing draft fields. Updated main.js and ordering copy on Rise Ring, Half Eternity, and Monogram pages. Syntax/whitespace checks and focused input-validation assertions passed; desktop and 390px browser checks verified product/bag handoff, quantity 2, draft preservation, repeat handoff without duplication, and mobile form/bag layout. No external submission or deployment.
+- Next: finish ticket 01 by confirming detailed order terms and defining the approved-order payment process; audit remaining customer copy against those decisions. Live enquiry delivery belongs to ticket 02. Ticket 04 can proceed in a separate session while business details are pending.
+
+- Ticket 04a complete: added `scripts/check_static.py` and documented `python3 scripts/check_static.py` in README. All 33 pages, 1,364 local references, and 28 JSON-LD blocks pass. A valid fixture and four injected defects verified missing-file, missing-anchor, duplicate-ID, and malformed-JSON detection. No UI changes or external requests. README payment instructions now reflect the existing confirmation gate.
+- Next executable subtask: ticket 04b, durable browser checks for shopping/enquiry, finder, draft, and gallery behavior. The older temporary journey script depends on a specific debugging port and needs adaptation before reuse. Ticket 01 detailed terms and approved-order payment process remain pending business input.
+
+- Ticket 04b complete: added `scripts/check_journeys.mjs` and `scripts/journey_assertions.mjs`; README documents the combined command `node scripts/check_journeys.mjs`. The runner owns its loopback server, dynamic debugging port, and disposable Chrome profile; no existing browser state is touched. Static checks and 41 browser assertions passed with zero runtime exceptions, covering bag/focus, gallery, finder, draft isolation/migration, mocked form recovery, and desktop/mobile enquiry handoff. Live submissions and external page requests are blocked. No product implementation changes.
+- Next: ticket 05, establish performance measurements and address the largest measured bottleneck in one bounded subtask. Ticket 01 business details, ticket 02 live delivery, and real-device qualification remain pending.
+
+- Ticket 05a complete: measured initial homepage resource sizes and added responsive hero derivatives/preload in `index.html` plus two image assets. Hero bytes fell 63.4% at 390px/1× and 14.4% at 1440px/1×; 2× phone selects 780px, 3× retains the original. Before/after phone and desktop screenshots reviewed; static checks and all 41 browser assertions passed. See [performance measurements](homepage-performance.md) for method and limits. Not deployed.
+- Next: ticket 05b, measure compression, external fonts, and render timing before choosing the next CSS/JS optimization. Local byte savings do not establish production Core Web Vitals gains.
+
+- Ticket 05b complete: added an optional gzip/font/render measurement mode to the isolated browser runner and saved `docs/performance-lab.json`. Five CSS/JS assets total 97,812 gzip bytes versus 482,070 raw; six local observations loaded fonts successfully with no failed requests or overflow. Method, measured timings, and production limitations are recorded in [performance measurements](homepage-performance.md). No further product optimization is justified by this baseline alone.
+- Next: ticket 06a, a bounded keyboard/focus/zoom accessibility audit of the primary shopping and enquiry journey. Real-device coverage and production performance qualification remain pending; business details for ticket 01 remain unresolved.
+
+- Ticket 06a complete: fixed personal-finder opening focus in `assets/js/curation.js` and added `scripts/check_journeys.mjs --accessibility`. Sixteen accessibility assertions passed at 390px with reduced-motion emulation and 200% page scale; the normal 41-assertion journey suite and static checks also passed. See [accessibility audit](accessibility-audit-2026-09-12.md). No external submission, camera use, or deployment.
+- Next: ticket 06b, test browser text zoom, screen-reader semantics, and authorized iOS Safari/Android Chrome coverage. Ticket 01 detailed terms, ticket 02 live delivery, and production qualification remain pending.
+
+- Ticket 06b complete: added `scripts/check_journeys.mjs --screen-reader`, fixed the visible Custom Made `#dimensions` textbox with an explicit accessible name, and documented the audit in [accessibility-screen-reader-2026-09-12.md](accessibility-screen-reader-2026-09-12.md). Fifteen accessibility-tree/text-scaling assertions passed across Home, Shop, The Rise Ring, and Custom Made; 16 keyboard/reduced-motion assertions, 41 journey assertions, and static checks also passed. No external submission, camera use, or deployment.
+- Next: ticket 06c, authorized native browser/device coverage for iOS Safari, Android Chrome, screen readers, and true browser text zoom. Ticket 01 detailed terms, ticket 02 live delivery, and production qualification remain pending.
+
+- Ticket 06c partial: native Chrome accessibility-tree review of Custom Made passed; the corrected dimensions field, landmarks, headings, appointment controls, enquiry controls, and draft/status text were exposed with names. Safari control timed out and no Android device was connected, so full native device qualification is not claimed. See [native coverage record](accessibility-native-2026-09-12.md). No submission, payment, camera use, or deployment.
+- Next: complete 06c when authorized iOS Safari, Android Chrome, and screen-reader devices are available; meanwhile ticket 07 can proceed with customer-page refinement. Ticket 01 detailed terms, ticket 02 live delivery, and production qualification remain pending.
+
+- Ticket 07a complete: refined the Custom Made hero with a concise confirmation-before-payment note beside the primary actions. Desktop browser composition was reviewed; the 390px accessibility run confirmed no overflow, and the accessibility, journey, static, and whitespace checks passed. No form submission, payment, camera use, or deployment.
+- Next: ticket 07b, refine the Estate page as one bounded customer-page subtask. Native iOS/Android coverage and ticket 01/02 production work remain pending.
+
+- Ticket 07b complete: added a concise Estate hero note in `curated-luxuries.html` and shared its editorial styling in `assets/css/curation.css`, making the written confirmation-before-payment journey explicit before clients browse the edit. Desktop composition was reviewed; the 390px accessibility run confirmed no overflow, and the accessibility, journey, static, and whitespace checks passed. No form submission, payment, camera use, or deployment.
+- Next: ticket 07c, refine the About page as one bounded customer-page subtask. Native iOS/Android coverage and ticket 01/02 production work remain pending.
+
+- Ticket 07c complete: added clear custom and Estate actions plus the confirmation-before-payment note to the About page in `about.html`, sharing the existing editorial note treatment in `assets/css/curation.css`. Desktop composition was reviewed; the 390px accessibility run confirmed the actions and note remain usable without overflow, and the accessibility, journey, static, and whitespace checks passed. No form submission, payment, camera use, or deployment.
+- Next: ticket 07d, refine the Contact page as one bounded customer-page subtask. Native iOS/Android coverage and ticket 01/02 production work remain pending.
+
+- Ticket 07d complete: added a concise confirmation-before-payment note beside the Contact enquiry form in `contact.html`, sharing the existing editorial note treatment in `assets/css/curation.css`. Desktop form composition was reviewed; the 390px accessibility run confirmed the note and fields remain usable without overflow, and the accessibility, journey, static, and whitespace checks passed. No form submission, payment, camera use, or deployment.
+- Next: ticket 07e, refine one remaining guide page or begin ticket 08 design-session reliability, depending on the next bounded priority. Native iOS/Android coverage and ticket 01/02 production work remain pending.
+
+- Ticket 08a complete: added `scripts/check_design_session.mjs` and documented `node scripts/check_design_session.mjs` in README. Eighteen dependency-free assertions cover deterministic seeds and variations, stone/metal/structure locks, physical fit dimensions, undo/redo branch truncation, v3 JSON round trips, v2 migration defaults, version metadata, millimetre units, canonical revisions, and malformed-document guards. The design-session harness, static checks, and 41 browser assertions passed; no UI changes, external requests, or exports were performed.
+- Next: ticket 08b, exercise design-session save/reload and representative studio controls in the browser, then record any integration defect before changing geometry. Native iOS/Android coverage and ticket 01/02 production work remain pending.
+
+- Ticket 08b complete: browser QA verified seeded preset save/reload, physical specification output, locked variation behavior, and undo/redo state restoration. The variation check found stale hidden metadata after a variation; `assets/js/designer.js` now synchronizes hidden field attributes, and `assets/js/main.js`/`customs.html` use cache-busted studio module keys so updated design-session code is loaded. Node syntax, the design-session harness (18 assertions), static checks, and the established browser journey suite (41 assertions with no runtime errors) passed. No form submission, export, camera use, or deployment.
+- Next: ticket 08c, exercise representative necklace, bracelet, and earring sessions and cross-piece physical dimensions before geometry changes. Native iOS/Android coverage and ticket 01/02 production work remain pending.

@@ -1,0 +1,3260 @@
+{
+  "measuredAt": "2026-09-12T04:20:56.802Z",
+  "method": "Local gzip server; cache disabled; unthrottled Chrome; 4-second window; 3 samples per width; Google Fonts allowed, other external requests blocked. Not production metrics.",
+  "compression": [
+    {
+      "path": "assets/css/styles.css",
+      "raw": 209799,
+      "gzip": 36493,
+      "brotli": 28383
+    },
+    {
+      "path": "assets/css/atelier.css",
+      "raw": 36943,
+      "gzip": 6785,
+      "brotli": 5862
+    },
+    {
+      "path": "assets/css/curation.css",
+      "raw": 31283,
+      "gzip": 6371,
+      "brotli": 5434
+    },
+    {
+      "path": "assets/js/main.js",
+      "raw": 196236,
+      "gzip": 45600,
+      "brotli": 37295
+    },
+    {
+      "path": "assets/js/curation.js",
+      "raw": 7809,
+      "gzip": 2563,
+      "brotli": 2117
+    }
+  ],
+  "samples": [
+    {
+      "width": 390,
+      "ready": "complete",
+      "fontsStatus": "loaded",
+      "fontFaces": [
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "400",
+          "style": "italic"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "400",
+          "style": "italic"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "400",
+          "style": "italic"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "400",
+          "style": "italic"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "loaded",
+          "weight": "400",
+          "style": "italic"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "500",
+          "style": "italic"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "500",
+          "style": "italic"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "500",
+          "style": "italic"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "500",
+          "style": "italic"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "500",
+          "style": "italic"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "400",
+          "style": "normal"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "400",
+          "style": "normal"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "400",
+          "style": "normal"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "400",
+          "style": "normal"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "loaded",
+          "weight": "400",
+          "style": "normal"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "500",
+          "style": "normal"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "500",
+          "style": "normal"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "500",
+          "style": "normal"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "500",
+          "style": "normal"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "500",
+          "style": "normal"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "600",
+          "style": "normal"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "600",
+          "style": "normal"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "600",
+          "style": "normal"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "600",
+          "style": "normal"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "loaded",
+          "weight": "600",
+          "style": "normal"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "700",
+          "style": "normal"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "700",
+          "style": "normal"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "700",
+          "style": "normal"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "700",
+          "style": "normal"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "loaded",
+          "weight": "700",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "400",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "400",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "400",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "400",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "400",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "loaded",
+          "weight": "400",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "500",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "500",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "500",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "500",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "500",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "loaded",
+          "weight": "500",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "600",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "600",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "600",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "600",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "600",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "loaded",
+          "weight": "600",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "700",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "700",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "700",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "700",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "700",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "loaded",
+          "weight": "700",
+          "style": "normal"
+        }
+      ],
+      "paint": [
+        {
+          "name": "first-paint",
+          "ms": 264
+        },
+        {
+          "name": "first-contentful-paint",
+          "ms": 264
+        }
+      ],
+      "lcp": 264,
+      "cls": 0,
+      "resources": [
+        {
+          "url": "/assets/images/optimized/studio-ring-pink-gemstone-480.jpg",
+          "encoded": 143375,
+          "decoded": 143375,
+          "ms": 6.9000000059604645
+        },
+        {
+          "url": "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Manrope:wght@400;500;600;700&display=swap",
+          "encoded": 1022,
+          "decoded": 20996,
+          "ms": 165.3999999910593
+        },
+        {
+          "url": "/assets/css/styles.css?v=20260831-responsive-images",
+          "encoded": 36493,
+          "decoded": 209799,
+          "ms": 10.399999991059303
+        },
+        {
+          "url": "/assets/css/atelier.css?v=20260911-editorial-v1",
+          "encoded": 6785,
+          "decoded": 36943,
+          "ms": 11.199999988079071
+        },
+        {
+          "url": "/assets/css/curation.css?v=20260912-curation-v3",
+          "encoded": 6371,
+          "decoded": 31283,
+          "ms": 14.5
+        },
+        {
+          "url": "/assets/js/curation.js?v=20260912-curation-v3",
+          "encoded": 2563,
+          "decoded": 7809,
+          "ms": 17.400000005960464
+        },
+        {
+          "url": "/assets/js/main.js?v=20260912-curation-v3",
+          "encoded": 45600,
+          "decoded": 196236,
+          "ms": 16.80000001192093
+        },
+        {
+          "url": "/assets/images/logo-wordmark.svg",
+          "encoded": 508,
+          "decoded": 922,
+          "ms": 12
+        },
+        {
+          "url": "/site.webmanifest",
+          "encoded": 415,
+          "decoded": 415,
+          "ms": 12.199999988079071
+        },
+        {
+          "url": "/assets/images/products/signature-monogram-ring/signature-monogram-ring-product-angled.jpeg",
+          "encoded": 45949,
+          "decoded": 45949,
+          "ms": 3.699999988079071
+        },
+        {
+          "url": "/assets/images/products/rise-ring/rise-ring-polished.jpeg",
+          "encoded": 57312,
+          "decoded": 57312,
+          "ms": 3.8999999910593033
+        },
+        {
+          "url": "/assets/images/logo-emblem.svg",
+          "encoded": 491,
+          "decoded": 905,
+          "ms": 2.9000000059604645
+        },
+        {
+          "url": "/assets/images/logo-emblem.svg",
+          "encoded": 491,
+          "decoded": 905,
+          "ms": 2.8999999910593033
+        }
+      ],
+      "overflow": false,
+      "responses": [
+        {
+          "url": "/index.html",
+          "type": "Document",
+          "status": 200,
+          "encoding": "gzip"
+        },
+        {
+          "url": "/assets/images/optimized/studio-ring-pink-gemstone-480.jpg",
+          "type": "Image",
+          "status": 200,
+          "encoding": null
+        },
+        {
+          "url": "/assets/css/styles.css?v=20260831-responsive-images",
+          "type": "Stylesheet",
+          "status": 200,
+          "encoding": "gzip"
+        },
+        {
+          "url": "/assets/css/atelier.css?v=20260911-editorial-v1",
+          "type": "Stylesheet",
+          "status": 200,
+          "encoding": "gzip"
+        },
+        {
+          "url": "/assets/images/logo-wordmark.svg",
+          "type": "Image",
+          "status": 200,
+          "encoding": "gzip"
+        },
+        {
+          "url": "/assets/css/curation.css?v=20260912-curation-v3",
+          "type": "Stylesheet",
+          "status": 200,
+          "encoding": "gzip"
+        },
+        {
+          "url": "/assets/js/curation.js?v=20260912-curation-v3",
+          "type": "Script",
+          "status": 200,
+          "encoding": "gzip"
+        },
+        {
+          "url": "/assets/js/main.js?v=20260912-curation-v3",
+          "type": "Script",
+          "status": 200,
+          "encoding": "gzip"
+        },
+        {
+          "url": "/site.webmanifest",
+          "type": "Manifest",
+          "status": 200,
+          "encoding": null
+        },
+        {
+          "url": "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Manrope:wght@400;500;600;700&display=swap",
+          "type": "Stylesheet",
+          "status": 200,
+          "encoding": "gzip"
+        },
+        {
+          "url": "/assets/images/products/signature-monogram-ring/signature-monogram-ring-product-angled.jpeg",
+          "type": "Image",
+          "status": 200,
+          "encoding": null
+        },
+        {
+          "url": "/assets/images/products/rise-ring/rise-ring-polished.jpeg",
+          "type": "Image",
+          "status": 200,
+          "encoding": null
+        },
+        {
+          "url": "https://fonts.gstatic.com/s/manrope/v20/xn7gYHE41ni1AdIRggexSvfedN4.woff2",
+          "type": "Font",
+          "status": 200,
+          "encoding": null
+        },
+        {
+          "url": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNSIgdmlld0JveD0iMCAwIDI0IDI0Ij48cGF0aCBmaWxsPSJXaW5kb3dUZXh0IiBkPSJNMjAgM2gtMVYxaC0ydjJIN1YxSDV2Mkg0Yy0xLjEgMC0yIC45LTIgMnYxNmMwIDEuMS45IDIgMiAyaDE2YzEuMSAwIDItLjkgMi0yVjVjMC0xLjEtLjktMi0yLTJ6bTAgMThINFY4aDE2djEzeiIvPjxwYXRoIGZpbGw9Im5vbmUiIGQ9Ik0wIDBoMjR2MjRIMHoiLz48L3N2Zz4=",
+          "type": "Image",
+          "status": 200,
+          "encoding": null
+        },
+        {
+          "url": "https://fonts.gstatic.com/s/cormorantgaramond/v21/co3bmX5slCNuHLi8bLeY9MK7whWMhyjYqXtKky2F7g.woff2",
+          "type": "Font",
+          "status": 200,
+          "encoding": null
+        },
+        {
+          "url": "https://fonts.gstatic.com/s/cormorantgaramond/v21/co3ZmX5slCNuHLi8bLeY9MK7whWMhyjYrEtImSqn7B6D.woff2",
+          "type": "Font",
+          "status": 200,
+          "encoding": null
+        },
+        {
+          "url": "/assets/images/logo-emblem.svg",
+          "type": "Other",
+          "status": 200,
+          "encoding": "gzip"
+        },
+        {
+          "url": "/assets/images/logo-emblem.svg",
+          "type": "Other",
+          "status": 200,
+          "encoding": "gzip"
+        }
+      ],
+      "failures": []
+    },
+    {
+      "width": 390,
+      "ready": "complete",
+      "fontsStatus": "loaded",
+      "fontFaces": [
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "400",
+          "style": "italic"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "400",
+          "style": "italic"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "400",
+          "style": "italic"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "400",
+          "style": "italic"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "loaded",
+          "weight": "400",
+          "style": "italic"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "500",
+          "style": "italic"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "500",
+          "style": "italic"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "500",
+          "style": "italic"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "500",
+          "style": "italic"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "500",
+          "style": "italic"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "400",
+          "style": "normal"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "400",
+          "style": "normal"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "400",
+          "style": "normal"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "400",
+          "style": "normal"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "loaded",
+          "weight": "400",
+          "style": "normal"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "500",
+          "style": "normal"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "500",
+          "style": "normal"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "500",
+          "style": "normal"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "500",
+          "style": "normal"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "500",
+          "style": "normal"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "600",
+          "style": "normal"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "600",
+          "style": "normal"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "600",
+          "style": "normal"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "600",
+          "style": "normal"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "loaded",
+          "weight": "600",
+          "style": "normal"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "700",
+          "style": "normal"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "700",
+          "style": "normal"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "700",
+          "style": "normal"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "700",
+          "style": "normal"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "loaded",
+          "weight": "700",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "400",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "400",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "400",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "400",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "400",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "loaded",
+          "weight": "400",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "500",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "500",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "500",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "500",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "500",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "loaded",
+          "weight": "500",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "600",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "600",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "600",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "600",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "600",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "loaded",
+          "weight": "600",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "700",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "700",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "700",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "700",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "700",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "loaded",
+          "weight": "700",
+          "style": "normal"
+        }
+      ],
+      "paint": [
+        {
+          "name": "first-paint",
+          "ms": 104
+        },
+        {
+          "name": "first-contentful-paint",
+          "ms": 104
+        }
+      ],
+      "lcp": 104,
+      "cls": 0,
+      "resources": [
+        {
+          "url": "/assets/images/optimized/studio-ring-pink-gemstone-480.jpg",
+          "encoded": 143375,
+          "decoded": 143375,
+          "ms": 11.200000002980232
+        },
+        {
+          "url": "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Manrope:wght@400;500;600;700&display=swap",
+          "encoded": 1022,
+          "decoded": 20996,
+          "ms": 62.5
+        },
+        {
+          "url": "/assets/css/curation.css?v=20260912-curation-v3",
+          "encoded": 6371,
+          "decoded": 31283,
+          "ms": 12.799999997019768
+        },
+        {
+          "url": "/assets/css/styles.css?v=20260831-responsive-images",
+          "encoded": 36493,
+          "decoded": 209799,
+          "ms": 17.299999997019768
+        },
+        {
+          "url": "/assets/css/atelier.css?v=20260911-editorial-v1",
+          "encoded": 6785,
+          "decoded": 36943,
+          "ms": 17.900000005960464
+        },
+        {
+          "url": "/assets/js/main.js?v=20260912-curation-v3",
+          "encoded": 45600,
+          "decoded": 196236,
+          "ms": 23
+        },
+        {
+          "url": "/assets/js/curation.js?v=20260912-curation-v3",
+          "encoded": 2563,
+          "decoded": 7809,
+          "ms": 23
+        },
+        {
+          "url": "/assets/images/logo-wordmark.svg",
+          "encoded": 508,
+          "decoded": 922,
+          "ms": 18
+        },
+        {
+          "url": "/site.webmanifest",
+          "encoded": 415,
+          "decoded": 415,
+          "ms": 6.799999997019768
+        },
+        {
+          "url": "/assets/images/products/rise-ring/rise-ring-polished.jpeg",
+          "encoded": 57312,
+          "decoded": 57312,
+          "ms": 2.199999988079071
+        },
+        {
+          "url": "/assets/images/products/signature-monogram-ring/signature-monogram-ring-product-angled.jpeg",
+          "encoded": 45949,
+          "decoded": 45949,
+          "ms": 2.4000000059604645
+        },
+        {
+          "url": "/assets/images/logo-emblem.svg",
+          "encoded": 491,
+          "decoded": 905,
+          "ms": 0.8999999910593033
+        }
+      ],
+      "overflow": false,
+      "responses": [
+        {
+          "url": "/index.html",
+          "type": "Document",
+          "status": 200,
+          "encoding": "gzip"
+        },
+        {
+          "url": "/assets/images/optimized/studio-ring-pink-gemstone-480.jpg",
+          "type": "Image",
+          "status": 200,
+          "encoding": null
+        },
+        {
+          "url": "/site.webmanifest",
+          "type": "Manifest",
+          "status": 200,
+          "encoding": null
+        },
+        {
+          "url": "/assets/css/curation.css?v=20260912-curation-v3",
+          "type": "Stylesheet",
+          "status": 200,
+          "encoding": "gzip"
+        },
+        {
+          "url": "/assets/css/styles.css?v=20260831-responsive-images",
+          "type": "Stylesheet",
+          "status": 200,
+          "encoding": "gzip"
+        },
+        {
+          "url": "/assets/css/atelier.css?v=20260911-editorial-v1",
+          "type": "Stylesheet",
+          "status": 200,
+          "encoding": "gzip"
+        },
+        {
+          "url": "/assets/images/logo-wordmark.svg",
+          "type": "Image",
+          "status": 200,
+          "encoding": "gzip"
+        },
+        {
+          "url": "/assets/js/curation.js?v=20260912-curation-v3",
+          "type": "Script",
+          "status": 200,
+          "encoding": "gzip"
+        },
+        {
+          "url": "/assets/js/main.js?v=20260912-curation-v3",
+          "type": "Script",
+          "status": 200,
+          "encoding": "gzip"
+        },
+        {
+          "url": "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Manrope:wght@400;500;600;700&display=swap",
+          "type": "Stylesheet",
+          "status": 200,
+          "encoding": "gzip"
+        },
+        {
+          "url": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNSIgdmlld0JveD0iMCAwIDI0IDI0Ij48cGF0aCBmaWxsPSJXaW5kb3dUZXh0IiBkPSJNMjAgM2gtMVYxaC0ydjJIN1YxSDV2Mkg0Yy0xLjEgMC0yIC45LTIgMnYxNmMwIDEuMS45IDIgMiAyaDE2YzEuMSAwIDItLjkgMi0yVjVjMC0xLjEtLjktMi0yLTJ6bTAgMThINFY4aDE2djEzeiIvPjxwYXRoIGZpbGw9Im5vbmUiIGQ9Ik0wIDBoMjR2MjRIMHoiLz48L3N2Zz4=",
+          "type": "Image",
+          "status": 200,
+          "encoding": null
+        },
+        {
+          "url": "/assets/images/products/rise-ring/rise-ring-polished.jpeg",
+          "type": "Image",
+          "status": 200,
+          "encoding": null
+        },
+        {
+          "url": "/assets/images/products/signature-monogram-ring/signature-monogram-ring-product-angled.jpeg",
+          "type": "Image",
+          "status": 200,
+          "encoding": null
+        },
+        {
+          "url": "https://fonts.gstatic.com/s/manrope/v20/xn7gYHE41ni1AdIRggexSvfedN4.woff2",
+          "type": "Font",
+          "status": 200,
+          "encoding": null
+        },
+        {
+          "url": "https://fonts.gstatic.com/s/cormorantgaramond/v21/co3ZmX5slCNuHLi8bLeY9MK7whWMhyjYrEtImSqn7B6D.woff2",
+          "type": "Font",
+          "status": 200,
+          "encoding": null
+        },
+        {
+          "url": "https://fonts.gstatic.com/s/cormorantgaramond/v21/co3bmX5slCNuHLi8bLeY9MK7whWMhyjYqXtKky2F7g.woff2",
+          "type": "Font",
+          "status": 200,
+          "encoding": null
+        },
+        {
+          "url": "/assets/images/logo-emblem.svg",
+          "type": "Other",
+          "status": 200,
+          "encoding": "gzip"
+        }
+      ],
+      "failures": []
+    },
+    {
+      "width": 390,
+      "ready": "complete",
+      "fontsStatus": "loaded",
+      "fontFaces": [
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "400",
+          "style": "italic"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "400",
+          "style": "italic"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "400",
+          "style": "italic"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "400",
+          "style": "italic"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "loaded",
+          "weight": "400",
+          "style": "italic"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "500",
+          "style": "italic"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "500",
+          "style": "italic"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "500",
+          "style": "italic"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "500",
+          "style": "italic"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "500",
+          "style": "italic"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "400",
+          "style": "normal"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "400",
+          "style": "normal"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "400",
+          "style": "normal"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "400",
+          "style": "normal"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "loaded",
+          "weight": "400",
+          "style": "normal"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "500",
+          "style": "normal"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "500",
+          "style": "normal"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "500",
+          "style": "normal"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "500",
+          "style": "normal"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "500",
+          "style": "normal"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "600",
+          "style": "normal"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "600",
+          "style": "normal"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "600",
+          "style": "normal"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "600",
+          "style": "normal"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "loaded",
+          "weight": "600",
+          "style": "normal"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "700",
+          "style": "normal"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "700",
+          "style": "normal"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "700",
+          "style": "normal"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "700",
+          "style": "normal"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "loaded",
+          "weight": "700",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "400",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "400",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "400",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "400",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "400",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "loaded",
+          "weight": "400",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "500",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "500",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "500",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "500",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "500",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "loaded",
+          "weight": "500",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "600",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "600",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "600",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "600",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "600",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "loaded",
+          "weight": "600",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "700",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "700",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "700",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "700",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "700",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "loaded",
+          "weight": "700",
+          "style": "normal"
+        }
+      ],
+      "paint": [
+        {
+          "name": "first-paint",
+          "ms": 80
+        },
+        {
+          "name": "first-contentful-paint",
+          "ms": 80
+        }
+      ],
+      "lcp": 80,
+      "cls": 0,
+      "resources": [
+        {
+          "url": "/assets/images/optimized/studio-ring-pink-gemstone-480.jpg",
+          "encoded": 143375,
+          "decoded": 143375,
+          "ms": 7.700000002980232
+        },
+        {
+          "url": "/assets/css/styles.css?v=20260831-responsive-images",
+          "encoded": 36493,
+          "decoded": 209799,
+          "ms": 14.700000002980232
+        },
+        {
+          "url": "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Manrope:wght@400;500;600;700&display=swap",
+          "encoded": 1022,
+          "decoded": 20996,
+          "ms": 51.70000000298023
+        },
+        {
+          "url": "/assets/css/atelier.css?v=20260911-editorial-v1",
+          "encoded": 6785,
+          "decoded": 36943,
+          "ms": 10.5
+        },
+        {
+          "url": "/assets/images/logo-wordmark.svg",
+          "encoded": 508,
+          "decoded": 922,
+          "ms": 10.599999994039536
+        },
+        {
+          "url": "/assets/css/curation.css?v=20260912-curation-v3",
+          "encoded": 6371,
+          "decoded": 31283,
+          "ms": 10.599999994039536
+        },
+        {
+          "url": "/assets/js/curation.js?v=20260912-curation-v3",
+          "encoded": 2563,
+          "decoded": 7809,
+          "ms": 15.099999994039536
+        },
+        {
+          "url": "/assets/js/main.js?v=20260912-curation-v3",
+          "encoded": 45600,
+          "decoded": 196236,
+          "ms": 20
+        },
+        {
+          "url": "/site.webmanifest",
+          "encoded": 415,
+          "decoded": 415,
+          "ms": 3.5
+        },
+        {
+          "url": "/assets/images/products/rise-ring/rise-ring-polished.jpeg",
+          "encoded": 57312,
+          "decoded": 57312,
+          "ms": 2.7000000029802322
+        },
+        {
+          "url": "/assets/images/products/signature-monogram-ring/signature-monogram-ring-product-angled.jpeg",
+          "encoded": 45949,
+          "decoded": 45949,
+          "ms": 3.1000000089406967
+        },
+        {
+          "url": "/assets/images/logo-emblem.svg",
+          "encoded": 491,
+          "decoded": 905,
+          "ms": 1.3999999910593033
+        }
+      ],
+      "overflow": false,
+      "responses": [
+        {
+          "url": "/index.html",
+          "type": "Document",
+          "status": 200,
+          "encoding": "gzip"
+        },
+        {
+          "url": "/assets/images/optimized/studio-ring-pink-gemstone-480.jpg",
+          "type": "Image",
+          "status": 200,
+          "encoding": null
+        },
+        {
+          "url": "/site.webmanifest",
+          "type": "Manifest",
+          "status": 200,
+          "encoding": null
+        },
+        {
+          "url": "/assets/css/atelier.css?v=20260911-editorial-v1",
+          "type": "Stylesheet",
+          "status": 200,
+          "encoding": "gzip"
+        },
+        {
+          "url": "/assets/css/curation.css?v=20260912-curation-v3",
+          "type": "Stylesheet",
+          "status": 200,
+          "encoding": "gzip"
+        },
+        {
+          "url": "/assets/images/logo-wordmark.svg",
+          "type": "Image",
+          "status": 200,
+          "encoding": "gzip"
+        },
+        {
+          "url": "/assets/css/styles.css?v=20260831-responsive-images",
+          "type": "Stylesheet",
+          "status": 200,
+          "encoding": "gzip"
+        },
+        {
+          "url": "/assets/js/curation.js?v=20260912-curation-v3",
+          "type": "Script",
+          "status": 200,
+          "encoding": "gzip"
+        },
+        {
+          "url": "/assets/js/main.js?v=20260912-curation-v3",
+          "type": "Script",
+          "status": 200,
+          "encoding": "gzip"
+        },
+        {
+          "url": "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Manrope:wght@400;500;600;700&display=swap",
+          "type": "Stylesheet",
+          "status": 200,
+          "encoding": "gzip"
+        },
+        {
+          "url": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNSIgdmlld0JveD0iMCAwIDI0IDI0Ij48cGF0aCBmaWxsPSJXaW5kb3dUZXh0IiBkPSJNMjAgM2gtMVYxaC0ydjJIN1YxSDV2Mkg0Yy0xLjEgMC0yIC45LTIgMnYxNmMwIDEuMS45IDIgMiAyaDE2YzEuMSAwIDItLjkgMi0yVjVjMC0xLjEtLjktMi0yLTJ6bTAgMThINFY4aDE2djEzeiIvPjxwYXRoIGZpbGw9Im5vbmUiIGQ9Ik0wIDBoMjR2MjRIMHoiLz48L3N2Zz4=",
+          "type": "Image",
+          "status": 200,
+          "encoding": null
+        },
+        {
+          "url": "/assets/images/products/rise-ring/rise-ring-polished.jpeg",
+          "type": "Image",
+          "status": 200,
+          "encoding": null
+        },
+        {
+          "url": "/assets/images/products/signature-monogram-ring/signature-monogram-ring-product-angled.jpeg",
+          "type": "Image",
+          "status": 200,
+          "encoding": null
+        },
+        {
+          "url": "https://fonts.gstatic.com/s/manrope/v20/xn7gYHE41ni1AdIRggexSvfedN4.woff2",
+          "type": "Font",
+          "status": 200,
+          "encoding": null
+        },
+        {
+          "url": "https://fonts.gstatic.com/s/cormorantgaramond/v21/co3bmX5slCNuHLi8bLeY9MK7whWMhyjYqXtKky2F7g.woff2",
+          "type": "Font",
+          "status": 200,
+          "encoding": null
+        },
+        {
+          "url": "https://fonts.gstatic.com/s/cormorantgaramond/v21/co3ZmX5slCNuHLi8bLeY9MK7whWMhyjYrEtImSqn7B6D.woff2",
+          "type": "Font",
+          "status": 200,
+          "encoding": null
+        },
+        {
+          "url": "/assets/images/logo-emblem.svg",
+          "type": "Other",
+          "status": 200,
+          "encoding": "gzip"
+        }
+      ],
+      "failures": []
+    },
+    {
+      "width": 1440,
+      "ready": "complete",
+      "fontsStatus": "loaded",
+      "fontFaces": [
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "400",
+          "style": "italic"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "400",
+          "style": "italic"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "400",
+          "style": "italic"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "400",
+          "style": "italic"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "loaded",
+          "weight": "400",
+          "style": "italic"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "500",
+          "style": "italic"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "500",
+          "style": "italic"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "500",
+          "style": "italic"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "500",
+          "style": "italic"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "500",
+          "style": "italic"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "400",
+          "style": "normal"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "400",
+          "style": "normal"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "400",
+          "style": "normal"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "400",
+          "style": "normal"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "loaded",
+          "weight": "400",
+          "style": "normal"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "500",
+          "style": "normal"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "500",
+          "style": "normal"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "500",
+          "style": "normal"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "500",
+          "style": "normal"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "500",
+          "style": "normal"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "600",
+          "style": "normal"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "600",
+          "style": "normal"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "600",
+          "style": "normal"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "600",
+          "style": "normal"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "loaded",
+          "weight": "600",
+          "style": "normal"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "700",
+          "style": "normal"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "700",
+          "style": "normal"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "700",
+          "style": "normal"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "700",
+          "style": "normal"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "loaded",
+          "weight": "700",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "400",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "400",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "400",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "400",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "400",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "loaded",
+          "weight": "400",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "500",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "500",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "500",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "500",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "500",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "loaded",
+          "weight": "500",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "600",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "600",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "600",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "600",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "600",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "loaded",
+          "weight": "600",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "700",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "700",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "700",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "700",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "700",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "loaded",
+          "weight": "700",
+          "style": "normal"
+        }
+      ],
+      "paint": [
+        {
+          "name": "first-paint",
+          "ms": 72
+        },
+        {
+          "name": "first-contentful-paint",
+          "ms": 72
+        }
+      ],
+      "lcp": 72,
+      "cls": 0.0016781742216301226,
+      "resources": [
+        {
+          "url": "/assets/images/optimized/studio-ring-pink-gemstone-780.jpg",
+          "encoded": 335023,
+          "decoded": 335023,
+          "ms": 5
+        },
+        {
+          "url": "/assets/css/styles.css?v=20260831-responsive-images",
+          "encoded": 36493,
+          "decoded": 209799,
+          "ms": 8
+        },
+        {
+          "url": "/assets/css/atelier.css?v=20260911-editorial-v1",
+          "encoded": 6785,
+          "decoded": 36943,
+          "ms": 8.5
+        },
+        {
+          "url": "/assets/css/curation.css?v=20260912-curation-v3",
+          "encoded": 6371,
+          "decoded": 31283,
+          "ms": 9.5
+        },
+        {
+          "url": "/assets/js/curation.js?v=20260912-curation-v3",
+          "encoded": 2563,
+          "decoded": 7809,
+          "ms": 13
+        },
+        {
+          "url": "/assets/js/main.js?v=20260912-curation-v3",
+          "encoded": 45600,
+          "decoded": 196236,
+          "ms": 13.200000002980232
+        },
+        {
+          "url": "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Manrope:wght@400;500;600;700&display=swap",
+          "encoded": 1022,
+          "decoded": 20996,
+          "ms": 46.5
+        },
+        {
+          "url": "/assets/images/logo-wordmark.svg",
+          "encoded": 508,
+          "decoded": 922,
+          "ms": 8.799999997019768
+        },
+        {
+          "url": "/site.webmanifest",
+          "encoded": 415,
+          "decoded": 415,
+          "ms": 2.7000000029802322
+        },
+        {
+          "url": "/assets/images/products/signature-monogram-ring/signature-monogram-ring-product-angled.jpeg",
+          "encoded": 45949,
+          "decoded": 45949,
+          "ms": 1.7000000029802322
+        },
+        {
+          "url": "/assets/images/products/rise-ring/rise-ring-polished.jpeg",
+          "encoded": 57312,
+          "decoded": 57312,
+          "ms": 1.7999999970197678
+        },
+        {
+          "url": "/assets/images/products/quiet-power-tennis-bracelet-1.jpeg",
+          "encoded": 136273,
+          "decoded": 136273,
+          "ms": 2
+        },
+        {
+          "url": "/assets/images/optimized/diamond-tennis-necklace-1600.jpg",
+          "encoded": 341961,
+          "decoded": 341961,
+          "ms": 2.2000000029802322
+        },
+        {
+          "url": "/assets/images/logo-emblem.svg",
+          "encoded": 491,
+          "decoded": 905,
+          "ms": 1
+        }
+      ],
+      "overflow": false,
+      "responses": [
+        {
+          "url": "/index.html",
+          "type": "Document",
+          "status": 200,
+          "encoding": "gzip"
+        },
+        {
+          "url": "/assets/images/optimized/studio-ring-pink-gemstone-780.jpg",
+          "type": "Image",
+          "status": 200,
+          "encoding": null
+        },
+        {
+          "url": "/site.webmanifest",
+          "type": "Manifest",
+          "status": 200,
+          "encoding": null
+        },
+        {
+          "url": "/assets/css/styles.css?v=20260831-responsive-images",
+          "type": "Stylesheet",
+          "status": 200,
+          "encoding": "gzip"
+        },
+        {
+          "url": "/assets/css/atelier.css?v=20260911-editorial-v1",
+          "type": "Stylesheet",
+          "status": 200,
+          "encoding": "gzip"
+        },
+        {
+          "url": "/assets/images/logo-wordmark.svg",
+          "type": "Image",
+          "status": 200,
+          "encoding": "gzip"
+        },
+        {
+          "url": "/assets/css/curation.css?v=20260912-curation-v3",
+          "type": "Stylesheet",
+          "status": 200,
+          "encoding": "gzip"
+        },
+        {
+          "url": "/assets/js/curation.js?v=20260912-curation-v3",
+          "type": "Script",
+          "status": 200,
+          "encoding": "gzip"
+        },
+        {
+          "url": "/assets/js/main.js?v=20260912-curation-v3",
+          "type": "Script",
+          "status": 200,
+          "encoding": "gzip"
+        },
+        {
+          "url": "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Manrope:wght@400;500;600;700&display=swap",
+          "type": "Stylesheet",
+          "status": 200,
+          "encoding": "gzip"
+        },
+        {
+          "url": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNSIgdmlld0JveD0iMCAwIDI0IDI0Ij48cGF0aCBmaWxsPSJXaW5kb3dUZXh0IiBkPSJNMjAgM2gtMVYxaC0ydjJIN1YxSDV2Mkg0Yy0xLjEgMC0yIC45LTIgMnYxNmMwIDEuMS45IDIgMiAyaDE2YzEuMSAwIDItLjkgMi0yVjVjMC0xLjEtLjktMi0yLTJ6bTAgMThINFY4aDE2djEzeiIvPjxwYXRoIGZpbGw9Im5vbmUiIGQ9Ik0wIDBoMjR2MjRIMHoiLz48L3N2Zz4=",
+          "type": "Image",
+          "status": 200,
+          "encoding": null
+        },
+        {
+          "url": "/assets/images/products/signature-monogram-ring/signature-monogram-ring-product-angled.jpeg",
+          "type": "Image",
+          "status": 200,
+          "encoding": null
+        },
+        {
+          "url": "/assets/images/products/rise-ring/rise-ring-polished.jpeg",
+          "type": "Image",
+          "status": 200,
+          "encoding": null
+        },
+        {
+          "url": "/assets/images/products/quiet-power-tennis-bracelet-1.jpeg",
+          "type": "Image",
+          "status": 200,
+          "encoding": null
+        },
+        {
+          "url": "/assets/images/optimized/diamond-tennis-necklace-1600.jpg",
+          "type": "Image",
+          "status": 200,
+          "encoding": null
+        },
+        {
+          "url": "https://fonts.gstatic.com/s/manrope/v20/xn7gYHE41ni1AdIRggexSvfedN4.woff2",
+          "type": "Font",
+          "status": 200,
+          "encoding": null
+        },
+        {
+          "url": "https://fonts.gstatic.com/s/cormorantgaramond/v21/co3bmX5slCNuHLi8bLeY9MK7whWMhyjYqXtKky2F7g.woff2",
+          "type": "Font",
+          "status": 200,
+          "encoding": null
+        },
+        {
+          "url": "https://fonts.gstatic.com/s/cormorantgaramond/v21/co3ZmX5slCNuHLi8bLeY9MK7whWMhyjYrEtImSqn7B6D.woff2",
+          "type": "Font",
+          "status": 200,
+          "encoding": null
+        },
+        {
+          "url": "/assets/images/logo-emblem.svg",
+          "type": "Other",
+          "status": 200,
+          "encoding": "gzip"
+        }
+      ],
+      "failures": []
+    },
+    {
+      "width": 1440,
+      "ready": "complete",
+      "fontsStatus": "loaded",
+      "fontFaces": [
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "400",
+          "style": "italic"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "400",
+          "style": "italic"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "400",
+          "style": "italic"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "400",
+          "style": "italic"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "loaded",
+          "weight": "400",
+          "style": "italic"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "500",
+          "style": "italic"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "500",
+          "style": "italic"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "500",
+          "style": "italic"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "500",
+          "style": "italic"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "500",
+          "style": "italic"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "400",
+          "style": "normal"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "400",
+          "style": "normal"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "400",
+          "style": "normal"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "400",
+          "style": "normal"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "loaded",
+          "weight": "400",
+          "style": "normal"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "500",
+          "style": "normal"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "500",
+          "style": "normal"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "500",
+          "style": "normal"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "500",
+          "style": "normal"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "500",
+          "style": "normal"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "600",
+          "style": "normal"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "600",
+          "style": "normal"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "600",
+          "style": "normal"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "600",
+          "style": "normal"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "loaded",
+          "weight": "600",
+          "style": "normal"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "700",
+          "style": "normal"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "700",
+          "style": "normal"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "700",
+          "style": "normal"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "700",
+          "style": "normal"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "loaded",
+          "weight": "700",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "400",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "400",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "400",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "400",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "400",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "loaded",
+          "weight": "400",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "500",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "500",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "500",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "500",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "500",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "loaded",
+          "weight": "500",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "600",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "600",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "600",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "600",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "600",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "loaded",
+          "weight": "600",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "700",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "700",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "700",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "700",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "700",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "loaded",
+          "weight": "700",
+          "style": "normal"
+        }
+      ],
+      "paint": [
+        {
+          "name": "first-paint",
+          "ms": 104
+        },
+        {
+          "name": "first-contentful-paint",
+          "ms": 104
+        }
+      ],
+      "lcp": 104,
+      "cls": 0.002268928400152178,
+      "resources": [
+        {
+          "url": "/assets/images/optimized/studio-ring-pink-gemstone-780.jpg",
+          "encoded": 335023,
+          "decoded": 335023,
+          "ms": 9.5
+        },
+        {
+          "url": "/assets/css/styles.css?v=20260831-responsive-images",
+          "encoded": 36493,
+          "decoded": 209799,
+          "ms": 14.799999997019768
+        },
+        {
+          "url": "/assets/css/atelier.css?v=20260911-editorial-v1",
+          "encoded": 6785,
+          "decoded": 36943,
+          "ms": 15.599999994039536
+        },
+        {
+          "url": "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Manrope:wght@400;500;600;700&display=swap",
+          "encoded": 1022,
+          "decoded": 20996,
+          "ms": 69.8999999910593
+        },
+        {
+          "url": "/assets/css/curation.css?v=20260912-curation-v3",
+          "encoded": 6371,
+          "decoded": 31283,
+          "ms": 16.400000005960464
+        },
+        {
+          "url": "/assets/images/logo-wordmark.svg",
+          "encoded": 508,
+          "decoded": 922,
+          "ms": 17.299999997019768
+        },
+        {
+          "url": "/assets/js/curation.js?v=20260912-curation-v3",
+          "encoded": 2563,
+          "decoded": 7809,
+          "ms": 23.299999997019768
+        },
+        {
+          "url": "/assets/js/main.js?v=20260912-curation-v3",
+          "encoded": 45600,
+          "decoded": 196236,
+          "ms": 22.900000005960464
+        },
+        {
+          "url": "/site.webmanifest",
+          "encoded": 415,
+          "decoded": 415,
+          "ms": 5
+        },
+        {
+          "url": "/assets/images/products/rise-ring/rise-ring-polished.jpeg",
+          "encoded": 57312,
+          "decoded": 57312,
+          "ms": 3.1000000089406967
+        },
+        {
+          "url": "/assets/images/products/quiet-power-tennis-bracelet-1.jpeg",
+          "encoded": 136273,
+          "decoded": 136273,
+          "ms": 3.4000000059604645
+        },
+        {
+          "url": "/assets/images/optimized/diamond-tennis-necklace-1600.jpg",
+          "encoded": 341961,
+          "decoded": 341961,
+          "ms": 3.800000011920929
+        },
+        {
+          "url": "/assets/images/products/signature-monogram-ring/signature-monogram-ring-product-angled.jpeg",
+          "encoded": 45949,
+          "decoded": 45949,
+          "ms": 4.300000011920929
+        },
+        {
+          "url": "/assets/images/logo-emblem.svg",
+          "encoded": 491,
+          "decoded": 905,
+          "ms": 1.0999999940395355
+        }
+      ],
+      "overflow": false,
+      "responses": [
+        {
+          "url": "/index.html",
+          "type": "Document",
+          "status": 200,
+          "encoding": "gzip"
+        },
+        {
+          "url": "/assets/images/optimized/studio-ring-pink-gemstone-780.jpg",
+          "type": "Image",
+          "status": 200,
+          "encoding": null
+        },
+        {
+          "url": "/site.webmanifest",
+          "type": "Manifest",
+          "status": 200,
+          "encoding": null
+        },
+        {
+          "url": "/assets/css/styles.css?v=20260831-responsive-images",
+          "type": "Stylesheet",
+          "status": 200,
+          "encoding": "gzip"
+        },
+        {
+          "url": "/assets/css/atelier.css?v=20260911-editorial-v1",
+          "type": "Stylesheet",
+          "status": 200,
+          "encoding": "gzip"
+        },
+        {
+          "url": "/assets/css/curation.css?v=20260912-curation-v3",
+          "type": "Stylesheet",
+          "status": 200,
+          "encoding": "gzip"
+        },
+        {
+          "url": "/assets/images/logo-wordmark.svg",
+          "type": "Image",
+          "status": 200,
+          "encoding": "gzip"
+        },
+        {
+          "url": "/assets/js/curation.js?v=20260912-curation-v3",
+          "type": "Script",
+          "status": 200,
+          "encoding": "gzip"
+        },
+        {
+          "url": "/assets/js/main.js?v=20260912-curation-v3",
+          "type": "Script",
+          "status": 200,
+          "encoding": "gzip"
+        },
+        {
+          "url": "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Manrope:wght@400;500;600;700&display=swap",
+          "type": "Stylesheet",
+          "status": 200,
+          "encoding": "gzip"
+        },
+        {
+          "url": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNSIgdmlld0JveD0iMCAwIDI0IDI0Ij48cGF0aCBmaWxsPSJXaW5kb3dUZXh0IiBkPSJNMjAgM2gtMVYxaC0ydjJIN1YxSDV2Mkg0Yy0xLjEgMC0yIC45LTIgMnYxNmMwIDEuMS45IDIgMiAyaDE2YzEuMSAwIDItLjkgMi0yVjVjMC0xLjEtLjktMi0yLTJ6bTAgMThINFY4aDE2djEzeiIvPjxwYXRoIGZpbGw9Im5vbmUiIGQ9Ik0wIDBoMjR2MjRIMHoiLz48L3N2Zz4=",
+          "type": "Image",
+          "status": 200,
+          "encoding": null
+        },
+        {
+          "url": "/assets/images/products/rise-ring/rise-ring-polished.jpeg",
+          "type": "Image",
+          "status": 200,
+          "encoding": null
+        },
+        {
+          "url": "/assets/images/products/quiet-power-tennis-bracelet-1.jpeg",
+          "type": "Image",
+          "status": 200,
+          "encoding": null
+        },
+        {
+          "url": "/assets/images/optimized/diamond-tennis-necklace-1600.jpg",
+          "type": "Image",
+          "status": 200,
+          "encoding": null
+        },
+        {
+          "url": "/assets/images/products/signature-monogram-ring/signature-monogram-ring-product-angled.jpeg",
+          "type": "Image",
+          "status": 200,
+          "encoding": null
+        },
+        {
+          "url": "https://fonts.gstatic.com/s/manrope/v20/xn7gYHE41ni1AdIRggexSvfedN4.woff2",
+          "type": "Font",
+          "status": 200,
+          "encoding": null
+        },
+        {
+          "url": "https://fonts.gstatic.com/s/cormorantgaramond/v21/co3bmX5slCNuHLi8bLeY9MK7whWMhyjYqXtKky2F7g.woff2",
+          "type": "Font",
+          "status": 200,
+          "encoding": null
+        },
+        {
+          "url": "https://fonts.gstatic.com/s/cormorantgaramond/v21/co3ZmX5slCNuHLi8bLeY9MK7whWMhyjYrEtImSqn7B6D.woff2",
+          "type": "Font",
+          "status": 200,
+          "encoding": null
+        },
+        {
+          "url": "/assets/images/logo-emblem.svg",
+          "type": "Other",
+          "status": 200,
+          "encoding": "gzip"
+        }
+      ],
+      "failures": []
+    },
+    {
+      "width": 1440,
+      "ready": "complete",
+      "fontsStatus": "loaded",
+      "fontFaces": [
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "400",
+          "style": "italic"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "400",
+          "style": "italic"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "400",
+          "style": "italic"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "400",
+          "style": "italic"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "loaded",
+          "weight": "400",
+          "style": "italic"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "500",
+          "style": "italic"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "500",
+          "style": "italic"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "500",
+          "style": "italic"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "500",
+          "style": "italic"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "500",
+          "style": "italic"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "400",
+          "style": "normal"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "400",
+          "style": "normal"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "400",
+          "style": "normal"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "400",
+          "style": "normal"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "loaded",
+          "weight": "400",
+          "style": "normal"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "500",
+          "style": "normal"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "500",
+          "style": "normal"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "500",
+          "style": "normal"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "500",
+          "style": "normal"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "500",
+          "style": "normal"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "600",
+          "style": "normal"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "600",
+          "style": "normal"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "600",
+          "style": "normal"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "600",
+          "style": "normal"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "loaded",
+          "weight": "600",
+          "style": "normal"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "700",
+          "style": "normal"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "700",
+          "style": "normal"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "700",
+          "style": "normal"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "unloaded",
+          "weight": "700",
+          "style": "normal"
+        },
+        {
+          "family": "Cormorant Garamond",
+          "status": "loaded",
+          "weight": "700",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "400",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "400",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "400",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "400",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "400",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "loaded",
+          "weight": "400",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "500",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "500",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "500",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "500",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "500",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "loaded",
+          "weight": "500",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "600",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "600",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "600",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "600",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "600",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "loaded",
+          "weight": "600",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "700",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "700",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "700",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "700",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "unloaded",
+          "weight": "700",
+          "style": "normal"
+        },
+        {
+          "family": "Manrope",
+          "status": "loaded",
+          "weight": "700",
+          "style": "normal"
+        }
+      ],
+      "paint": [
+        {
+          "name": "first-paint",
+          "ms": 76
+        },
+        {
+          "name": "first-contentful-paint",
+          "ms": 76
+        }
+      ],
+      "lcp": 76,
+      "cls": 0.002269084931466478,
+      "resources": [
+        {
+          "url": "/assets/images/optimized/studio-ring-pink-gemstone-780.jpg",
+          "encoded": 335023,
+          "decoded": 335023,
+          "ms": 11.399999991059303
+        },
+        {
+          "url": "/assets/css/styles.css?v=20260831-responsive-images",
+          "encoded": 36493,
+          "decoded": 209799,
+          "ms": 16
+        },
+        {
+          "url": "/assets/css/atelier.css?v=20260911-editorial-v1",
+          "encoded": 6785,
+          "decoded": 36943,
+          "ms": 16.599999994039536
+        },
+        {
+          "url": "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Manrope:wght@400;500;600;700&display=swap",
+          "encoded": 1022,
+          "decoded": 20996,
+          "ms": 52.8999999910593
+        },
+        {
+          "url": "/assets/css/curation.css?v=20260912-curation-v3",
+          "encoded": 6371,
+          "decoded": 31283,
+          "ms": 17.5
+        },
+        {
+          "url": "/assets/images/logo-wordmark.svg",
+          "encoded": 508,
+          "decoded": 922,
+          "ms": 17.700000002980232
+        },
+        {
+          "url": "/assets/js/curation.js?v=20260912-curation-v3",
+          "encoded": 2563,
+          "decoded": 7809,
+          "ms": 18.200000002980232
+        },
+        {
+          "url": "/assets/js/main.js?v=20260912-curation-v3",
+          "encoded": 45600,
+          "decoded": 196236,
+          "ms": 22.700000002980232
+        },
+        {
+          "url": "/site.webmanifest",
+          "encoded": 415,
+          "decoded": 415,
+          "ms": 6.5999999940395355
+        },
+        {
+          "url": "/assets/images/products/rise-ring/rise-ring-polished.jpeg",
+          "encoded": 57312,
+          "decoded": 57312,
+          "ms": 3.5999999940395355
+        },
+        {
+          "url": "/assets/images/products/signature-monogram-ring/signature-monogram-ring-product-angled.jpeg",
+          "encoded": 45949,
+          "decoded": 45949,
+          "ms": 3.8999999910593033
+        },
+        {
+          "url": "/assets/images/optimized/diamond-tennis-necklace-1600.jpg",
+          "encoded": 341961,
+          "decoded": 341961,
+          "ms": 4.399999991059303
+        },
+        {
+          "url": "/assets/images/products/quiet-power-tennis-bracelet-1.jpeg",
+          "encoded": 136273,
+          "decoded": 136273,
+          "ms": 4.899999991059303
+        },
+        {
+          "url": "/assets/images/logo-emblem.svg",
+          "encoded": 491,
+          "decoded": 905,
+          "ms": 1.2000000029802322
+        }
+      ],
+      "overflow": false,
+      "responses": [
+        {
+          "url": "/index.html",
+          "type": "Document",
+          "status": 200,
+          "encoding": "gzip"
+        },
+        {
+          "url": "/site.webmanifest",
+          "type": "Manifest",
+          "status": 200,
+          "encoding": null
+        },
+        {
+          "url": "/assets/images/optimized/studio-ring-pink-gemstone-780.jpg",
+          "type": "Image",
+          "status": 200,
+          "encoding": null
+        },
+        {
+          "url": "/assets/css/styles.css?v=20260831-responsive-images",
+          "type": "Stylesheet",
+          "status": 200,
+          "encoding": "gzip"
+        },
+        {
+          "url": "/assets/css/atelier.css?v=20260911-editorial-v1",
+          "type": "Stylesheet",
+          "status": 200,
+          "encoding": "gzip"
+        },
+        {
+          "url": "/assets/css/curation.css?v=20260912-curation-v3",
+          "type": "Stylesheet",
+          "status": 200,
+          "encoding": "gzip"
+        },
+        {
+          "url": "/assets/images/logo-wordmark.svg",
+          "type": "Image",
+          "status": 200,
+          "encoding": "gzip"
+        },
+        {
+          "url": "/assets/js/curation.js?v=20260912-curation-v3",
+          "type": "Script",
+          "status": 200,
+          "encoding": "gzip"
+        },
+        {
+          "url": "/assets/js/main.js?v=20260912-curation-v3",
+          "type": "Script",
+          "status": 200,
+          "encoding": "gzip"
+        },
+        {
+          "url": "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Manrope:wght@400;500;600;700&display=swap",
+          "type": "Stylesheet",
+          "status": 200,
+          "encoding": "gzip"
+        },
+        {
+          "url": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNSIgdmlld0JveD0iMCAwIDI0IDI0Ij48cGF0aCBmaWxsPSJXaW5kb3dUZXh0IiBkPSJNMjAgM2gtMVYxaC0ydjJIN1YxSDV2Mkg0Yy0xLjEgMC0yIC45LTIgMnYxNmMwIDEuMS45IDIgMiAyaDE2YzEuMSAwIDItLjkgMi0yVjVjMC0xLjEtLjktMi0yLTJ6bTAgMThINFY4aDE2djEzeiIvPjxwYXRoIGZpbGw9Im5vbmUiIGQ9Ik0wIDBoMjR2MjRIMHoiLz48L3N2Zz4=",
+          "type": "Image",
+          "status": 200,
+          "encoding": null
+        },
+        {
+          "url": "/assets/images/products/rise-ring/rise-ring-polished.jpeg",
+          "type": "Image",
+          "status": 200,
+          "encoding": null
+        },
+        {
+          "url": "/assets/images/products/signature-monogram-ring/signature-monogram-ring-product-angled.jpeg",
+          "type": "Image",
+          "status": 200,
+          "encoding": null
+        },
+        {
+          "url": "/assets/images/optimized/diamond-tennis-necklace-1600.jpg",
+          "type": "Image",
+          "status": 200,
+          "encoding": null
+        },
+        {
+          "url": "/assets/images/products/quiet-power-tennis-bracelet-1.jpeg",
+          "type": "Image",
+          "status": 200,
+          "encoding": null
+        },
+        {
+          "url": "https://fonts.gstatic.com/s/manrope/v20/xn7gYHE41ni1AdIRggexSvfedN4.woff2",
+          "type": "Font",
+          "status": 200,
+          "encoding": null
+        },
+        {
+          "url": "https://fonts.gstatic.com/s/cormorantgaramond/v21/co3bmX5slCNuHLi8bLeY9MK7whWMhyjYqXtKky2F7g.woff2",
+          "type": "Font",
+          "status": 200,
+          "encoding": null
+        },
+        {
+          "url": "https://fonts.gstatic.com/s/cormorantgaramond/v21/co3ZmX5slCNuHLi8bLeY9MK7whWMhyjYrEtImSqn7B6D.woff2",
+          "type": "Font",
+          "status": 200,
+          "encoding": null
+        },
+        {
+          "url": "/assets/images/logo-emblem.svg",
+          "type": "Other",
+          "status": 200,
+          "encoding": "gzip"
+        }
+      ],
+      "failures": []
+    }
+  ]
+}

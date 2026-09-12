@@ -80,11 +80,11 @@ const products = [
       ["Price", "$2,200 CAD for the featured lab-grown diamond design"]
     ],
     care: "Store separately and clean gently with a soft jewellery cloth to protect the polished gold and stone setting.",
-    shipping: "Made to order; ring size, gold colour, production timing, and insured delivery are confirmed after checkout.",
-    heroImage: "/assets/images/products/rise-ring/rise-ring-worn.jpeg",
+    shipping: "Made to order; ring size, gold colour, production timing, and insured delivery are confirmed in writing before payment.",
+    heroImage: "/assets/images/products/rise-ring/rise-ring-polished.jpeg",
     gallery: [
-      "/assets/images/products/rise-ring/rise-ring-worn.jpeg",
       "/assets/images/products/rise-ring/rise-ring-polished.jpeg",
+      "/assets/images/products/rise-ring/rise-ring-worn.jpeg",
       "/assets/images/products/rise-ring/rise-ring-satin.jpeg",
       "/assets/images/products/rise-ring/rise-ring-styled.jpeg"
     ],
@@ -105,11 +105,11 @@ const products = [
     specs: [
       ["Metal", "Solid 9K yellow gold"],
       ["Personalization", "Custom monogram engraving"],
-      ["Made to Order", "Provide the desired initials during secure checkout"],
+      ["Made to Order", "Provide the desired initials during your order enquiry"],
       ["Price", "$900 CAD"]
     ],
     care: "Store separately and polish gently with a soft jewellery cloth to preserve the gold finish and engraving.",
-    shipping: "Made to order; initials, ring size, production timing, and insured delivery are confirmed with the order.",
+    shipping: "Made to order; initials, ring size, production timing, and insured delivery are confirmed in writing before payment.",
     heroImage: "/assets/images/products/signature-monogram-ring/signature-monogram-ring-product-angled.jpeg",
     gallery: [
       "/assets/images/products/signature-monogram-ring/signature-monogram-ring-product-angled.jpeg",
@@ -138,7 +138,7 @@ const products = [
       ["Price", "$900 CAD"]
     ],
     care: "Store separately and clean gently with a soft jewellery cloth to protect the diamond setting and polished finish.",
-    shipping: "Made to order; ring size, production timing, and insured delivery are confirmed after checkout.",
+    shipping: "Made to order; ring size, production timing, and insured delivery are confirmed in writing before payment.",
     heroImage: "/assets/images/products/half-eternity-pinky-band/half-eternity-pinky-band-product.jpeg",
     gallery: [
       "/assets/images/products/half-eternity-pinky-band/half-eternity-pinky-band-product.jpeg",
@@ -328,7 +328,7 @@ function productPriceLabel(product) {
   }
 
   return Number.isFinite(Number(product.price))
-    ? `Starting at ${money.format(product.price)}`
+    ? `Starting at ${product.currency ? checkoutPriceLabel(product) : money.format(product.price)}`
     : "Please inquire for pricing";
 }
 
@@ -360,7 +360,7 @@ function productInquiryHref(product) {
     inquire: product.slug
   });
 
-  return `customs.html?${params.toString()}#request-form`;
+  return `/customs.html?${params.toString()}#request-form`;
 }
 
 function isPurchasable(product) {
@@ -397,7 +397,7 @@ function writeCart(cart) {
   try {
     window.localStorage.setItem(CART_KEY, JSON.stringify(cart));
   } catch (error) {
-    // Checkout still works for Buy now when browser storage is unavailable.
+    // A direct product enquiry still works when browser storage is unavailable.
   }
   document.dispatchEvent(new CustomEvent("tj:cart-changed"));
 }
@@ -435,36 +435,33 @@ function addProductToCart(product, quantity = 1) {
   return true;
 }
 
-async function startStripeCheckout(items, trigger) {
-  if (!items.length) return;
-  const originalText = trigger?.textContent;
-  if (trigger) {
-    trigger.disabled = true;
-    trigger.textContent = "Opening secure checkout…";
-  }
+function startOrderInquiry(items) {
+  const selection = items.map(({ slug, quantity }) => ({ slug, quantity }));
+  if (!selection.length) return;
+  const params = new URLSearchParams({ order: JSON.stringify(selection) });
+  window.location.assign(`/customs.html?${params}#request-form`);
+}
 
-  try {
-    const response = await fetch("/.netlify/functions/create-checkout-session", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ items: items.map(({ slug, quantity }) => ({ slug, quantity })) })
-    });
-    const result = await response.json().catch(() => ({}));
-    if (!response.ok || !result.url) {
-      throw new Error(result.message || "Checkout could not be started.");
-    }
-    const checkoutUrl = new URL(result.url);
-    if (checkoutUrl.protocol !== "https:" || !checkoutUrl.hostname.endsWith("stripe.com")) {
-      throw new Error("The checkout address was not valid.");
-    }
-    window.location.assign(checkoutUrl.href);
-  } catch (error) {
-    window.tjToast?.(error.message || "Checkout could not be started. Please try again.", { tone: "error", duration: 5000 });
-    if (trigger) {
-      trigger.disabled = false;
-      trigger.textContent = originalText;
-    }
-  }
+function applyOrderInquiryToForm(form) {
+  const raw = new URLSearchParams(window.location.search).get("order");
+  if (!raw) return;
+  let items;
+  try { items = JSON.parse(raw); } catch { return; }
+  if (!Array.isArray(items) || !items.length || items.length > 20) return;
+  const selection = items.map((item) => {
+    const product = products.find((candidate) => candidate.slug === item?.slug);
+    if (!isPurchasable(product) || !Number.isInteger(item.quantity) || item.quantity < 1 || item.quantity > (product.maxQuantity || 5)) return null;
+    return `${item.quantity} × ${product.name} — listed unit price ${checkoutPriceLabel(product)}`;
+  });
+  if (selection.some((item) => !item)) return;
+  const description = form.querySelector("#description");
+  if (!description) return;
+  const summary = `[Order Enquiry]\n${selection.join("\n")}\nPlease confirm availability, size/finish, final total, timing, delivery, and applicable cancellation/return terms in writing before payment.\n[/Order Enquiry]`;
+  const existing = description.value.replace(/\n*\[Order Enquiry\][\s\S]*?\[\/Order Enquiry\]/gu, "").trim();
+  description.value = `${existing ? `${existing}\n\n` : ""}${summary}`;
+  description.dispatchEvent(new Event("input", { bubbles: true }));
+  description.closest(".form-field")?.classList.add("is-prefilled");
+  writeCustomFormDraft(form);
 }
 
 const FAVORITES_KEY = "tj-favorite-products";
@@ -476,6 +473,8 @@ const CART_KEY = "tj-checkout-cart-v1";
 
 const shopState = {
   filter: "all",
+  query: "",
+  budget: "any",
   sort: "recommended",
   view: "grid"
 };
@@ -676,7 +675,7 @@ function renderFavoritesShelf() {
     shelf = document.createElement("div");
     shelf.className = "favorites-shelf";
     shelf.dataset.favoritesShelf = "";
-    productGrid.parentNode.insertBefore(shelf, productGrid);
+    productGrid.insertAdjacentElement("afterend", shelf);
   }
 
   const favorites = getFavoriteSlugs();
@@ -727,7 +726,7 @@ function renderRecentlyViewedShelf(anchorSelector, excludeSlug = "") {
     shelf = document.createElement("div");
     shelf.className = "favorites-shelf recently-viewed-shelf";
     shelf.dataset.recentlyViewedShelf = context;
-    anchor.parentNode.insertBefore(shelf, anchor);
+    anchor.insertAdjacentElement("afterend", shelf);
   }
 
   const recentProducts = readStoredList(RECENTLY_VIEWED_KEY)
@@ -947,8 +946,9 @@ function keepFocusInDialog(event, panel) {
   }
 
   const focusable = Array.from(
-    panel.querySelectorAll('a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])')
-  ).filter((element) => !element.hidden && element.getClientRects().length);
+    panel.querySelectorAll('a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])')
+  ).filter((element) => element.tabIndex >= 0 && !element.closest("[inert]") && !element.hidden
+    && element.getClientRects().length && getComputedStyle(element).visibility !== "hidden");
 
   if (!focusable.length) {
     event.preventDefault();
@@ -958,13 +958,28 @@ function keepFocusInDialog(event, panel) {
 
   const first = focusable[0];
   const last = focusable[focusable.length - 1];
-  if (event.shiftKey && document.activeElement === first) {
+  const focusIsOutsideControls = !focusable.includes(document.activeElement);
+  if (event.shiftKey && (document.activeElement === first || focusIsOutsideControls)) {
     event.preventDefault();
     last.focus();
-  } else if (!event.shiftKey && document.activeElement === last) {
+  } else if (!event.shiftKey && (document.activeElement === last || focusIsOutsideControls)) {
     event.preventDefault();
     first.focus();
   }
+}
+
+function isolateDialogBackground(modal) {
+  const previousStates = new Map();
+  let branch = modal;
+  while (branch.parentElement && branch !== document.body) {
+    [...branch.parentElement.children].forEach((sibling) => {
+      if (sibling === branch || !(sibling instanceof HTMLElement)) return;
+      previousStates.set(sibling, sibling.inert);
+      sibling.inert = true;
+    });
+    branch = branch.parentElement;
+  }
+  return () => previousStates.forEach((wasInert, element) => { element.inert = wasInert; });
 }
 
 let closeActiveQuickView = null;
@@ -1120,16 +1135,30 @@ function setupProductQuickViewButtons(scope = document) {
   });
 }
 
+const productCardPresentation = {
+  "estate-cushion-halo-diamond-ring": { title: "Cushion Halo Estate Ring", materials: "Cushion-cut diamond · layered halo" },
+  "15-carat-graduated-diamond-tennis-necklace": { title: "Graduated Diamond Necklace", materials: "15 ct natural diamonds · estate" },
+  "rise-ring": { title: "The Rise Ring", materials: "14K gold · 1 ct lab-grown diamond" },
+  "signature-monogram-ring": { title: "Signature Monogram Ring", materials: "Solid 9K yellow gold · your initials" },
+  "half-eternity-pinky-band": { title: "Half Eternity Pinky Band", materials: "Lab-grown diamonds · half-eternity" },
+  "pear-halo-ring": { title: "Rare Blue Diamond Ring", materials: "18K white gold · 1 ct blue diamond" },
+  "diamond-tennis-necklace": { title: "She’s Unstoppable Necklace", materials: "14K gold · 10 ct diamond options" },
+  "diamond-bracelet-stack": { title: "Quiet Power Tennis Bracelet", materials: "14K gold · 1.50 ct lab-grown diamonds" },
+  "vintage-halo-stud-earrings": { title: "Yellow Diamond Oval Studs", materials: "14K gold · yellow diamond centres" },
+  "gold-bezel-hand-chain": { title: "Diamond Hand Chain", materials: "14K yellow gold · natural diamonds" },
+  "cushion-diamond-ring": { title: "Cushion Cut Diamond Ring", materials: "14K gold · 1 ct lab-grown diamond" }
+};
+
 function productCardMarkup(product) {
   const isSaved = isProductFavorite(product.slug);
   const isCompared = isProductCompared(product.slug);
-  const galleryImages = [...new Set([product.heroImage, ...(product.gallery || [])])].filter(Boolean).slice(0, 5);
+  const presentation = productCardPresentation[product.slug] || {};
+  const coverImage = product.slug === "rise-ring" ? "/assets/images/products/rise-ring/rise-ring-polished.jpeg" : product.heroImage;
+  const galleryImages = [...new Set([coverImage, ...(product.gallery || [])])].filter(Boolean).slice(0, 5);
   const cardGallery = galleryImages.length > 1 ? `
-    <div class="product-card__gallery" aria-label="${product.name} image choices">
+    <div class="product-card__gallery" role="group" aria-label="${product.name} image choices">
       ${galleryImages.map((image, index) => `
-        <button class="product-card__thumb ${index === 0 ? "is-active" : ""}" type="button" data-card-image="${image}" aria-label="Show ${product.name} image ${index + 1}">
-          <img src="${image}" alt="" loading="lazy">
-        </button>
+        <button class="product-card__thumb ${index === 0 ? "is-active" : ""}" type="button" data-card-image="${image}" aria-label="Show ${product.name} image ${index + 1}" aria-pressed="${index === 0}"></button>
       `).join("")}
     </div>
   ` : "";
@@ -1137,6 +1166,7 @@ function productCardMarkup(product) {
   return `
     <article class="product-card" data-product-card="${product.slug}" data-reveal>
       <button class="favorite-button ${isSaved ? "is-active" : ""}" type="button" data-favorite-toggle="${product.slug}" aria-label="${isSaved ? "Remove" : "Save"} ${product.name}" aria-pressed="${isSaved}">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
         <span data-favorite-label>${isSaved ? "Saved" : "Save"}</span>
       </button>
       <button class="compare-button ${isCompared ? "is-active" : ""}" type="button" data-compare-toggle="${product.slug}" aria-label="Compare ${product.name}" aria-pressed="${isCompared}">
@@ -1150,18 +1180,18 @@ function productCardMarkup(product) {
       </button>
       <a class="product-card__link" href="${productUrl(product)}">
         <div class="product-card__media">
-          <img src="${product.heroImage}" alt="${product.name}" loading="lazy">
+          <img src="${coverImage}" alt="${product.name}" width="1000" height="1250" loading="lazy" decoding="async">
         </div>
         <div class="product-card__body">
-          <h3>${product.name}</h3>
-          <p class="product-card__materials">${product.materials}</p>
+          <h3>${escapeHtml(presentation.title || product.name)}</h3>
+          <p class="product-card__materials">${escapeHtml(presentation.materials || product.materials)}</p>
           <span class="product-card__price">${productPriceLabel(product)}</span>
         </div>
       </a>
       ${cardGallery}
       ${isPurchasable(product) ? `
         <button class="product-card__checkout" type="button" data-card-add="${product.slug}">
-          Add to bag · ${escapeHtml(checkoutPriceLabel(product))}
+          Add to bag <span aria-hidden="true">↗</span>
         </button>
       ` : ""}
     </article>
@@ -1199,6 +1229,7 @@ function setupProductCardImageChoosers(scope = document) {
       image.src = button.dataset.cardImage;
       card.querySelectorAll("[data-card-image]").forEach((thumb) => {
         thumb.classList.toggle("is-active", thumb === button);
+        thumb.setAttribute("aria-pressed", String(thumb === button));
       });
     });
   });
@@ -1237,41 +1268,104 @@ function renderProductCollection(container, items) {
 
 function setupHeader() {
   const body = document.body;
+  body.dataset.navigationReady = "true";
   const menuButton = document.querySelector("[data-menu-toggle]");
-  const navLinks = document.querySelectorAll(".primary-nav a");
+  const nav = document.querySelector(".primary-nav");
   const header = document.querySelector(".site-header");
-
-  if (menuButton) {
-    menuButton.addEventListener("click", () => {
-      const expanded = menuButton.getAttribute("aria-expanded") === "true";
-      menuButton.setAttribute("aria-expanded", String(!expanded));
-      body.classList.toggle("nav-open");
+  const inertRegions = new Map();
+  const positionMenu = () => {
+    if (header) body.style.setProperty("--navigation-top", `${Math.round(header.getBoundingClientRect().bottom)}px`);
+  };
+  const setMenu = (open, restoreFocus = false) => {
+    if (open) positionMenu();
+    body.classList.toggle("nav-open", open);
+    menuButton?.setAttribute("aria-expanded", String(open));
+    menuButton?.setAttribute("aria-label", open ? "Close menu" : "Open menu");
+    if (open) {
+      document.querySelectorAll("main, .footer").forEach((region) => {
+        if (!inertRegions.has(region)) inertRegions.set(region, region.inert);
+        region.inert = true;
+      });
+    } else {
+      inertRegions.forEach((previous, region) => { region.inert = previous; });
+      inertRegions.clear();
+      if (restoreFocus) menuButton?.focus();
+    }
+  };
+  if (menuButton && nav) {
+    nav.id ||= "primary-navigation";
+    menuButton.setAttribute("aria-controls", nav.id);
+    menuButton.addEventListener("click", () => setMenu(!body.classList.contains("nav-open")));
+    document.addEventListener("keydown", (event) => {
+      if (!body.classList.contains("nav-open") || body.classList.contains("search-open") || body.classList.contains("modal-open")) return;
+      if (event.key === "Escape") setMenu(false, true);
+      else keepFocusInDialog(event, header);
+    });
+    window.matchMedia("(min-width: 1181px)").addEventListener("change", (event) => {
+      if (event.matches) setMenu(false);
     });
   }
-
-  navLinks.forEach((link) => {
+  document.querySelectorAll(".primary-nav a").forEach((link) => {
     if (link.dataset.page === body.dataset.page) {
       link.classList.add("is-active");
+      link.setAttribute("aria-current", "page");
     }
-
-    link.addEventListener("click", () => {
-      body.classList.remove("nav-open");
-      if (menuButton) {
-        menuButton.setAttribute("aria-expanded", "false");
-      }
-    });
+    link.addEventListener("click", () => setMenu(false));
   });
-
-  const onScroll = () => {
-    if (!header) {
-      return;
-    }
-
-    header.classList.toggle("is-scrolled", window.scrollY > 8);
-  };
-
+  const onScroll = () => header?.classList.toggle("is-scrolled", window.scrollY > 8);
   onScroll();
   window.addEventListener("scroll", onScroll, { passive: true });
+  window.addEventListener("resize", positionMenu, { passive: true });
+}
+
+function matchesProductQuery(product, query) {
+  const searchable = [product.name, product.category, product.materials, product.shortDescription]
+    .filter(Boolean).join(" ").toLocaleLowerCase();
+  return query.trim().toLocaleLowerCase().split(/\s+/).every((term) => searchable.includes(term));
+}
+
+function setupEditorialHome() {
+  const container = document.querySelector("[data-editorial-products]");
+  if (!container) return;
+  const selection = ["rise-ring", "signature-monogram-ring", "diamond-bracelet-stack", "diamond-tennis-necklace"];
+  const links = [...document.querySelectorAll("[data-edit-category]")];
+  const render = (category) => {
+    const items = category === "all"
+      ? selection.map((slug) => products.find((product) => product.slug === slug)).filter(Boolean)
+      : products.filter((product) => product.category === category && !product.estate).slice(0, 4);
+    renderProductCollection(container, items);
+    links.forEach((link) => {
+      const active = link.dataset.editCategory === category;
+      link.classList.toggle("is-active", active);
+      if (active) link.setAttribute("aria-current", "true");
+      else link.removeAttribute("aria-current");
+    });
+    document.querySelector("[data-edit-status]").textContent = items.length + " selected pieces shown";
+    revealVisible();
+  };
+  links.forEach((link) => link.addEventListener("click", (event) => {
+    if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    event.preventDefault();
+    render(link.dataset.editCategory);
+  }));
+  render("all");
+  const finishes = {
+    polished: "/assets/images/products/rise-ring/rise-ring-polished.jpeg",
+    satin: "/assets/images/products/rise-ring/rise-ring-satin.jpeg"
+  };
+  document.querySelectorAll("[data-signature-finish]").forEach((button) => {
+    button.disabled = false;
+    button.addEventListener("click", () => {
+      const finish = button.dataset.signatureFinish;
+      const image = document.querySelector("[data-signature-image]");
+      if (!finishes[finish] || !image) return;
+      image.src = finishes[finish];
+      image.alt = "The Rise Ring, " + finish + " gold finish study";
+      document.querySelectorAll("[data-signature-finish]").forEach((choice) => {
+        choice.setAttribute("aria-pressed", String(choice === button));
+      });
+    });
+  });
 }
 
 function renderFeaturedProducts() {
@@ -1288,21 +1382,78 @@ function readShopViewPreference() {
   }
 }
 
+const shopBudgets = {
+  any: "All prices",
+  "under-1500": "Under $1,500 CAD",
+  "1500-3000": "$1,500–$3,000 CAD",
+  "3000-10000": "$3,000–$10,000 CAD",
+  "over-10000": "$10,000+ CAD",
+  inquiry: "Price by inquiry"
+};
+
+function matchesShopBudget(product) {
+  if (shopState.budget === "any") return true;
+  const price = typeof product.price === "number" && Number.isFinite(product.price) ? product.price : null;
+  if (shopState.budget === "inquiry") return price === null;
+  if (price === null || product.currency !== "cad") return false;
+  if (shopState.budget === "under-1500") return price < 1500;
+  if (shopState.budget === "1500-3000") return price >= 1500 && price < 3000;
+  if (shopState.budget === "3000-10000") return price >= 3000 && price < 10000;
+  return price >= 10000;
+}
+
+function readShopLocation() {
+  const params = new URLSearchParams(window.location.search);
+  const category = params.get("category");
+  shopState.filter = ["rings", "necklaces", "bracelets", "earrings"].includes(category) ? category : "all";
+  shopState.query = (params.get("q") || "").slice(0, 120);
+  shopState.budget = Object.hasOwn(shopBudgets, params.get("price")) ? params.get("price") : "any";
+  shopState.sort = ["price-low", "price-high", "name"].includes(params.get("sort")) ? params.get("sort") : "recommended";
+  const values = { "shop-query": shopState.query, "shop-budget": shopState.budget, "shop-sort": shopState.sort };
+  Object.entries(values).forEach(([attribute, value]) => {
+    const control = document.querySelector("[data-" + attribute + "]");
+    if (control) control.value = value;
+  });
+}
+
+function writeShopLocation(replace = false) {
+  const url = new URL(window.location.href);
+  const values = { category: shopState.filter === "all" ? "" : shopState.filter,
+    q: shopState.query.trim(), price: shopState.budget === "any" ? "" : shopState.budget,
+    sort: shopState.sort === "recommended" ? "" : shopState.sort };
+  Object.entries(values).forEach(([key, value]) => {
+    if (value) url.searchParams.set(key, value);
+    else url.searchParams.delete(key);
+  });
+  if (url.href !== window.location.href) {
+    window.history[replace ? "replaceState" : "pushState"](null, "", url);
+  }
+}
+
+function resetShopFilters() {
+  shopState.filter = "all";
+  shopState.query = "";
+  shopState.budget = "any";
+  writeShopLocation();
+  readShopLocation();
+  renderShopProducts();
+  document.querySelector("[data-shop-query]")?.focus({ preventScroll: true });
+}
+
 function sortShopProducts(items, sort) {
   const sorted = [...items];
-  if (sort === "name") {
-    return sorted.sort((first, second) => first.name.localeCompare(second.name));
-  }
+  if (sort === "name") return sorted.sort((first, second) => first.name.localeCompare(second.name));
   if (sort === "price-low" || sort === "price-high") {
     return sorted.sort((first, second) => {
-      const firstPrice = Number.isFinite(Number(first.price)) ? Number(first.price) : null;
-      const secondPrice = Number.isFinite(Number(second.price)) ? Number(second.price) : null;
+      const firstPrice = typeof first.price === "number" ? first.price : null;
+      const secondPrice = typeof second.price === "number" ? second.price : null;
       if (firstPrice === null) return secondPrice === null ? 0 : 1;
       if (secondPrice === null) return -1;
+      if (first.currency !== second.currency) return first.currency.localeCompare(second.currency);
       return sort === "price-low" ? firstPrice - secondPrice : secondPrice - firstPrice;
     });
   }
-  return sorted;
+  return sorted.sort((first, second) => Number(Boolean(first.estate)) - Number(Boolean(second.estate)));
 }
 
 function setupShopDiscoveryControls() {
@@ -1352,9 +1503,36 @@ function setupShopDiscoveryControls() {
     </div>
   `;
   container.parentNode.insertBefore(toolbar, container);
+  const finder = document.createElement("div");
+  finder.className = "shop-finder";
+  finder.innerHTML = `
+    <label class="shop-finder__search"><span>Find your piece</span><input type="search" data-shop-query placeholder="Search…" maxlength="120" autocomplete="off" aria-controls="shop-results"></label>
+    <label class="shop-finder__budget"><span>Price range</span><select data-shop-budget>${Object.entries(shopBudgets).map(([value, label]) => '<option value="' + value + '">' + label + '</option>').join("")}</select></label>
+    <p class="shop-finder__note">Ranges use listed or starting CAD prices. USD pieces are labelled separately; sorting groups currencies.</p>
+  `;
+  container.id = "shop-results";
+  toolbar.before(finder);
+  const activeFilters = document.createElement("div");
+  activeFilters.className = "shop-active-filters";
+  activeFilters.dataset.shopActiveFilters = "";
+  toolbar.after(activeFilters);
+  finder.querySelector("[data-shop-query]").addEventListener("input", (event) => {
+    shopState.query = event.target.value;
+    writeShopLocation(true);
+    renderShopProducts();
+  });
+  finder.querySelector("[data-shop-budget]").addEventListener("change", (event) => {
+    shopState.budget = event.target.value;
+    writeShopLocation();
+    renderShopProducts();
+  });
+  activeFilters.addEventListener("click", (event) => {
+    if (event.target.closest("[data-shop-clear]")) resetShopFilters();
+  });
 
   toolbar.querySelector("[data-shop-sort]")?.addEventListener("change", (event) => {
     shopState.sort = event.target.value;
+    writeShopLocation();
     renderShopProducts();
   });
   toolbar.querySelectorAll("[data-shop-view]").forEach((button) => {
@@ -1372,21 +1550,36 @@ function setupShopDiscoveryControls() {
 
 function renderShopProducts(filter = shopState.filter) {
   const container = document.querySelector("[data-shop-products]");
-  if (!container) {
-    return;
-  }
-
+  if (!container) return;
   shopState.filter = filter;
-  const filteredItems = filter === "all"
-    ? products
-    : products.filter((product) => product.category === filter);
-  const items = sortShopProducts(filteredItems, shopState.sort);
-
+  const items = sortShopProducts(products.filter((product) =>
+    (filter === "all" || product.category === filter)
+    && matchesProductQuery(product, shopState.query)
+    && matchesShopBudget(product)
+  ), shopState.sort);
   container.classList.toggle("product-grid--list", shopState.view === "list");
   renderProductCollection(container, items);
+  if (!items.length) {
+    container.innerHTML = '<div class="shop-empty"><span class="eyebrow">A different direction</span><h2>Not here. Not impossible.</h2><p>No pieces match these filters. Explore the full collection, or let us create something around your idea.</p><button class="atelier-button" type="button" data-shop-reset>Clear filters</button><a class="atelier-link" href="/customs.html">Create something personal <span aria-hidden="true">↗</span></a></div>';
+    container.querySelector("[data-shop-reset]").addEventListener("click", resetShopFilters);
+  }
   document.querySelector("[data-shop-result-count]")?.replaceChildren(
-    document.createTextNode(`${items.length} ${items.length === 1 ? "piece" : "pieces"}`)
+    document.createTextNode(items.length + (items.length === 1 ? " piece" : " pieces") + " to make your own")
   );
+  document.querySelectorAll("[data-filter]").forEach((chip) => {
+    const active = chip.dataset.filter === filter;
+    chip.classList.toggle("is-active", active);
+    if (active) chip.setAttribute("aria-current", "true");
+    else chip.removeAttribute("aria-current");
+  });
+  const filters = [filter === "all" ? "" : filter, shopState.query.trim() ? "Search: “" + shopState.query.trim() + "”" : "",
+    shopState.budget === "any" ? "" : shopBudgets[shopState.budget]].filter(Boolean);
+  const activeFilters = document.querySelector("[data-shop-active-filters]");
+  if (activeFilters) {
+    activeFilters.hidden = !filters.length;
+    activeFilters.innerHTML = filters.map((label) => "<span>" + escapeHtml(label) + "</span>").join("")
+      + '<button type="button" data-shop-clear>Clear filters ×</button>';
+  }
   document.querySelectorAll("[data-shop-view]").forEach((button) => {
     const active = button.dataset.shopView === shopState.view;
     button.classList.toggle("is-active", active);
@@ -1398,22 +1591,23 @@ function renderShopProducts(filter = shopState.filter) {
 
 function setupShopFilters() {
   const chips = document.querySelectorAll("[data-filter]");
-  if (!chips.length) {
-    return;
-  }
-
+  if (!chips.length || !document.querySelector("[data-shop-products]")) return;
   setupShopDiscoveryControls();
-
+  readShopLocation();
   chips.forEach((chip) => {
     chip.addEventListener("click", (event) => {
+      if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
       event.preventDefault();
-      chips.forEach((item) => item.classList.remove("is-active"));
-      chip.classList.add("is-active");
-      renderShopProducts(chip.dataset.filter || "all");
+      shopState.filter = chip.dataset.filter || "all";
+      writeShopLocation();
+      renderShopProducts();
     });
   });
-
-  renderShopProducts("all");
+  window.addEventListener("popstate", () => {
+    readShopLocation();
+    renderShopProducts();
+  });
+  renderShopProducts();
 }
 
 let closeActiveLightbox = null;
@@ -1611,6 +1805,14 @@ function renderProductPage() {
   };
 
   setText("[data-product-name]", product.name);
+  const productHeading = page.querySelector("h1[data-product-name]");
+  if (productHeading && product.name.includes(" — ")) {
+    const [name, ...details] = product.name.split(" — ");
+    const designation = document.createElement("span");
+    designation.className = "product-title-detail";
+    designation.textContent = ` — ${details.join(" — ")}`;
+    productHeading.replaceChildren(document.createTextNode(name), designation);
+  }
   setText("[data-product-category]", product.category.charAt(0).toUpperCase() + product.category.slice(1), page);
   setText("[data-product-price]", productPriceLabel(product), page);
   setText("[data-product-materials]", product.materials, page);
@@ -1656,7 +1858,7 @@ function renderProductPage() {
     thumbnailGrid.innerHTML = product.gallery
       .map(
         (image, index) => `
-          <button class="thumbnail-button ${index === 0 ? "is-active" : ""}" type="button" data-gallery-thumb>
+          <button class="thumbnail-button ${index === 0 ? "is-active" : ""}" type="button" data-gallery-thumb aria-label="View ${index + 1} of ${product.gallery.length}" aria-pressed="${index === 0}">
             <img src="${image}" alt="${product.name} view ${index + 1}" loading="lazy">
           </button>
         `
@@ -1666,8 +1868,10 @@ function renderProductPage() {
     thumbnailGrid.querySelectorAll("[data-gallery-thumb]").forEach((button, index) => {
       button.addEventListener("click", () => {
         activeGalleryIndex = index;
-        thumbnailGrid.querySelectorAll("[data-gallery-thumb]").forEach((item) => item.classList.remove("is-active"));
-        button.classList.add("is-active");
+        thumbnailGrid.querySelectorAll("[data-gallery-thumb]").forEach((item) => {
+          item.classList.toggle("is-active", item === button);
+          item.setAttribute("aria-pressed", String(item === button));
+        });
         updateMainImage(product.gallery[index], true);
       });
     });
@@ -1720,11 +1924,32 @@ function renderProductPage() {
 
   renderProductCollection(
     related,
-    products.filter((item) => item.slug !== product.slug).slice(0, 3)
+    products.filter((item) => item.slug !== product.slug)
+      .sort((first, second) => {
+        const score = (item) => Number(item.category === product.category) * 4
+          + Number(Boolean(item.estate) === Boolean(product.estate)) * 2
+          + Number(item.currency === product.currency);
+        return score(second) - score(first);
+      }).slice(0, 3)
   );
   renderRecentlyViewedShelf("[data-related-products]", product.slug);
 
   const actionGroup = page.querySelector(".product-action-group");
+
+  if (actionGroup && product.shipping && !page.querySelector("[data-product-order-note]")) {
+    const orderNote = document.createElement("div");
+    orderNote.className = "product-order-note";
+    orderNote.dataset.productOrderNote = "";
+    const label = document.createElement("strong");
+    label.textContent = "Ordering your piece";
+    const detail = document.createElement("p");
+    detail.textContent = product.shipping;
+    const deliveryLink = document.createElement("a");
+    deliveryLink.href = "/shipping-returns.html";
+    deliveryLink.textContent = "Delivery & returns";
+    orderNote.append(label, detail, deliveryLink);
+    actionGroup.insertAdjacentElement("afterend", orderNote);
+  }
 
   if (actionGroup && isPurchasable(product) && !actionGroup.querySelector("[data-buy-now]")) {
     const inquiry = actionGroup.querySelector("[data-product-inquiry]");
@@ -1734,8 +1959,8 @@ function renderProductPage() {
     buyButton.className = "button";
     buyButton.type = "button";
     buyButton.dataset.buyNow = product.slug;
-    buyButton.textContent = `Buy now · ${checkoutPriceLabel(product)}`;
-    buyButton.addEventListener("click", () => startStripeCheckout([{ slug: product.slug, quantity: 1 }], buyButton));
+    buyButton.textContent = "Request order confirmation";
+    buyButton.addEventListener("click", () => startOrderInquiry([{ slug: product.slug, quantity: 1 }]));
     actionGroup.insertBefore(buyButton, actionGroup.firstChild);
 
     const addButton = document.createElement("button");
@@ -1795,15 +2020,23 @@ function renderProductPage() {
 }
 
 function setupFaq() {
-  document.querySelectorAll(".faq-item").forEach((item) => {
+  document.querySelectorAll(".faq-item").forEach((item, index) => {
     const trigger = item.querySelector(".faq-question");
-    if (!trigger) {
+    const answer = item.querySelector(".faq-answer");
+    if (!trigger || !answer) {
       return;
     }
-
-    trigger.addEventListener("click", () => {
-      item.classList.toggle("is-open");
-    });
+    if (!answer.id) answer.id = `faq-answer-${index + 1}`;
+    trigger.setAttribute("aria-controls", answer.id);
+    const setExpanded = (expanded) => {
+      item.classList.toggle("is-open", expanded);
+      trigger.setAttribute("aria-expanded", String(expanded));
+      answer.hidden = !expanded;
+      // Long answers remain readable at narrow widths and larger text sizes.
+      answer.style.maxHeight = expanded ? "none" : "";
+    };
+    setExpanded(item.classList.contains("is-open"));
+    trigger.addEventListener("click", () => setExpanded(trigger.getAttribute("aria-expanded") !== "true"));
   });
 }
 
@@ -1972,7 +2205,7 @@ let arModulePromise;
 
 function loadDesignerModule() {
   if (!designerModulePromise) {
-    designerModulePromise = import("/assets/js/designer.js");
+    designerModulePromise = import("/assets/js/designer.js?v=20260912-studio-session3");
   }
 
   return designerModulePromise;
@@ -1980,7 +2213,7 @@ function loadDesignerModule() {
 
 function loadArModule() {
   if (!arModulePromise) {
-    arModulePromise = import("/assets/js/ar-tryon.js");
+    arModulePromise = import("/assets/js/ar-tryon.js?v=20260911-ar-live3");
   }
 
   return arModulePromise;
@@ -2009,7 +2242,14 @@ function setupLazyFeatureModules() {
   }, true);
 
   if (window.location.hash === "#design-studio") {
-    loadDesignerModule();
+    loadDesignerModule().then(() => {
+      const studio = document.querySelector("[data-design-studio]");
+      if (window.location.hash === "#design-studio" && studio && !studio.hidden) {
+        studio.scrollIntoView({ block: "start" });
+      }
+    }).catch(() => {
+      window.tjToast?.("The studio could not load. Please refresh or start a custom request.", { tone: "error" });
+    });
   }
 }
 
@@ -2780,15 +3020,28 @@ function setupAppointmentModal() {
   }
 
   const form = modal.querySelector("[data-appointment-form]");
+  const panel = modal.querySelector(".modal__dialog");
   const triggers = document.querySelectorAll("[data-appointment-trigger]");
+  if (!panel) return;
+  panel.tabIndex = -1;
+  modal.inert = true;
+  let previousFocus = null;
+  let restoreBackground = null;
 
   const closeModal = () => {
+    if (!modal.classList.contains("is-open")) return;
     modal.classList.remove("is-open");
     modal.setAttribute("aria-hidden", "true");
+    modal.inert = true;
+    restoreBackground?.();
+    restoreBackground = null;
     document.body.classList.remove("modal-open");
+    if (previousFocus?.isConnected) previousFocus.focus();
   };
 
-  const openModal = (selectedItem) => {
+  const openModal = (selectedItem, trigger) => {
+    if (document.body.classList.contains("nav-open")) document.querySelector("[data-menu-toggle]")?.click();
+    previousFocus = trigger || document.activeElement;
     if (form) {
       form.dataset.selectedItem = selectedItem;
       syncSelectedPiece(form);
@@ -2800,12 +3053,16 @@ function setupAppointmentModal() {
 
     modal.classList.add("is-open");
     modal.setAttribute("aria-hidden", "false");
+    modal.inert = false;
+    restoreBackground?.();
+    restoreBackground = isolateDialogBackground(modal);
     document.body.classList.add("modal-open");
+    (panel.querySelector("[data-modal-close]") || panel).focus();
   };
 
   triggers.forEach((trigger) => {
     trigger.addEventListener("click", () => {
-      openModal(trigger.dataset.appointmentTrigger || "Selected piece");
+      openModal(trigger.dataset.appointmentTrigger || "Selected piece", trigger);
     });
   });
 
@@ -2814,9 +3071,11 @@ function setupAppointmentModal() {
   });
 
   document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape" && modal.classList.contains("is-open")) {
+    if (!modal.classList.contains("is-open")) return;
+    if (event.key === "Escape") {
+      event.preventDefault();
       closeModal();
-    }
+    } else keepFocusInDialog(event, panel);
   });
 }
 
@@ -2828,17 +3087,44 @@ function shouldAutosaveField(field) {
   return !["bot-field"].includes(field.name);
 }
 
-function readCustomFormDraft() {
-  try {
-    const value = window.localStorage.getItem(CUSTOM_FORM_DRAFT_KEY);
+function customFormDraftKey(form) {
+  return `${CUSTOM_FORM_DRAFT_KEY}:${encodeURIComponent(form.name || form.id || window.location.pathname)}`;
+}
 
-    return value ? JSON.parse(value) : null;
+function legacyDraftFormName(draft) {
+  if (!draft || typeof draft !== "object" || Array.isArray(draft)) return "";
+  if ("contact-name" in draft || "contact-email" in draft) return "contact-inquiry";
+  if ("appointment-name" in draft || "appointment-email" in draft) return "luxury-appointment";
+  if ("piece-type" in draft || "full-name" in draft) return "custom-request";
+  return "";
+}
+
+function readCustomFormDraft(form) {
+  try {
+    const value = window.localStorage.getItem(customFormDraftKey(form));
+    if (value) {
+      const draft = JSON.parse(value);
+      return draft && typeof draft === "object" && !Array.isArray(draft) ? draft : null;
+    }
+    const legacyValue = window.localStorage.getItem(CUSTOM_FORM_DRAFT_KEY);
+    const legacyDraft = legacyValue ? JSON.parse(legacyValue) : null;
+    if (legacyDraftFormName(legacyDraft) !== form.name) return null;
+    // Migrate only an identifiable draft belonging to this form. Leave unknown
+    // legacy data, and drafts for other forms, untouched.
+    try {
+      window.localStorage.setItem(customFormDraftKey(form), JSON.stringify(legacyDraft));
+      window.localStorage.removeItem(CUSTOM_FORM_DRAFT_KEY);
+    } catch (error) {
+      // The matching draft can still be restored when storage is full.
+    }
+    return legacyDraft;
   } catch (error) {
     return null;
   }
 }
 
 function writeCustomFormDraft(form) {
+  if (form.dataset.draftResetting === "true") return;
   try {
     const draft = {};
 
@@ -2864,26 +3150,32 @@ function writeCustomFormDraft(form) {
       draft[field.name] = field.value;
     });
 
-    window.localStorage.setItem(CUSTOM_FORM_DRAFT_KEY, JSON.stringify(draft));
+    window.localStorage.setItem(customFormDraftKey(form), JSON.stringify(draft));
+    form.dispatchEvent(new CustomEvent("tj:draft-saved"));
   } catch (error) {
     // Storage can be blocked in private browsing; the form still works normally.
   }
 }
 
-function clearCustomFormDraft() {
+function clearCustomFormDraft(form) {
   try {
-    window.localStorage.removeItem(CUSTOM_FORM_DRAFT_KEY);
+    window.localStorage.removeItem(customFormDraftKey(form));
+    const legacyValue = window.localStorage.getItem(CUSTOM_FORM_DRAFT_KEY);
+    if (legacyValue && legacyDraftFormName(JSON.parse(legacyValue)) === form.name) {
+      window.localStorage.removeItem(CUSTOM_FORM_DRAFT_KEY);
+    }
   } catch (error) {
     // Nothing to clear if storage is unavailable.
   }
 }
 
 function restoreCustomFormDraft(form) {
-  const draft = readCustomFormDraft();
+  const draft = readCustomFormDraft(form);
 
   if (!draft || typeof draft !== "object") {
     return;
   }
+  form.dataset.draftRestored = "true";
 
   form.querySelectorAll("input, select, textarea").forEach((field) => {
     if (!shouldAutosaveField(field) || !(field.name in draft)) {
@@ -2909,15 +3201,37 @@ function restoreCustomFormDraft(form) {
   });
 }
 
+function resetCustomFormDraft(form) {
+  form.dataset.draftResetting = "true";
+  try {
+    form.reset();
+    form.querySelectorAll("input, select, textarea").forEach((field) => {
+      field.dispatchEvent(new Event("input", { bubbles: true }));
+      field.dispatchEvent(new Event("change", { bubbles: true }));
+    });
+    clearCustomFormDraft(form);
+    delete form.dataset.draftRestored;
+  } finally {
+    delete form.dataset.draftResetting;
+  }
+  form.dispatchEvent(new CustomEvent("tj:draft-cleared"));
+}
+
 function setupCustomForm() {
   document.querySelectorAll("[data-custom-form]").forEach((form) => {
     const status = form.querySelector("[data-form-status]") || form.parentElement?.querySelector("[data-form-status]");
     const submitButton = form.querySelector('button[type="submit"]');
     const defaultSubmitLabel = submitButton ? submitButton.textContent : "Submit";
+    if (status) {
+      status.setAttribute("role", "status");
+      status.setAttribute("aria-live", "polite");
+      status.setAttribute("aria-atomic", "true");
+    }
 
     restoreCustomFormDraft(form);
     applyGuideRecommendationToForm(recommendationFromGuideParams());
     applyProductInquiryToForm(productInquiryFromParams());
+    applyOrderInquiryToForm(form);
     form.addEventListener("input", () => writeCustomFormDraft(form));
     form.addEventListener("change", () => writeCustomFormDraft(form));
 
@@ -2950,11 +3264,7 @@ function setupCustomForm() {
           throw new Error("Form submission failed");
         }
 
-        form.reset();
-        clearCustomFormDraft();
-        form.querySelectorAll("input, select, textarea").forEach((field) => {
-          field.dispatchEvent(new Event("change", { bubbles: true }));
-        });
+        resetCustomFormDraft(form);
 
         if (form.hasAttribute("data-appointment-form")) {
           syncSelectedPiece(form);
@@ -2967,7 +3277,10 @@ function setupCustomForm() {
         }
       } catch (error) {
         if (status) {
-          status.textContent = "Submission failed. Please try again in a moment or email us directly.";
+          const emailLink = document.createElement("a");
+          emailLink.href = "mailto:info@torontojewelscuration.com";
+          emailLink.textContent = "email our atelier";
+          status.replaceChildren("We couldn’t send your request. Your details are still here. Please try again or ", emailLink, ".");
         }
       } finally {
         if (submitButton) {
@@ -3485,6 +3798,7 @@ function setupHeroMotion() {
 }
 
 function setupDepthCards(scope = document) {
+  if (document.body.dataset.experience === "atelier") return;
   const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
 
   if (mediaQuery.matches) {
@@ -3559,6 +3873,7 @@ function setupDepthCards(scope = document) {
 }
 
 function setupMagneticActions(scope = document) {
+  if (document.body.dataset.experience === "atelier") return;
   const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
 
   if (mediaQuery.matches) {
@@ -3710,14 +4025,24 @@ function setupCartIcon() {
   if (!buttons.length) return;
 
   let previousFocus = null;
+  let restoreBackground = null;
+  let closeTimer = null;
+  let cartIsOpen = false;
   const closeCart = () => {
     const modal = document.querySelector("[data-cart-modal]");
-    if (!modal) return;
+    if (!modal || !cartIsOpen) return;
+    cartIsOpen = false;
     modal.classList.remove("is-open");
     modal.setAttribute("aria-hidden", "true");
+    modal.inert = true;
+    restoreBackground?.();
+    restoreBackground = null;
     document.body.classList.remove("modal-open");
-    window.setTimeout(() => { modal.hidden = true; }, 180);
-    previousFocus?.focus?.();
+    closeTimer = window.setTimeout(() => {
+      if (!cartIsOpen) modal.hidden = true;
+      closeTimer = null;
+    }, 180);
+    if (previousFocus?.isConnected) previousFocus.focus();
   };
 
   const renderCart = () => {
@@ -3726,10 +4051,21 @@ function setupCartIcon() {
     const items = cartDetails();
     const content = modal.querySelector("[data-cart-content]");
     const footer = modal.querySelector("[data-cart-footer]");
+    const activeControl = content.contains(document.activeElement) ? document.activeElement : null;
+    const activeLine = activeControl?.closest("[data-cart-line]");
+    const lineIndex = activeLine ? [...content.querySelectorAll("[data-cart-line]")].indexOf(activeLine) : -1;
+    const restoreLineFocus = () => {
+      if (!cartIsOpen || !activeControl) return;
+      const currentLine = [...content.querySelectorAll("[data-cart-line]")].find((line) => line.dataset.cartLine === activeLine?.dataset.cartLine);
+      const nextLine = currentLine || content.querySelectorAll("[data-cart-line]")[Math.min(lineIndex, items.length - 1)];
+      const selector = activeControl.matches("[data-cart-quantity]") && currentLine ? "[data-cart-quantity]" : "[data-cart-remove]";
+      (nextLine?.querySelector(selector) || content.querySelector("a") || modal.querySelector(".cart-modal__panel [data-cart-close]"))?.focus();
+    };
 
     if (!items.length) {
       content.innerHTML = '<div class="cart-empty"><p>Your bag is empty.</p><a class="button" href="/shop.html">Explore the collection</a></div>';
       footer.hidden = true;
+      restoreLineFocus();
       return;
     }
 
@@ -3747,7 +4083,7 @@ function setupCartIcon() {
                   .join("")}
               </select>
             </label>
-            <button type="button" data-cart-remove="${product.slug}">Remove</button>
+            <button type="button" data-cart-remove="${product.slug}" aria-label="Remove ${escapeHtml(product.name)} from your bag">Remove</button>
           </div>
         </div>
       </article>
@@ -3771,9 +4107,16 @@ function setupCartIcon() {
         writeCart(readCart().filter((item) => item.slug !== button.dataset.cartRemove));
       });
     });
+    restoreLineFocus();
   };
 
   const openCart = (trigger) => {
+    if (cartIsOpen) return;
+    if (closeTimer) {
+      window.clearTimeout(closeTimer);
+      closeTimer = null;
+    }
+    if (document.body.classList.contains("nav-open")) document.querySelector("[data-menu-toggle]")?.click();
     previousFocus = trigger;
     let modal = document.querySelector("[data-cart-modal]");
     if (!modal) {
@@ -3785,28 +4128,37 @@ function setupCartIcon() {
       modal.setAttribute("aria-modal", "true");
       modal.setAttribute("aria-labelledby", "cart-title");
       modal.innerHTML = `
-        <button class="cart-modal__scrim" type="button" data-cart-close aria-label="Close shopping bag"></button>
-        <section class="cart-modal__panel">
-          <header class="cart-modal__header"><div><span class="eyebrow">Secure checkout</span><h2 id="cart-title">Your bag</h2></div><button class="icon-button" type="button" data-cart-close aria-label="Close shopping bag">×</button></header>
+        <div class="cart-modal__scrim" data-cart-close aria-hidden="true"></div>
+        <section class="cart-modal__panel" tabindex="-1">
+          <header class="cart-modal__header"><div><span class="eyebrow">Your selection</span><h2 id="cart-title">Your bag</h2></div><button class="icon-button" type="button" data-cart-close aria-label="Close shopping bag">×</button></header>
           <div class="cart-modal__content" data-cart-content></div>
           <footer class="cart-modal__footer" data-cart-footer>
-            <div><span>Subtotal</span><strong data-cart-total></strong></div>
-            <p>Shipping address is collected securely by Stripe. Taxes or delivery arrangements, where applicable, are confirmed with your order.</p>
-            <button class="button" type="button" data-cart-checkout>Continue to secure checkout</button>
-            <span class="cart-modal__secure">Payments securely processed by Stripe</span>
+            <div><span>Listed subtotal</span><strong data-cart-total></strong></div>
+            <p>We will confirm availability, specifications, final price, timing, delivery, and applicable terms in writing before payment.</p>
+            <button class="button" type="button" data-cart-checkout>Request order confirmation</button>
+            <span class="cart-modal__secure">No payment is taken with this enquiry</span>
           </footer>
         </section>`;
       document.body.appendChild(modal);
       modal.querySelectorAll("[data-cart-close]").forEach((button) => button.addEventListener("click", closeCart));
-      modal.querySelector("[data-cart-checkout]").addEventListener("click", (event) => startStripeCheckout(readCart(), event.currentTarget));
-      modal.addEventListener("keydown", (event) => { if (event.key === "Escape") closeCart(); });
+      modal.querySelector("[data-cart-checkout]").addEventListener("click", () => startOrderInquiry(readCart()));
+      modal.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") { event.preventDefault(); closeCart(); }
+        else keepFocusInDialog(event, modal.querySelector(".cart-modal__panel"));
+      });
     }
     renderCart();
     modal.hidden = false;
+    modal.inert = false;
     modal.removeAttribute("aria-hidden");
+    cartIsOpen = true;
+    restoreBackground = isolateDialogBackground(modal);
     document.body.classList.add("modal-open");
-    requestAnimationFrame(() => modal.classList.add("is-open"));
-    modal.querySelector("[data-cart-close]")?.focus();
+    requestAnimationFrame(() => {
+      if (!cartIsOpen) return;
+      modal.classList.add("is-open");
+      modal.querySelector(".cart-modal__panel [data-cart-close]")?.focus();
+    });
   };
 
   buttons.forEach((button) => {
@@ -3892,166 +4244,128 @@ async function setupCheckoutResult() {
 
 function setupSearchModal() {
   const triggers = document.querySelectorAll('.icon-button[aria-label="Search catalogue"]');
-  if (!triggers.length) {
-    return;
-  }
-
-  let modal = null;
-  let input = null;
-  let resultList = null;
+  if (!triggers.length) return;
+  let modal;
+  let input;
+  let results;
+  let lastFocus;
   let activeIndex = -1;
-  let lastFocus = null;
-
-  const buildModal = () => {
+  let previousInert = false;
+  const shell = document.querySelector(".page-shell");
+  const close = () => {
+    if (!modal || modal.hidden) return;
+    modal.classList.remove("is-open");
+    document.body.classList.remove("search-open");
+    if (shell) shell.inert = previousInert;
+    input.setAttribute("aria-expanded", "false");
+    modal.hidden = true;
+    if (lastFocus?.isConnected) lastFocus.focus();
+  };
+  const setActive = (index, scroll = false) => {
+    const options = results.querySelectorAll('[role="option"]');
+    activeIndex = options.length ? (index + options.length) % options.length : -1;
+    options.forEach((option, optionIndex) => {
+      const active = optionIndex === activeIndex;
+      option.setAttribute("aria-selected", String(active));
+      option.closest("li").classList.toggle("is-active", active);
+    });
+    if (activeIndex < 0) input.removeAttribute("aria-activedescendant");
+    else {
+      input.setAttribute("aria-activedescendant", options[activeIndex].id);
+      if (scroll) options[activeIndex].scrollIntoView({ block: "nearest" });
+    }
+  };
+  const render = (query) => {
+    const matches = query.trim()
+      ? products.filter((product) => matchesProductQuery(product, query)).slice(0, 8)
+      : products.filter((product) => product.featured).slice(0, 6);
+    results.innerHTML = matches.map((product, index) => `
+      <li class="search-result" role="presentation">
+        <a id="catalogue-result-${index}" role="option" aria-selected="false" tabindex="-1" href="${productUrl(product)}">
+          <img src="${product.heroImage}" alt="" width="60" height="70" loading="lazy">
+          <span class="search-result__body"><strong>${highlight(product.name, query.trim())}</strong><small>${product.category} · ${productPriceLabel(product)}</small></span>
+          <span aria-hidden="true">↗</span>
+        </a>
+      </li>
+    `).join("");
+    const empty = modal.querySelector("[data-search-empty]");
+    empty.hidden = Boolean(matches.length);
+    modal.querySelector("[data-search-status]").textContent = matches.length
+      ? matches.length + " suggestions. Use arrow keys to explore."
+      : "No pieces match. Try a material, stone or jewellery type.";
+    results.querySelectorAll(".search-result").forEach((result, index) => {
+      result.addEventListener("mouseenter", () => setActive(index));
+    });
+    setActive(0);
+  };
+  const build = () => {
     modal = document.createElement("div");
     modal.className = "search-modal";
     modal.setAttribute("role", "dialog");
     modal.setAttribute("aria-modal", "true");
-    modal.setAttribute("aria-label", "Search catalogue");
+    modal.setAttribute("aria-label", "Find your next piece");
     modal.hidden = true;
     modal.innerHTML = `
       <div class="search-modal__overlay" data-search-close></div>
       <div class="search-modal__panel">
         <div class="search-modal__bar">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="1.6"/>
-            <path d="M16 16L21 21" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
-          </svg>
-          <input type="search" class="search-modal__input" placeholder="Search pieces, materials, stones…" autocomplete="off" aria-label="Search">
-          <kbd class="search-modal__hint">Esc</kbd>
+          <input type="search" class="search-modal__input" role="combobox" aria-expanded="true" aria-autocomplete="list" aria-controls="catalogue-results" aria-label="Search pieces, materials and stones" placeholder="Find something that feels like you…" maxlength="120" autocomplete="off">
+          <button class="search-modal__close" type="button" data-search-close aria-label="Close search">×</button>
         </div>
-        <ul class="search-modal__results" role="listbox"></ul>
-        <div class="search-modal__footer">
-          <span><kbd>↑</kbd><kbd>↓</kbd> navigate</span>
-          <span><kbd>Enter</kbd> open</span>
-          <span><kbd>/</kbd> focus</span>
-        </div>
+        <ul class="search-modal__results" id="catalogue-results" role="listbox" aria-label="Suggested pieces"></ul>
+        <div class="search-modal__empty" data-search-empty hidden><p>No pieces match. Try a material, stone or jewellery type.</p><a class="atelier-link" href="/shop.html">Explore the collection <span aria-hidden="true">↗</span></a></div>
+        <p class="sr-only" data-search-status role="status"></p>
+        <div class="search-modal__footer"><span><kbd>↑</kbd><kbd>↓</kbd> explore</span><span><kbd>Enter</kbd> open</span><span><kbd>Esc</kbd> close</span></div>
       </div>
     `;
     document.body.appendChild(modal);
-
-    input = modal.querySelector(".search-modal__input");
-    resultList = modal.querySelector(".search-modal__results");
-
+    input = modal.querySelector("input");
+    results = modal.querySelector("[role=listbox]");
     modal.addEventListener("click", (event) => {
-      if (event.target.closest("[data-search-close]")) {
-        closeModal();
-      }
+      if (event.target.closest("[data-search-close]")) close();
     });
-
+    modal.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") { event.preventDefault(); close(); }
+      else keepFocusInDialog(event, modal.querySelector(".search-modal__panel"));
+    });
     input.addEventListener("input", () => render(input.value));
-    input.addEventListener("keydown", onKeydown);
-    render("");
-  };
-
-  const render = (query) => {
-    const q = query.trim().toLowerCase();
-    const matches = q
-      ? products.filter((p) =>
-          [p.name, p.category, p.materials, p.shortDescription]
-            .filter(Boolean)
-            .some((v) => v.toLowerCase().includes(q))
-        ).slice(0, 8)
-      : products.filter((p) => p.featured).slice(0, 6);
-
-    activeIndex = matches.length ? 0 : -1;
-
-    if (!matches.length) {
-      resultList.innerHTML = `<li class="search-modal__empty">No pieces match “${escapeHtml(query)}”. Try a category like rings or necklaces.</li>`;
-      return;
-    }
-
-    resultList.innerHTML = matches.map((p, i) => `
-      <li role="option" class="search-result${i === 0 ? " is-active" : ""}" data-slug="${p.slug}">
-        <a href="${productUrl(p)}">
-          <img src="${p.heroImage}" alt="" loading="lazy">
-          <span class="search-result__body">
-            <strong>${highlight(p.name, q)}</strong>
-            <small>${p.category} · ${productPriceLabel(p)}</small>
-          </span>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <path d="M5 12H19" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
-            <path d="M13 6L19 12L13 18" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </a>
-      </li>
-    `).join("");
-
-    resultList.querySelectorAll(".search-result").forEach((el, i) => {
-      el.addEventListener("mouseenter", () => setActive(i));
+    input.addEventListener("keydown", (event) => {
+      if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+        event.preventDefault();
+        setActive(activeIndex + (event.key === "ArrowDown" ? 1 : -1), true);
+      } else if (event.key === "Enter") {
+        const option = results.querySelectorAll('[role="option"]')[activeIndex];
+        if (option) { event.preventDefault(); option.click(); }
+      }
     });
   };
-
-  const setActive = (index) => {
-    const items = resultList.querySelectorAll(".search-result");
-    if (!items.length) return;
-    activeIndex = (index + items.length) % items.length;
-    items.forEach((item, i) => item.classList.toggle("is-active", i === activeIndex));
-    items[activeIndex].scrollIntoView({ block: "nearest" });
-  };
-
-  const onKeydown = (event) => {
-    if (event.key === "ArrowDown") {
-      event.preventDefault();
-      setActive(activeIndex + 1);
-    } else if (event.key === "ArrowUp") {
-      event.preventDefault();
-      setActive(activeIndex - 1);
-    } else if (event.key === "Enter") {
-      const items = resultList.querySelectorAll(".search-result");
-      if (items[activeIndex]) {
-        const link = items[activeIndex].querySelector("a");
-        if (link) {
-          window.location.href = link.href;
-        }
-      }
-    } else if (event.key === "Escape") {
-      closeModal();
-    }
-  };
-
-  const openModal = () => {
-    if (!modal) buildModal();
-    lastFocus = document.activeElement;
+  const open = (event) => {
+    if (!modal) build();
+    if (!modal.hidden) { input.focus(); return; }
+    if (document.body.classList.contains("nav-open")) document.querySelector("[data-menu-toggle]")?.click();
+    lastFocus = event?.currentTarget || document.activeElement;
+    if (shell) { previousInert = shell.inert; shell.inert = true; }
     modal.hidden = false;
+    input.value = "";
+    input.setAttribute("aria-expanded", "true");
+    render("");
     document.body.classList.add("search-open");
     requestAnimationFrame(() => {
+      if (modal.hidden) return;
       modal.classList.add("is-open");
-      input.value = "";
-      render("");
       input.focus();
     });
   };
-
-  const closeModal = () => {
-    if (!modal || modal.hidden) return;
-    modal.classList.remove("is-open");
-    document.body.classList.remove("search-open");
-    window.setTimeout(() => {
-      modal.hidden = true;
-      if (lastFocus && lastFocus.focus) {
-        lastFocus.focus();
-      }
-    }, 200);
-  };
-
-  triggers.forEach((trigger) => {
-    trigger.addEventListener("click", openModal);
-  });
-
+  triggers.forEach((trigger) => trigger.addEventListener("click", open));
   document.addEventListener("keydown", (event) => {
-    const target = event.target;
-    const typing = target && target.matches && target.matches('input, textarea, select, [contenteditable="true"]');
-    const mod = event.ctrlKey || event.metaKey;
-
-    if (mod && event.key.toLowerCase() === "k") {
-      event.preventDefault();
-      openModal();
-      return;
-    }
-    if (event.key === "/" && !typing && !mod) {
-      event.preventDefault();
-      openModal();
+    const typing = event.target.closest?.('input, textarea, select, [contenteditable="true"]');
+    const modifier = event.ctrlKey || event.metaKey;
+    if ((modifier && event.key.toLowerCase() === "k") || (event.key === "/" && !typing && !modifier)) {
+      const anotherDialog = [...document.querySelectorAll('[aria-modal="true"]')].some((dialog) =>
+        dialog !== modal && !dialog.hidden && dialog.getAttribute("aria-hidden") !== "true"
+        && dialog.getClientRects().length && getComputedStyle(dialog).visibility !== "hidden"
+      );
+      if (!anotherDialog) { event.preventDefault(); open(); }
     }
   });
 }
@@ -4264,7 +4578,7 @@ function setupCustomFormProgress() {
   form.addEventListener("change", update);
   update();
 
-  // Draft saved indicator — hook into the same input/change autosave flow
+  // Announce only successful storage writes, including when storage is blocked.
   const draftIndicator = wrap.querySelector("[data-form-draft-indicator]");
   const draftText = wrap.querySelector("[data-form-draft-text]");
   let saveTimer = null;
@@ -4293,8 +4607,13 @@ function setupCustomFormProgress() {
     saveTimer = window.setTimeout(flashDraftSaved, 350);
   };
 
-  form.addEventListener("input", onChange);
-  form.addEventListener("change", onChange);
+  form.addEventListener("tj:draft-saved", onChange);
+  form.addEventListener("tj:draft-cleared", () => {
+    if (saveTimer) clearTimeout(saveTimer);
+    lastSaved = 0;
+    draftIndicator.hidden = true;
+    wrap.querySelector(".form-progress__clear")?.remove();
+  });
 
   // Refresh "Xs ago" label periodically
   window.setInterval(() => {
@@ -4305,7 +4624,7 @@ function setupCustomFormProgress() {
 
   // If a draft already exists on load, show indicator
   try {
-    if (window.localStorage.getItem(CUSTOM_FORM_DRAFT_KEY)) {
+    if (form.dataset.draftRestored === "true") {
       draftIndicator.hidden = false;
       draftText.textContent = "Draft restored";
       lastSaved = Date.now() - 60000;
@@ -4358,7 +4677,7 @@ function setupCustomFormProgress() {
 
   // "Clear draft" button — only shown when a saved draft is restored
   try {
-    if (window.localStorage.getItem(CUSTOM_FORM_DRAFT_KEY)) {
+    if (form.dataset.draftRestored === "true") {
       const clearBtn = document.createElement("button");
       clearBtn.type = "button";
       clearBtn.className = "form-progress__clear";
@@ -4367,14 +4686,7 @@ function setupCustomFormProgress() {
       wrap.querySelector(".form-progress__row").appendChild(clearBtn);
       clearBtn.addEventListener("click", () => {
         if (!window.confirm("Clear the saved draft and reset the form?")) return;
-        clearCustomFormDraft();
-        form.reset();
-        form.querySelectorAll("input, select, textarea").forEach((f) => {
-          f.dispatchEvent(new Event("input", { bubbles: true }));
-          f.dispatchEvent(new Event("change", { bubbles: true }));
-        });
-        clearBtn.remove();
-        draftIndicator.hidden = true;
+        resetCustomFormDraft(form);
         if (window.tjToast) window.tjToast("Draft cleared", { tone: "warn" });
       });
     }
@@ -4606,6 +4918,16 @@ function setupVipWelcome() {
   document.body.appendChild(wrapper);
 
   const drawer = wrapper.querySelector(".vip-welcome__drawer");
+  wrapper.inert = true;
+  let lastFocus = null;
+  let previousInert = false;
+  const shell = document.querySelector(".page-shell");
+  const invite = document.createElement("button");
+  invite.type = "button";
+  invite.className = "footer-private-list";
+  invite.dataset.vipOpen = "";
+  invite.textContent = "Join the private list ↗";
+  document.querySelector(".footer-brand")?.appendChild(invite);
   const form = wrapper.querySelector("[data-vip-form]");
   const status = wrapper.querySelector("[data-vip-status]");
   const success = wrapper.querySelector("[data-vip-success]");
@@ -4613,14 +4935,21 @@ function setupVipWelcome() {
   const remember = () => {
     try { window.localStorage.setItem("tj-vip-welcome-seen-v1", "true"); } catch (error) { /* storage is optional */ }
   };
-  const open = () => {
+  const open = (event) => {
+    lastFocus = event?.currentTarget || document.activeElement;
+    if (shell) { previousInert = shell.inert; shell.inert = true; }
+    wrapper.inert = false;
     wrapper.classList.add("is-open");
     drawer?.setAttribute("aria-hidden", "false");
     document.body.classList.add("vip-open");
-    window.setTimeout(() => drawer?.focus(), 80);
+    drawer?.focus();
     recordSiteEvent("vip_offer_view");
   };
   const close = () => {
+    if (!wrapper.classList.contains("is-open")) return;
+    if (shell) shell.inert = previousInert;
+    if (lastFocus?.isConnected) lastFocus.focus();
+    wrapper.inert = true;
     wrapper.classList.remove("is-open");
     drawer?.setAttribute("aria-hidden", "true");
     document.body.classList.remove("vip-open");
@@ -4628,9 +4957,11 @@ function setupVipWelcome() {
   };
 
   wrapper.querySelectorAll("[data-vip-close]").forEach((button) => button.addEventListener("click", close));
-  wrapper.querySelector("[data-vip-open]")?.addEventListener("click", open);
+  document.querySelectorAll("[data-vip-open]").forEach((button) => button.addEventListener("click", open));
   document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape" && wrapper.classList.contains("is-open")) close();
+    if (!wrapper.classList.contains("is-open")) return;
+    if (event.key === "Escape") close();
+    else keepFocusInDialog(event, drawer);
   });
 
   form?.addEventListener("submit", async (event) => {
@@ -4657,9 +4988,6 @@ function setupVipWelcome() {
     }
   });
 
-  let hasSeen = false;
-  try { hasSeen = window.localStorage.getItem("tj-vip-welcome-seen-v1") === "true"; } catch (error) { /* storage is optional */ }
-  if (!hasSeen) window.setTimeout(open, 900);
 }
 
 function setupTrustAssurances() {
@@ -4730,6 +5058,7 @@ document.addEventListener("DOMContentLoaded", () => {
   setupBackToTop();
   setupCartIcon();
   renderFeaturedProducts();
+  setupEditorialHome();
   setupShopFilters();
   renderProductPage();
   setupFaq();

@@ -4,3 +4,7 @@
 # macOS metadata
 .DS_Store
 **/.DS_Store
+
+# Local offline render outputs
+renders/
+__pycache__/

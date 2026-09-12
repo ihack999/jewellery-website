@@ -1,0 +1,428 @@
+:root {
+  --bg: #f8f6f1;
+  --surface: #fcfaf6;
+  --surface-alt: #eeebe4;
+  --surface-muted: #f4f1eb;
+  --ink: #252820;
+  --heading: #252820;
+  --text: #33362f;
+  --muted: #706e65;
+  --primary: #343c30;
+  --primary-deep: #242b23;
+  --accent: #826944;
+  --line: #ded9cf;
+  --line-strong: #afa99b;
+  --champagne: #eee8dc;
+  --container: min(1380px, calc(100% - 96px));
+}
+
+body[data-experience="atelier"] { background: var(--bg); }
+body[data-experience="atelier"].nav-open { overflow: hidden; }
+body:not([data-navigation-ready]) .header-actions .icon-button,
+body:not([data-navigation-ready]) .header-actions .menu-toggle { display: none; }
+body[data-experience="atelier"]::before { display: none; }
+body[data-experience="atelier"] h1,
+body[data-experience="atelier"] h2,
+body[data-experience="atelier"] h3 { font-weight: 400; letter-spacing: -.035em; }
+body[data-experience="atelier"] h1,
+body[data-experience="atelier"] h2 { line-height: 1.04; }
+body[data-experience="atelier"] ::selection { background: #d9d1be; color: #252820; }
+body[data-experience="atelier"] :focus-visible { outline: 2px solid #826944; outline-offset: 5px; }
+body[data-experience="atelier"] [hidden] { display: none !important; }
+body[data-experience="atelier"] .scroll-progress { display: none; }
+body[data-experience="atelier"] .section--surface { background: var(--bg); }
+body[data-experience="atelier"] .section--soft { background: #f0ede5; }
+body[data-experience="atelier"] .eyebrow { color: var(--muted); font-size: 10px; font-weight: 500; letter-spacing: .17em; }
+body[data-experience="atelier"] .eyebrow::before { display: none; }
+body[data-experience="atelier"] .accent-rule { height: 1px; width: 34px; margin-block: 16px; background: #a99d85; box-shadow: none; }
+body[data-experience="atelier"] .button,
+body[data-experience="atelier"] .header-cta { background: var(--primary-deep); border: 1px solid var(--primary-deep); color: #fffef9; border-radius: 0; box-shadow: none; font-weight: 500; }
+body[data-experience="atelier"] .button-secondary { background: transparent; color: var(--ink); border: 1px solid var(--line-strong); border-radius: 0; box-shadow: none; font-weight: 500; }
+body[data-experience="atelier"] .button::before,
+body[data-experience="atelier"] .button-secondary::before { display: none; }
+body[data-experience="atelier"] .button:hover,
+body[data-experience="atelier"] .header-cta:hover { background: #45503e; color: #fff; }
+body[data-experience="atelier"] .button-secondary:hover { background: #e9e4d9; color: #252820; }
+
+.announcement-bar { background: #272f26; color: #e8e8de; min-height: 30px; border: 0; }
+.announcement-bar__inner { min-height: 30px; padding-block: 6px; font-size: 9px; font-weight: 400; letter-spacing: .12em; }
+.site-header { background: #faf8f2; border-bottom: 1px solid #ded9cf; backdrop-filter: none; box-shadow: none; }
+.site-header.is-scrolled { background: #faf8f2; box-shadow: 0 4px 22px #25282008; }
+.site-header__inner { width: calc(100% - 72px); max-width: 1520px; min-height: 90px; grid-template-columns: 260px minmax(0, 1fr) auto; gap: 20px; padding-block: 12px; }
+.brand { width: 260px; }
+.brand img { filter: grayscale(1); }
+.primary-nav__list { gap: clamp(14px, 1.8vw, 28px); }
+.primary-nav a { font-size: 10px; text-transform: uppercase; letter-spacing: .08em; font-weight: 500; padding-block: 10px; }
+.primary-nav a::after { height: 1px; background: #7c6c50; }
+.header-actions { gap: 8px; }
+.header-actions .icon-button { display: inline-flex; }
+.header-actions .header-cta { font-size: 10px; min-height: 42px; padding: 10px 16px; letter-spacing: .02em; }
+.header-actions .icon-button,
+.header-actions .menu-toggle { width: 40px; height: 42px; border: 0; border-radius: 0; box-shadow: none; background: transparent; color: #252820; }
+.header-actions .icon-button:hover,
+.header-actions .menu-toggle:hover { background: #eee8dc; }
+
+.atelier-container { width: min(1380px, calc(100% - 96px)); margin-inline: auto; }
+.atelier-section { padding-block: clamp(72px, 8vw, 120px); }
+.editorial-kicker { margin: 0 0 25px; font: 500 10px/1.5 "Manrope", sans-serif; letter-spacing: .18em; text-transform: uppercase; }
+.editorial-hero { display: grid; grid-template-columns: 46% 54%; min-height: min(790px, calc(100svh - 120px)); background: #eeeae0; }
+.editorial-hero__copy { padding: clamp(55px, 6vw, 100px) 8% 24px 10%; display: flex; flex-direction: column; align-items: flex-start; }
+.editorial-hero h1 { font-size: clamp(68px, 7.15vw, 114px); font-family: "Cormorant Garamond", Georgia, serif; font-weight: 400; line-height: .96; letter-spacing: -.055em; margin: 24px 0 30px; white-space: nowrap; }
+.editorial-hero h1 em { color: #747b63; font-weight: 400; }
+.editorial-hero__intro { font-size: 13px; line-height: 1.9; color: #68695e; margin: 0 0 35px; }
+.editorial-actions { display: flex; flex-direction: column; align-items: flex-start; gap: 25px; }
+.atelier-button { display: inline-flex; align-items: center; justify-content: space-between; gap: 30px; min-height: 52px; padding: 15px 24px; background: #293025; color: #faf8f1; border: 1px solid #293025; font-size: 11px; font-weight: 500; transition: background .2s; }
+.atelier-button:hover { background: #49563c; color: #fff; }
+.atelier-button > span { font-size: 18px; }
+.atelier-button--light { background: #eeece2; border-color: #eeece2; color: #293025; }
+.atelier-button--light:hover { background: #d7dcc9; color: #293025; }
+.atelier-link { display: inline-flex; align-items: center; justify-content: space-between; gap: 24px; font: 500 11px/1.5 "Manrope", sans-serif; padding-block: 8px; border-bottom: 1px solid currentColor; width: fit-content; }
+.atelier-link > span:last-child { font-size: 17px; transition: transform .2s; }
+.atelier-link:hover > span:last-child { transform: translate(2px, -2px); }
+.editorial-hero__footnote { display: flex; justify-content: space-between; align-items: center; width: 100%; margin-top: auto; padding-top: 58px; font-size: 8px; letter-spacing: .12em; text-transform: uppercase; color: #747566; }
+.editorial-hero__footnote a { display: grid; place-items: center; width: 42px; height: 42px; border: 1px solid #c6c7b9; border-radius: 50%; font-size: 16px; }
+.editorial-hero__visual { position: relative; overflow: hidden; min-height: 580px; }
+.editorial-hero__visual > img { width: 100%; height: 100%; position: absolute; inset: 0; object-fit: cover; object-position: 50% 51%; }
+.editorial-hero__side { position: absolute; top: 32px; right: 20px; writing-mode: vertical-rl; font-size: 8px; letter-spacing: .2em; text-transform: uppercase; color: #fefdf5; mix-blend-mode: difference; }
+.editorial-hero__caption { position: absolute; bottom: 26px; left: 30px; right: 30px; display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 17px 21px; background: #fbf9f1eb; color: #33382b; font: 400 21px/1.2 "Cormorant Garamond", Georgia, serif; }
+.editorial-hero__caption small { display: block; margin-bottom: 6px; font: 500 8px/1.4 "Manrope", sans-serif; letter-spacing: .14em; text-transform: uppercase; }
+.editorial-hero__caption > span:last-child { font-family: "Manrope", sans-serif; font-size: 22px; }
+.atelier-marquee { padding: 23px 48px; display: flex; align-items: center; justify-content: space-evenly; gap: 30px; border-bottom: 1px solid var(--line); font-size: 9px; text-transform: uppercase; letter-spacing: .12em; }
+.atelier-marquee > span { font-size: 18px; color: #8b8e72; }
+.atelier-marquee a:hover { text-decoration: underline; text-underline-offset: 4px; }
+.atelier-section-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 40px; margin-bottom: 40px; }
+.atelier-section-heading h2 { font: 400 clamp(40px, 4.1vw, 65px)/1.08 "Cormorant Garamond", Georgia, serif; margin: 0; }
+.atelier-section-heading h2 em { color: #777c67; }
+.atelier-section-heading .editorial-kicker { margin-bottom: 15px; color: #737369; }
+.atelier-section-heading > p { margin: 0 0 4px; color: var(--muted); font-size: 12px; line-height: 1.8; }
+.edit-categories { display: flex; gap: 28px; margin-bottom: 28px; border-bottom: 1px solid var(--line); }
+.edit-categories a { padding: 10px 0 15px; border-bottom: 1px solid transparent; font-size: 11px; color: var(--muted); white-space: nowrap; }
+.edit-categories a.is-active { color: var(--ink); border-color: var(--ink); }
+
+body[data-experience="atelier"] .product-grid { gap: 34px 24px; }
+body[data-experience="atelier"] .editorial-product-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+body[data-experience="atelier"] .product-card { border: 0; background: transparent; border-radius: 0; box-shadow: none; overflow: visible; transform: none; }
+body[data-experience="atelier"] .product-card::before,
+body[data-experience="atelier"] .product-card::after { display: none; }
+body[data-experience="atelier"] .product-card__body::before,
+body[data-experience="atelier"] .product-card__media::after,
+body[data-experience="atelier"] .product-card__link::after { display: none; }
+body[data-experience="atelier"] .product-card__link { display: block; }
+body[data-experience="atelier"] .product-card__media { aspect-ratio: 4/5; border-radius: 0; background: #fff; min-height: 0; overflow: hidden; }
+body[data-experience="atelier"] .product-card__media img { width: 100%; height: 100%; object-fit: contain; aspect-ratio: auto; }
+body[data-experience="atelier"] .product-card__link:hover .product-card__media img { transform: none; }
+body[data-experience="atelier"] .product-card__body { padding: 18px 0 0; border: 0; }
+body[data-experience="atelier"] .product-card__body h3 { font: 400 24px/1.1 "Cormorant Garamond", Georgia, serif; letter-spacing: -.015em; margin-bottom: 8px; min-height: 2.2em; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+body[data-experience="atelier"] .product-card__materials { color: var(--muted); font-size: 10px; line-height: 1.65; min-height: 3.3em; margin: 0 0 10px; }
+body[data-experience="atelier"] .product-card__price { font-size: 12px; font-weight: 500; color: var(--ink); border: 0; }
+body[data-experience="atelier"] .product-card .favorite-button,
+body[data-experience="atelier"] .product-card .quick-view-button { display: grid; place-items: center; position: absolute; top: 12px; width: 36px; height: 36px; min-width: 0; min-height: 0; border: 0; border-radius: 50%; background: #faf9f1eb; color: var(--ink); box-shadow: none; padding: 0; z-index: 2; }
+body[data-experience="atelier"] .product-card .favorite-button { right: 12px; left: auto; }
+body[data-experience="atelier"] .product-card .favorite-button [data-favorite-label] { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+body[data-experience="atelier"] .product-card .favorite-button.is-active svg { fill: #6e765f; color: #6e765f; }
+body[data-experience="atelier"] .product-card .quick-view-button { left: 12px; right: auto; opacity: 0; }
+body[data-experience="atelier"] .product-card .compare-button { top: 55px; right: 12px; left: auto; min-height: 30px; padding: 6px 9px; font-size: 8px; border: 0; border-radius: 0; background: #faf9f1ed; color: #343c30; opacity: 0; }
+body[data-experience="atelier"] .product-card:hover .quick-view-button,
+body[data-experience="atelier"] .product-card:focus-within .quick-view-button,
+body[data-experience="atelier"] .product-card:hover .compare-button,
+body[data-experience="atelier"] .product-card:focus-within .compare-button,
+body[data-experience="atelier"] .product-card .compare-button.is-active { opacity: 1; }
+body[data-experience="atelier"] .product-card__gallery { display: flex; gap: 5px; padding: 5px 0; background: none; border: 0; margin: 4px 0 0; }
+body[data-experience="atelier"] .product-card__thumb { display: grid; place-items: center; width: 24px; height: 28px; min-width: 0; border: 0; border-radius: 0; background: transparent; padding: 0; }
+body[data-experience="atelier"] .product-card__thumb::before { content: ""; width: 20px; height: 2px; background: #d2cfc4; }
+body[data-experience="atelier"] .product-card__thumb.is-active::before { background: #5c6550; }
+body[data-experience="atelier"] .product-card__checkout { display: flex; justify-content: space-between; align-items: center; width: 100%; padding: 13px 0; margin-top: 0; border: 0; border-bottom: 1px solid var(--line); border-radius: 0; background: transparent; color: var(--ink); font-size: 10px; font-weight: 500; box-shadow: none; }
+body[data-experience="atelier"] .product-card__checkout:hover { border-color: #5c6550; color: #526c36; }
+
+.signature-story { display: grid; grid-template-columns: 1fr 1fr; background: #e7e4d9; }
+.signature-story__copy { padding: clamp(50px, 7.5vw, 120px); display: flex; flex-direction: column; align-items: flex-start; justify-content: center; }
+.signature-story h2 { font: 400 clamp(54px, 5.6vw, 90px)/.98 "Cormorant Garamond", Georgia, serif; margin: 10px 0 28px; }
+.signature-story h2 em { color: #72775f; }
+.signature-story__copy > p:not(.editorial-kicker) { font-size: 12px; line-height: 1.9; max-width: 360px; color: #696b5e; }
+.signature-facts { margin: 30px 0; display: flex; flex-wrap: wrap; gap: 18px 24px; padding-top: 25px; border-top: 1px solid #c7c8b8; }
+.signature-facts dt { font-size: 8px; letter-spacing: .1em; text-transform: uppercase; margin-bottom: 8px; color: #777a69; }
+.signature-facts dd { margin: 0; font-size: 10px; }
+.signature-story__visual { position: relative; background: #f8f5f0; min-width: 0; display: grid; place-items: center; padding-bottom: 60px; }
+.signature-story__visual > img { width: 100%; height: auto; aspect-ratio: 1; object-fit: contain; mix-blend-mode: multiply; }
+.signature-finish { position: absolute; inset: auto 34px 25px; display: flex; align-items: center; justify-content: space-between; gap: 20px; font-size: 9px; }
+.signature-finish > span { text-transform: uppercase; letter-spacing: .13em; }
+.signature-finish small { display: block; text-transform: none; letter-spacing: 0; font-size: 8px; color: var(--muted); margin-top: 5px; }
+.signature-finish [role="group"] { display: flex; gap: 20px; }
+.signature-finish button { padding: 10px 0; color: var(--muted); border-bottom: 1px solid transparent; font-size: 10px; }
+.signature-finish button[aria-pressed="true"] { color: var(--ink); border-color: var(--ink); }
+.atelier-worlds { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px; }
+.atelier-world { display: block; min-width: 0; }
+.atelier-world > img { width: 100%; aspect-ratio: 3/4; object-fit: cover; transition: filter .3s; }
+.atelier-world:hover > img { filter: brightness(.94); }
+.atelier-world > span { display: flex; align-items: center; gap: 14px; padding: 17px 0 0; font: 400 30px/1.2 "Cormorant Garamond", Georgia, serif; }
+.atelier-world small { font: 400 9px "Manrope", sans-serif; color: #868775; }
+.atelier-world b { margin-left: auto; font: 400 19px "Manrope", sans-serif; }
+.atelier-bespoke { display: grid; grid-template-columns: 46% 54%; background: #293127; color: #f2efdf; }
+.atelier-bespoke__image { min-height: 620px; position: relative; }
+.atelier-bespoke__image img { width: 100%; height: 100%; position: absolute; object-fit: cover; object-position: 50% 65%; }
+.atelier-bespoke__copy { padding: 90px clamp(40px, 6.5vw, 100px); }
+.atelier-bespoke h2 { font: 400 clamp(43px, 4.6vw, 72px)/1.06 "Cormorant Garamond", Georgia, serif; color: #f2efdf; margin: 40px 0 26px; }
+.atelier-bespoke h2 em { color: #bcc4a7; }
+.atelier-bespoke__copy > p:not(.editorial-kicker) { font-size: 12px; line-height: 1.9; color: #c8cabc; max-width: 380px; margin-bottom: 32px; }
+.atelier-bespoke .atelier-link { display: flex; margin-top: 16px; color: #e7e7d8; }
+.atelier-bespoke__note { display: flex; flex-wrap: wrap; gap: 15px 30px; margin-top: 70px; padding-top: 22px; border-top: 1px solid #ffffff28; font-size: 8px; letter-spacing: .08em; text-transform: uppercase; color: #c0c5ae; }
+.atelier-story-grid { display: grid; grid-template-columns: 1.2fr 1fr; gap: 7%; }
+.atelier-estate { position: relative; overflow: hidden; display: block; }
+.atelier-estate > img { width: 100%; aspect-ratio: 1.18; object-fit: cover; }
+.atelier-estate > div { padding-top: 24px; }
+.atelier-estate .editorial-kicker { margin-bottom: 9px; color: #747665; }
+.atelier-estate h3 { font: 400 43px/1.1 "Cormorant Garamond", Georgia, serif; margin: 0 0 18px; }
+.atelier-journal { padding: 8px 0 0; }
+.atelier-journal > h3 { font: 400 clamp(35px, 3.2vw, 50px)/1.12 "Cormorant Garamond", Georgia, serif; margin: 0 0 25px; }
+.atelier-journal > a:not(.atelier-link) { display: flex; justify-content: space-between; align-items: center; padding: 24px 0; border-top: 1px solid var(--line); font: 400 27px/1.1 "Cormorant Garamond", Georgia, serif; }
+.atelier-journal > a small { display: block; font: 500 8px/1.4 "Manrope", sans-serif; text-transform: uppercase; letter-spacing: .1em; margin-bottom: 14px; color: var(--muted); }
+.atelier-journal > .atelier-link { margin-top: 20px; }
+
+body[data-experience="atelier"] .booking-section { background: #eae8de; padding-block: 90px; }
+body[data-experience="atelier"] .booking-intro h2 { font-size: clamp(42px, 4.3vw, 65px); }
+body[data-experience="atelier"] .booking-intro > p { font-size: 12px; line-height: 1.9; }
+body[data-experience="atelier"] .booking-card { background: #f8f6ef; border: 1px solid #dcd7ca; box-shadow: none; border-radius: 0; }
+body[data-experience="atelier"] .booking-choice { border-radius: 0; background: #f4f1e8; }
+body[data-experience="atelier"] .booking-choice:has(input:checked) { border-color: #667154; background: #eeeee3; }
+body[data-experience="atelier"] .form-field input,
+body[data-experience="atelier"] .form-field select,
+body[data-experience="atelier"] .form-field textarea { border-radius: 0; border-color: #cdc8ba; background: #fffdf7; box-shadow: none; }
+body[data-experience="atelier"] .form-field label { font-size: 10px; font-weight: 500; }
+body[data-experience="atelier"] .trust-strip { background: #f0ede4; border-block: 1px solid #ded9cf; padding: 35px 0; }
+body[data-experience="atelier"] .trust-strip strong { font-weight: 500; }
+body[data-experience="atelier"] .trust-strip p { font-size: 10px; }
+body[data-experience="atelier"] .trust-strip article > span { color: #888b73; background: none; border: 0; }
+body[data-experience="atelier"] .footer { background: #242c24; color: #e5e5d8; padding-block: 64px 28px; }
+body[data-experience="atelier"] .footer-brand img { filter: grayscale(1) invert(1); opacity: .9; }
+body[data-experience="atelier"] .footer-brand p { color: #b8bdb0; font-size: 11px; max-width: 260px; }
+body[data-experience="atelier"] .footer-column h3 { color: #ecebdd; font: 500 9px "Manrope", sans-serif; text-transform: uppercase; letter-spacing: .14em; margin-bottom: 23px; }
+body[data-experience="atelier"] .footer-column a { color: #bfc4b8; font-size: 11px; }
+body[data-experience="atelier"] .footer a:hover { color: #fff; text-decoration: underline; text-underline-offset: 4px; }
+body[data-experience="atelier"] .footer-bottom { border-color: #ffffff24; color: #a9afa0; font-size: 9px; }
+.footer-private-list { display: inline-flex; color: #e8eadb; font-size: 10px; border-bottom: 1px solid #ffffff75; padding: 8px 0; margin-top: 12px; }
+body[data-experience="atelier"] .vip-welcome__tab { display: none; }
+body[data-experience="atelier"] .vip-welcome { visibility: hidden; }
+body[data-experience="atelier"] .vip-welcome.is-open { visibility: visible; }
+body[data-experience="atelier"] .vip-welcome__drawer { background: #faf8f1; }
+body[data-experience="atelier"] .favorites-shelf { margin-top: 45px; padding: 25px 0; border: 0; border-top: 1px solid var(--line); border-radius: 0; background: transparent; box-shadow: none; }
+body[data-experience="atelier"] .favorite-chip { border-radius: 0; background: transparent; border-color: var(--line); box-shadow: none; }
+body[data-experience="atelier"] .favorite-chip small { color: var(--muted); }
+body[data-experience="atelier"] .vip-welcome__offer { color: #7c8065; }
+
+.collection-intro { padding: 62px 0 38px; }
+.collection-intro .atelier-container { display: flex; align-items: flex-end; justify-content: space-between; gap: 50px; }
+.collection-intro h1 { font: 400 clamp(48px, 5vw, 76px)/1 "Cormorant Garamond", Georgia, serif; margin: 0; }
+.collection-intro p:not(.editorial-kicker) { font-size: 12px; color: var(--muted); max-width: 330px; line-height: 1.8; margin-bottom: 0; }
+.collection-intro .editorial-kicker { margin-bottom: 16px; }
+.collection-shell { padding-bottom: 90px; }
+.collection-shell .filter-bar { justify-content: flex-start; gap: 25px; padding: 0; border: 0; border-bottom: 1px solid var(--line); margin-bottom: 24px; border-radius: 0; background: transparent; box-shadow: none; }
+body[data-experience="atelier"] .collection-shell .product-grid { grid-template-columns: repeat(4, minmax(0,1fr)); }
+.collection-shell .filter-chip { min-width: 0; min-height: 44px; border: 0; border-bottom: 1px solid transparent; border-radius: 0; background: transparent; padding: 12px 0; color: var(--muted); font-size: 11px; box-shadow: none; }
+.collection-shell .filter-chip.is-active { border-color: var(--ink); color: var(--ink); }
+.shop-finder { display: grid; grid-template-columns: minmax(180px, 1fr) minmax(150px, 220px); gap: 14px; margin-bottom: 12px; }
+.shop-finder label { display: grid; gap: 8px; font-size: 9px; letter-spacing: .07em; text-transform: uppercase; color: #727466; }
+.shop-finder input,
+.shop-finder select { width: 100%; min-width: 0; min-height: 46px; border: 1px solid #d6d2c5; border-radius: 0; padding: 12px 14px; background: transparent; color: var(--ink); font-size: 12px; }
+.shop-finder__note { grid-column: 1/-1; margin: 0; font-size: 10px; color: var(--muted); }
+body[data-experience="atelier"] .shop-toolbar { border: 0; border-radius: 0; background: transparent; box-shadow: none; padding: 8px 0 26px; gap: 20px; }
+body[data-experience="atelier"] .shop-toolbar__count { font-size: 10px; color: var(--muted); }
+body[data-experience="atelier"] .shop-toolbar__sort { font-size: 10px; }
+body[data-experience="atelier"] .shop-toolbar select { border: 0; border-bottom: 1px solid var(--line); border-radius: 0; background: transparent; font-size: 11px; padding: 10px; }
+body[data-experience="atelier"] .shop-view-toggle { background: none; border-color: var(--line); border-radius: 0; }
+body[data-experience="atelier"] .shop-view-toggle button { border-radius: 0; min-height: 40px; min-width: 40px; }
+body[data-experience="atelier"] .shop-view-toggle button.is-active { background: #e1e4d5; color: #303929; box-shadow: none; }
+.shop-active-filters { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-bottom: 14px; }
+.shop-active-filters > span { font-size: 11px; padding: 6px 10px; background: #eeebe2; overflow-wrap: anywhere; }
+.shop-active-filters button { border: 1px solid var(--line); padding: 8px 12px; font-size: 10px; color: var(--muted); background: transparent; }
+.shop-empty { grid-column: 1/-1; padding: 75px 25px; text-align: center; border: 1px solid var(--line); }
+.shop-empty h2 { font: 400 40px "Cormorant Garamond", Georgia, serif; margin-bottom: 15px; }
+.shop-empty p { font-size: 12px; color: var(--muted); }
+.shop-empty .atelier-link { margin-left: 24px; }
+body[data-experience="atelier"] .product-grid--list { grid-template-columns: 1fr; }
+body[data-experience="atelier"] .product-grid--list .product-card { display: grid; grid-template-columns: minmax(0,1fr); padding-bottom: 22px; border-bottom: 1px solid var(--line); }
+body[data-experience="atelier"] .product-grid--list .product-card__link { display: grid; grid-template-columns: 200px 1fr; gap: 32px; }
+body[data-experience="atelier"] .product-grid--list .product-card__media { width: 200px; }
+body[data-experience="atelier"] .product-grid--list .product-card__body { padding-top: 30px; }
+body[data-experience="atelier"] .product-grid--list .product-card__gallery { display: none; }
+body[data-experience="atelier"] .product-grid--list .product-card__checkout { width: auto; margin-left: 232px; }
+
+body[data-experience="atelier"] [data-product-page] { padding-block: 38px 65px; }
+body[data-experience="atelier"] .breadcrumbs { font-size: 10px; margin-bottom: 28px; }
+body[data-experience="atelier"] .product-layout { grid-template-columns: minmax(0,1.12fr) minmax(0,.88fr); gap: clamp(40px,6vw,90px); align-items: start; }
+body[data-experience="atelier"] .gallery-main { border: 0; border-radius: 0; box-shadow: none; background: #eeece4; aspect-ratio: 1; padding: 0; }
+body[data-experience="atelier"] .gallery-main img { aspect-ratio: auto; width: 100%; height: 100%; max-height: none; object-fit: contain; border-radius: 0; }
+body[data-experience="atelier"] .thumbnail-grid { display: flex; overflow: auto; gap: 10px; margin-top: 12px; }
+body[data-experience="atelier"] .thumbnail { width: 70px; flex: 0 0 70px; border-radius: 0; background: transparent; border-color: var(--line); }
+body[data-experience="atelier"] .thumbnail-button { width: 70px; flex: 0 0 70px; border-radius: 0; border-color: var(--line); box-shadow: none; }
+body[data-experience="atelier"] .product-info { padding: 12px 0 0; }
+body[data-experience="atelier"] .product-info h1 { font-size: clamp(38px,3.5vw,53px); margin-bottom: 24px; }
+body[data-experience="atelier"] .product-price { color: var(--ink); font-size: 17px; font-weight: 500; }
+body[data-experience="atelier"] .product-meta { color: #777969; font-size: 11px; }
+body[data-experience="atelier"] .product-info > p { font-size: 12px; line-height: 1.9; }
+body[data-experience="atelier"] .product-action-group { display: flex; flex-wrap: wrap; gap: 10px; }
+body[data-experience="atelier"] .product-action-group > :not([data-buy-now]):not([data-add-to-cart]) { width: auto; flex: 0 1 auto; font-size: 12px; }
+body[data-experience="atelier"] .product-action-group > [data-buy-now] { flex: 1 0 100%; }
+body[data-experience="atelier"] .product-action-group > [data-add-to-cart] { flex: 1 0 100%; }
+body[data-experience="atelier"] .product-action-group > a { font-size: 10px; padding: 10px 0; border: 0; margin-right: 15px; min-height: 40px; }
+body[data-experience="atelier"] .product-save-button,
+body[data-experience="atelier"] .product-compare-button,
+body[data-experience="atelier"] .product-share-button { padding: 10px; border: 0; font-size: 10px; min-height: 40px; }
+body[data-experience="atelier"] .info-panel { background: transparent; border: 0; border-bottom: 1px solid var(--line); border-radius: 0; box-shadow: none; }
+body[data-experience="atelier"] .info-panel h2 { font-size: 36px; }
+body[data-experience="atelier"] .service-link-card { background: transparent; border-radius: 0; box-shadow: none; border: 1px solid var(--line); }
+body[data-experience="atelier"] .search-modal__panel,
+body[data-experience="atelier"] .quick-view-modal__panel,
+body[data-experience="atelier"] .cart-modal__panel { background: #faf8f1; border-radius: 0; }
+.search-modal__close { display: grid; place-items: center; width: 40px; height: 40px; flex: 0 0 40px; font-size: 25px; color: var(--ink); }
+body[data-experience="atelier"] .search-result.is-active { background: #e9eadf; }
+
+@media (max-width: 1180px) {
+  .site-header__inner { grid-template-columns: 1fr auto; width: calc(100% - 48px); }
+  .primary-nav { position: fixed; inset: var(--navigation-top, 120px) 0 auto; width: 100%; max-width: none; justify-self: stretch; height: calc(100dvh - var(--navigation-top, 120px)); overflow-y: auto; overscroll-behavior: contain; background: #f6f3eb; border: 0; border-radius: 0; margin: 0; padding: 30px 40px 80px; transform: none; opacity: 0; visibility: hidden; pointer-events: none; box-shadow: none; }
+  body.nav-open .primary-nav { opacity: 1; visibility: visible; pointer-events: auto; transform: none; }
+  .primary-nav__list { display: flex; flex-direction: column; align-items: stretch; gap: 0; }
+  .primary-nav a { display: block; padding: 18px 0; border-bottom: 1px solid var(--line); font: 400 36px/1.2 "Cormorant Garamond", Georgia, serif; text-transform: none; letter-spacing: -.02em; }
+  .primary-nav a::after { display: none; }
+  .menu-toggle { display: inline-flex; }
+  body:not([data-navigation-ready]) .primary-nav { position: static; grid-column: 1/-1; grid-row: 2; height: auto; padding: 0; visibility: visible; opacity: 1; pointer-events: auto; }
+  body:not([data-navigation-ready]) .primary-nav__list { flex-direction: row; flex-wrap: wrap; gap: 12px; }
+  body:not([data-navigation-ready]) .primary-nav a { font: 500 12px "Manrope", sans-serif; padding-block: 10px; }
+  .editorial-hero h1 { font-size: 7.4vw; }
+  .editorial-hero__copy { padding-left: 8%; }
+  .editorial-hero__visual { min-height: 630px; }
+  .atelier-marquee { gap: 16px; padding-inline: 24px; font-size: 8px; }
+  .signature-story__copy { padding: 50px; }
+  .atelier-bespoke__copy { padding: 65px 45px; }
+}
+
+@media (max-width: 900px) {
+  :root { --container: calc(100% - 48px); }
+  .atelier-container { width: calc(100% - 48px); }
+  .editorial-hero { min-height: 620px; }
+  .editorial-hero__copy { padding-top: 65px; padding-right: 22px; }
+  .editorial-hero__intro { font-size: 11px; }
+  .editorial-hero .atelier-button { padding: 13px 16px; gap: 20px; font-size: 10px; }
+  .editorial-hero .atelier-link { font-size: 10px; gap: 12px; }
+  body[data-experience="atelier"] .editorial-product-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  body[data-experience="atelier"] .collection-shell .product-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .atelier-worlds { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 30px 18px; }
+  .signature-story__copy { padding: 45px 28px; }
+  .signature-story h2 { font-size: 55px; }
+  .signature-facts { gap: 18px; }
+  .atelier-bespoke { grid-template-columns: 42% 58%; }
+  .atelier-bespoke__copy { padding: 60px 30px; }
+  .atelier-bespoke h2 { font-size: 44px; }
+  .atelier-bespoke__image { min-height: 570px; }
+  .atelier-section-heading { gap: 25px; }
+  body[data-experience="atelier"] .product-layout { grid-template-columns: 1fr; gap: 35px; }
+  body[data-experience="atelier"] .gallery-main img { max-height: 640px; }
+  .collection-intro .atelier-container { gap: 30px; }
+}
+
+@media (max-width: 700px) {
+  .announcement-bar__inner { justify-content: center; min-height: 26px; font-size: 8px; padding-block: 5px; }
+  .announcement-bar__inner > span:last-child { display: none; }
+  .site-header__inner { min-height: 74px; padding-block: 10px; width: calc(100% - 32px); gap: 5px; }
+  .brand { width: 218px; max-width: 100%; }
+  .header-actions { gap: 0; }
+  .header-actions .header-cta { display: none; }
+  .header-actions .icon-button,
+  .header-actions .menu-toggle { width: 36px; height: 40px; }
+  .primary-nav { padding: 20px 25px 70px; }
+  .editorial-hero { grid-template-columns: 1fr; min-height: 0; }
+  .editorial-hero__copy { padding: 42px 25px 30px; }
+  .editorial-hero .editorial-kicker { font-size: 8px; margin: 0; }
+  .editorial-hero h1 { font-size: clamp(61px, 15vw, 94px); margin: 22px 0 22px; letter-spacing: -.045em; }
+  .editorial-hero__intro { font-size: 12px; margin-bottom: 25px; }
+  .editorial-actions { gap: 18px; }
+  .editorial-hero .atelier-button { font-size: 11px; min-height: 48px; padding: 13px 19px; }
+  .editorial-hero__footnote { display: none; }
+  .editorial-hero__visual { min-height: 0; aspect-ratio: 1.05; }
+  .editorial-hero__visual > img { object-position: 50% 53%; }
+  .editorial-hero__caption { inset: auto 16px 16px; padding: 13px 15px; font-size: 20px; }
+  .editorial-hero__side { top: 16px; right: 12px; font-size: 7px; }
+  .atelier-marquee { display: grid; grid-template-columns: 1fr 1fr; text-align: center; gap: 16px 18px; padding: 24px 20px; font-size: 8px; }
+  .atelier-marquee > span { display: none; }
+  .atelier-section { padding-block: 60px; }
+  .atelier-section-heading { align-items: flex-start; flex-direction: column; gap: 18px; margin-bottom: 28px; }
+  .atelier-section-heading h2 { font-size: 43px; }
+  .atelier-section-heading .editorial-kicker { font-size: 8px; margin-bottom: 15px; }
+  .atelier-section-heading > .atelier-link { font-size: 10px; }
+  .edit-categories { gap: 23px; overflow-x: auto; scrollbar-width: thin; margin-bottom: 22px; }
+  .edit-categories a { font-size: 10px; padding-block: 9px 13px; }
+  body[data-experience="atelier"] .product-grid { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 26px 14px; }
+  body[data-experience="atelier"] .product-card__body { padding-top: 14px; }
+  body[data-experience="atelier"] .product-card__body h3 { font-size: 22px; }
+  body[data-experience="atelier"] .product-card__materials { font-size: 11px; line-height: 1.6; min-height: 4.8em; }
+  body[data-experience="atelier"] .product-card__price { font-size: 12px; }
+  body[data-experience="atelier"] .product-card .favorite-button,
+  body[data-experience="atelier"] .product-card .quick-view-button { top: 8px; width: 32px; height: 32px; }
+  body[data-experience="atelier"] .product-card .favorite-button { right: 8px; }
+  body[data-experience="atelier"] .product-card .quick-view-button { left: 8px; opacity: 1; }
+  body[data-experience="atelier"] .product-card .compare-button { top: 46px; right: 8px; opacity: 1; }
+  .signature-story { grid-template-columns: 1fr; }
+  .signature-story__copy { padding: 55px 28px; }
+  .signature-story h2 { font-size: 65px; }
+  .signature-story__visual { padding-bottom: 65px; }
+  .signature-story__visual > img { max-height: 460px; }
+  .signature-finish { inset-inline: 25px; }
+  .atelier-world > span { font-size: 27px; gap: 9px; padding-top: 12px; }
+  .atelier-world small { font-size: 8px; }
+  .atelier-bespoke { grid-template-columns: 1fr; }
+  .atelier-bespoke__image { min-height: 0; aspect-ratio: 1.12; }
+  .atelier-bespoke__copy { padding: 50px 27px; }
+  .atelier-bespoke h2 { font-size: 48px; margin-top: 25px; }
+  .atelier-bespoke__note { margin-top: 45px; gap: 18px; }
+  .atelier-story-grid { grid-template-columns: 1fr; gap: 50px; }
+  .atelier-journal { padding-top: 10px; }
+  .atelier-journal > h3 { font-size: 42px; }
+  .atelier-estate h3 { font-size: 38px; }
+  body[data-experience="atelier"] .booking-section { padding-block: 60px; }
+  body[data-experience="atelier"] .booking-intro h2 { font-size: 46px; }
+  body[data-experience="atelier"] .booking-card { padding: 22px 18px; }
+  body[data-experience="atelier"] .footer { padding-block: 48px 30px; }
+  .collection-intro { padding-block: 32px 24px; }
+  .collection-intro .atelier-container { align-items: flex-start; flex-direction: column; gap: 20px; }
+  .collection-intro .atelier-container > p { display: none; }
+  .collection-intro h1 { font-size: 55px; }
+  .collection-shell .filter-bar { flex-wrap: nowrap; gap: 18px; overflow-x: auto; }
+  .shop-finder { grid-template-columns: minmax(0,1fr) minmax(135px,.9fr); gap: 12px; }
+  .shop-finder label { gap: 5px; }
+  .shop-finder input,
+  .shop-finder select { font-size: 16px; }
+  body[data-experience="atelier"] .shop-toolbar { flex-direction: column; align-items: stretch; gap: 10px; padding-block: 5px 20px; }
+  body[data-experience="atelier"] .shop-toolbar__controls { justify-content: space-between; gap: 10px; }
+  body[data-experience="atelier"] .shop-toolbar__sort { flex: 1; }
+  body[data-experience="atelier"] .shop-toolbar__sort select { max-width: 190px; min-width: 0; }
+  body[data-experience="atelier"] .product-grid--list { grid-template-columns: 1fr; }
+  body[data-experience="atelier"] .product-grid--list .product-card__link { grid-template-columns: 125px minmax(0,1fr); gap: 18px; }
+  body[data-experience="atelier"] .product-grid--list .product-card__media { width: 125px; }
+  body[data-experience="atelier"] .product-grid--list .product-card__body { padding-top: 0; }
+  body[data-experience="atelier"] .product-grid--list .product-card__checkout { margin-left: 143px; }
+  body[data-experience="atelier"] [data-product-page] { padding-block: 25px 40px; }
+  body[data-experience="atelier"] .product-info h1 { font-size: 43px; }
+  body[data-experience="atelier"] .breadcrumbs { font-size: 9px; flex-wrap: wrap; }
+}
+
+@media (max-width: 380px) {
+  :root { --container: calc(100% - 32px); }
+  .atelier-container { width: calc(100% - 32px); }
+  .brand { width: 183px; }
+  .editorial-hero__copy { padding-inline: 20px; }
+  .editorial-hero h1 { font-size: 58px; }
+  .atelier-section-heading h2 { font-size: 38px; }
+}
+
+@media (hover: none) {
+  body[data-experience="atelier"] .product-card .quick-view-button,
+  body[data-experience="atelier"] .product-card .compare-button { opacity: 1; }
+}
+
+body[data-experience="atelier"] .collection-shell .product-grid--list { grid-template-columns: 1fr; }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .atelier-link > span,
+  .atelier-world > img,
+  body[data-experience="atelier"] .product-card__media img { transition: none; }
+}

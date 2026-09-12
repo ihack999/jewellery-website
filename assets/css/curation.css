@@ -1,0 +1,428 @@
+/* Toronto Jewels Curation — the personal point of view. */
+:root {
+  --bg: #f7f3ec;
+  --surface: #fbf8f2;
+  --surface-alt: #eee7dd;
+  --surface-muted: #f0ebe3;
+  --ink: #2c2423;
+  --heading: #2c2423;
+  --text: #3d3330;
+  --muted: #766b65;
+  --primary: #512e36;
+  --primary-deep: #41262d;
+  --accent: #8f6668;
+  --line: #ddd4c9;
+  --line-strong: #b2a396;
+  --container: min(1440px, calc(100% - 112px));
+}
+body[data-experience="atelier"] { color: var(--text); }
+body[data-experience="atelier"] [data-reveal] { opacity: 1; filter: none; transform: none; transition: none; will-change: auto; }
+body[data-experience="atelier"]:not([data-navigation-ready]) .faq-answer,
+body[data-experience="atelier"] .faq-item.is-open .faq-answer { max-height: none; }
+body[data-experience="atelier"] ::selection { color: #fff8f0; background: #714850; }
+body[data-experience="atelier"] :focus-visible { outline-color: #976271; }
+body[data-experience="atelier"] h1,
+body[data-experience="atelier"] h2,
+body[data-experience="atelier"] h3 { text-wrap: balance; }
+body[data-experience="atelier"] .section--soft { background: #efe9e0; }
+body[data-experience="atelier"] .button,
+body[data-experience="atelier"] .header-cta { background: var(--primary); border-color: var(--primary); }
+body[data-experience="atelier"] .button:hover,
+body[data-experience="atelier"] .header-cta:hover { background: #6d414b; border-color: #6d414b; }
+body[data-experience="atelier"] .button-secondary:hover { background: #ece3d9; }
+body[data-experience="atelier"] .eyebrow { font-size: 11px; color: var(--muted); }
+.custom-hero-note,
+.luxury-hero-note,
+.about-panel__note,
+.contact-form-note { max-width: 48ch; margin: 25px 0 0; padding-left: 15px; border-left: 1px solid #b2a396; color: #70645d; font-size: 12px; line-height: 1.75; }
+.contact-form-note { margin-top: 20px; }
+.announcement-bar { background: #3f272e; color: #fff5e9; }
+.announcement-bar__inner { min-height: 30px; font-size: 9px; letter-spacing: .12em; }
+.site-header, .site-header.is-scrolled { background: #fbf8f2; border-color: var(--line); }
+.site-header__inner { min-height: 92px; max-width: 1600px; width: calc(100% - 80px); }
+.primary-nav a { font-size: 11px; letter-spacing: .04em; }
+.primary-nav a::after { background: var(--primary); }
+.header-actions .header-cta { font-size: 11px; }
+.header-actions .icon-button, .header-actions .menu-toggle { color: var(--ink); }
+.header-actions .icon-button:hover, .header-actions .menu-toggle:hover { background: #ede4da; }
+.atelier-container { width: var(--container); }
+.atelier-section { padding-block: clamp(76px, 8vw, 128px); }
+.editorial-kicker { font-size: 11px; letter-spacing: .14em; }
+.atelier-button { background: var(--primary); border-color: var(--primary); min-height: 54px; font-size: 13px; padding: 16px 24px; gap: 36px; }
+.atelier-button:hover { background: #6d414b; border-color: #6d414b; color: #fff8f0; }
+.atelier-link { font-size: 13px; padding-block: 11px; min-height: 44px; gap: 28px; }
+.atelier-link:hover { color: var(--primary); }
+.atelier-section-heading { margin-bottom: 38px; }
+.atelier-section-heading h2 { font-size: clamp(46px, 5.3vw, 80px); line-height: 1.02; }
+.atelier-section-heading h2 em, .signature-story h2 em { color: #8c5b65; }
+.atelier-section-heading .editorial-kicker { color: var(--muted); font-size: 11px; margin-bottom: 20px; }
+.atelier-section-heading > p { font-size: 14px; line-height: 1.8; }
+
+/* Campaign: one richly coloured photograph, generous type, direct actions. */
+.campaign-hero { grid-template-columns: 47% 53%; background: #251c1d; color: #fff7ea; min-height: 720px; }
+.campaign-hero .editorial-hero__copy { padding: 50px 40px 30px 8%; position: relative; z-index: 1; }
+.campaign-hero .editorial-kicker { display: flex; align-items: center; gap: 16px; font-size: 10px; color: #e1d1c4; letter-spacing: .11em; margin: 0; }
+.campaign-star { font-size: 28px; color: #cba591; line-height: 1; }
+body[data-experience="atelier"] .campaign-hero h1 { color: #fff7ea; font-size: clamp(96px, 9.2vw, 150px); line-height: .83; letter-spacing: -.055em; margin: 67px 0 32px; font-weight: 400; text-wrap: initial; }
+.campaign-hero h1 em { color: #d2aa9a; display: inline-block; margin-left: .32em; font-weight: 400; }
+.campaign-hero .editorial-hero__intro { color: #dfcfc5; font-size: 14px; line-height: 1.85; margin: 0 0 29px; }
+.campaign-hero .editorial-actions { gap: 13px; }
+.campaign-hero .atelier-button { background: #f2e6d4; border-color: #f2e6d4; color: #35262a; }
+.campaign-hero .atelier-button:hover { background: #fff7ea; border-color: #fff7ea; }
+.campaign-hero .atelier-link { color: #f0e2d5; border-color: #836963; font-size: 12px; }
+.campaign-hero .editorial-hero__footnote { padding-top: 38px; font-size: 9px; color: #e4cfc0; letter-spacing: .08em; align-items: flex-end; }
+.campaign-hero .editorial-hero__footnote small { display: block; font-size: 9px; color: #bda89b; margin-top: 5px; text-transform: none; letter-spacing: .02em; }
+.campaign-hero .editorial-hero__footnote a { border-color: #82655f; color: #ead8c9; }
+.campaign-hero .editorial-hero__visual { min-height: 720px; }
+.campaign-hero .editorial-hero__visual > img { object-position: 50% 64%; }
+.campaign-hero .editorial-hero__side { font-size: 9px; right: 22px; top: 28px; color: #fff5e9; mix-blend-mode: normal; text-shadow: 0 1px 7px #000; }
+.campaign-hero .editorial-hero__caption { left: 30px; right: 30px; bottom: 27px; background: #2b1f22d9; border: 1px solid #dfc4b448; backdrop-filter: blur(12px); color: #fff1df; padding: 20px 23px; font-size: 27px; }
+.campaign-hero .editorial-hero__caption small { font-size: 9px; color: #dbc1ad; }
+.maison-introduction { display: grid; grid-template-columns: 1fr 1fr; gap: 12%; padding: 72px max(56px, calc((100vw - 1440px)/2)); background: #eee7dd; text-transform: none; text-align: left; letter-spacing: 0; }
+.maison-introduction > p { margin: 0; font: 400 clamp(34px, 3.4vw, 52px)/1.12 "Cormorant Garamond", Georgia, serif; color: var(--ink); }
+.maison-introduction > p em { color: #8f6268; }
+.maison-introduction > div { max-width: 450px; }
+.maison-introduction > div > span { font-size: 11px; text-transform: uppercase; letter-spacing: .1em; }
+.maison-introduction > div > p { font-size: 14px; line-height: 1.8; color: #70625b; margin: 15px 0 10px; }
+.maison-introduction .atelier-link { font-size: 12px; }
+
+/* Collection: the piece stays complete, the supporting information stays legible. */
+.edit-categories { gap: 32px; margin-bottom: 30px; }
+.edit-categories a { font-size: 13px; min-height: 44px; }
+.edit-categories a.is-active { color: var(--primary); border-color: var(--primary); }
+body[data-experience="atelier"] .product-grid { gap: 40px 22px; }
+body[data-experience="atelier"] .product-card__media { background: #eee8df; }
+body[data-experience="atelier"] .product-card__media img { transition: opacity .25s ease; }
+body[data-experience="atelier"] .product-card__body { padding-top: 18px; }
+body[data-experience="atelier"] .product-card__body h3 { font-size: 27px; line-height: 1.08; min-height: 2.16em; margin-bottom: 10px; }
+body[data-experience="atelier"] .product-card__materials { font-size: 12px; line-height: 1.6; color: #746860; min-height: 3.2em; }
+body[data-experience="atelier"] .product-card__price { font-size: 13px; }
+body[data-experience="atelier"] .product-card__checkout { font-size: 12px; padding-block: 15px; min-height: 46px; }
+body[data-experience="atelier"] .product-card .favorite-button,
+body[data-experience="atelier"] .product-card .quick-view-button { width: 42px; height: 42px; background: #fbf8f1ed; }
+body[data-experience="atelier"] .product-card .compare-button { font-size: 10px; min-height: 34px; top: 60px; }
+body[data-experience="atelier"] .product-card .favorite-button.is-active svg { color: #764552; fill: #764552; }
+body[data-experience="atelier"] .product-card__thumb { width: 30px; height: 32px; }
+body[data-experience="atelier"] .product-card__thumb.is-active::before { background: var(--primary); }
+.collection-intro { padding: 62px 0 40px; background: linear-gradient(100deg, #efe6dc 0%, #f7f3ec 65%); }
+.collection-intro h1 { font-size: clamp(51px, 5.7vw, 85px); line-height: .98; }
+.collection-intro h1 em { color: #84565f; }
+.collection-intro .editorial-kicker { font-size: 10px; }
+.collection-intro__aside { padding-bottom: 6px; }
+.collection-intro .collection-intro__aside p { font-size: 14px; line-height: 1.8; margin-bottom: 14px; }
+.collection-intro__aside .atelier-link { color: var(--primary); }
+.collection-shell { padding-top: 20px; }
+.collection-shell .filter-chip { font-size: 13px; }
+.collection-shell .filter-chip.is-active { color: var(--primary); border-color: var(--primary); }
+.shop-finder label { font-size: 10px; color: var(--muted); }
+.shop-finder input, .shop-finder select { font-size: 14px; background: #fbf8f2; border-color: var(--line); min-height: 50px; }
+.shop-finder__note { font-size: 11px; }
+body[data-experience="atelier"] .shop-toolbar { padding-bottom: 28px; }
+body[data-experience="atelier"] .shop-toolbar__count { font-size: 11px; }
+body[data-experience="atelier"] .shop-toolbar select { font-size: 12px; }
+body[data-experience="atelier"] .shop-view-toggle button.is-active { background: #e9dad9; color: var(--primary); }
+
+/* A private, useful discovery tool; no signup required. */
+.personal-edit-invitation { width: var(--container); margin: 0 auto 100px; padding: 48px 60px; border: 1px solid #ccbaae; display: grid; grid-template-columns: 1.2fr 1fr; align-items: center; gap: 60px; position: relative; overflow: hidden; }
+.personal-edit-invitation .editorial-kicker { color: #82555f; }
+.personal-edit-invitation h2 { margin: 15px 0 0; font: 400 clamp(37px, 3.6vw, 54px)/1.05 "Cormorant Garamond", Georgia, serif; }
+.personal-edit-invitation h2 em { color: #8f6268; }
+.personal-edit-invitation > div { z-index: 1; }
+.personal-edit-invitation p { color: #72645c; font-size: 14px; line-height: 1.8; margin-bottom: 24px; }
+.invitation-star { position: absolute; right: -20px; bottom: -82px; color: #e8ded2; font: 250px Georgia, serif; pointer-events: none; }
+.personal-edit-dialog { width: min(1050px, calc(100% - 48px)); max-width: none; max-height: calc(100dvh - 48px); margin: auto; padding: 0; border: 1px solid #d4c5b8; background: #fbf7f0; color: var(--ink); box-shadow: 0 30px 100px #160e0e40; overflow: auto; }
+.personal-edit-dialog::backdrop { background: #251c1daa; backdrop-filter: blur(6px); }
+.personal-edit-dialog__header { padding: 26px 40px 22px; border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; gap: 25px; align-items: flex-start; position: sticky; top: 0; z-index: 2; background: #fbf7f0; }
+.personal-edit-dialog__header .editorial-kicker { font-size: 10px; margin: 0 0 9px; color: #885a64; }
+.personal-edit-dialog h2 { font: 400 48px/1.05 "Cormorant Garamond", Georgia, serif; margin: 0; }
+.personal-edit-dialog__close { flex: 0 0 44px; width: 44px; height: 44px; border: 1px solid var(--line); font-size: 27px; color: var(--ink); }
+.personal-edit-dialog__body { padding: 28px 40px 35px; }
+.personal-edit-dialog__intro { font-size: 14px; color: var(--muted); margin: 0 0 24px; line-height: 1.7; }
+.personal-edit-controls { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 24px; }
+.personal-edit-controls label { display: grid; gap: 10px; font-size: 11px; letter-spacing: .04em; }
+.personal-edit-controls select { padding: 13px 14px; border: 1px solid #cfc1b5; border-radius: 0; width: 100%; min-width: 0; background: #fffaf3; font: inherit; font-size: 15px; color: var(--ink); }
+.personal-edit-status { font-size: 12px; line-height: 1.6; color: var(--muted); min-height: 20px; }
+.personal-edit-results { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 22px; margin-top: 22px; }
+.personal-edit-result { display: flex; flex-direction: column; border-bottom: 1px solid #c4b1a4; padding-bottom: 15px; }
+.personal-edit-result img { width: 100%; aspect-ratio: 1.35; object-fit: contain; background: #eee6da; }
+.personal-edit-result h3 { font: 400 25px/1.08 "Cormorant Garamond", Georgia, serif; margin: 16px 0 9px; }
+.personal-edit-result p { font-size: 12px; margin: 0 0 10px; color: var(--muted); line-height: 1.6; }
+.personal-edit-result > span { font-size: 13px; margin-top: auto; display: flex; justify-content: space-between; gap: 10px; }
+.personal-edit-result:hover h3 { text-decoration: underline; text-underline-offset: 4px; }
+.personal-edit-empty { grid-column: 1/-1; padding: 28px; background: #eee4d8; text-align: center; }
+.personal-edit-empty h3 { font: 34px "Cormorant Garamond", Georgia, serif; margin: 0 0 12px; }
+.personal-edit-empty p { font-size: 14px; line-height: 1.7; }
+.personal-edit-dialog__footer { display: flex; justify-content: space-between; align-items: center; gap: 20px; margin-top: 25px; padding-top: 20px; border-top: 1px solid var(--line); }
+.personal-edit-dialog__footer p { font-size: 11px; line-height: 1.7; max-width: 490px; margin: 0; color: var(--muted); }
+
+/* A three-part study: on the hand, the story, and the finish. */
+.signature-story { grid-template-columns: 1.05fr 1fr 1fr; background: #ece3d7; }
+.signature-story__worn { position: relative; overflow: hidden; min-height: 580px; }
+.signature-story__worn img { width: 100%; height: 100%; position: absolute; inset: 0; object-fit: cover; object-position: 22% 50%; }
+.signature-story__worn > span { position: absolute; inset: auto 24px 25px; background: #fbf6eced; padding: 16px; font-size: 12px; display: flex; justify-content: space-between; gap: 15px; }
+.signature-story__worn b { font-weight: 400; font-size: 16px; }
+.signature-story__copy { padding: 45px 36px; }
+.signature-story__copy .editorial-kicker { font-size: 10px; }
+.signature-story h2 { font-size: clamp(43px, 4.2vw, 68px); margin: 18px 0 23px; }
+.signature-story__copy > p:not(.editorial-kicker) { font-size: 14px; color: #75655c; line-height: 1.8; }
+.signature-facts { display: grid; grid-template-columns: 1fr; width: 100%; gap: 15px; margin: 22px 0; padding-top: 20px; border-color: #c9b8a7; }
+.signature-facts > div { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; }
+.signature-facts dt { font-size: 9px; color: #806b5b; margin: 0; }
+.signature-facts dd { font-size: 11px; }
+.signature-story__copy .atelier-link { font-size: 12px; }
+.signature-story__visual { padding: 25px 10px 92px; background: #f4eee5; }
+.signature-finish { inset: auto 25px 28px; align-items: flex-start; flex-direction: column; gap: 12px; }
+.signature-finish > span { font-size: 9px; }
+.signature-finish small { display: inline; margin-left: 8px; font-size: 9px; }
+.signature-finish [role="group"] { gap: 10px; width: 100%; }
+.signature-finish button { min-height: 44px; font-size: 12px; border: 1px solid #cebdac; padding: 10px 20px; flex: 1; }
+.signature-finish button[aria-pressed="true"] { background: #512e36; color: #fff8ee; border-color: #512e36; }
+
+/* Categories become an editorial spread instead of another product grid. */
+.atelier-worlds { grid-template-columns: 1.15fr 1fr 1fr; gap: 20px; align-items: stretch; }
+.atelier-world { position: relative; overflow: hidden; min-height: 290px; background: #d8cfc2; }
+.atelier-world:first-child { grid-row: span 2; }
+.atelier-world:nth-child(2) { grid-row: span 2; }
+.atelier-world:nth-child(3), .atelier-world:nth-child(4) { grid-column: 3; }
+.atelier-world > img { position: absolute; inset: 0; width: 100%; height: 100%; aspect-ratio: auto; object-fit: cover; transition: transform .7s ease; }
+.atelier-world:first-child > img { object-position: 25% 50%; }
+.atelier-world:nth-child(3) > img { object-position: 50% 60%; }
+.atelier-world:nth-child(4) > img { object-position: 50% 40%; }
+.atelier-world::after { content: ""; position: absolute; inset: 30% 0 0; background: linear-gradient(transparent, #201617b0); pointer-events: none; }
+.atelier-world > span { position: absolute; z-index: 1; inset: auto 25px 25px; display: block; color: #fff8ee; font-size: 42px; padding: 0; }
+.atelier-world small { display: block; margin-bottom: 12px; font-size: 9px; letter-spacing: .04em; color: #fff5e7; }
+.atelier-world b { position: absolute; bottom: 6px; right: 0; font-size: 23px; }
+@media (hover: hover) { .atelier-world:hover > img { transform: scale(1.035); filter: none; } }
+
+.atelier-bespoke { grid-template-columns: 1fr 1fr; background: #482a33; color: #f9eddf; }
+.atelier-bespoke__image { min-height: 720px; overflow: hidden; }
+.atelier-bespoke__image img { object-position: 50% 58%; }
+.bespoke-image-note { position: absolute; bottom: 28px; left: 30px; color: #fff; text-shadow: 0 1px 12px #312021; font-size: 11px; letter-spacing: .04em; }
+.atelier-bespoke__copy { padding: 74px clamp(35px,6vw,96px); }
+.atelier-bespoke__copy .editorial-kicker { font-size: 11px; color: #e1bbbc; }
+.atelier-bespoke h2 { font-size: clamp(65px,6.7vw,100px); line-height: .97; color: #fff3e3; margin: 48px 0 30px; }
+.atelier-bespoke h2 em { color: #dbaea8; }
+.atelier-bespoke__copy > p:not(.editorial-kicker) { font-size: 14px; line-height: 1.9; color: #e7cfc9; max-width: 420px; }
+.atelier-bespoke .atelier-button--light { background: #f2e1ce; color: #492b34; border-color: #f2e1ce; }
+.atelier-bespoke .atelier-button--light:hover { background: #fff5e8; }
+.atelier-bespoke .atelier-link { color: #f2dbd3; font-size: 12px; }
+.atelier-bespoke__note { list-style: none; padding: 25px 0 0; margin: 42px 0 0; border-color: #b58a884f; gap: 25px; justify-content: space-between; color: #f0d4ca; }
+.atelier-bespoke__note li { font-size: 10px; text-transform: none; letter-spacing: 0; }
+.atelier-bespoke__note li > span { display: block; color: #caa4a0; font: italic 24px "Cormorant Garamond", Georgia, serif; margin-bottom: 8px; }
+.atelier-story-grid { gap: 7%; grid-template-columns: 1.2fr 1fr; }
+.atelier-estate > img { aspect-ratio: 1.45; }
+.atelier-estate h3 { font-size: 46px; }
+.atelier-estate .editorial-kicker { font-size: 10px; }
+.atelier-journal > h3 { font-size: clamp(36px,3.3vw,50px); }
+.atelier-journal > a:not(.atelier-link) { font-size: 29px; }
+.atelier-journal > a small { font-size: 10px; color: #8b5964; }
+.atelier-stories { border-bottom: 1px solid var(--line); }
+body[data-experience="atelier"] .booking-section { padding-block: 90px; }
+body[data-experience="atelier"] .booking-intro p { font-size: 14px; }
+body[data-experience="atelier"] .booking-card { background: #fbf8f2; border-color: var(--line); padding: 36px; }
+body[data-experience="atelier"] .booking-card label { font-size: 12px; }
+body[data-experience="atelier"] .booking-card input,
+body[data-experience="atelier"] .booking-card textarea,
+body[data-experience="atelier"] .form-card input,
+body[data-experience="atelier"] .form-card textarea,
+body[data-experience="atelier"] .form-card select { font-size: 16px; }
+body[data-experience="atelier"] .booking-choice:has(input:checked) { background: #eee0de; border-color: #835762; }
+body[data-experience="atelier"] .footer-assurances { background: #eee6da; }
+body[data-experience="atelier"] .footer-assurances__grid strong { font-size: 13px; }
+body[data-experience="atelier"] .footer-assurances__grid p { font-size: 12px; color: #75675e; line-height: 1.7; }
+body[data-experience="atelier"] .footer { background: #2b2024; color: #e6d2c3; }
+body[data-experience="atelier"] .footer p,
+body[data-experience="atelier"] .footer a { font-size: 12px; color: #dbc7ba; }
+body[data-experience="atelier"] .footer-column h3 { font-size: 11px; color: #f3e0cd; }
+body[data-experience="atelier"] .footer-bottom { font-size: 10px; color: #bfa69a; }
+.footer-signature { display: flex; justify-content: space-between; gap: 30px; align-items: center; border-bottom: 1px solid #b78b8438; padding: 0 0 48px; margin-bottom: 50px; }
+.footer-signature > p { margin: 0; font: italic 400 clamp(64px,8.5vw,130px)/1 "Cormorant Garamond", Georgia, serif !important; color: #e5c4b1 !important; letter-spacing: -.045em; }
+.footer-signature .atelier-link { font-size: 13px !important; color: #efd8c7 !important; }
+body[data-experience="atelier"] .search-modal__panel,
+body[data-experience="atelier"] .quick-view-modal__panel,
+body[data-experience="atelier"] .cart-modal__panel { background: #fbf7f0; }
+body[data-experience="atelier"] .cart-line__details > a { font-size: 20px; }
+body[data-experience="atelier"] .cart-modal__footer p { font-size: 12px; line-height: 1.7; }
+
+@media (max-width: 1180px) {
+  :root { --container: calc(100% - 64px); }
+  .site-header__inner { width: calc(100% - 48px); }
+  .primary-nav { background: #f7f1e8; }
+  .primary-nav a { font-size: 36px; }
+  .campaign-hero { grid-template-columns: 48% 52%; min-height: 690px; }
+  .campaign-hero .editorial-hero__copy { padding-left: 7%; padding-right: 30px; }
+  body[data-experience="atelier"] .campaign-hero h1 { font-size: 10vw; margin-top: 62px; }
+  .campaign-hero .editorial-kicker { font-size: 9px; max-width: 330px; }
+  .campaign-hero .editorial-hero__visual { min-height: 690px; }
+  .maison-introduction { padding: 56px 32px; gap: 8%; }
+  .signature-story { grid-template-columns: 1fr 1fr; }
+  .signature-story__worn { grid-row: span 2; }
+  .signature-story__copy { padding: 45px 35px 20px; }
+  .signature-story__visual { padding: 0 20px 75px; }
+  .signature-story__visual > img { max-width: 290px; }
+  .signature-finish { inset: auto 35px 22px; flex-direction: row; align-items: center; }
+  .signature-finish [role="group"] { width: auto; }
+  .signature-finish small { display: block; margin: 4px 0 0; }
+  .signature-finish button { padding-inline: 15px; }
+  .atelier-worlds { grid-template-columns: 1fr 1fr; }
+  .atelier-world:first-child, .atelier-world:nth-child(2) { grid-row: auto; min-height: 450px; }
+  .atelier-world:nth-child(3), .atelier-world:nth-child(4) { grid-column: auto; min-height: 310px; }
+}
+@media (max-width: 900px) {
+  .campaign-hero { min-height: 640px; }
+  .campaign-hero .editorial-hero__copy { padding: 38px 24px 24px 32px; }
+  .campaign-hero .editorial-kicker { font-size: 8px; gap: 10px; }
+  .campaign-star { font-size: 22px; }
+  .campaign-hero .editorial-hero__visual { min-height: 640px; }
+  .campaign-hero .editorial-hero__intro { font-size: 13px; }
+  .campaign-hero .atelier-button { font-size: 12px; padding-inline: 17px; gap: 22px; }
+  .campaign-hero .atelier-link { font-size: 11px; gap: 12px; }
+  .campaign-hero .editorial-hero__caption { inset: auto 18px 24px; padding: 16px; font-size: 23px; }
+  .personal-edit-invitation { padding: 35px; gap: 30px; margin-bottom: 70px; }
+  .signature-story__copy { padding-inline: 28px; }
+  .signature-finish { inset-inline: 28px; }
+  .signature-finish > span { max-width: 90px; }
+  .signature-facts > div { flex-wrap: wrap; }
+  .atelier-bespoke__copy { padding: 58px 32px; }
+  .atelier-bespoke h2 { font-size: 65px; }
+  .atelier-bespoke__image { min-height: 690px; }
+  .atelier-bespoke__note { gap: 14px; }
+  .atelier-bespoke__note li { font-size: 9px; }
+  .atelier-section-heading h2 { font-size: 52px; }
+  .atelier-story-grid { gap: 35px; }
+  .atelier-estate h3 { font-size: 35px; }
+  .atelier-journal > a:not(.atelier-link) { font-size: 25px; }
+  .collection-intro .atelier-container { align-items: flex-start; }
+  .collection-intro h1 { font-size: 57px; }
+  .collection-intro__aside { max-width: 230px; }
+}
+@media (max-width: 700px) {
+  :root { --container: calc(100% - 40px); }
+  .announcement-bar__inner { font-size: 8px; min-height: 27px; }
+  .site-header__inner { min-height: 73px; width: calc(100% - 28px); }
+  .brand { width: min(218px, 54vw); }
+  .primary-nav a { font-size: 34px; }
+  .campaign-hero { display: flex; flex-direction: column; min-height: 0; }
+  .campaign-hero .editorial-hero__copy { padding: 34px 25px 36px; }
+  .campaign-hero .editorial-kicker { font-size: 8px; letter-spacing: .07em; max-width: none; }
+  body[data-experience="atelier"] .campaign-hero h1 { font-size: clamp(89px,23vw,150px); margin: 35px 0 27px; line-height: .82; }
+  .campaign-hero h1 em { margin-left: .6em; }
+  .campaign-hero .editorial-hero__intro { font-size: 13px; margin-bottom: 23px; }
+  .campaign-hero .editorial-actions { gap: 10px; }
+  .campaign-hero .atelier-button { min-height: 50px; font-size: 12px; gap: 35px; padding: 13px 20px; }
+  .campaign-hero .atelier-link { min-height: 40px; font-size: 11px; }
+  .campaign-hero .editorial-hero__visual { min-height: 0; aspect-ratio: 1.1; }
+  .campaign-hero .editorial-hero__visual > img { object-position: 50% 66%; }
+  .campaign-hero .editorial-hero__side { display: none; }
+  .campaign-hero .editorial-hero__caption { inset: auto 20px 20px; padding: 15px 18px; font-size: 24px; }
+  .campaign-hero .editorial-hero__caption small { font-size: 8px; }
+  .maison-introduction { grid-template-columns: 1fr; padding: 43px 25px; gap: 25px; }
+  .maison-introduction > p { font-size: 35px; }
+  .maison-introduction > div > p { font-size: 13px; }
+  .maison-introduction > div > span { font-size: 10px; }
+  .atelier-section { padding-block: 65px; }
+  .atelier-section-heading { gap: 16px; margin-bottom: 26px; }
+  .atelier-section-heading h2 { font-size: 45px; }
+  .atelier-section-heading .editorial-kicker { font-size: 10px; margin-bottom: 15px; }
+  .atelier-section-heading > .atelier-link { font-size: 12px; }
+  .atelier-section-heading > p { font-size: 13px; }
+  .edit-categories { gap: 22px; margin-bottom: 22px; }
+  .edit-categories a { font-size: 12px; }
+  body[data-experience="atelier"] .product-grid { gap: 30px 14px; }
+  body[data-experience="atelier"] .product-card__body h3 { font-size: 23px; }
+  body[data-experience="atelier"] .product-card__materials { font-size: 11px; min-height: 3.2em; }
+  body[data-experience="atelier"] .product-card__price { font-size: 12px; }
+  body[data-experience="atelier"] .product-card .favorite-button,
+  body[data-experience="atelier"] .product-card .quick-view-button { width: 36px; height: 36px; top: 7px; }
+  body[data-experience="atelier"] .product-card .favorite-button { right: 6px; }
+  body[data-experience="atelier"] .product-card .quick-view-button { left: 6px; }
+  body[data-experience="atelier"] .product-card .compare-button { top: 47px; right: 6px; font-size: 9px; padding: 7px; }
+  body[data-experience="atelier"] .product-card__checkout { font-size: 11px; }
+  .personal-edit-invitation { grid-template-columns: 1fr; padding: 32px 25px; gap: 20px; margin-bottom: 65px; }
+  .personal-edit-invitation h2 { font-size: 42px; }
+  .personal-edit-invitation p { font-size: 13px; margin: 0 0 22px; }
+  .personal-edit-invitation .editorial-kicker { font-size: 10px; }
+  .personal-edit-invitation .atelier-button { font-size: 12px; }
+  .signature-story { grid-template-columns: 1fr; }
+  .signature-story__worn { grid-row: auto; min-height: 0; aspect-ratio: 1; }
+  .signature-story__copy { padding: 40px 25px 15px; }
+  .signature-story h2 { font-size: 58px; }
+  .signature-facts { max-width: 420px; }
+  .signature-story__visual { padding: 0 25px 90px; }
+  .signature-story__visual > img { max-width: 330px; }
+  .signature-finish { inset: auto 25px 25px; }
+  .signature-finish [role="group"] { gap: 8px; }
+  .atelier-worlds { gap: 14px; }
+  .atelier-world:first-child, .atelier-world:nth-child(2),
+  .atelier-world:nth-child(3), .atelier-world:nth-child(4) { min-height: 0; aspect-ratio: .7; }
+  .atelier-world > span { inset: auto 13px 18px; font-size: 30px; }
+  .atelier-world small { font-size: 8px; line-height: 1.4; max-width: 110px; min-height: 23px; margin-bottom: 8px; }
+  .atelier-world b { font-size: 16px; bottom: 5px; }
+  .atelier-bespoke { grid-template-columns: 1fr; }
+  .atelier-bespoke__image { min-height: 0; aspect-ratio: 1; }
+  .atelier-bespoke__image img { object-position: 50% 55%; }
+  .atelier-bespoke__copy { padding: 46px 25px 43px; }
+  .atelier-bespoke h2 { font-size: 78px; margin: 28px 0; }
+  .atelier-bespoke__note { margin-top: 30px; }
+  .atelier-bespoke__note li { font-size: 10px; }
+  .atelier-story-grid { grid-template-columns: 1fr; gap: 45px; }
+  .atelier-estate h3 { font-size: 39px; }
+  .atelier-journal > h3 { font-size: 41px; }
+  .atelier-journal > a:not(.atelier-link) { font-size: 27px; }
+  .collection-intro { padding: 35px 0 28px; }
+  .collection-intro .atelier-container { display: block; }
+  .collection-intro h1 { font-size: clamp(44px,12vw,70px); }
+  .collection-intro__aside { max-width: none; padding: 0; }
+  .collection-intro .collection-intro__aside p { display: none; }
+  .collection-intro__aside .atelier-link { margin-top: 18px; font-size: 12px; }
+  .collection-shell { padding-top: 12px; }
+  .collection-shell .filter-bar { gap: 17px; overflow-x: auto; flex-wrap: nowrap; }
+  .collection-shell .filter-chip { font-size: 12px; flex: 0 0 auto; }
+  .shop-finder { gap: 13px; grid-template-columns: 1fr 1fr; }
+  .shop-finder label { font-size: 9px; }
+  .shop-finder input, .shop-finder select { font-size: 16px; padding: 12px 10px; }
+  .shop-finder__note { font-size: 10px; }
+  body[data-experience="atelier"] .shop-toolbar__count { font-size: 10px; }
+  body[data-experience="atelier"] .booking-section { padding-block: 60px; }
+  body[data-experience="atelier"] .booking-card { padding: 24px 18px; }
+  body[data-experience="atelier"] .footer p,
+  body[data-experience="atelier"] .footer a { font-size: 12px; }
+  .footer-signature { flex-direction: column; align-items: flex-start; padding-bottom: 30px; gap: 20px; margin-bottom: 36px; }
+  .footer-signature > p { font-size: 76px !important; }
+  .personal-edit-dialog { width: calc(100% - 20px); max-height: calc(100dvh - 20px); }
+  .personal-edit-dialog__header { padding: 22px 20px; position: sticky; top: 0; z-index: 2; background: #fbf7f0; }
+  .personal-edit-dialog h2 { font-size: 36px; }
+  .personal-edit-dialog__body { padding: 22px 20px; }
+  .personal-edit-dialog__intro { font-size: 13px; }
+  .personal-edit-controls { gap: 12px; }
+  .personal-edit-controls select { font-size: 16px; padding: 12px 8px; }
+  .personal-edit-results { grid-template-columns: 1fr; gap: 18px; }
+  .personal-edit-result { display: grid; grid-template-columns: 100px 1fr; column-gap: 17px; padding-bottom: 18px; }
+  .personal-edit-result img { grid-row: span 3; aspect-ratio: 1; }
+  .personal-edit-result h3 { margin: 0 0 8px; font-size: 24px; }
+  .personal-edit-result p { font-size: 11px; margin-bottom: 8px; }
+  .personal-edit-result > span { font-size: 12px; }
+  .personal-edit-dialog__footer { align-items: flex-start; flex-direction: column; gap: 15px; }
+}
+@media (max-width: 370px) {
+  .brand { width: 174px; }
+  .header-actions .icon-button, .header-actions .menu-toggle { width: 31px; }
+  body[data-experience="atelier"] .campaign-hero h1 { font-size: 82px; }
+  .campaign-hero .editorial-kicker { font-size: 7px; gap: 8px; }
+  .campaign-hero .editorial-hero__copy { padding-inline: 20px; }
+  .campaign-hero .editorial-hero__caption { inset-inline: 15px; font-size: 21px; }
+  .atelier-section-heading h2 { font-size: 40px; }
+  .atelier-world > span { font-size: 26px; inset-inline: 10px; }
+  .atelier-world b { font-size: 14px; }
+  .signature-finish { gap: 10px; }
+  .signature-finish button { padding-inline: 10px; font-size: 11px; }
+  .personal-edit-dialog__header { padding-inline: 15px; }
+  .personal-edit-dialog__body { padding-inline: 15px; }
+  .personal-edit-dialog h2 { font-size: 31px; }
+  .collection-shell .filter-bar { gap: 17px; }
+  .collection-shell .filter-chip { font-size: 11px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .atelier-world > img, .product-card__media img { transition: none !important; }
+  .atelier-world:hover > img { transform: none; }
+}

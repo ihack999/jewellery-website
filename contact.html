@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Contact Toronto Jewels Curation to arrange a private custom jewellery, fine diamond, or estate luxury consultation in Toronto.">
     <meta name="robots" content="index, follow, max-image-preview:large">
-    <meta name="theme-color" content="#0a3941">
+    <meta name="theme-color" content="#272f26">
     <title>Custom Jewellery Consultations Toronto | Contact TJC</title>
     <link rel="canonical" href="https://torontojewelscuration.com/contact.html">
     <meta property="og:type" content="website">
@@ -20,9 +20,12 @@
     <link rel="manifest" href="site.webmanifest">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="assets/css/styles.css?v=20260831-responsive-images">
-    <script src="assets/js/main.js?v=20260902-necklace-gallery" defer></script>
+    <link rel="stylesheet" href="/assets/css/atelier.css?v=20260911-editorial-v1">
+    <link rel="stylesheet" href="/assets/css/curation.css?v=20260912-curation-v3">
+    <script src="assets/js/main.js?v=20260912-curation-v3" defer></script>
+    <script src="/assets/js/curation.js?v=20260912-curation-v3" defer></script>
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
@@ -34,7 +37,7 @@
       }
     </script>
   </head>
-  <body data-page="contact">
+  <body data-experience="atelier" data-page="contact">
     <div class="page-shell">
       <div class="announcement-bar">
         <div class="announcement-bar__inner">
@@ -121,6 +124,10 @@
                 <div class="accent-rule"></div>
                 <h2>Send a note</h2>
                 <p>Use this form for general questions, appointment requests, and collection inquiries.</p>
+                <p class="contact-form-note">
+                  This form starts a conversation. For custom and estate orders, we confirm availability,
+                  specifications, final price, timing, delivery, and applicable terms in writing before payment.
+                </p>
               </div>
 
               <form
@@ -139,11 +146,11 @@
                 </p>
                 <div class="form-field">
                   <label for="contact-name">Name</label>
-                  <input id="contact-name" name="contact-name" type="text" required>
+                  <input id="contact-name" name="contact-name" type="text" autocomplete="name" required>
                 </div>
                 <div class="form-field">
                   <label for="contact-email">Email</label>
-                  <input id="contact-email" name="contact-email" type="email" required>
+                  <input id="contact-email" name="contact-email" type="email" autocomplete="email" required>
                 </div>
                 <div class="form-field">
                   <label for="contact-message">Message</label>
@@ -152,7 +159,7 @@
                 <div class="button-row">
                   <button class="button" type="submit">Send Inquiry</button>
                 </div>
-                <p class="status-note" data-form-status></p>
+                <p class="status-note" data-form-status role="status" aria-live="polite" aria-atomic="true"></p>
               </form>
             </article>
           </div>

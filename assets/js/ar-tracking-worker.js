@@ -13,9 +13,9 @@ let initialized = false;
 function clonePoint(point) {
   if (!point) return null;
   const output = {
-    x: Number(point.x) || 0,
-    y: Number(point.y) || 0,
-    z: Number(point.z) || 0
+    x: Number.isFinite(point.x) ? point.x : NaN,
+    y: Number.isFinite(point.y) ? point.y : NaN,
+    z: Number.isFinite(point.z) ? point.z : NaN
   };
   if (point.visibility !== undefined) output.visibility = Number(point.visibility);
   if (point.presence !== undefined) output.presence = Number(point.presence);
@@ -45,7 +45,10 @@ function serializeResult(result) {
 
   return {
     landmarks: cloneLandmarkGroups(result?.landmarks),
-    worldLandmarks: cloneLandmarkGroups(result?.worldLandmarks)
+    worldLandmarks: cloneLandmarkGroups(result?.worldLandmarks),
+    handedness: (result?.handedness || result?.handednesses || []).map((categories) => categories.map((category) => ({
+      categoryName: category.categoryName, score: category.score
+    })))
   };
 }
 
@@ -132,14 +135,18 @@ self.onmessage = async (event) => {
         type: "result",
         result: serialized,
         detectCost: performance.now() - startedAt,
-        frameId: message.frameId
+        frameId: message.frameId,
+        timestamp: message.timestamp,
+        generation: message.generation
       });
     } catch (error) {
       self.postMessage({
         type: "error",
         phase: "frame",
         message: error?.message || String(error),
-        frameId: message.frameId
+        frameId: message.frameId,
+        timestamp: message.timestamp,
+        generation: message.generation
       });
     } finally {
       bitmap.close?.();

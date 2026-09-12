@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Explore fine diamond rings, tennis necklaces, bracelets, earrings, and made-to-order jewellery from Toronto Jewels Curation.">
     <meta name="robots" content="index, follow, max-image-preview:large">
-    <meta name="theme-color" content="#0a3941">
+    <meta name="theme-color" content="#272f26">
     <title>Fine Jewellery &amp; Diamond Pieces | Toronto Jewels Curation</title>
     <link rel="canonical" href="https://torontojewelscuration.com/shop.html">
     <meta property="og:type" content="website">
@@ -20,9 +20,12 @@
     <link rel="manifest" href="site.webmanifest">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="assets/css/styles.css?v=20260831-responsive-images">
-    <script src="assets/js/main.js?v=20260902-necklace-gallery" defer></script>
+    <link rel="stylesheet" href="/assets/css/atelier.css?v=20260911-editorial-v1">
+    <link rel="stylesheet" href="/assets/css/curation.css?v=20260912-curation-v3">
+    <script src="assets/js/main.js?v=20260912-curation-v3" defer></script>
+    <script src="/assets/js/curation.js?v=20260912-curation-v3" defer></script>
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
@@ -34,7 +37,7 @@
       }
     </script>
   </head>
-  <body data-page="shop">
+  <body data-experience="atelier" data-page="shop">
     <div class="page-shell">
       <div class="announcement-bar">
         <div class="announcement-bar__inner">
@@ -83,43 +86,22 @@
         </div>
       </header>
 
-      <main>
-        <section class="section section--surface">
-          <div class="container page-hero">
-            <div class="page-hero__copy" data-reveal>
-              <span class="eyebrow">Shop</span>
-              <div class="accent-rule"></div>
-              <h1>Shop the Collection</h1>
-              <p>Explore diamond rings, tennis necklaces, bracelets, earrings, and made-to-order fine jewellery curated in Toronto. Each piece can be refined through a personal consultation.</p>
-            </div>
-            <div class="page-banner" data-reveal>
-              <img src="assets/images/customer-stories/diamond-jewellery-portrait.jpeg" alt="Diamond ring, bracelet, and earrings styled together" width="1068" height="1600" fetchpriority="high">
-            </div>
+      <main id="main-content">
+        <section class="collection-intro">
+          <div class="atelier-container">
+            <div><p class="editorial-kicker">The collection · Toronto Jewels Curation</p><h1>Find your <em>signature.</em></h1></div>
+            <div class="collection-intro__aside"><p>Considered pieces. Personal beginnings.<br>Find the one you’ll make your own.</p><button class="atelier-link" type="button" data-personal-edit-open hidden>Find my personal edit <span aria-hidden="true">↗</span></button></div>
           </div>
         </section>
-
-        <section class="section section--surface section--tight">
-          <div class="container">
-            <div class="filter-bar" aria-label="Shop filters" data-reveal>
-              <a class="filter-chip is-active" href="/shop.html" data-filter="all">All</a>
+        <section class="collection-shell" aria-label="Explore the jewellery collection">
+          <div class="atelier-container">
+            <nav class="filter-bar" aria-label="Jewellery types">
+              <a class="filter-chip is-active" href="/shop.html" data-filter="all" aria-current="true">All pieces</a>
               <a class="filter-chip" href="/rings/" data-filter="rings">Rings</a>
               <a class="filter-chip" href="/necklaces/" data-filter="necklaces">Necklaces</a>
               <a class="filter-chip" href="/bracelets/" data-filter="bracelets">Bracelets</a>
               <a class="filter-chip" href="/earrings/" data-filter="earrings">Earrings</a>
-            </div>
-          </div>
-        </section>
-
-        <section class="section section--surface">
-          <div class="container">
-            <div class="collection-heading" data-reveal>
-              <div class="collection-heading__copy">
-                <span class="eyebrow">Eleven curated designs</span>
-                <h2>Fine jewellery selected for presence, versatility, and longevity</h2>
-                <p>Every piece is available through personal consultation, with guidance on sizing, stones, materials, and custom refinements.</p>
-              </div>
-              <a class="button-secondary" href="/custom-jewellery-toronto/">Create something custom</a>
-            </div>
+            </nav>
             <div class="product-grid" data-shop-products>
               <article class="product-card">
                 <a class="product-card__link" href="/products/the-rise-ring/">
