@@ -1,5 +1,5 @@
 {
-  "measuredAt": "2026-09-14T04:21:15.243Z",
+  "measuredAt": "2026-09-14T06:16:38.855Z",
   "method": "Local gzip server; cache disabled; unthrottled Chrome; 4-second window; 3 samples per width; Google Fonts allowed, other external requests blocked. Not production metrics.",
   "compression": [
     {
@@ -27,16 +27,28 @@
       "brotli": 6542
     },
     {
+      "path": "assets/css/experience.css",
+      "raw": 13924,
+      "gzip": 3768,
+      "brotli": 3229
+    },
+    {
       "path": "assets/js/main.js",
-      "raw": 211019,
-      "gzip": 48964,
-      "brotli": 39989
+      "raw": 211238,
+      "gzip": 49011,
+      "brotli": 40027
     },
     {
       "path": "assets/js/curation.js",
-      "raw": 8920,
-      "gzip": 2760,
-      "brotli": 2291
+      "raw": 13626,
+      "gzip": 4023,
+      "brotli": 3372
+    },
+    {
+      "path": "assets/js/experience.js",
+      "raw": 15884,
+      "gzip": 5466,
+      "brotli": 4723
     }
   ],
   "samples": [
@@ -67,123 +79,135 @@
       "paint": [
         {
           "name": "first-paint",
-          "ms": 56
+          "ms": 60
         },
         {
           "name": "first-contentful-paint",
-          "ms": 56
+          "ms": 60
         }
       ],
-      "lcp": 56,
+      "lcp": 60,
       "cls": 0,
       "resources": [
         {
           "url": "/assets/images/responsive/studio-ring-pink-gemstone-1600-7e4ee8f0-480.webp",
           "encoded": 67826,
           "decoded": 67826,
-          "ms": 5.300000011920929
+          "ms": 6.4000000059604645
         },
         {
           "url": "/assets/fonts/cormorant-garamond-latin-normal.woff2",
           "encoded": 37640,
           "decoded": 37640,
-          "ms": 5.700000017881393
+          "ms": 6.200000017881393
         },
         {
           "url": "/assets/css/fonts.css?v=20260914-mobile",
           "encoded": 234,
           "decoded": 620,
-          "ms": 6.0999999940395355
+          "ms": 6.300000011920929
         },
         {
           "url": "/assets/fonts/manrope-latin-normal.woff2",
           "encoded": 24836,
           "decoded": 24836,
-          "ms": 6.299999982118607
+          "ms": 5.300000011920929
         },
         {
           "url": "/assets/css/styles.css?v=20260831-responsive-images",
           "encoded": 36493,
           "decoded": 209799,
+          "ms": 8.799999982118607
+        },
+        {
+          "url": "/assets/css/atelier.css?v=20260911-editorial-v1",
+          "encoded": 6785,
+          "decoded": 36943,
           "ms": 9.399999976158142
         },
         {
           "url": "/assets/css/curation.css?v=20260914-mobile",
           "encoded": 7653,
           "decoded": 37044,
-          "ms": 9.599999994039536
+          "ms": 10
         },
         {
-          "url": "/assets/css/atelier.css?v=20260911-editorial-v1",
-          "encoded": 6785,
-          "decoded": 36943,
-          "ms": 10.399999976158142
-        },
-        {
-          "url": "/assets/js/main.js?v=20260914-mobile",
-          "encoded": 48925,
-          "decoded": 210940,
-          "ms": 13.799999982118607
+          "url": "/assets/css/experience.css?v=20260914-atelier",
+          "encoded": 3768,
+          "decoded": 13924,
+          "ms": 10.400000005960464
         },
         {
           "url": "/assets/images/logo-wordmark.svg",
           "encoded": 508,
           "decoded": 922,
-          "ms": 10.5
+          "ms": 10.699999988079071
         },
         {
-          "url": "/assets/js/curation.js?v=20260914-mobile",
-          "encoded": 2760,
-          "decoded": 8920,
-          "ms": 14
+          "url": "/assets/js/experience.js?v=20260914-atelier",
+          "encoded": 5466,
+          "decoded": 15884,
+          "ms": 15.400000005960464
+        },
+        {
+          "url": "/assets/js/curation.js?v=20260914-atelier",
+          "encoded": 4023,
+          "decoded": 13626,
+          "ms": 15.599999994039536
+        },
+        {
+          "url": "/assets/js/main.js?v=20260914-studio",
+          "encoded": 49011,
+          "decoded": 211238,
+          "ms": 15.599999994039536
         },
         {
           "url": "/site.webmanifest",
           "encoded": 415,
           "decoded": 415,
-          "ms": 11.5
+          "ms": 12.400000005960464
         },
         {
           "url": "/assets/fonts/cormorant-garamond-latin-italic.woff2",
           "encoded": 39260,
           "decoded": 39260,
-          "ms": 5.300000011920929
-        },
-        {
-          "url": "/assets/images/responsive/signature-monogram-ring-product-angled-9034b797-320.webp",
-          "encoded": 3474,
-          "decoded": 3474,
-          "ms": 2.2000000178813934
+          "ms": 2.5
         },
         {
           "url": "/assets/images/responsive/rise-ring-polished-c902186e-320.webp",
           "encoded": 6270,
           "decoded": 6270,
-          "ms": 2.5
+          "ms": 5.0999999940395355
         },
         {
-          "url": "/assets/images/responsive/quiet-power-tennis-bracelet-1-23965d05-320.webp",
-          "encoded": 26312,
-          "decoded": 26312,
-          "ms": 2.7000000178813934
+          "url": "/assets/images/responsive/signature-monogram-ring-product-angled-9034b797-320.webp",
+          "encoded": 3474,
+          "decoded": 3474,
+          "ms": 5.100000023841858
         },
         {
           "url": "/assets/images/responsive/diamond-tennis-necklace-1600-8fc2af6f-320.webp",
           "encoded": 12526,
           "decoded": 12526,
-          "ms": 2.800000011920929
+          "ms": 5.4000000059604645
+        },
+        {
+          "url": "/assets/images/responsive/quiet-power-tennis-bracelet-1-23965d05-320.webp",
+          "encoded": 26312,
+          "decoded": 26312,
+          "ms": 5.700000017881393
         },
         {
           "url": "/assets/images/logo-emblem.svg",
           "encoded": 491,
           "decoded": 905,
-          "ms": 3.7000000178813934
+          "ms": 3
         },
         {
           "url": "/assets/images/logo-emblem.svg",
           "encoded": 491,
           "decoded": 905,
-          "ms": 3.800000011920929
+          "ms": 1.5999999940395355
         }
       ],
       "overflow": false,
@@ -207,13 +231,13 @@
           "encoding": "gzip"
         },
         {
-          "url": "/assets/fonts/manrope-latin-normal.woff2",
+          "url": "/assets/fonts/cormorant-garamond-latin-normal.woff2",
           "type": "Font",
           "status": 200,
           "encoding": null
         },
         {
-          "url": "/assets/fonts/cormorant-garamond-latin-normal.woff2",
+          "url": "/assets/fonts/manrope-latin-normal.woff2",
           "type": "Font",
           "status": 200,
           "encoding": null
@@ -225,13 +249,19 @@
           "encoding": "gzip"
         },
         {
+          "url": "/assets/css/atelier.css?v=20260911-editorial-v1",
+          "type": "Stylesheet",
+          "status": 200,
+          "encoding": "gzip"
+        },
+        {
           "url": "/assets/css/curation.css?v=20260914-mobile",
           "type": "Stylesheet",
           "status": 200,
           "encoding": "gzip"
         },
         {
-          "url": "/assets/css/atelier.css?v=20260911-editorial-v1",
+          "url": "/assets/css/experience.css?v=20260914-atelier",
           "type": "Stylesheet",
           "status": 200,
           "encoding": "gzip"
@@ -249,13 +279,37 @@
           "encoding": null
         },
         {
+          "url": "/assets/images/responsive/rise-ring-polished-c902186e-320.webp",
+          "type": "Image",
+          "status": 200,
+          "encoding": null
+        },
+        {
+          "url": "/assets/js/experience.js?v=20260914-atelier",
+          "type": "Script",
+          "status": 200,
+          "encoding": "gzip"
+        },
+        {
+          "url": "/assets/js/curation.js?v=20260914-atelier",
+          "type": "Script",
+          "status": 200,
+          "encoding": "gzip"
+        },
+        {
           "url": "/assets/images/responsive/signature-monogram-ring-product-angled-9034b797-320.webp",
           "type": "Image",
           "status": 200,
           "encoding": null
         },
         {
-          "url": "/assets/images/responsive/rise-ring-polished-c902186e-320.webp",
+          "url": "/assets/js/main.js?v=20260914-studio",
+          "type": "Script",
+          "status": 200,
+          "encoding": "gzip"
+        },
+        {
+          "url": "/assets/images/responsive/diamond-tennis-necklace-1600-8fc2af6f-320.webp",
           "type": "Image",
           "status": 200,
           "encoding": null
@@ -267,32 +321,14 @@
           "encoding": null
         },
         {
-          "url": "/assets/images/responsive/diamond-tennis-necklace-1600-8fc2af6f-320.webp",
+          "url": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNSIgdmlld0JveD0iMCAwIDI0IDI0Ij48cGF0aCBmaWxsPSJXaW5kb3dUZXh0IiBkPSJNMjAgM2gtMVYxaC0ydjJIN1YxSDV2Mkg0Yy0xLjEgMC0yIC45LTIgMnYxNmMwIDEuMS45IDIgMiAyaDE2YzEuMSAwIDItLjkgMi0yVjVjMC0xLjEtLjktMi0yLTJ6bTAgMThINFY4aDE2djEzeiIvPjxwYXRoIGZpbGw9Im5vbmUiIGQ9Ik0wIDBoMjR2MjRIMHoiLz48L3N2Zz4=",
           "type": "Image",
           "status": 200,
           "encoding": null
-        },
-        {
-          "url": "/assets/js/curation.js?v=20260914-mobile",
-          "type": "Script",
-          "status": 200,
-          "encoding": "gzip"
         },
         {
           "url": "/site.webmanifest",
           "type": "Manifest",
-          "status": 200,
-          "encoding": null
-        },
-        {
-          "url": "/assets/js/main.js?v=20260914-mobile",
-          "type": "Script",
-          "status": 200,
-          "encoding": "gzip"
-        },
-        {
-          "url": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNSIgdmlld0JveD0iMCAwIDI0IDI0Ij48cGF0aCBmaWxsPSJXaW5kb3dUZXh0IiBkPSJNMjAgM2gtMVYxaC0ydjJIN1YxSDV2Mkg0Yy0xLjEgMC0yIC45LTIgMnYxNmMwIDEuMS45IDIgMiAyaDE2YzEuMSAwIDItLjkgMi0yVjVjMC0xLjEtLjktMi0yLTJ6bTAgMThINFY4aDE2djEzeiIvPjxwYXRoIGZpbGw9Im5vbmUiIGQ9Ik0wIDBoMjR2MjRIMHoiLz48L3N2Zz4=",
-          "type": "Image",
           "status": 200,
           "encoding": null
         },
@@ -352,103 +388,115 @@
           "url": "/assets/images/responsive/studio-ring-pink-gemstone-1600-7e4ee8f0-480.webp",
           "encoded": 67826,
           "decoded": 67826,
-          "ms": 8.599999994039536
-        },
-        {
-          "url": "/assets/fonts/cormorant-garamond-latin-normal.woff2",
-          "encoded": 37640,
-          "decoded": 37640,
-          "ms": 10.200000017881393
+          "ms": 10.700000017881393
         },
         {
           "url": "/assets/fonts/manrope-latin-normal.woff2",
           "encoded": 24836,
           "decoded": 24836,
-          "ms": 10.5
+          "ms": 10.799999982118607
         },
         {
-          "url": "/assets/css/styles.css?v=20260831-responsive-images",
-          "encoded": 36493,
-          "decoded": 209799,
-          "ms": 16.100000023841858
+          "url": "/assets/fonts/cormorant-garamond-latin-normal.woff2",
+          "encoded": 37640,
+          "decoded": 37640,
+          "ms": 10.599999994039536
         },
         {
           "url": "/assets/css/fonts.css?v=20260914-mobile",
           "encoded": 234,
           "decoded": 620,
-          "ms": 16.30000001192093
+          "ms": 10.800000011920929
+        },
+        {
+          "url": "/assets/css/styles.css?v=20260831-responsive-images",
+          "encoded": 36493,
+          "decoded": 209799,
+          "ms": 14.800000011920929
         },
         {
           "url": "/assets/css/atelier.css?v=20260911-editorial-v1",
           "encoded": 6785,
           "decoded": 36943,
-          "ms": 17.200000017881393
+          "ms": 15.199999988079071
+        },
+        {
+          "url": "/assets/css/experience.css?v=20260914-atelier",
+          "encoded": 3768,
+          "decoded": 13924,
+          "ms": 16.5
         },
         {
           "url": "/assets/css/curation.css?v=20260914-mobile",
           "encoded": 7653,
           "decoded": 37044,
-          "ms": 18.69999998807907
+          "ms": 17.19999998807907
         },
         {
-          "url": "/assets/js/curation.js?v=20260914-mobile",
-          "encoded": 2760,
-          "decoded": 8920,
-          "ms": 24.599999994039536
-        },
-        {
-          "url": "/assets/js/main.js?v=20260914-mobile",
-          "encoded": 48925,
-          "decoded": 210940,
-          "ms": 24.299999982118607
+          "url": "/assets/js/main.js?v=20260914-studio",
+          "encoded": 49011,
+          "decoded": 211238,
+          "ms": 21.099999994039536
         },
         {
           "url": "/assets/images/logo-wordmark.svg",
           "encoded": 508,
           "decoded": 922,
-          "ms": 19.099999994039536
+          "ms": 21.30000001192093
+        },
+        {
+          "url": "/assets/js/curation.js?v=20260914-atelier",
+          "encoded": 4023,
+          "decoded": 13626,
+          "ms": 21.400000005960464
+        },
+        {
+          "url": "/assets/js/experience.js?v=20260914-atelier",
+          "encoded": 5466,
+          "decoded": 15884,
+          "ms": 22
         },
         {
           "url": "/site.webmanifest",
           "encoded": 415,
           "decoded": 415,
-          "ms": 5.300000011920929
+          "ms": 5.5999999940395355
         },
         {
           "url": "/assets/fonts/cormorant-garamond-latin-italic.woff2",
           "encoded": 39260,
           "decoded": 39260,
-          "ms": 1.300000011920929
+          "ms": 1.2000000178813934
         },
         {
           "url": "/assets/images/responsive/rise-ring-polished-c902186e-320.webp",
           "encoded": 6270,
           "decoded": 6270,
-          "ms": 2.2000000178813934
-        },
-        {
-          "url": "/assets/images/responsive/quiet-power-tennis-bracelet-1-23965d05-320.webp",
-          "encoded": 26312,
-          "decoded": 26312,
           "ms": 2.399999976158142
         },
         {
           "url": "/assets/images/responsive/signature-monogram-ring-product-angled-9034b797-320.webp",
           "encoded": 3474,
           "decoded": 3474,
-          "ms": 2.5
+          "ms": 2.5999999940395355
+        },
+        {
+          "url": "/assets/images/responsive/quiet-power-tennis-bracelet-1-23965d05-320.webp",
+          "encoded": 26312,
+          "decoded": 26312,
+          "ms": 3
         },
         {
           "url": "/assets/images/responsive/diamond-tennis-necklace-1600-8fc2af6f-320.webp",
           "encoded": 12526,
           "decoded": 12526,
-          "ms": 2.699999988079071
+          "ms": 3.199999988079071
         },
         {
           "url": "/assets/images/logo-emblem.svg",
           "encoded": 491,
           "decoded": 905,
-          "ms": 2.4000000059604645
+          "ms": 2.7000000178813934
         }
       ],
       "overflow": false,
@@ -472,13 +520,19 @@
           "encoding": null
         },
         {
-          "url": "/assets/fonts/cormorant-garamond-latin-normal.woff2",
+          "url": "/assets/css/fonts.css?v=20260914-mobile",
+          "type": "Stylesheet",
+          "status": 200,
+          "encoding": "gzip"
+        },
+        {
+          "url": "/assets/fonts/manrope-latin-normal.woff2",
           "type": "Font",
           "status": 200,
           "encoding": null
         },
         {
-          "url": "/assets/fonts/manrope-latin-normal.woff2",
+          "url": "/assets/fonts/cormorant-garamond-latin-normal.woff2",
           "type": "Font",
           "status": 200,
           "encoding": null
@@ -490,13 +544,13 @@
           "encoding": "gzip"
         },
         {
-          "url": "/assets/css/fonts.css?v=20260914-mobile",
+          "url": "/assets/css/atelier.css?v=20260911-editorial-v1",
           "type": "Stylesheet",
           "status": 200,
           "encoding": "gzip"
         },
         {
-          "url": "/assets/css/atelier.css?v=20260911-editorial-v1",
+          "url": "/assets/css/experience.css?v=20260914-atelier",
           "type": "Stylesheet",
           "status": 200,
           "encoding": "gzip"
@@ -514,13 +568,19 @@
           "encoding": "gzip"
         },
         {
-          "url": "/assets/js/curation.js?v=20260914-mobile",
+          "url": "/assets/js/curation.js?v=20260914-atelier",
           "type": "Script",
           "status": 200,
           "encoding": "gzip"
         },
         {
-          "url": "/assets/js/main.js?v=20260914-mobile",
+          "url": "/assets/js/experience.js?v=20260914-atelier",
+          "type": "Script",
+          "status": 200,
+          "encoding": "gzip"
+        },
+        {
+          "url": "/assets/js/main.js?v=20260914-studio",
           "type": "Script",
           "status": 200,
           "encoding": "gzip"
@@ -544,13 +604,13 @@
           "encoding": null
         },
         {
-          "url": "/assets/images/responsive/quiet-power-tennis-bracelet-1-23965d05-320.webp",
+          "url": "/assets/images/responsive/signature-monogram-ring-product-angled-9034b797-320.webp",
           "type": "Image",
           "status": 200,
           "encoding": null
         },
         {
-          "url": "/assets/images/responsive/signature-monogram-ring-product-angled-9034b797-320.webp",
+          "url": "/assets/images/responsive/quiet-power-tennis-bracelet-1-23965d05-320.webp",
           "type": "Image",
           "status": 200,
           "encoding": null
@@ -597,117 +657,129 @@
       "paint": [
         {
           "name": "first-paint",
-          "ms": 68
+          "ms": 40
         },
         {
           "name": "first-contentful-paint",
-          "ms": 68
+          "ms": 40
         }
       ],
-      "lcp": 68,
+      "lcp": 40,
       "cls": 0,
       "resources": [
         {
           "url": "/assets/images/responsive/studio-ring-pink-gemstone-1600-7e4ee8f0-480.webp",
           "encoded": 67826,
           "decoded": 67826,
-          "ms": 6.4000000059604645
-        },
-        {
-          "url": "/assets/fonts/manrope-latin-normal.woff2",
-          "encoded": 24836,
-          "decoded": 24836,
-          "ms": 6.9000000059604645
+          "ms": 5.5
         },
         {
           "url": "/assets/fonts/cormorant-garamond-latin-normal.woff2",
           "encoded": 37640,
           "decoded": 37640,
-          "ms": 6.700000017881393
+          "ms": 5.700000017881393
         },
         {
           "url": "/assets/css/fonts.css?v=20260914-mobile",
           "encoded": 234,
           "decoded": 620,
-          "ms": 7.299999982118607
+          "ms": 6.199999988079071
+        },
+        {
+          "url": "/assets/fonts/manrope-latin-normal.woff2",
+          "encoded": 24836,
+          "decoded": 24836,
+          "ms": 6
         },
         {
           "url": "/assets/css/styles.css?v=20260831-responsive-images",
           "encoded": 36493,
           "decoded": 209799,
-          "ms": 11.399999976158142
+          "ms": 9.199999988079071
         },
         {
           "url": "/assets/css/atelier.css?v=20260911-editorial-v1",
           "encoded": 6785,
           "decoded": 36943,
-          "ms": 12.299999982118607
+          "ms": 9.799999982118607
         },
         {
           "url": "/assets/css/curation.css?v=20260914-mobile",
           "encoded": 7653,
           "decoded": 37044,
-          "ms": 13
+          "ms": 10.5
         },
         {
-          "url": "/assets/js/curation.js?v=20260914-mobile",
-          "encoded": 2760,
-          "decoded": 8920,
-          "ms": 13.799999982118607
-        },
-        {
-          "url": "/assets/js/main.js?v=20260914-mobile",
-          "encoded": 48925,
-          "decoded": 210940,
-          "ms": 17.5
+          "url": "/assets/css/experience.css?v=20260914-atelier",
+          "encoded": 3768,
+          "decoded": 13924,
+          "ms": 10.799999982118607
         },
         {
           "url": "/assets/images/logo-wordmark.svg",
           "encoded": 508,
           "decoded": 922,
-          "ms": 12.300000011920929
+          "ms": 11.099999994039536
+        },
+        {
+          "url": "/assets/js/curation.js?v=20260914-atelier",
+          "encoded": 4023,
+          "decoded": 13626,
+          "ms": 14.599999994039536
+        },
+        {
+          "url": "/assets/js/experience.js?v=20260914-atelier",
+          "encoded": 5466,
+          "decoded": 15884,
+          "ms": 15
+        },
+        {
+          "url": "/assets/js/main.js?v=20260914-studio",
+          "encoded": 49011,
+          "decoded": 211238,
+          "ms": 14.099999994039536
         },
         {
           "url": "/site.webmanifest",
           "encoded": 415,
           "decoded": 415,
-          "ms": 2.300000011920929
+          "ms": 3.0999999940395355
         },
         {
           "url": "/assets/fonts/cormorant-garamond-latin-italic.woff2",
           "encoded": 39260,
           "decoded": 39260,
-          "ms": 0.9000000059604645
+          "ms": 4.5
         },
         {
           "url": "/assets/images/responsive/rise-ring-polished-c902186e-320.webp",
           "encoded": 6270,
           "decoded": 6270,
-          "ms": 2.600000023841858
+          "ms": 2.5
         },
         {
           "url": "/assets/images/responsive/signature-monogram-ring-product-angled-9034b797-320.webp",
           "encoded": 3474,
           "decoded": 3474,
-          "ms": 2.5
+          "ms": 2.699999988079071
         },
         {
           "url": "/assets/images/responsive/quiet-power-tennis-bracelet-1-23965d05-320.webp",
           "encoded": 26312,
           "decoded": 26312,
-          "ms": 2.7999999821186066
+          "ms": 2.800000011920929
         },
         {
           "url": "/assets/images/responsive/diamond-tennis-necklace-1600-8fc2af6f-320.webp",
           "encoded": 12526,
           "decoded": 12526,
-          "ms": 3.199999988079071
+          "ms": 3.300000011920929
         },
         {
           "url": "/assets/images/logo-emblem.svg",
           "encoded": 491,
           "decoded": 905,
-          "ms": 2.2000000178813934
+          "ms": 1.600000023841858
         }
       ],
       "overflow": false,
@@ -719,14 +791,14 @@
           "encoding": "gzip"
         },
         {
-          "url": "/site.webmanifest",
-          "type": "Manifest",
+          "url": "/assets/images/responsive/studio-ring-pink-gemstone-1600-7e4ee8f0-480.webp",
+          "type": "Image",
           "status": 200,
           "encoding": null
         },
         {
-          "url": "/assets/images/responsive/studio-ring-pink-gemstone-1600-7e4ee8f0-480.webp",
-          "type": "Image",
+          "url": "/site.webmanifest",
+          "type": "Manifest",
           "status": 200,
           "encoding": null
         },
@@ -737,13 +809,13 @@
           "encoding": "gzip"
         },
         {
-          "url": "/assets/fonts/manrope-latin-normal.woff2",
+          "url": "/assets/fonts/cormorant-garamond-latin-normal.woff2",
           "type": "Font",
           "status": 200,
           "encoding": null
         },
         {
-          "url": "/assets/fonts/cormorant-garamond-latin-normal.woff2",
+          "url": "/assets/fonts/manrope-latin-normal.woff2",
           "type": "Font",
           "status": 200,
           "encoding": null
@@ -761,25 +833,43 @@
           "encoding": "gzip"
         },
         {
-          "url": "/assets/images/logo-wordmark.svg",
-          "type": "Image",
-          "status": 200,
-          "encoding": "gzip"
-        },
-        {
           "url": "/assets/css/curation.css?v=20260914-mobile",
           "type": "Stylesheet",
           "status": 200,
           "encoding": "gzip"
         },
         {
-          "url": "/assets/js/curation.js?v=20260914-mobile",
+          "url": "/assets/css/experience.css?v=20260914-atelier",
+          "type": "Stylesheet",
+          "status": 200,
+          "encoding": "gzip"
+        },
+        {
+          "url": "/assets/images/logo-wordmark.svg",
+          "type": "Image",
+          "status": 200,
+          "encoding": "gzip"
+        },
+        {
+          "url": "/assets/fonts/cormorant-garamond-latin-italic.woff2",
+          "type": "Font",
+          "status": 200,
+          "encoding": null
+        },
+        {
+          "url": "/assets/js/curation.js?v=20260914-atelier",
           "type": "Script",
           "status": 200,
           "encoding": "gzip"
         },
         {
-          "url": "/assets/js/main.js?v=20260914-mobile",
+          "url": "/assets/js/experience.js?v=20260914-atelier",
+          "type": "Script",
+          "status": 200,
+          "encoding": "gzip"
+        },
+        {
+          "url": "/assets/js/main.js?v=20260914-studio",
           "type": "Script",
           "status": 200,
           "encoding": "gzip"
@@ -787,12 +877,6 @@
         {
           "url": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNSIgdmlld0JveD0iMCAwIDI0IDI0Ij48cGF0aCBmaWxsPSJXaW5kb3dUZXh0IiBkPSJNMjAgM2gtMVYxaC0ydjJIN1YxSDV2Mkg0Yy0xLjEgMC0yIC45LTIgMnYxNmMwIDEuMS45IDIgMiAyaDE2YzEuMSAwIDItLjkgMi0yVjVjMC0xLjEtLjktMi0yLTJ6bTAgMThINFY4aDE2djEzeiIvPjxwYXRoIGZpbGw9Im5vbmUiIGQ9Ik0wIDBoMjR2MjRIMHoiLz48L3N2Zz4=",
           "type": "Image",
-          "status": 200,
-          "encoding": null
-        },
-        {
-          "url": "/assets/fonts/cormorant-garamond-latin-italic.woff2",
-          "type": "Font",
           "status": 200,
           "encoding": null
         },
@@ -815,16 +899,16 @@
           "encoding": null
         },
         {
-          "url": "/assets/images/logo-emblem.svg",
-          "type": "Other",
-          "status": 200,
-          "encoding": "gzip"
-        },
-        {
           "url": "/assets/images/responsive/diamond-tennis-necklace-1600-8fc2af6f-320.webp",
           "type": "Image",
           "status": 200,
           "encoding": null
+        },
+        {
+          "url": "/assets/images/logo-emblem.svg",
+          "type": "Other",
+          "status": 200,
+          "encoding": "gzip"
         }
       ],
       "failures": []
@@ -864,109 +948,121 @@
         }
       ],
       "lcp": 44,
-      "cls": 0.006858491941015088,
+      "cls": 0.00142181927297668,
       "resources": [
         {
           "url": "/assets/images/responsive/studio-ring-pink-gemstone-1600-7e4ee8f0-780.webp",
           "encoded": 149752,
           "decoded": 149752,
-          "ms": 5.100000023841858
-        },
-        {
-          "url": "/assets/css/fonts.css?v=20260914-mobile",
-          "encoded": 234,
-          "decoded": 620,
-          "ms": 5.5
-        },
-        {
-          "url": "/assets/fonts/manrope-latin-normal.woff2",
-          "encoded": 24836,
-          "decoded": 24836,
-          "ms": 5.0999999940395355
+          "ms": 4.5
         },
         {
           "url": "/assets/fonts/cormorant-garamond-latin-normal.woff2",
           "encoded": 37640,
           "decoded": 37640,
-          "ms": 5.399999976158142
+          "ms": 4.4000000059604645
+        },
+        {
+          "url": "/assets/css/fonts.css?v=20260914-mobile",
+          "encoded": 234,
+          "decoded": 620,
+          "ms": 5.300000011920929
+        },
+        {
+          "url": "/assets/fonts/manrope-latin-normal.woff2",
+          "encoded": 24836,
+          "decoded": 24836,
+          "ms": 5
         },
         {
           "url": "/assets/css/styles.css?v=20260831-responsive-images",
           "encoded": 36493,
           "decoded": 209799,
-          "ms": 8.799999982118607
+          "ms": 8.099999994039536
         },
         {
           "url": "/assets/css/atelier.css?v=20260911-editorial-v1",
           "encoded": 6785,
           "decoded": 36943,
-          "ms": 9.199999988079071
+          "ms": 8.699999988079071
         },
         {
           "url": "/assets/css/curation.css?v=20260914-mobile",
           "encoded": 7653,
           "decoded": 37044,
-          "ms": 9.799999982118607
+          "ms": 9.400000005960464
+        },
+        {
+          "url": "/assets/css/experience.css?v=20260914-atelier",
+          "encoded": 3768,
+          "decoded": 13924,
+          "ms": 9.599999994039536
         },
         {
           "url": "/assets/images/logo-wordmark.svg",
           "encoded": 508,
           "decoded": 922,
-          "ms": 10
+          "ms": 9.800000011920929
         },
         {
-          "url": "/assets/js/curation.js?v=20260914-mobile",
-          "encoded": 2760,
-          "decoded": 8920,
-          "ms": 14.5
+          "url": "/assets/js/curation.js?v=20260914-atelier",
+          "encoded": 4023,
+          "decoded": 13626,
+          "ms": 13.599999994039536
         },
         {
-          "url": "/assets/js/main.js?v=20260914-mobile",
-          "encoded": 48925,
-          "decoded": 210940,
-          "ms": 14.400000005960464
+          "url": "/assets/js/experience.js?v=20260914-atelier",
+          "encoded": 5466,
+          "decoded": 15884,
+          "ms": 13.700000017881393
+        },
+        {
+          "url": "/assets/js/main.js?v=20260914-studio",
+          "encoded": 49011,
+          "decoded": 211238,
+          "ms": 13
         },
         {
           "url": "/site.webmanifest",
           "encoded": 415,
           "decoded": 415,
-          "ms": 2.2999999821186066
+          "ms": 1.699999988079071
         },
         {
           "url": "/assets/fonts/cormorant-garamond-latin-italic.woff2",
           "encoded": 39260,
           "decoded": 39260,
-          "ms": 3.5999999940395355
+          "ms": 4.0999999940395355
         },
         {
           "url": "/assets/images/responsive/rise-ring-polished-c902186e-480.webp",
           "encoded": 11186,
           "decoded": 11186,
-          "ms": 1.699999988079071
+          "ms": 2.199999988079071
         },
         {
           "url": "/assets/images/responsive/signature-monogram-ring-product-angled-9034b797-480.webp",
           "encoded": 5692,
           "decoded": 5692,
-          "ms": 2.5999999940395355
-        },
-        {
-          "url": "/assets/images/responsive/quiet-power-tennis-bracelet-1-23965d05-480.webp",
-          "encoded": 54600,
-          "decoded": 54600,
-          "ms": 2.800000011920929
+          "ms": 2.0999999940395355
         },
         {
           "url": "/assets/images/responsive/diamond-tennis-necklace-1600-8fc2af6f-480.webp",
           "encoded": 24934,
           "decoded": 24934,
-          "ms": 3.199999988079071
+          "ms": 2.2999999821186066
+        },
+        {
+          "url": "/assets/images/responsive/quiet-power-tennis-bracelet-1-23965d05-480.webp",
+          "encoded": 54600,
+          "decoded": 54600,
+          "ms": 2.5
         },
         {
           "url": "/assets/images/logo-emblem.svg",
           "encoded": 491,
           "decoded": 905,
-          "ms": 1.699999988079071
+          "ms": 1.2999999821186066
         }
       ],
       "overflow": false,
@@ -996,13 +1092,13 @@
           "encoding": "gzip"
         },
         {
-          "url": "/assets/fonts/manrope-latin-normal.woff2",
+          "url": "/assets/fonts/cormorant-garamond-latin-normal.woff2",
           "type": "Font",
           "status": 200,
           "encoding": null
         },
         {
-          "url": "/assets/fonts/cormorant-garamond-latin-normal.woff2",
+          "url": "/assets/fonts/manrope-latin-normal.woff2",
           "type": "Font",
           "status": 200,
           "encoding": null
@@ -1026,6 +1122,12 @@
           "encoding": "gzip"
         },
         {
+          "url": "/assets/css/experience.css?v=20260914-atelier",
+          "type": "Stylesheet",
+          "status": 200,
+          "encoding": "gzip"
+        },
+        {
           "url": "/assets/images/logo-wordmark.svg",
           "type": "Image",
           "status": 200,
@@ -1038,13 +1140,19 @@
           "encoding": null
         },
         {
-          "url": "/assets/js/curation.js?v=20260914-mobile",
+          "url": "/assets/js/curation.js?v=20260914-atelier",
           "type": "Script",
           "status": 200,
           "encoding": "gzip"
         },
         {
-          "url": "/assets/js/main.js?v=20260914-mobile",
+          "url": "/assets/js/experience.js?v=20260914-atelier",
+          "type": "Script",
+          "status": 200,
+          "encoding": "gzip"
+        },
+        {
+          "url": "/assets/js/main.js?v=20260914-studio",
           "type": "Script",
           "status": 200,
           "encoding": "gzip"
@@ -1068,13 +1176,13 @@
           "encoding": null
         },
         {
-          "url": "/assets/images/responsive/quiet-power-tennis-bracelet-1-23965d05-480.webp",
+          "url": "/assets/images/responsive/diamond-tennis-necklace-1600-8fc2af6f-480.webp",
           "type": "Image",
           "status": 200,
           "encoding": null
         },
         {
-          "url": "/assets/images/responsive/diamond-tennis-necklace-1600-8fc2af6f-480.webp",
+          "url": "/assets/images/responsive/quiet-power-tennis-bracelet-1-23965d05-480.webp",
           "type": "Image",
           "status": 200,
           "encoding": null
@@ -1115,51 +1223,51 @@
       "paint": [
         {
           "name": "first-paint",
-          "ms": 76
+          "ms": 56
         },
         {
           "name": "first-contentful-paint",
-          "ms": 76
+          "ms": 56
         }
       ],
-      "lcp": 76,
-      "cls": 0,
+      "lcp": 56,
+      "cls": 0.00142181927297668,
       "resources": [
         {
           "url": "/assets/images/responsive/studio-ring-pink-gemstone-1600-7e4ee8f0-780.webp",
           "encoded": 149752,
           "decoded": 149752,
-          "ms": 7
-        },
-        {
-          "url": "/assets/fonts/manrope-latin-normal.woff2",
-          "encoded": 24836,
-          "decoded": 24836,
-          "ms": 8.400000005960464
+          "ms": 11.5
         },
         {
           "url": "/assets/fonts/cormorant-garamond-latin-normal.woff2",
           "encoded": 37640,
           "decoded": 37640,
-          "ms": 8.300000011920929
+          "ms": 11.399999976158142
         },
         {
           "url": "/assets/css/fonts.css?v=20260914-mobile",
           "encoded": 234,
           "decoded": 620,
-          "ms": 9.700000017881393
+          "ms": 11.5
+        },
+        {
+          "url": "/assets/fonts/manrope-latin-normal.woff2",
+          "encoded": 24836,
+          "decoded": 24836,
+          "ms": 11.400000005960464
         },
         {
           "url": "/assets/css/styles.css?v=20260831-responsive-images",
           "encoded": 36493,
           "decoded": 209799,
-          "ms": 14.599999994039536
+          "ms": 15.299999982118607
         },
         {
-          "url": "/assets/css/atelier.css?v=20260911-editorial-v1",
-          "encoded": 6785,
-          "decoded": 36943,
-          "ms": 15.900000005960464
+          "url": "/assets/css/experience.css?v=20260914-atelier",
+          "encoded": 3768,
+          "decoded": 13924,
+          "ms": 16.19999998807907
         },
         {
           "url": "/assets/css/curation.css?v=20260914-mobile",
@@ -1168,64 +1276,76 @@
           "ms": 17
         },
         {
-          "url": "/assets/js/curation.js?v=20260914-mobile",
-          "encoded": 2760,
-          "decoded": 8920,
-          "ms": 17.900000005960464
-        },
-        {
-          "url": "/assets/js/main.js?v=20260914-mobile",
-          "encoded": 48925,
-          "decoded": 210940,
-          "ms": 23
+          "url": "/assets/css/atelier.css?v=20260911-editorial-v1",
+          "encoded": 6785,
+          "decoded": 36943,
+          "ms": 18.19999998807907
         },
         {
           "url": "/assets/images/logo-wordmark.svg",
           "encoded": 508,
           "decoded": 922,
-          "ms": 17.19999998807907
+          "ms": 17.200000017881393
+        },
+        {
+          "url": "/assets/js/curation.js?v=20260914-atelier",
+          "encoded": 4023,
+          "decoded": 13626,
+          "ms": 23.30000001192093
+        },
+        {
+          "url": "/assets/js/experience.js?v=20260914-atelier",
+          "encoded": 5466,
+          "decoded": 15884,
+          "ms": 23.5
+        },
+        {
+          "url": "/assets/js/main.js?v=20260914-studio",
+          "encoded": 49011,
+          "decoded": 211238,
+          "ms": 23
         },
         {
           "url": "/site.webmanifest",
           "encoded": 415,
           "decoded": 415,
-          "ms": 3.199999988079071
+          "ms": 6.200000017881393
         },
         {
           "url": "/assets/fonts/cormorant-garamond-latin-italic.woff2",
           "encoded": 39260,
           "decoded": 39260,
-          "ms": 1.4000000059604645
+          "ms": 1.0999999940395355
         },
         {
           "url": "/assets/images/responsive/rise-ring-polished-c902186e-480.webp",
           "encoded": 11186,
           "decoded": 11186,
-          "ms": 2
+          "ms": 2.2999999821186066
         },
         {
           "url": "/assets/images/responsive/signature-monogram-ring-product-angled-9034b797-480.webp",
           "encoded": 5692,
           "decoded": 5692,
-          "ms": 2
+          "ms": 3.5999999940395355
         },
         {
           "url": "/assets/images/responsive/quiet-power-tennis-bracelet-1-23965d05-480.webp",
           "encoded": 54600,
           "decoded": 54600,
-          "ms": 2.199999988079071
+          "ms": 4.300000011920929
         },
         {
           "url": "/assets/images/responsive/diamond-tennis-necklace-1600-8fc2af6f-480.webp",
           "encoded": 24934,
           "decoded": 24934,
-          "ms": 2.699999988079071
+          "ms": 4.300000011920929
         },
         {
           "url": "/assets/images/logo-emblem.svg",
           "encoded": 491,
           "decoded": 905,
-          "ms": 2.4000000059604645
+          "ms": 1.199999988079071
         }
       ],
       "overflow": false,
@@ -1237,16 +1357,22 @@
           "encoding": "gzip"
         },
         {
+          "url": "/site.webmanifest",
+          "type": "Manifest",
+          "status": 200,
+          "encoding": null
+        },
+        {
           "url": "/assets/images/responsive/studio-ring-pink-gemstone-1600-7e4ee8f0-780.webp",
           "type": "Image",
           "status": 200,
           "encoding": null
         },
         {
-          "url": "/site.webmanifest",
-          "type": "Manifest",
+          "url": "/assets/css/fonts.css?v=20260914-mobile",
+          "type": "Stylesheet",
           "status": 200,
-          "encoding": null
+          "encoding": "gzip"
         },
         {
           "url": "/assets/fonts/manrope-latin-normal.woff2",
@@ -1261,19 +1387,13 @@
           "encoding": null
         },
         {
-          "url": "/assets/css/fonts.css?v=20260914-mobile",
-          "type": "Stylesheet",
-          "status": 200,
-          "encoding": "gzip"
-        },
-        {
           "url": "/assets/css/styles.css?v=20260831-responsive-images",
           "type": "Stylesheet",
           "status": 200,
           "encoding": "gzip"
         },
         {
-          "url": "/assets/css/atelier.css?v=20260911-editorial-v1",
+          "url": "/assets/css/experience.css?v=20260914-atelier",
           "type": "Stylesheet",
           "status": 200,
           "encoding": "gzip"
@@ -1291,13 +1411,31 @@
           "encoding": "gzip"
         },
         {
-          "url": "/assets/js/curation.js?v=20260914-mobile",
+          "url": "/assets/css/atelier.css?v=20260911-editorial-v1",
+          "type": "Stylesheet",
+          "status": 200,
+          "encoding": "gzip"
+        },
+        {
+          "url": "/assets/js/curation.js?v=20260914-atelier",
           "type": "Script",
           "status": 200,
           "encoding": "gzip"
         },
         {
-          "url": "/assets/js/main.js?v=20260914-mobile",
+          "url": "/assets/js/experience.js?v=20260914-atelier",
+          "type": "Script",
+          "status": 200,
+          "encoding": "gzip"
+        },
+        {
+          "url": "/assets/fonts/cormorant-garamond-latin-italic.woff2",
+          "type": "Font",
+          "status": 200,
+          "encoding": null
+        },
+        {
+          "url": "/assets/js/main.js?v=20260914-studio",
           "type": "Script",
           "status": 200,
           "encoding": "gzip"
@@ -1305,12 +1443,6 @@
         {
           "url": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNSIgdmlld0JveD0iMCAwIDI0IDI0Ij48cGF0aCBmaWxsPSJXaW5kb3dUZXh0IiBkPSJNMjAgM2gtMVYxaC0ydjJIN1YxSDV2Mkg0Yy0xLjEgMC0yIC45LTIgMnYxNmMwIDEuMS45IDIgMiAyaDE2YzEuMSAwIDItLjkgMi0yVjVjMC0xLjEtLjktMi0yLTJ6bTAgMThINFY4aDE2djEzeiIvPjxwYXRoIGZpbGw9Im5vbmUiIGQ9Ik0wIDBoMjR2MjRIMHoiLz48L3N2Zz4=",
           "type": "Image",
-          "status": 200,
-          "encoding": null
-        },
-        {
-          "url": "/assets/fonts/cormorant-garamond-latin-italic.woff2",
-          "type": "Font",
           "status": 200,
           "encoding": null
         },
@@ -1382,109 +1514,121 @@
         }
       ],
       "lcp": 52,
-      "cls": 0.006858491941015088,
+      "cls": 0.00142181927297668,
       "resources": [
         {
           "url": "/assets/images/responsive/studio-ring-pink-gemstone-1600-7e4ee8f0-780.webp",
           "encoded": 149752,
           "decoded": 149752,
-          "ms": 11.5
-        },
-        {
-          "url": "/assets/fonts/manrope-latin-normal.woff2",
-          "encoded": 24836,
-          "decoded": 24836,
           "ms": 11.900000005960464
         },
         {
           "url": "/assets/fonts/cormorant-garamond-latin-normal.woff2",
           "encoded": 37640,
           "decoded": 37640,
-          "ms": 12.199999988079071
+          "ms": 12.400000005960464
         },
         {
           "url": "/assets/css/fonts.css?v=20260914-mobile",
           "encoded": 234,
           "decoded": 620,
-          "ms": 11.599999994039536
+          "ms": 11.900000005960464
+        },
+        {
+          "url": "/assets/fonts/manrope-latin-normal.woff2",
+          "encoded": 24836,
+          "decoded": 24836,
+          "ms": 12.599999994039536
         },
         {
           "url": "/assets/css/styles.css?v=20260831-responsive-images",
           "encoded": 36493,
           "decoded": 209799,
-          "ms": 16.69999998807907
+          "ms": 17.900000005960464
         },
         {
           "url": "/assets/css/atelier.css?v=20260911-editorial-v1",
           "encoded": 6785,
           "decoded": 36943,
-          "ms": 17.5
+          "ms": 13.5
         },
         {
           "url": "/assets/css/curation.css?v=20260914-mobile",
           "encoded": 7653,
           "decoded": 37044,
-          "ms": 18.400000005960464
+          "ms": 18.900000005960464
+        },
+        {
+          "url": "/assets/css/experience.css?v=20260914-atelier",
+          "encoded": 3768,
+          "decoded": 13924,
+          "ms": 19.400000005960464
+        },
+        {
+          "url": "/assets/js/main.js?v=20260914-studio",
+          "encoded": 49011,
+          "decoded": 211238,
+          "ms": 24.30000001192093
         },
         {
           "url": "/assets/images/logo-wordmark.svg",
           "encoded": 508,
           "decoded": 922,
-          "ms": 19.099999994039536
+          "ms": 19.600000023841858
         },
         {
-          "url": "/assets/js/curation.js?v=20260914-mobile",
-          "encoded": 2760,
-          "decoded": 8920,
-          "ms": 18.80000001192093
+          "url": "/assets/js/curation.js?v=20260914-atelier",
+          "encoded": 4023,
+          "decoded": 13626,
+          "ms": 24.400000005960464
         },
         {
-          "url": "/assets/js/main.js?v=20260914-mobile",
-          "encoded": 48925,
-          "decoded": 210940,
-          "ms": 24
+          "url": "/assets/js/experience.js?v=20260914-atelier",
+          "encoded": 5466,
+          "decoded": 15884,
+          "ms": 24.900000005960464
         },
         {
           "url": "/site.webmanifest",
           "encoded": 415,
           "decoded": 415,
-          "ms": 7.9000000059604645
+          "ms": 6.4000000059604645
         },
         {
           "url": "/assets/fonts/cormorant-garamond-latin-italic.woff2",
           "encoded": 39260,
           "decoded": 39260,
-          "ms": 4.0999999940395355
+          "ms": 6.5999999940395355
         },
         {
           "url": "/assets/images/responsive/rise-ring-polished-c902186e-480.webp",
           "encoded": 11186,
           "decoded": 11186,
-          "ms": 2.4000000059604645
+          "ms": 2.7999999821186066
         },
         {
           "url": "/assets/images/responsive/signature-monogram-ring-product-angled-9034b797-480.webp",
           "encoded": 5692,
           "decoded": 5692,
-          "ms": 2.800000011920929
+          "ms": 3.0999999940395355
         },
         {
           "url": "/assets/images/responsive/quiet-power-tennis-bracelet-1-23965d05-480.webp",
           "encoded": 54600,
           "decoded": 54600,
-          "ms": 3
+          "ms": 3.300000011920929
         },
         {
           "url": "/assets/images/responsive/diamond-tennis-necklace-1600-8fc2af6f-480.webp",
           "encoded": 24934,
           "decoded": 24934,
-          "ms": 3.199999988079071
+          "ms": 3.800000011920929
         },
         {
           "url": "/assets/images/logo-emblem.svg",
           "encoded": 491,
           "decoded": 905,
-          "ms": 1.800000011920929
+          "ms": 1.4000000059604645
         }
       ],
       "overflow": false,
@@ -1496,6 +1640,12 @@
           "encoding": "gzip"
         },
         {
+          "url": "/site.webmanifest",
+          "type": "Manifest",
+          "status": 200,
+          "encoding": null
+        },
+        {
           "url": "/assets/images/responsive/studio-ring-pink-gemstone-1600-7e4ee8f0-780.webp",
           "type": "Image",
           "status": 200,
@@ -1508,10 +1658,10 @@
           "encoding": "gzip"
         },
         {
-          "url": "/site.webmanifest",
-          "type": "Manifest",
+          "url": "/assets/css/atelier.css?v=20260911-editorial-v1",
+          "type": "Stylesheet",
           "status": 200,
-          "encoding": null
+          "encoding": "gzip"
         },
         {
           "url": "/assets/fonts/manrope-latin-normal.woff2",
@@ -1532,13 +1682,13 @@
           "encoding": "gzip"
         },
         {
-          "url": "/assets/css/atelier.css?v=20260911-editorial-v1",
+          "url": "/assets/css/curation.css?v=20260914-mobile",
           "type": "Stylesheet",
           "status": 200,
           "encoding": "gzip"
         },
         {
-          "url": "/assets/css/curation.css?v=20260914-mobile",
+          "url": "/assets/css/experience.css?v=20260914-atelier",
           "type": "Stylesheet",
           "status": 200,
           "encoding": "gzip"
@@ -1556,13 +1706,19 @@
           "encoding": null
         },
         {
-          "url": "/assets/js/curation.js?v=20260914-mobile",
+          "url": "/assets/js/curation.js?v=20260914-atelier",
           "type": "Script",
           "status": 200,
           "encoding": "gzip"
         },
         {
-          "url": "/assets/js/main.js?v=20260914-mobile",
+          "url": "/assets/js/experience.js?v=20260914-atelier",
+          "type": "Script",
+          "status": 200,
+          "encoding": "gzip"
+        },
+        {
+          "url": "/assets/js/main.js?v=20260914-studio",
           "type": "Script",
           "status": 200,
           "encoding": "gzip"

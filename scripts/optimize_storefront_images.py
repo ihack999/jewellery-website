@@ -22,16 +22,26 @@ previous = json.loads(previous_match[1]) if previous_match else {}
 previous_files = {OUT / f'{stem}-{width}.webp' for stem, widths in previous.values() for width in widths}
 main = re.sub(r'// BEGIN RESPONSIVE PHOTOS.*?// END RESPONSIVE PHOTOS\n', '', main, flags=re.S)
 pages = sorted(ROOT.glob('*.html')) + sorted(ROOT.glob('*/index.html')) + sorted(ROOT.glob('*/*/index.html'))
-sources = set(re.findall(r'["\'](/assets/images/[^"\']+\.(?:jpeg|jpg|png))["\']', main))
+sources = set(re.findall(r'["\'](/assets/images/[^"\']+\.(?:jpeg|jpg|png|webp))["\']', main))
 for page in pages:
-    sources.update('/' + src.lstrip('/') for src in re.findall(r'<img\b[^>]*\bsrc="(/?assets/images/[^"?]+\.(?:jpg|jpeg|png))"', page.read_text()))
+    for tag in re.findall(r'<img\b[^>]+>', page.read_text()):
+        src = re.search(r'\bsrc="(/?assets/images/[^"?]+\.(?:jpg|jpeg|png|webp))"', tag)
+        if src and 'data-responsive-manual' not in tag:
+            sources.add('/' + src[1].lstrip('/'))
+    sources.update('/' + src.lstrip('/') for src in re.findall(r'(?:poster|data-poster-source)="(/?assets/images/[^"?]+\.(?:jpg|jpeg|png|webp))"', page.read_text()))
 sources = sorted(src for src in sources if '/responsive/' not in src)
 manifest = {}
+dimensions = {}
 for src in sources:
     path = ROOT / src.lstrip('/')
     if not path.exists():
         continue
-    with Image.open(path) as original:
+    # Encode studio variants directly from the retained PNG, avoiding a second
+    # lossy encode of the WebP fallback. Never synthesize extra source detail.
+    master = path.parent / 'sources' / (path.stem + '.png') if '/studio/' in src else path
+    if not master.exists():
+        master = path
+    with Image.open(master) as original:
         photo = ImageOps.exif_transpose(original)
         profile = photo.info.get('icc_profile')
         if profile:
@@ -40,10 +50,11 @@ for src in sources:
         else:
             photo = photo.convert('RGBA' if photo.mode == 'RGBA' else 'RGB')
     width, height = photo.size
+    dimensions[src] = (width, height)
     if width < 300:
         continue
     # A replacement photo or encoder recipe gets a new URL despite CDN caching.
-    stem = path.stem + '-' + hashlib.sha256(src.encode() + path.read_bytes() + b'webp-q86-v1').hexdigest()[:8]
+    stem = path.stem + '-' + hashlib.sha256(src.encode() + master.read_bytes() + b'webp-q86-v1').hexdigest()[:8]
     widths = sorted(set(min(width, target) for target in [160, 320, 480, 780, 1280]))
     for size in widths:
         dest = OUT / f'{stem}-{size}.webp'
@@ -65,6 +76,8 @@ for page in pages:
     text = page.read_text()
     def image(match):
         tag = match[0]
+        if 'data-responsive-manual' in tag:
+            return tag
         src_match = re.search(r'\bsrc="([^"]+)"', tag)
         if not src_match:
             return tag
@@ -80,8 +93,27 @@ for page in pages:
         tag = re.sub(r'\s+(?:srcset|sizes)="[^"]*"', '', tag)
         if 'decoding=' not in tag:
             tag = tag[:-1] + ' decoding="async">'
+        if 'width=' not in tag and 'height=' not in tag:
+            width, height = dimensions[src]
+            tag = tag[:-1] + f' width="{width}" height="{height}">'
         return tag[:-1] + f' srcset="{candidates(src)}" sizes="{sizes}">'
     text = re.sub(r'<img\b[^>]+>', image, text)
+    def poster(match):
+        tag = match[0]
+        original = re.search(r'\bdata-poster-source="([^"]+)"', tag)
+        current = re.search(r'\bposter="([^"]+)"', tag)
+        if not current:
+            return tag
+        src = '/' + (original or current)[1].lstrip('/')
+        if src not in manifest:
+            return tag
+        stem, widths = manifest[src]
+        size = max(w for w in widths if w <= 780)
+        tag = tag.replace(current[0], f'poster="/assets/images/responsive/{stem}-{size}.webp"')
+        if not original:
+            tag = tag[:-1] + f' data-poster-source="{src}">'
+        return tag
+    text = re.sub(r'<video\b[^>]+>', poster, text)
     # Keep the high-priority preload identical to the hero's source selection.
     def preload(match):
         tag = match[0]

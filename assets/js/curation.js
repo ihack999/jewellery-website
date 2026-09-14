@@ -51,6 +51,8 @@
     const results = dialog.querySelector(".personal-edit-results");
     const status = dialog.querySelector(".personal-edit-status");
     const priorities = ["rise-ring", "signature-monogram-ring", "diamond-bracelet-stack", "diamond-tennis-necklace", "vintage-halo-stud-earrings", "half-eternity-pinky-band", "pear-halo-ring", "gold-bezel-hand-chain", "cushion-diamond-ring"];
+    let mood = "all";
+    let step = 0;
     let opener = null;
     let alreadyLocked = false;
 
@@ -65,7 +67,15 @@
           const index = priorities.indexOf(product.slug);
           return index < 0 ? priorities.length : index;
         };
-        return priority(a) - priority(b);
+        const affinity = (product) => {
+          if (mood === "all") return 0;
+          const text = [product.name, product.materials, product.shortDescription].join(" ").toLowerCase();
+          const words = mood === "sculptural" ? ["bezel", "signet", "monogram", "rise", "sculptural"]
+            : mood === "statement" ? ["tennis", "halo", "graduated", "blue", "yellow", "10 ct"]
+            : ["stud", "solitaire", "eternity", "diamond", "classic"];
+          return words.reduce((score, word) => score + Number(text.includes(word)), 0);
+        };
+        return affinity(b) - affinity(a) || priority(a) - priority(b);
       });
       const selection = matches.slice(0, 3);
       results.replaceChildren();
@@ -79,7 +89,7 @@
         link.className = "personal-edit-result";
         link.href = productUrl(product);
         const image = document.createElement("img");
-        setResponsivePhoto(image, product.slug === "rise-ring" ? "/assets/images/products/rise-ring/rise-ring-polished.jpeg" : product.heroImage, "(max-width: 700px) 100px, 30vw");
+        setResponsivePhoto(image, product.heroImage, "(max-width: 700px) 100px, 30vw");
         image.decoding = "async";
         image.alt = product.name;
         image.width = 400;
@@ -111,10 +121,62 @@
       }
     };
 
+    const body = dialog.querySelector(".personal-edit-dialog__body");
+    const progress = document.createElement("nav");
+    progress.className = "finder-progress";
+    progress.setAttribute("aria-label", "Build your personal edit");
+    progress.innerHTML = '<button type="button" data-finder-step="0">01 · Your mood</button><button type="button" data-finder-step="1">02 · The details</button><button type="button" data-finder-step="2">03 · Your pieces</button>';
+    const moodChapter = document.createElement("section");
+    moodChapter.className = "finder-chapter";
+    moodChapter.innerHTML = '<h3 tabindex="-1">What feels like you?</h3><p>A first instinct. A point of view. There is no wrong answer.</p><div class="finder-moods" role="group" aria-label="Your jewellery mood"><button type="button" data-finder-mood="timeless" aria-pressed="false"><span aria-hidden="true">01.</span>Quietly timeless</button><button type="button" data-finder-mood="sculptural" aria-pressed="false"><span aria-hidden="true">02.</span>A little sculptural</button><button type="button" data-finder-mood="statement" aria-pressed="false"><span aria-hidden="true">03.</span>Make a statement</button></div>';
+    const detailsChapter = document.createElement("section");
+    detailsChapter.className = "finder-chapter";
+    detailsChapter.innerHTML = '<h3 tabindex="-1">A few little details.</h3>';
+    detailsChapter.append(dialog.querySelector(".personal-edit-controls"));
+    const piecesChapter = document.createElement("section");
+    piecesChapter.className = "finder-chapter";
+    piecesChapter.innerHTML = '<h3 tabindex="-1">A considered selection.</h3>';
+    piecesChapter.append(status, results, dialog.querySelector(".personal-edit-dialog__footer"));
+    const chapters = [moodChapter, detailsChapter, piecesChapter];
+    const navigation = document.createElement("div");
+    navigation.className = "finder-next";
+    navigation.innerHTML = '<button class="atelier-link" type="button" data-finder-back>Back</button><button class="atelier-button" type="button" data-finder-next>Make it personal</button>';
+    body.replaceChildren(progress, ...chapters, navigation);
+    const finderMotion = matchMedia("(prefers-reduced-motion: reduce)");
+    let stepAnimation;
+    finderMotion.addEventListener("change", () => { if (finderMotion.matches) stepAnimation?.cancel(); });
+    const showStep = (next, focus = true) => {
+      stepAnimation?.cancel();
+      step = Math.max(0, Math.min(2, next));
+      chapters.forEach((chapter, i) => { chapter.hidden = i !== step; });
+      progress.querySelectorAll("button").forEach((button, i) => {
+        if (i === step) button.setAttribute("aria-current", "step");
+        else button.removeAttribute("aria-current");
+      });
+      navigation.querySelector("[data-finder-back]").hidden = step === 0;
+      const nextButton = navigation.querySelector("[data-finder-next]");
+      nextButton.hidden = step === 2;
+      nextButton.textContent = step === 0 ? "Make it personal" : "Reveal my edit";
+      if (!finderMotion.matches && chapters[step].animate) {
+        stepAnimation = chapters[step].animate([{opacity: .3, transform: "translateX(15px)"}, {opacity: 1, transform: "none"}], {duration: 350, easing: "cubic-bezier(.22,1,.36,1)"});
+      }
+      if (focus) chapters[step].querySelector("h3").focus({preventScroll: true});
+      body.scrollTop = 0;
+    };
+    progress.querySelectorAll("button").forEach(button => button.addEventListener("click", () => showStep(Number(button.dataset.finderStep))));
+    navigation.querySelector("[data-finder-back]").addEventListener("click", () => showStep(step - 1));
+    navigation.querySelector("[data-finder-next]").addEventListener("click", () => showStep(step + 1));
+    moodChapter.querySelectorAll("[data-finder-mood]").forEach(button => button.addEventListener("click", () => {
+      mood = button.dataset.finderMood;
+      moodChapter.querySelectorAll("button").forEach(choice => choice.setAttribute("aria-pressed", String(choice === button)));
+      render();
+    }));
+
     const open = (event) => {
       if (dialog.open) return;
       opener = event.currentTarget;
       render();
+      showStep(0, false);
       alreadyLocked = document.body.classList.contains("modal-open");
       document.body.classList.add("modal-open");
       dialog.showModal();

@@ -1,0 +1,102 @@
+/* One photographic frame throughout browsing; original detail stays uncropped. */
+:root { --photo-ground: #f4f0e9; --photo-edge: #e7e0d6; }
+body[data-experience="atelier"] .product-card__media {
+  aspect-ratio: 1;
+  background: var(--photo-ground);
+  border: 1px solid var(--photo-edge);
+}
+body[data-experience="atelier"] .product-card__media img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+  filter: none;
+}
+body[data-experience="atelier"] .product-card .compare-button {
+  position: static;
+  align-self: flex-start;
+  opacity: 1;
+  min-height: 44px;
+  padding: 0 8px;
+  margin: 0;
+  color: #75655b;
+  background: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
+  font-weight: 500;
+  letter-spacing: .06em;
+  transform: none;
+}
+body[data-experience="atelier"] .product-card .compare-button.is-active { color: #6d3545; text-decoration: underline; text-underline-offset: 4px; }
+body[data-experience="atelier"] :is(.product-card__gallery, .thumbnail-grid) { scrollbar-width: none; }
+body[data-experience="atelier"] :is(.product-card__gallery, .thumbnail-grid)::-webkit-scrollbar { display: none; }
+body[data-experience="atelier"] :is(.gallery-main, .thumbnail-button, .quick-view-modal__stage, .quick-view-modal__thumb, .product-lightbox__stage, .product-lightbox__thumbs button) {
+  background: var(--photo-ground);
+  border-color: var(--photo-edge);
+}
+body[data-experience="atelier"] .product-gallery .gallery-main {
+  aspect-ratio: 1;
+  height: auto;
+}
+body[data-experience="atelier"] .product-gallery .gallery-main img {
+  aspect-ratio: 1;
+  object-fit: contain;
+  object-position: center;
+  max-height: none;
+}
+body[data-experience="atelier"] [data-product-slug="estate-cushion-halo-diamond-ring"] .gallery-main img[src*="/studio/"] {
+  max-width: none;
+  max-height: none;
+}
+body[data-experience="atelier"] :is(.quick-view-modal__thumb, .product-lightbox__thumbs button, .thumbnail-button) img {
+  width: 100%;
+  height: 100%;
+  aspect-ratio: 1;
+  object-fit: contain;
+}
+body[data-experience="atelier"] :is(.edit-drawer__item, .personal-edit-result, .favorite-chip, .compare-bar__items, .compare-table__row--media, .cart-item, .search-result) img {
+  object-fit: contain;
+  object-position: center;
+  background: var(--photo-ground);
+  border: 1px solid var(--photo-edge);
+}
+.personal-edit-result img { aspect-ratio: 1; }
+.edit-drawer__item img { height: 92px; }
+.photography-caption {
+  margin: 10px 0 0;
+  color: #756a60;
+  font: 400 11px/1.6 "Manrope", sans-serif;
+}
+.estate-original { margin-block: 16px; }
+.estate-original summary { min-height: 44px; padding-block: 12px; cursor: pointer; font-size: 12px; }
+.estate-original video { display: block; width: 100%; max-height: 420px; background: var(--photo-ground); object-fit: contain; }
+/* Editorial and customer imagery keeps its original colour and context. */
+body[data-experience="atelier"] :is(.page-banner, .studio-card, .luxury-card__media, .customer-story-card, .estate-gallery) {
+  overflow: hidden;
+  background-color: var(--photo-ground);
+  border-color: var(--photo-edge);
+}
+body[data-experience="atelier"] .luxury-card__media > a { display: block; }
+body[data-experience="atelier"] .luxury-card__media::after { display: none; }
+body[data-experience="atelier"] .luxury-card__media :is(img, video) {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: contain;
+  object-position: center;
+  filter: none;
+  transform: none;
+}
+body[data-experience="atelier"] .estate-gallery img {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1;
+  object-fit: contain;
+  background: var(--photo-ground);
+}
+body[data-experience="atelier"] :is(.customer-story-card, .studio-card):is(:hover, :focus-within) :is(img, video) { filter: none; }
+.signature-story__visual > img { mix-blend-mode: normal; }
+@media (max-width: 700px) {
+  .edit-drawer__item img { height: 75px; }
+}

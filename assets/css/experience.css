@@ -1,0 +1,140 @@
+/* A shared motion language. Content is visible before and without JavaScript. */
+:root { --atelier-ease: cubic-bezier(.22,1,.36,1); }
+@media (prefers-reduced-motion: no-preference) {
+  .atelier-button,.atelier-link,.option-chip,.product-card__checkout { transition: background-color .25s,color .25s,border-color .25s,transform .3s var(--atelier-ease); }
+  .atelier-button:active,.product-card__checkout:active { transform: scale(.975); }
+  .atelier-button .ui-icon { transition: transform .45s var(--atelier-ease); }
+  .atelier-button:hover .ui-icon,.atelier-button:focus-visible .ui-icon { transform: translate(3px,-3px); }
+  .personal-edit-dialog[open],.edit-drawer[open] { animation: atelier-dialog-in .45s var(--atelier-ease) both; }
+  dialog[open]::backdrop { animation: atelier-backdrop .35s ease both; }
+}
+@keyframes atelier-dialog-in { from { opacity: 0; transform: translateY(28px) scale(.98); } }
+@keyframes atelier-backdrop { from { opacity: 0; } }
+.campaign-hero .hero-study-link { display: inline-flex; align-items: center; gap: 12px; width: auto; height: auto; min-height: 44px; border: 0; border-bottom: 1px solid #80655c; border-radius: 0; color: #f3dfc8; font-size: 11px; text-transform: none; letter-spacing: .02em; }
+.campaign-hero .editorial-hero__footnote { flex-wrap: wrap; gap: 18px; }
+.hero-study-link + span { display: none; }
+
+/* The material study: photography opens the scene; actual 3D is opt-in. */
+.material-study { background: #211b1b; color: #f8eee0; padding: clamp(60px,7vw,108px) max(24px,calc((100vw - 1320px)/2)); scroll-margin-top: 100px; }
+.material-study__intro { display: grid; grid-template-columns: 1fr 1fr; align-items: end; column-gap: 10%; margin-bottom: 48px; }
+.material-study__intro .editorial-kicker { grid-column: 1/-1; color: #c4a69a; margin: 0 0 24px; }
+body[data-experience="atelier"] .material-study h2 { color: #f8eee0; font: 400 clamp(44px,5.8vw,86px)/.98 "Cormorant Garamond",Georgia,serif; letter-spacing: -.035em; margin: 0; }
+.material-study h2 em { color: #c99b87; }
+.material-study__intro > p:last-child { font: 400 14px/1.9 "Manrope",sans-serif; color: #d2bbb0; margin: 0 0 7px; }
+.material-study__body { display: grid; grid-template-columns: minmax(0,1.6fr) minmax(290px,1fr); border: 1px solid #5c4440; }
+.material-study__stage { position: relative; min-width: 0; min-height: 590px; overflow: hidden; isolation: isolate; background: radial-gradient(ellipse at 50% 44%,#342c2a,#120e0e 75%); }
+.material-study__art { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: .85; transition: opacity .65s ease; }
+.material-study[data-study-state="ready"] .material-study__art { opacity: 0; }
+.material-study__invitation { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; background: linear-gradient(180deg,#180a0630,#180a0630); }
+.material-study__orbit { display: grid; place-items: center; width: 112px; height: 112px; border-radius: 50%; border: 1px solid #f4ddbc80; color: #fff2df; font: italic 38px/1 "Cormorant Garamond",serif; background: #25161133; }
+.material-study .atelier-button { background: #eadbc5; border-color: #eadbc5; color: #302224; gap: 20px; font-size: 12px; }
+.material-study .atelier-button:hover { background: #fff4e3; color: #302224; }
+.material-study__viewer { position: absolute; inset: 0; }
+.material-study__viewer canvas { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; cursor: grab; }
+.material-study__viewer canvas:active { cursor: grabbing; }
+.material-study__viewer canvas:focus-visible { outline: 2px solid #d5b58b; outline-offset: -8px; }
+.material-study__tools { position: absolute; top: 18px; inset-inline: 18px; display: flex; justify-content: center; gap: 6px; }
+.material-study__tools button { color: #f5e5cf; background: #201b1bdd; border: 1px solid #725950; border-radius: 30px; min-width: 44px; min-height: 44px; padding: 8px 14px; font: 500 11px/1.3 "Manrope",sans-serif; cursor: pointer; }
+.material-study__tools button[aria-pressed="true"] { background: #e6d5be; color: #2c2020; }
+.material-study__tools button:disabled { opacity: .55; cursor: default; }
+.material-study__hint { position: absolute; bottom: 44px; inset-inline: 20px; margin: 0; color: #c9b5a8; font-size: 11px; text-align: center; pointer-events: none; }
+.material-study__edition { position: absolute; bottom: 20px; inset-inline: 20px; font-size: 9px; text-transform: uppercase; letter-spacing: .12em; color: #cbb9aa; text-align: center; pointer-events: none; }
+.material-study__status { position: absolute; inset: auto 20px 72px; text-align: center; color: #ffedcf; font: 500 12px/1.6 "Manrope",sans-serif; pointer-events: none; }
+.material-study__controls { padding: 32px; background: #2c2222; border-left: 1px solid #5c4440; }
+.material-study__number { display: block; color: #bd9986; font: italic 30px/1 "Cormorant Garamond",serif; margin-bottom: 34px; }
+.material-study fieldset { border: 0; padding: 0; margin: 0 0 30px; min-width: 0; }
+.material-study legend { margin: 0 0 16px; padding: 0; color: #edddce; font: 500 12px/1.4 "Manrope",sans-serif; }
+.material-study legend span { margin-right: 14px; color: #b99583; font-size: 10px; }
+.study-metals { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; }
+.study-metals button { display: flex; align-items: center; flex-direction: column; gap: 12px; background: transparent; border: 1px solid transparent; color: #cebaac; border-radius: 5px; font: 500 10px/1.4 "Manrope",sans-serif; cursor: pointer; min-height: 78px; padding: 8px 3px; }
+.study-metals i { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(130deg,#fff9e6 -35%,var(--metal) 25%,#45372b 58%,var(--metal) 72%,#fff9e6 125%); box-shadow: inset 0 0 0 1px #ffffff3b; }
+.study-metals button[aria-pressed="true"] { border-color: #c6a78d; background: #ffffff07; color: #f8ede2; }
+.study-metals button,.study-segments button { transition: background .25s,border-color .25s,color .25s; }
+.study-segments { display: grid; grid-template-columns: 1fr 1fr; border: 1px solid #816359; border-radius: 3px; padding: 3px; gap: 3px; }
+.study-segments button { min-height: 44px; background: transparent; border: 0; font: 500 11px/1.4 "Manrope",sans-serif; color: #dec5b5; cursor: pointer; }
+.study-segments button[aria-pressed="true"] { background: #e8d8c1; color: #302222; }
+.material-study__selection { border-top: 1px solid #60483e; padding-top: 22px; margin: 0 0 20px; }
+.material-study__selection span { display: block; color: #bfa593; font-size: 9px; text-transform: uppercase; letter-spacing: .12em; margin-bottom: 8px; }
+.material-study__selection strong { color: #f2e4d4; font: 400 23px/1.2 "Cormorant Garamond",serif; }
+.material-study__controls > .atelier-button { display: flex; justify-content: space-between; width: 100%; }
+.material-study__note { color: #c7ada0; font-size: 10px; line-height: 1.8; margin: 15px 0 0; }
+
+/* A persistent edit connects browsing to saved pieces, without another account. */
+.journey-dock { position: fixed; bottom: calc(16px + env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%); z-index: 48; display: flex; gap: 4px; padding: 5px; border: 1px solid #bba99b; border-radius: 60px; background: #fbf7f0f5; color: #38292b; box-shadow: 0 8px 35px #30202418; max-width: calc(100% - 24px); }
+.journey-dock a,.journey-dock button { display: inline-flex; align-items: center; justify-content: center; gap: 7px; min-height: 44px; min-width: 44px; padding: 9px 17px; border: 0; border-radius: 30px; background: transparent; color: inherit; font: 500 11px/1.3 "Manrope",sans-serif; white-space: nowrap; cursor: pointer; transition: color .25s,background .3s; }
+.journey-dock a[aria-current="location"] { background: #50313a; color: #fff5e7; }
+.journey-dock button { border-left: 1px solid #d7c7b7; border-radius: 0 28px 28px 0; }
+.journey-dock svg { width: 17px; height: 17px; }
+.journey-dock b { font-weight: 600; min-width: 14px; }
+.journey-dock--compact { left: 24px; transform: none; }
+.journey-dock--compact button { border-left: 0; border-radius: 30px; }
+body.modal-open .journey-dock,body.nav-open .journey-dock,body:has(.design-studio:not([hidden])) .journey-dock { display: none; }
+body:has(.journey-dock) .back-to-top { bottom: calc(86px + env(safe-area-inset-bottom)); }
+body:has(.journey-dock) .toast-stack { bottom: calc(86px + env(safe-area-inset-bottom)); }
+body:has(.journey-dock) .footer { padding-bottom: 100px; }
+.edit-drawer { box-sizing: border-box; position: fixed; inset: 12px 12px 12px auto; margin: 0; width: min(490px,calc(100vw - 24px)); max-width: none; height: calc(100dvh - 24px); max-height: none; padding: 30px; border: 1px solid #c9b6a4; border-radius: 5px; color: #30262a; background: #f6f0e6; overflow: auto; overscroll-behavior: contain; }
+.edit-drawer::backdrop { background: #1b111187; backdrop-filter: blur(4px); }
+.edit-drawer__header { display: flex; align-items: start; justify-content: space-between; gap: 20px; }
+.edit-drawer__header button { flex: 0 0 44px; min-height: 44px; border: 1px solid #bca89c; border-radius: 50%; background: transparent; color: #50313a; font: 300 24px/1 "Manrope",sans-serif; cursor: pointer; }
+body[data-experience="atelier"] .edit-drawer h2 { margin: 8px 0 24px; color: #38272d; font: 400 50px/1 "Cormorant Garamond",serif; }
+.edit-drawer__intro { color: #706159; font: 400 13px/1.8 "Manrope",sans-serif; margin: 0 0 25px; }
+.edit-drawer__items { display: grid; gap: 20px; }
+.edit-drawer__item { display: grid; grid-template-columns: 92px 1fr 44px; gap: 15px; align-items: center; padding-bottom: 20px; border-bottom: 1px solid #d7c7b9; }
+.edit-drawer__item img { width: 92px; height: 105px; object-fit: cover; background: #eae0d4; }
+.edit-drawer__item h3 { margin: 0 0 8px; font: 400 23px/1.07 "Cormorant Garamond",serif; }
+.edit-drawer__item p { margin: 0; font: 400 11px/1.5 "Manrope",sans-serif; color: #6d5b53; }
+.edit-drawer__item button { min-height: 44px; width: 44px; background: transparent; border: 1px solid #cbb7a5; border-radius: 50%; color: #65434d; cursor: pointer; }
+.edit-drawer__item button[aria-pressed="true"] { background: #51323c; color: #fff2df; }
+.edit-drawer__item svg { width: 18px; height: 18px; }
+.edit-drawer__actions { display: flex; flex-wrap: wrap; gap: 15px; margin-top: 25px; }
+.edit-drawer__status { min-height: 1.5em; color: #6c4c4f; font-size: 12px; line-height: 1.5; }
+.edit-drawer__empty { padding: 30px 0; font: 400 32px/1.1 "Cormorant Garamond",serif; }
+
+/* Finder chapters layer a guided route over the existing working filters. */
+.finder-progress { display: grid; grid-template-columns: repeat(3,1fr); gap: 7px; margin: 0 0 24px; }
+.finder-progress button { border: 0; border-top: 2px solid #d8c5b6; background: transparent; padding: 12px 0; text-align: left; font: 500 10px/1.3 "Manrope",sans-serif; color: #7e6c64; min-height: 44px; cursor: pointer; }
+.finder-progress button[aria-current="step"] { border-color: #593943; color: #593943; }
+.finder-chapter h3 { font: 400 35px/1.08 "Cormorant Garamond",serif; margin: 0 0 20px; }
+.finder-moods { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin: 0 0 24px; }
+.finder-moods button { display: grid; gap: 16px; padding: 22px 14px; min-height: 130px; background: #ede3d6; color: #54333e; border: 1px solid #c4ae9e; font: 500 12px/1.4 "Manrope",sans-serif; text-align: left; cursor: pointer; }
+.finder-moods button span { font: italic 34px/1 "Cormorant Garamond",serif; color: #9b7065; }
+.finder-moods button[aria-pressed="true"] { background: #4e3139; border-color: #4e3139; color: #fff3df; }
+.finder-moods button[aria-pressed="true"] span { color: #e3bba3; }
+.finder-next { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 24px 0 0; }
+.finder-next button { min-height: 44px; }
+.finder-chapter > p { color: #76615a; font: 400 13px/1.8 "Manrope",sans-serif; }
+.personal-edit-result { transition: background-color .25s; }
+.personal-edit-result:hover { background-color: #eadfcf; }
+
+@media (max-width: 800px) {
+  .material-study { padding: 58px 20px; }
+  .material-study__intro { grid-template-columns: 1fr; gap: 22px; margin-bottom: 30px; }
+  .material-study__intro .editorial-kicker { margin-bottom: 0; font-size: 10px; }
+  .material-study__intro > p:last-child { font-size: 13px; }
+  .material-study__body { grid-template-columns: 1fr; }
+  .material-study__stage { min-height: 0; height: clamp(350px,55svh,480px); }
+  .material-study__controls { border-left: 0; border-top: 1px solid #5c4440; padding: 24px; }
+  .material-study__number { display: none; }
+  .material-study fieldset { margin-bottom: 24px; }
+  .study-metals button { font-size: 12px; }
+  .study-segments button { font-size: 12px; }
+  .journey-dock { bottom: calc(10px + env(safe-area-inset-bottom)); gap: 1px; padding: 4px; }
+  .journey-dock a,.journey-dock button { padding-inline: 12px; font-size: 10px; gap: 4px; }
+  .journey-dock--compact { left: 12px; }
+  .edit-drawer { padding: 23px; }
+  body[data-experience="atelier"] .edit-drawer h2 { font-size: 43px; }
+  .edit-drawer__item { grid-template-columns: 75px 1fr 44px; gap: 11px; }
+  .edit-drawer__item img { width: 75px; height: 90px; }
+  .edit-drawer__item h3 { font-size: 21px; }
+  .finder-moods { gap: 7px; }
+  .finder-moods button { padding: 18px 10px; min-height: 110px; font-size: 11px; }
+  .finder-chapter h3 { font-size: 29px; }
+}
+@media (max-width: 380px) {
+  .journey-dock a,.journey-dock button { padding-inline: 9px; font-size: 9px; }
+  .material-study__controls { padding: 20px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .material-study__art,.study-metals button,.study-segments button,.journey-dock a,.journey-dock button { transition: none; }
+  .edit-drawer[open],.personal-edit-dialog[open],.personal-edit-result,dialog[open]::backdrop { animation: none; }
+}

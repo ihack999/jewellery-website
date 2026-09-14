@@ -1,0 +1,204 @@
+{
+  "photographsWithResponsiveVariants": 77,
+  "studioImages": [
+    {
+      "id": "rise",
+      "asset": "/assets/images/studio/rise-ring-polished.webp",
+      "width": 1254,
+      "height": 1254,
+      "fallbackBytes": 57742,
+      "card320Bytes": 6296,
+      "originalUnchanged": true,
+      "previousCard320Bytes": 6270
+    },
+    {
+      "id": "monogram",
+      "asset": "/assets/images/studio/signature-monogram-ring.webp",
+      "width": 1254,
+      "height": 1254,
+      "fallbackBytes": 46300,
+      "card320Bytes": 4854,
+      "originalUnchanged": true,
+      "previousCard320Bytes": 3474
+    },
+    {
+      "id": "half-eternity",
+      "asset": "/assets/images/studio/half-eternity-pinky-band.webp",
+      "width": 1254,
+      "height": 1254,
+      "fallbackBytes": 60562,
+      "card320Bytes": 5542,
+      "originalUnchanged": true,
+      "previousCard320Bytes": 5098
+    },
+    {
+      "id": "oval-bracelet",
+      "asset": "/assets/images/studio/oval-bezel-diamond-bracelet.webp",
+      "width": 1254,
+      "height": 1254,
+      "fallbackBytes": 129560,
+      "card320Bytes": 11136,
+      "originalUnchanged": true,
+      "previousCard320Bytes": 10668
+    },
+    {
+      "id": "hand-chain",
+      "asset": "/assets/images/studio/diamond-hand-chain.webp",
+      "width": 1254,
+      "height": 1254,
+      "fallbackBytes": 39122,
+      "card320Bytes": 3600,
+      "originalUnchanged": true,
+      "previousCard320Bytes": 33940
+    },
+    {
+      "id": "graduated-necklace",
+      "asset": "/assets/images/studio/graduated-diamond-necklace.webp",
+      "width": 1254,
+      "height": 1254,
+      "fallbackBytes": 62378,
+      "card320Bytes": 4654,
+      "originalUnchanged": true,
+      "previousCard320Bytes": 10504
+    },
+    {
+      "id": "estate-halo",
+      "asset": "/assets/images/studio/estate-cushion-halo.webp",
+      "width": 1254,
+      "height": 1254,
+      "fallbackBytes": 170678,
+      "card320Bytes": 14146,
+      "originalUnchanged": true,
+      "previousCard320Bytes": 12084
+    },
+    {
+      "id": "blue-ring",
+      "asset": "/assets/images/studio/rare-blue-diamond-ring.webp",
+      "width": 1254,
+      "height": 1254,
+      "fallbackBytes": 96782,
+      "card320Bytes": 6406,
+      "originalUnchanged": true,
+      "previousCard320Bytes": 18084
+    },
+    {
+      "id": "tennis-necklace",
+      "asset": "/assets/images/studio/diamond-tennis-necklace.webp",
+      "width": 1254,
+      "height": 1254,
+      "fallbackBytes": 65998,
+      "card320Bytes": 4904,
+      "originalUnchanged": true,
+      "previousCard320Bytes": 12526
+    },
+    {
+      "id": "tennis-bracelet",
+      "asset": "/assets/images/studio/quiet-power-tennis-bracelet.webp",
+      "width": 1254,
+      "height": 1254,
+      "fallbackBytes": 57384,
+      "card320Bytes": 4706,
+      "originalUnchanged": true,
+      "previousCard320Bytes": 26312
+    },
+    {
+      "id": "yellow-earrings",
+      "asset": "/assets/images/studio/yellow-diamond-oval-studs.webp",
+      "width": 1254,
+      "height": 1254,
+      "fallbackBytes": 181148,
+      "card320Bytes": 12788,
+      "originalUnchanged": true,
+      "previousCard320Bytes": 12950
+    },
+    {
+      "id": "cushion-ring",
+      "asset": "/assets/images/studio/cushion-cut-diamond-ring.webp",
+      "width": 1254,
+      "height": 1254,
+      "fallbackBytes": 66678,
+      "card320Bytes": 5748,
+      "originalUnchanged": true,
+      "previousCard320Bytes": 8586
+    },
+    {
+      "id": "patek-watch",
+      "asset": "/assets/images/studio/patek-philippe-detail.webp",
+      "width": 1254,
+      "height": 1254,
+      "fallbackBytes": 191614,
+      "card320Bytes": 18416,
+      "originalUnchanged": true
+    },
+    {
+      "id": "piaget-watch",
+      "asset": "/assets/images/studio/piaget-detail.webp",
+      "width": 1254,
+      "height": 1254,
+      "fallbackBytes": 211826,
+      "card320Bytes": 15210,
+      "originalUnchanged": true
+    },
+    {
+      "id": "royal-oak-watch",
+      "asset": "/assets/images/studio/royal-oak-detail.webp",
+      "width": 1254,
+      "height": 1254,
+      "fallbackBytes": 164674,
+      "card320Bytes": 14158,
+      "originalUnchanged": true
+    },
+    {
+      "id": "emerald-floral-earring",
+      "asset": "/assets/images/studio/emerald-floral-earring.webp",
+      "width": 1254,
+      "height": 1254,
+      "fallbackBytes": 113080,
+      "card320Bytes": 7828,
+      "originalUnchanged": true
+    },
+    {
+      "id": "white-birkin",
+      "asset": "/assets/images/studio/white-birkin.webp",
+      "width": 1254,
+      "height": 1254,
+      "fallbackBytes": 190170,
+      "card320Bytes": 10886,
+      "originalUnchanged": true
+    }
+  ],
+  "posters": [
+    {
+      "source": "/assets/images/optimized/poster-layered-necklaces.jpg",
+      "webp": "/assets/images/responsive/poster-layered-necklaces-025f21be-675.webp",
+      "sourceBytes": 100016,
+      "webpBytes": 38860
+    },
+    {
+      "source": "/assets/images/optimized/poster-custom-ring-sunlight.jpg",
+      "webp": "/assets/images/responsive/poster-custom-ring-sunlight-2218e006-669.webp",
+      "sourceBytes": 134431,
+      "webpBytes": 60272
+    },
+    {
+      "source": "/assets/images/optimized/poster-custom-ring-vanity.jpg",
+      "webp": "/assets/images/responsive/poster-custom-ring-vanity-9439a82c-675.webp",
+      "sourceBytes": 101537,
+      "webpBytes": 38414
+    },
+    {
+      "source": "/assets/images/estate-luxuries/estate-cushion-halo-ring-source.png",
+      "webp": "/assets/images/responsive/estate-cushion-halo-ring-source-4d856d12-480.webp",
+      "sourceBytes": 282157,
+      "webpBytes": 22524
+    },
+    {
+      "source": "/assets/images/optimized/poster-rare-white-birkin.jpg",
+      "webp": "/assets/images/responsive/poster-rare-white-birkin-ef2cba1c-675.webp",
+      "sourceBytes": 68376,
+      "webpBytes": 21720
+    }
+  ],
+  "catalogue320BytesBefore": 160496,
+  "catalogue320BytesAfter": 84780
+}

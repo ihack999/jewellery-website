@@ -37,6 +37,10 @@ See the [curation design decisions, verified checks, and remaining launch work](
 
 The storefront uses a warm editorial design with a curated homepage, photographic finish study, compact catalogue discovery, and improved keyboard/mobile navigation. `assets/css/atelier.css` layers the shared visual system over the existing stylesheet; all public static pages load it.
 
+The [interactive atelier](docs/atelier-experience-2026-09-14.md) adds shared page/section motion, a three-step personal finder, a persistent saved-piece drawer and an opt-in 3D material study with editor handoff. Run `node scripts/check_journeys.mjs --experience` for its interaction, rendering and recovery checks. The document includes the generated artwork, final prompt and performance limits.
+
+The [ivory photography system](docs/photography-system-2026-09-14.md) adds matching studio covers, preserves original galleries, standardizes image frames and exports responsive WebP photographs/posters. Run `node scripts/check_journeys.mjs --photography` for image, gallery and responsive-layout checks. The document links the complete contact sheet, exact image-generation prompts and asset measurements.
+
 The shop combines category, text, and CAD price filters with currency-aware sorting and shareable URLs, for example `/shop.html?category=rings&price=1500-3000&sort=price-low`. Product content and navigation remain available without JavaScript. Signup opens only when requested from the footer, not automatically.
 
 See the [storefront audit, implementation, validation, and remaining quality gates](docs/storefront-editorial-upgrade.md). The existing studio/AR work remains intact. Camera testing always requires fresh permission.

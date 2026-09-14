@@ -76,7 +76,7 @@ try {
  await evaluate(`document.querySelector('[data-gallery-zoom]').click()`); await wait(250);
  await check(`document.querySelector('.product-lightbox.is-open')`, 'Gallery zoom opens');
  await touch(300,380,90,385);
- await check(`document.querySelector('[data-lightbox-counter]').textContent==='3 / 4'`, 'Full-screen gallery supports horizontal touch swipe');
+ await check(`document.querySelector('[data-lightbox-counter]').textContent==='3 / 5'`, 'Full-screen gallery supports horizontal touch swipe with studio and original views');
  await check(`!document.querySelector('[data-lightbox-image]').srcset && !document.querySelector('[data-lightbox-image]').src.includes('/responsive/')`, 'Zoom retains original photo resolution');
  await key('Escape'); await wait(80);
  await evaluate(`document.querySelectorAll('[data-gallery-thumb]')[2].click();document.querySelectorAll('[data-gallery-thumb]')[0].click()`); await wait(300);

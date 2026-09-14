@@ -54,7 +54,7 @@ try {
     }
   }
   const compression = [];
-  for (const path of ['assets/css/fonts.css','assets/css/styles.css','assets/css/atelier.css','assets/css/curation.css','assets/js/main.js','assets/js/curation.js']) {
+  for (const path of ['assets/css/fonts.css','assets/css/styles.css','assets/css/atelier.css','assets/css/curation.css','assets/css/experience.css','assets/js/main.js','assets/js/curation.js','assets/js/experience.js']) {
     const body = await readFile(new URL('../'+path,import.meta.url));
     compression.push({path,raw:body.length,gzip:gzipSync(body).length,brotli:brotliCompressSync(body).length});
   }

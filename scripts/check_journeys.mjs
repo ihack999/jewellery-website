@@ -6,6 +6,8 @@ const performanceMode = process.argv.includes('--performance');
 const mobileSiteMode = process.argv.includes('--mobile-site');
 const accessibilityMode = process.argv.includes('--accessibility');
 const screenReaderMode = process.argv.includes('--screen-reader');
+const experienceMode = process.argv.includes('--experience');
+const photographyMode = process.argv.includes('--photography');
 const studioMobileMode = process.argv.includes('--studio-mobile');
 const metalsMode = process.argv.includes('--metals');
 const sideSettingsMode = process.argv.includes('--side-settings');
@@ -53,7 +55,7 @@ try {
   if (!port) throw Error('Chrome did not start; set CHROME_BIN to a supported Chrome executable.');
   process.env.TJC_TEST_ORIGIN = `http://127.0.0.1:${server.address().port}`;
   process.env.TJC_TEST_CDP = `http://127.0.0.1:${port}`;
-  await import(studioMobileMode ? './studio_mobile_assertions.mjs' : mobileSiteMode ? './mobile_site_assertions.mjs' : metalsMode ? './metal_assertions.mjs' : arPlacementMode ? './ar_placement_assertions.mjs' : arLightingMode ? './ar_lighting_assertions.mjs' : arRenderMode ? './ar_render_assertions.mjs' : arBodyMode ? './ar_body_assertions.mjs' : arContactMode ? './ar_contact_assertions.mjs' : arTrackingMode ? './ar_tracking_assertions.mjs' : sideSettingsMode ? './side_settings_assertions.mjs' : performanceMode ? './measure_performance.mjs' : accessibilityMode ? './accessibility_assertions.mjs' : screenReaderMode ? './screen_reader_assertions.mjs' : './journey_assertions.mjs');
+  await import(photographyMode ? './photography_assertions.mjs' : experienceMode ? './experience_assertions.mjs' : studioMobileMode ? './studio_mobile_assertions.mjs' : mobileSiteMode ? './mobile_site_assertions.mjs' : metalsMode ? './metal_assertions.mjs' : arPlacementMode ? './ar_placement_assertions.mjs' : arLightingMode ? './ar_lighting_assertions.mjs' : arRenderMode ? './ar_render_assertions.mjs' : arBodyMode ? './ar_body_assertions.mjs' : arContactMode ? './ar_contact_assertions.mjs' : arTrackingMode ? './ar_tracking_assertions.mjs' : sideSettingsMode ? './side_settings_assertions.mjs' : performanceMode ? './measure_performance.mjs' : accessibilityMode ? './accessibility_assertions.mjs' : screenReaderMode ? './screen_reader_assertions.mjs' : './journey_assertions.mjs');
 } finally {
   if (chrome?.pid && chrome.exitCode === null) {
     const stopped = new Promise(resolve => chrome.once('exit', resolve));
