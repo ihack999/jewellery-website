@@ -2285,7 +2285,10 @@ let arModulePromise;
 
 function loadDesignerModule() {
   if (!designerModulePromise) {
-    designerModulePromise = import("/assets/js/designer.js?v=20260912-metals");
+    designerModulePromise = import("/assets/js/designer.js?v=20260914-studio").catch((error) => {
+      designerModulePromise = null;
+      throw error;
+    });
   }
 
   return designerModulePromise;
@@ -2293,7 +2296,7 @@ function loadDesignerModule() {
 
 function loadArModule() {
   if (!arModulePromise) {
-    arModulePromise = import("/assets/js/ar-tryon.js?v=20260912-metal-assets");
+    arModulePromise = import("/assets/js/ar-tryon.js?v=20260914-studio");
   }
 
   return arModulePromise;
@@ -2308,8 +2311,12 @@ function setupLazyFeatureModules() {
     if (designerTrigger && !designerModulePromise) {
       event.preventDefault();
       event.stopImmediatePropagation();
-      await loadDesignerModule();
-      designerTrigger.click();
+      try {
+        await loadDesignerModule();
+        designerTrigger.click();
+      } catch {
+        window.tjToast?.("The studio could not load. Please try opening it again.", { tone: "error" });
+      }
       return;
     }
 

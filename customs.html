@@ -24,8 +24,8 @@
     <link rel="stylesheet" href="assets/css/styles.css?v=20260831-responsive-images">
     <link rel="stylesheet" href="/assets/css/atelier.css?v=20260911-editorial-v1">
     <link rel="stylesheet" href="/assets/css/curation.css?v=20260914-mobile">
-    <link rel="stylesheet" href="assets/css/generator-v2.css?v=20260911">
-    <script src="assets/js/main.js?v=20260914-mobile" defer></script>
+    <link rel="stylesheet" href="assets/css/generator-v2.css?v=20260914-studio">
+    <script src="assets/js/main.js?v=20260914-studio" defer></script>
     <script src="/assets/js/curation.js?v=20260914-mobile" defer></script>
     <script type="application/ld+json">
       {
@@ -216,7 +216,12 @@
           <div class="design-studio__stage" data-designer-stage aria-label="Custom jewellery design preview">
             <canvas class="design-studio__canvas" data-designer-canvas aria-label="Interactive custom jewellery preview"></canvas>
             <div class="design-studio__fallback" data-designer-fallback hidden>
-              <canvas data-designer-fallback-canvas aria-label="Custom jewellery preview"></canvas>
+              <canvas data-designer-fallback-canvas aria-label="Simplified jewellery sketch, not the 3D preview"></canvas>
+            </div>
+
+            <div class="design-studio__preview-status" data-designer-preview-status role="status" aria-live="polite">
+              <span data-designer-preview-message>Preparing your 3D jewellery…</span>
+              <button type="button" data-designer-retry hidden>Retry 3D preview</button>
             </div>
 
             <!-- Expand button — top-right of viewer -->
@@ -277,7 +282,7 @@
             <div class="design-studio__intro" data-reveal>
               <span class="eyebrow">Design studio</span>
               <div class="accent-rule"></div>
-              <h2>Build a starting point for your custom piece</h2>
+              <h2>Your piece, your way.</h2>
               <p>
                 Choose the piece, metal, stone, size, and detail direction. Send the design into the request form when it feels right.
               </p>

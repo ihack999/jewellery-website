@@ -66,6 +66,8 @@ Use `--resolution 512 --samples 64 --device cpu` for a small proof. Output direc
 
 See [V3.2 construction and research notes](docs/generator-v3.2-construction.md), [advanced rendering details and limitations](docs/generator-v3-advanced.md), the [V2 foundation record](docs/generator-v2-foundation.md), and the [full roadmap](docs/jewellery-generator-upgrade-plan.md). Full spectral calibration and production CAD remain future work.
 
+The [iPhone editor recovery update](docs/iphone-editor-recovery-2026-09-14.md) fixes silent 2D fallback, excessive mobile startup allocations, portrait framing and oversized control headings. Run `node scripts/check_journeys.mjs --studio-mobile` for graphics-loss recovery, phone layouts and export checks without camera access.
+
 The [editor metal and cathedral update](docs/metals-cathedral-2026-09-12.md) adds conductor-reflectance colours, clearer polished/brushed finish behaviour, continuous band texture mapping and curved cathedral shoulders attached to actual shank surfaces. Gem optics and the studio lighting are preserved. Run `node scripts/check_metals.mjs` and `node scripts/check_journeys.mjs --metals` for the focused checks.
 
 ### AR V1 wearable fitting

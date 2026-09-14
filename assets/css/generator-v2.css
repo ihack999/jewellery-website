@@ -135,3 +135,75 @@
 .design-studio .generator-offline-output .generator-control-grid {
   margin-bottom: 1rem;
 }
+
+/* Studio controls should fit a phone without inheriting campaign typography. */
+.design-studio__preview-status {
+  position: absolute;
+  z-index: 5;
+  inset: auto 16px 16px;
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+  background: #101c1f;
+  border: 1px solid #647172;
+  border-radius: 12px;
+  color: #f7f4eb;
+  font: 500 14px/1.5 "Manrope", sans-serif;
+}
+.design-studio__preview-status button {
+  justify-self: start;
+  min-height: 44px;
+  padding: 10px 16px;
+  border: 1px solid #d7c7a3;
+  border-radius: 8px;
+  background: #e9ddc4;
+  color: #162326;
+  font: inherit;
+  cursor: pointer;
+}
+.design-studio[data-designer-preview="fallback"] .reality-score,
+.design-studio[data-designer-preview="loading"] .reality-score,
+.design-studio[data-designer-preview="paused"] .reality-score { visibility: hidden; }
+.design-studio .studio-expand-btn { min-width: 44px; min-height: 44px; }
+.design-studio .studio-expand-btn:disabled { opacity: .35; cursor: default; }
+.design-studio.is-inspecting .design-studio__stage { height: 100dvh; min-height: 0; }
+.design-studio .design-studio__split,
+.design-studio .design-studio__overlay { min-width: 0; }
+
+@media (max-width: 768px) {
+  .design-studio { padding-block: 20px 36px; scroll-margin-top: 90px; }
+  .design-studio .design-studio__split { min-height: 0; }
+  .design-studio:not(.is-inspecting) .design-studio__stage {
+    height: clamp(300px, 46svh, 410px);
+    min-height: 0;
+  }
+  body[data-experience="atelier"] .design-studio__intro h2 {
+    max-width: none;
+    width: 100%;
+    font-size: clamp(28px, 8vw, 36px);
+    line-height: 1.08;
+    margin: 0 0 10px;
+    text-wrap: balance;
+  }
+  .design-studio .design-studio__intro { padding-bottom: 12px; }
+  .design-studio .design-studio__intro .accent-rule { margin-block: 10px; }
+  .design-studio .design-studio__intro p { max-width: none; font-size: 14px; line-height: 1.6; }
+  .design-studio .design-studio__overlay { padding: 16px; }
+  .design-studio .reality-score { right: 68px; max-width: none; gap: 6px; padding: 0 8px; min-height: 44px; }
+  .design-studio .reality-score__bar,
+  .design-studio .reality-score__sep { display: none; }
+  .design-studio .reality-score__cost { margin-left: auto; font-size: 10px; }
+  .design-studio .reality-score__fix { min-width: 44px; min-height: 44px; font-size: 10px; padding: 2px 6px; }
+  .design-studio .reality-score__label { font-size: 10px; }
+  .design-studio .reality-score__value { font-size: 12px; }
+  .design-studio .design-studio__stage::before,
+  .design-studio .design-studio__stage::after { display: none; }
+}
+
+@media (max-width: 360px) {
+  .design-studio .reality-score__cost { display: none; }
+}
+
+@media (pointer: coarse) {
+  .design-studio .reality-score__fix { min-width: 44px; min-height: 44px; }
+}

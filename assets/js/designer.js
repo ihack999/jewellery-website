@@ -2139,25 +2139,34 @@ async function attachDesignScreenshot(sourceCanvas, state) {
 function drawFallback(canvas, state) {
   const context = canvas.getContext("2d");
   const rect = canvas.getBoundingClientRect();
-  const width = Math.max(Math.round(rect.width), 640);
-  const height = Math.max(Math.round(rect.height), 420);
+  const width = Math.max(Math.round(rect.width), 1);
+  const height = Math.max(Math.round(rect.height), 1);
   const pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
   canvas.width = width * pixelRatio;
   canvas.height = height * pixelRatio;
+  if (!context) return;
   context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
   context.clearRect(0, 0, width, height);
 
+  // Draw in a uniform logical space; CSS must never stretch a 640px drawing
+  // into a narrow phone viewport. This remains explicitly a simplified sketch.
+  const notice = canvas.closest("[data-designer-stage]")?.querySelector("[data-designer-preview-status]");
+  const sketchHeight = Math.max(80, height - (notice?.offsetHeight || 0) - 40);
+  const fit = Math.min(width / 640, sketchHeight / 420);
+  context.translate(width / 2, sketchHeight / 2 + 16);
+  context.scale(fit, fit);
+  context.translate(-320, -210);
   const metal = METAL_COLORS[state.metal];
   const stone = STONE_COLORS[state.stone];
   const lighting = LIGHTING_MODES[state.lighting] || LIGHTING_MODES.Daylight;
   const weight = Number(state.weight) || 1;
-  const cx = width / 2;
-  const cy = height / 2;
-  const glow = context.createRadialGradient(cx, cy, 20, cx, cy, Math.min(width, height) * 0.5);
+  const cx = 320;
+  const cy = 210;
+  const glow = context.createRadialGradient(cx, cy, 20, cx, cy, 210);
   glow.addColorStop(0, state.lighting === "Candlelight" ? "rgba(255,214,160,0.3)" : "rgba(255,255,255,0.24)");
   glow.addColorStop(1, "rgba(255,255,255,0)");
   context.fillStyle = glow;
-  context.fillRect(0, 0, width, height);
+  context.fillRect(0, 0, 640, 420);
 
   context.lineCap = "round";
   context.lineJoin = "round";
@@ -2831,10 +2840,36 @@ function setSummary(root, state) {
   });
 }
 
-async function createThreeStudio(root, canvas) {
+async function createThreeStudio(root, canvas, options = {}) {
+  root.dataset.designerInitStage = "engine";
   const THREE = await import("./three.module.js");
-  const { RGBELoader } = await import("./RGBELoader.js");
-  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, preserveDrawingBuffer: true });
+  root.dataset.designerInitStage = "context";
+  const compact = window.matchMedia("(pointer: coarse)").matches || window.innerWidth <= 768;
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: !compact && !options.recovery, alpha: true, preserveDrawingBuffer: true });
+  const cleanup = [];
+  let disposed = false;
+  const destroy = () => {
+    if (disposed) return;
+    disposed = true;
+    for (const release of cleanup.reverse()) {
+      try { release(); } catch { /* Release the remaining resources too. */ }
+    }
+    renderer.dispose();
+    renderer.forceContextLoss();
+    canvas.width = canvas.height = 1;
+  };
+  try {
+    const studio = await createThreeStudioScene(root, canvas, THREE, renderer, cleanup, { ...options, compact });
+    if (renderer.getContext().isContextLost()) throw new Error("3D graphics context was interrupted during startup");
+    root.dataset.designerInitStage = "ready";
+    return { ...studio, destroy };
+  } catch (error) {
+    destroy();
+    throw error;
+  }
+}
+
+async function createThreeStudioScene(root, canvas, THREE, renderer, cleanup, options) {
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(33, 1, 0.1, 100);
   const model = new THREE.Group();
@@ -2856,6 +2891,16 @@ async function createThreeStudio(root, canvas) {
   const patinaTextureCache = new Map();
   const hallmarkTextures = new Map();
   const disposableTextures = [];
+  cleanup.push(() => {
+    disposeObject(scene);
+    scene.traverse((object) => object.shadow?.dispose());
+    disposableTextures.forEach((texture) => {
+      texture.dispose();
+      // Safari can retain the canvas backing store after its texture is freed.
+      if (texture.image instanceof HTMLCanvasElement) texture.image.width = texture.image.height = 1;
+    });
+    patinaTextureCache.forEach((maps) => Object.values(maps).forEach((texture) => texture.dispose()));
+  });
   const cameraHomeZ = 5.75;
   const cameraMinZ = 3.05;
   const cameraMaxZ = 7.4;
@@ -2873,22 +2918,18 @@ async function createThreeStudio(root, canvas) {
   let lastPinchDistance = 0;
   let targetCameraZ = cameraHomeZ;
 
-  // ─── Phase 6: Adaptive quality ────────────────────────────────────
-  // Default to ULTRA. On sustained heavy frames (rolling avg > 26 ms ≈
-  // sub-38 fps) step down to HIGH, then MEDIUM. On sustained recovery
-  // (rolling avg < 16 ms ≈ 60 fps with headroom) step back up. Hysteresis
-  // via a min-dwell timer prevents oscillation when the GPU sits near a
-  // tier boundary. Only the cheap knobs are adjusted — pixel ratio cap
-  // and planar-reflection RT resolution. Bloom, DOF and CA stay on at
-  // every tier so the *look* of the renderer doesn't visibly degrade;
-  // only the *resolution* drops, which on M-series is invisible until
-  // tier 2 on a high-DPI display.
+  // Start phones within a bounded pixel budget before the first frame, rather
+  // than waiting for heavy allocations to trigger adaptation. The geometry,
+  // metal reflectance and gemstone ray tracing are shared with desktop.
   const QUALITY_TIERS = [
     { name: "ultra",  pixelRatioCap: 2,   reflectionSize: 512 },
     { name: "high",   pixelRatioCap: 1.5, reflectionSize: 384 },
     { name: "medium", pixelRatioCap: 1,   reflectionSize: 256 }
   ];
-  let qualityTier = 0;
+  const bestQualityTier = options.recovery ? 2 : options.compact ? 1 : 0;
+  let qualityTier = bestQualityTier;
+  root.dataset.designerQuality = QUALITY_TIERS[qualityTier].name;
+  root.dataset.designerProfile = options.recovery ? "recovery" : options.compact ? "mobile" : "desktop";
   const frameTimeRing = new Float32Array(60);
   let frameTimeIndex = 0;
   let frameTimeFilled = 0;
@@ -3487,14 +3528,18 @@ async function createThreeStudio(root, canvas) {
 
   async function loadStudioEnvironment() {
     try {
+      // HDR loading is optional: a failed loader request must not disable 3D.
+      const { RGBELoader } = await import("./RGBELoader.js");
       const hdrTexture = await new RGBELoader().loadAsync(TEXTURE_URLS.studioHdr);
       const pmrem = new THREE.PMREMGenerator(renderer);
-      const environment = pmrem.fromEquirectangular(hdrTexture).texture;
-
-      pmrem.dispose();
-      hdrTexture.dispose();
-
-      return trackTexture(environment);
+      try {
+        const target = pmrem.fromEquirectangular(hdrTexture);
+        cleanup.push(() => target.dispose());
+        return trackTexture(target.texture);
+      } finally {
+        pmrem.dispose();
+        hdrTexture.dispose();
+      }
     } catch (error) {
       root.dataset.designerTextureWarning = "studio-hdri-fallback";
       return createProceduralEnvironmentTexture();
@@ -3536,25 +3581,23 @@ async function createThreeStudio(root, canvas) {
     return trackTexture(texture);
   }
 
+  root.dataset.designerInitStage = "textures";
   runtimeTextures.brushNormal = createBrushedAnisotropyTexture();
   runtimeTextures.hammeredNormal = createHammeredNormalTexture();
   runtimeTextures.sandblastNormal = createSandblastNormalTexture();
   runtimeTextures.microRoughness = createFineRoughnessTexture();
   [runtimeTextures.brushNormal, runtimeTextures.hammeredNormal, runtimeTextures.sandblastNormal, runtimeTextures.microRoughness]
     .forEach((texture) => texture.repeat.set(1, 1));
-  runtimeTextures.metalSmudge = createMetalSmudgeTexture();
   runtimeTextures.velvet = createStudioVelvetTexture();
-  runtimeTextures.gemNormal = createGemMicroNormalTexture();
-  runtimeTextures.gemInclusions = createGemInclusionTexture();
-  runtimeTextures.gemBodyMaps = Object.fromEntries(
-    Object.entries(STONE_PROFILES).map(([name, profile]) => [name, createGemBodyTexture(profile, name)])
-  );
+  // The current optical materials use geometry/BVH inclusions. Do not allocate
+  // the unused legacy stone-body, inclusion and sparkle canvases at startup.
   runtimeTextures.caustics = createCausticTexture();
-  runtimeTextures.prismSpark = createPrismaticSparkTexture();
   runtimeTextures.showcaseNormal = createShowcaseNormalTexture();
-  runtimeTextures.metalNormal = await loadTexture(TEXTURE_URLS.metalNormal, { repeat: 10 });
-  runtimeTextures.metalRoughness = await loadTexture(TEXTURE_URLS.metalRoughness, { repeat: 10 });
-  environmentTexture = await loadStudioEnvironment();
+  [runtimeTextures.metalNormal, runtimeTextures.metalRoughness, environmentTexture] = await Promise.all([
+    loadTexture(TEXTURE_URLS.metalNormal, { repeat: 10 }),
+    loadTexture(TEXTURE_URLS.metalRoughness, { repeat: 10 }),
+    loadStudioEnvironment()
+  ]);
   root.dataset.designerTextures = runtimeTextures.metalNormal && runtimeTextures.metalRoughness
     ? "studio-hdri-metal-pbr"
     : "studio-hdri-procedural-metal";
@@ -3616,7 +3659,7 @@ async function createThreeStudio(root, canvas) {
   const key = new THREE.DirectionalLight(0xffffff, 3.0);
   key.position.set(3.8, 4.6, 3.4);
   key.castShadow = true;
-  key.shadow.mapSize.set(2048, 2048);
+  key.shadow.mapSize.set(options.compact || options.recovery ? 1024 : 2048, options.compact || options.recovery ? 1024 : 2048);
   key.shadow.camera.near = 0.5;
   key.shadow.camera.far = 12;
   key.shadow.camera.left = -4;
@@ -3835,7 +3878,8 @@ async function createThreeStudio(root, canvas) {
   // M-series GPUs. UnsignedByteType so the texture survives the renderer's
   // sRGB output transform (matches sceneRT — see threejs-gotchas note).
   const REFLECTION_PLANE_Y = -1.352;
-  const reflectionRT = new THREE.WebGLRenderTarget(512, 512, {
+  const reflectionSize = QUALITY_TIERS[qualityTier].reflectionSize;
+  const reflectionRT = new THREE.WebGLRenderTarget(reflectionSize, reflectionSize, {
     type: THREE.UnsignedByteType,
     format: THREE.RGBAFormat,
     minFilter: THREE.LinearFilter,
@@ -3844,6 +3888,7 @@ async function createThreeStudio(root, canvas) {
     depthBuffer: true,
     stencilBuffer: false
   });
+  cleanup.push(() => reflectionRT.dispose());
   reflectionRT.texture.colorSpace = THREE.SRGBColorSpace;
   const reflectionCamera = new THREE.PerspectiveCamera();
   const reflectionClipPlane = new THREE.Plane(
@@ -4261,6 +4306,10 @@ async function createThreeStudio(root, canvas) {
     sceneRT.depthTexture = new THREE.DepthTexture(2, 2);
     sceneRT.depthTexture.type = THREE.UnsignedShortType;
     const bloomMips = [];
+    cleanup.push(() => {
+      sceneRT.dispose();
+      bloomMips.flat().forEach((target) => target.dispose());
+    });
     for (let i = 0; i < 3; i += 1) {
       bloomMips.push([
         new THREE.WebGLRenderTarget(2, 2, bloomRtOpts),
@@ -4273,6 +4322,7 @@ async function createThreeStudio(root, canvas) {
     // saturates the lens; this pass streaks the bright pixels along two
     // diagonal axes to reproduce that aperture-diffraction signature.
     const starRT = new THREE.WebGLRenderTarget(2, 2, bloomRtOpts);
+    cleanup.push(() => starRT.dispose());
 
     const fsScene = new THREE.Scene();
     const fsCam = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
@@ -4596,6 +4646,10 @@ async function createThreeStudio(root, canvas) {
       renderer.render(fsScene, fsCam);
     }
 
+    cleanup.push(() => {
+      fsQuad.geometry.dispose();
+      [brightMat, blurMat, starMat, compositeMat].forEach((material) => material.dispose());
+    });
     return {
       resize: resizeTo,
       render: renderFrame,
@@ -4609,9 +4663,14 @@ async function createThreeStudio(root, canvas) {
     const width = Math.max(1, Math.round(rect.width));
     const height = Math.max(1, Math.round(rect.height));
     const cap = QUALITY_TIERS[qualityTier].pixelRatioCap;
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, cap));
+    const maxPixels = options.compact || options.recovery ? 750000 : 3000000;
+    const ratio = Math.min(window.devicePixelRatio || 1, cap, Math.sqrt(maxPixels / (width * height)));
+    renderer.setPixelRatio(ratio);
     renderer.setSize(width, height, false);
+    root.dataset.designerPixels = String(canvas.width * canvas.height);
     camera.aspect = width / height;
+    // Preserve horizontal framing in portrait, including fullscreen rotation.
+    camera.zoom = Math.min(1, camera.aspect / 0.95);
     camera.updateProjectionMatrix();
     if (post) {
       const dpr = renderer.getPixelRatio();
@@ -4630,6 +4689,7 @@ async function createThreeStudio(root, canvas) {
   }
 
   // Instantiate the post chain now that scene/camera/renderer/lights exist.
+  root.dataset.designerInitStage = "lighting";
   post = createPostChain();
 
   function materialForMetal(metalOverride = currentState.metal, karatOverride = currentState.karat) {
@@ -8363,19 +8423,12 @@ async function createThreeStudio(root, canvas) {
     }
     model.userData.overviewScale = model.scale.x;
     applyView(currentState.view);
-    // Centre necklace in the viewer panel; other pieces retain the historic
-    // slight left offset that lived alongside the older overlay editor.
-    const defaultX = currentState.piece === "Necklace" || currentState.piece === "Bracelet" ? 0
-      : currentState.piece === "Earrings" ? -0.2
-      : -0.58;
-    // Necklace hangs from the top of the frame so the pendant floats free
-    // above the plinth instead of resting on it.
+    // The controls have their own column now; every piece belongs in the
+    // centre of the viewer, including on narrow phones.
+    const defaultX = 0;
     const defaultY = currentState.piece === "Necklace" ? 0.2 : 0;
     model.userData.defaultX = defaultX;
     model.userData.defaultY = defaultY;
-    // In inspect mode keep the piece at its natural vertical position so a
-    // necklace doesn't drop out of view; centre horizontally so the piece
-    // sits in the middle of the loupe view.
     model.position.set(isInspecting ? 0 : defaultX, defaultY, 0);
 
     // §5 — Silhouette-matched floor contact shadow.
@@ -8538,7 +8591,17 @@ async function createThreeStudio(root, canvas) {
     lastReadoutKey = "";
   }
 
+  let stageInView = true;
+  const stageObserver = new IntersectionObserver(([entry]) => { stageInView = entry.isIntersecting; });
+  stageObserver.observe(canvas);
+  cleanup.push(() => stageObserver.disconnect());
+
   function animate(time = 0) {
+    if (document.hidden || root.hidden || !stageInView || renderer.getContext().isContextLost()) {
+      lastFrameTimestamp = 0;
+      frameId = window.requestAnimationFrame(animate);
+      return;
+    }
     if (window.__arTryOn?.modal?.isConnected && !window.__arTryOn._closed) {
       lastFrameTimestamp = time;
       frameId = window.requestAnimationFrame(animate);
@@ -8553,8 +8616,8 @@ async function createThreeStudio(root, canvas) {
     // with a 2-second minimum dwell time to prevent flapping.
     if (lastFrameTimestamp > 0) {
       const dt = time - lastFrameTimestamp;
-      if (dt > 0 && dt < 200) {
-        frameTimeRing[frameTimeIndex] = dt;
+      if (dt > 0 && dt < 2000) {
+        frameTimeRing[frameTimeIndex] = Math.min(dt, 100);
         frameTimeIndex = (frameTimeIndex + 1) % frameTimeRing.length;
         if (frameTimeFilled < frameTimeRing.length) frameTimeFilled += 1;
       }
@@ -8566,7 +8629,7 @@ async function createThreeStudio(root, canvas) {
           applyQualityTier(qualityTier + 1);
           qualityDwellUntil = time + 2000;
           frameTimeFilled = 0; // reset window after change
-        } else if (avg < 16 && qualityTier > 0) {
+        } else if (avg < 16 && qualityTier > bestQualityTier) {
           applyQualityTier(qualityTier - 1);
           qualityDwellUntil = time + 3000;
           frameTimeFilled = 0;
@@ -8808,7 +8871,24 @@ async function createThreeStudio(root, canvas) {
   canvas.addEventListener("contextmenu", onContextMenu);
   window.addEventListener("keydown", onKeyDown);
   window.addEventListener("resize", resize);
+  cleanup.push(() => {
+    window.cancelAnimationFrame(frameId);
+    canvas.removeEventListener("pointerdown", onPointerDown);
+    canvas.removeEventListener("pointermove", onPointerMove);
+    canvas.removeEventListener("pointerup", onPointerUp);
+    canvas.removeEventListener("pointercancel", onPointerUp);
+    canvas.removeEventListener("pointerleave", onPointerUp);
+    canvas.removeEventListener("wheel", onWheel);
+    canvas.removeEventListener("contextmenu", onContextMenu);
+    window.removeEventListener("keydown", onKeyDown);
+    window.removeEventListener("resize", resize);
+    stageResize.disconnect();
+  });
+  const stageResize = new ResizeObserver(resize);
+  stageResize.observe(canvas);
+  root.dataset.designerInitStage = "jewellery";
   rebuild(currentState);
+  root.dataset.designerInitStage = "first-frame";
   animate();
 
   return {
@@ -8821,7 +8901,7 @@ async function createThreeStudio(root, canvas) {
     captureImage(width = 2400) {
       const originalSize = renderer.getSize(new THREE.Vector2());
       const originalRatio = renderer.getPixelRatio();
-      const maximum = Math.min(4096, renderer.capabilities.maxTextureSize);
+      const maximum = Math.min(options.compact || options.recovery ? 1600 : 4096, renderer.capabilities.maxTextureSize);
       const targetWidth = Math.max(1, Math.round(Math.min(maximum, Math.max(512, width), maximum * camera.aspect)));
       const targetHeight = Math.max(1, Math.round(targetWidth / camera.aspect));
       const snapshot = document.createElement("canvas");
@@ -8886,21 +8966,6 @@ async function createThreeStudio(root, canvas) {
         random = previousRandom;
         wearableBuildOptions = previousWearable;
       }
-    },
-    destroy() {
-      window.cancelAnimationFrame(frameId);
-      canvas.removeEventListener("pointerdown", onPointerDown);
-      canvas.removeEventListener("pointermove", onPointerMove);
-      canvas.removeEventListener("pointerup", onPointerUp);
-      canvas.removeEventListener("pointercancel", onPointerUp);
-      canvas.removeEventListener("pointerleave", onPointerUp);
-      canvas.removeEventListener("wheel", onWheel);
-      canvas.removeEventListener("contextmenu", onContextMenu);
-      window.removeEventListener("keydown", onKeyDown);
-      window.removeEventListener("resize", resize);
-      disposableTextures.forEach((texture) => texture.dispose());
-      patinaTextureCache.forEach((maps) => Object.values(maps).forEach((texture) => texture.dispose()));
-      renderer.dispose();
     }
   };
 }
@@ -8911,14 +8976,13 @@ function createFallbackStudio(root, fallback, mainCanvas) {
   mainCanvas.hidden = true;
   fallback.hidden = false;
 
+  let state = getState(root);
+  const observer = new ResizeObserver(() => drawFallback(canvas, state));
+  observer.observe(canvas);
   return {
     renderer: "fallback",
-    update(state) {
-      drawFallback(canvas, state);
-    },
-    setInspectMode(enabled) {
-      root.classList.toggle("is-inspecting", Boolean(enabled));
-    }
+    update(next) { state = next; drawFallback(canvas, state); },
+    destroy() { observer.disconnect(); canvas.width = canvas.height = 1; }
   };
 }
 
@@ -9048,7 +9112,7 @@ async function setupDesigner(root = document.querySelector("[data-design-studio]
 
   root.dataset.designerReady = "loading";
 
-  const canvas = root.querySelector("[data-designer-canvas]");
+  let canvas = root.querySelector("[data-designer-canvas]");
   const fallback = root.querySelector("[data-designer-fallback]");
   const controls = root.querySelector("[data-designer-controls]");
   const sendButton = root.querySelector("[data-send-design]");
@@ -9069,21 +9133,92 @@ async function setupDesigner(root = document.querySelector("[data-design-studio]
   setSummary(root, getState(root));
   updateDesignerSmartDetails(root, getState(root));
 
-  try {
-    studio = await createThreeStudio(root, canvas);
-  } catch (error) {
-    root.dataset.designerError = error instanceof Error ? error.message : "3D preview unavailable";
-    studio = createFallbackStudio(root, fallback, canvas);
-  }
+  const previewStatus = root.querySelector("[data-designer-preview-status]");
+  const previewMessage = root.querySelector("[data-designer-preview-message]");
+  const retryButton = root.querySelector("[data-designer-retry]");
+  let starting = false;
+  let readoutListener = null;
+  let detachContextEvents = () => {};
 
-  // Expose a piece builder so the AR try-on module can render the full
-  // high-fidelity ring instead of its simplified placeholder. Guarded
-  // against the fallback studio which lacks Three.js.
-  if (typeof studio.buildPiece === "function") {
-    window.__tjcDesigner = window.__tjcDesigner || {};
-    window.__tjcDesigner.buildPiece = studio.buildPiece;
-    window.__tjcDesigner.getState = () => sanitizeDesignState(getState(root));
-  }
+  const setPreviewStatus = (mode, message = "") => {
+    root.dataset.designerPreview = mode;
+    if (previewStatus) previewStatus.hidden = mode === "ready";
+    if (previewMessage) previewMessage.textContent = message;
+    if (retryButton) {
+      retryButton.hidden = mode === "loading" || mode === "ready";
+      retryButton.disabled = mode === "loading";
+    }
+    canvas.setAttribute("aria-busy", String(mode === "loading"));
+    const available = mode === "ready";
+    root.querySelectorAll("[data-inspect-design], [data-export-glb], [data-audit-mesh], [data-export-render-job]")
+      .forEach((button) => { button.disabled = !available; });
+    if (available && studio?.buildPiece) {
+      window.__tjcDesigner = { buildPiece: studio.buildPiece, getState: () => sanitizeDesignState(getState(root)) };
+    } else {
+      delete window.__tjcDesigner;
+    }
+  };
+
+  const startStudio = async (recovery = false) => {
+    if (starting) return;
+    starting = true;
+    detachContextEvents();
+    if (studio?.isInspecting?.()) studio.setInspectMode(false);
+    studio?.destroy?.();
+    studio = null;
+    root.classList.remove("is-inspecting");
+    inspectButton?.setAttribute("aria-pressed", "false");
+    setPreviewStatus("loading", "Preparing your 3D jewellery…");
+    fallback.hidden = true;
+    // One automatic retry uses a fresh canvas and smaller GPU allocations.
+    // Never reuse a failed WebGL canvas (its context type cannot be changed).
+    const attempts = recovery ? [true] : [false, true];
+    for (const safeMode of attempts) {
+      const fresh = canvas.cloneNode(false);
+      fresh.hidden = false;
+      canvas.replaceWith(fresh);
+      canvas = fresh;
+      try {
+        studio = await createThreeStudio(root, canvas, { recovery: safeMode });
+        break;
+      } catch (error) {
+        root.dataset.designerError = error instanceof Error ? error.message : "3D preview unavailable";
+        root.dataset.designerFailureStage = root.dataset.designerInitStage || "engine";
+      }
+    }
+    if (!studio) {
+      studio = createFallbackStudio(root, fallback, canvas);
+      setPreviewStatus("fallback", "Simplified preview · 3D could not start. Your design choices are saved. Try 3D again.");
+    } else {
+      delete root.dataset.designerError;
+      delete root.dataset.designerFailureStage;
+      studio.setReadoutListener?.(readoutListener);
+      setPreviewStatus("ready");
+      const onLost = (event) => {
+        event.preventDefault();
+        root.dataset.designerError = "3D graphics context interrupted";
+        studio?.setInspectMode?.(false);
+        inspectButton?.setAttribute("aria-pressed", "false");
+        setPreviewStatus("paused", "3D preview paused. Your design is saved. Waiting for graphics to recover, or try 3D again.");
+      };
+      const onRestored = () => {
+        delete root.dataset.designerError;
+        studio.update(getState(root));
+        setPreviewStatus("ready");
+      };
+      canvas.addEventListener("webglcontextlost", onLost);
+      canvas.addEventListener("webglcontextrestored", onRestored);
+      detachContextEvents = () => {
+        canvas.removeEventListener("webglcontextlost", onLost);
+        canvas.removeEventListener("webglcontextrestored", onRestored);
+      };
+    }
+    studio.update(getState(root));
+    recordCanvasState(root, canvas.hidden ? fallback.querySelector("canvas") : canvas, studio.renderer);
+    starting = false;
+  };
+  await startStudio();
+  retryButton?.addEventListener("click", () => { void startStudio(true); });
 
   const history = createDesignHistory(getState(root));
   let pendingHistory = null;
@@ -9113,6 +9248,7 @@ async function setupDesigner(root = document.querySelector("[data-design-studio]
   const renderState = (state) => {
     window.cancelAnimationFrame(renderRequest);
     renderRequest = null;
+    if (!studio) return;
     studio.update(state);
     recordCanvasState(root, canvas.hidden ? fallback.querySelector("[data-designer-fallback-canvas]") : canvas, studio.renderer);
   };
@@ -9221,7 +9357,7 @@ async function setupDesigner(root = document.querySelector("[data-design-studio]
       }
     }
 
-    studio.setInspectMode?.(enabled);
+    studio?.setInspectMode?.(enabled);
 
     if (message) {
       setDesignerStatus(status, message);
@@ -9273,10 +9409,11 @@ async function setupDesigner(root = document.querySelector("[data-design-studio]
   };
 
   // Live camera/angle readout
-  studio.setReadoutListener?.(({ rx, ry, zoom }) => {
+  readoutListener = ({ rx, ry, zoom }) => {
     if (!hudReadout) return;
     hudReadout.textContent = `Y ${ry}° · X ${rx}° · Zoom ${zoom}×`;
-  });
+  };
+  studio.setReadoutListener?.(readoutListener);
 
   hudExit?.addEventListener("click", () => {
     setInspectButtonState(false, "Auto rotation restored.");
@@ -9285,7 +9422,7 @@ async function setupDesigner(root = document.querySelector("[data-design-studio]
   orbitChip?.addEventListener("click", () => {
     const enabled = orbitChip.getAttribute("aria-pressed") !== "true";
     orbitChip.setAttribute("aria-pressed", String(enabled));
-    studio.setAutoOrbit?.(enabled);
+    studio?.setAutoOrbit?.(enabled);
     setDesignerStatus(status, enabled ? "Auto-orbit on." : "Auto-orbit off.");
   });
 
@@ -9297,9 +9434,9 @@ async function setupDesigner(root = document.querySelector("[data-design-studio]
   });
 
   resetChip?.addEventListener("click", () => {
-    studio.resetView?.();
+    studio?.resetView?.();
     orbitChip?.setAttribute("aria-pressed", "false");
-    studio.setAutoOrbit?.(false);
+    studio?.setAutoOrbit?.(false);
     setDesignerStatus(status, "View reset.");
   });
 
@@ -9314,19 +9451,19 @@ async function setupDesigner(root = document.querySelector("[data-design-studio]
   });
 
   // Double-click the canvas to reset rotation/zoom
-  canvas.addEventListener("dblclick", () => {
-    if (studio.isInspecting?.()) {
-      studio.resetView?.();
+  root.addEventListener("dblclick", (event) => {
+    if (event.target === canvas && studio?.isInspecting?.()) {
+      studio?.resetView?.();
     }
   });
 
   // ESC closes inspect mode anywhere on the page
   document.addEventListener("keydown", (event) => {
-    if (!studio.isInspecting?.()) return;
+    if (!studio?.isInspecting?.()) return;
     if (event.key === "Escape") {
       setInspectButtonState(false, "Inspect closed.");
     } else if (event.key === "r" || event.key === "R") {
-      studio.resetView?.();
+      studio?.resetView?.();
     } else if (event.key === " " || event.code === "Space") {
       event.preventDefault();
       orbitChip?.click();

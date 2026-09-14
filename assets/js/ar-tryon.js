@@ -879,7 +879,7 @@ export class ARTryOn {
 
     try {
       this.setStatus("Preparing your selected design…");
-      const designer = await import("./designer.js?v=20260912-metals");
+      const designer = await import("./designer.js?v=20260914-studio");
       await designer.prepareDesignerForAR();
       if (this._closed) return;
       this._designState = readDesignState() || this._designState;
