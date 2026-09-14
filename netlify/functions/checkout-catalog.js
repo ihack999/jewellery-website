@@ -56,6 +56,14 @@ const CHECKOUT_CATALOG = Object.freeze({
     image: "/assets/images/products/quiet-power-tennis-bracelet-1.jpeg",
     maxQuantity: 5
   },
+  "oval-bezel-diamond-bracelet": {
+    name: "The Oval Bezel Diamond Bracelet",
+    description: "10.00 ct TW oval diamonds in 14K yellow gold or 14K white gold",
+    unitAmount: 820000,
+    currency: "cad",
+    image: "/assets/images/products/oval-bezel-diamond-bracelet/white-gold-angled.jpeg",
+    maxQuantity: 5
+  },
   "gold-bezel-hand-chain": {
     name: "14K Gold Diamond Hand Chain Bracelet",
     description: "14K yellow gold with three natural bezel-set diamonds",

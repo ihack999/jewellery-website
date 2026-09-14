@@ -44,7 +44,7 @@ export const DESIGN_FAMILIES = Object.freeze({
 export const LOCK_GROUPS = Object.freeze({
   stone: ["stone", "shape", "size", "accentStone", "stoneLengthMm", "stoneWidthMm", "stoneDepthMm", "lengthWidthRatio", "tablePct", "totalDepthPct", "crownAngleDeg", "pavilionAngleDeg", "girdlePct", "culetPct", "symmetryMode"],
   metal: ["metal", "karat", "finish", "twoTone", "finishStrength", "finishScaleMm", "patinaCoverage"],
-  structure: ["piece", "silhouette", "band", "setting", "halo", "accent", "hiddenHalo", "milgrain", "prongCount", "prongHeight", "setRotation", "stoneTilt", "haloGap", "haloCount", "accentDensity", "chainType", "clasp", "weight", "chainLengthMm", "chainWireMm", "braceletLengthMm", "braceletWidthMm", "braceletTubeMm", "braceletInnerDiameterMm", "braceletStoneDiameterMm", "cuffGapMm", "prongBaseDiameterMm", "prongTipDiameterMm", "bearingDepthMm", "galleryHeightMm", "galleryRailDiameterMm", "culetClearanceMm", "haloMeleeDiameterMm"]
+  structure: ["piece", "silhouette", "band", "setting", "halo", "accent", "hiddenHalo", "milgrain", "prongCount", "prongHeight", "setRotation", "stoneTilt", "haloGap", "haloCount", "accentDensity", "accentSetting", "chainType", "clasp", "weight", "chainLengthMm", "chainWireMm", "braceletLengthMm", "braceletWidthMm", "braceletTubeMm", "braceletInnerDiameterMm", "braceletStoneDiameterMm", "cuffGapMm", "prongBaseDiameterMm", "prongTipDiameterMm", "bearingDepthMm", "galleryHeightMm", "galleryRailDiameterMm", "culetClearanceMm", "haloMeleeDiameterMm"]
 });
 
 export function createDesignVariation(current, familyName = "Classic", locked = []) {
@@ -61,7 +61,7 @@ export function createDesignVariation(current, familyName = "Classic", locked = 
     halo: random() < family.halo, accent: random() < family.accent,
     hiddenHalo: false, milgrain: familyName === "Vintage", twoTone: false,
     prongCount: "Auto", prongHeight: "1.00", setRotation: "0", stoneTilt: "0",
-    haloGap: "0.25", haloCount: "Auto", accentDensity: "Auto",
+    haloGap: "0.25", haloCount: "Auto", accentDensity: "Auto", accentSetting: "Bezel",
     symmetryMode: familyName === "Vintage" ? "Antique" : "Precision"
   };
   next.karat = next.metal === "Platinum" ? "950" : "18K";

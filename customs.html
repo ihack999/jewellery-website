@@ -2,7 +2,7 @@
 <html lang="en-CA">
   <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="description" content="Create bespoke engagement rings and custom jewellery in Toronto through a private design consultation tailored to your style and budget.">
     <meta name="robots" content="index, follow, max-image-preview:large">
     <meta name="theme-color" content="#272f26">
@@ -18,15 +18,15 @@
     <meta name="twitter:image" content="https://torontojewelscuration.com/assets/images/seo/toronto-jewels-curation-og.jpg">
     <link rel="icon" type="image/svg+xml" href="assets/images/logo-emblem.svg">
     <link rel="manifest" href="site.webmanifest">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="preload" href="/assets/fonts/cormorant-garamond-latin-normal.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="/assets/fonts/manrope-latin-normal.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="stylesheet" href="/assets/css/fonts.css?v=20260914-mobile">
     <link rel="stylesheet" href="assets/css/styles.css?v=20260831-responsive-images">
     <link rel="stylesheet" href="/assets/css/atelier.css?v=20260911-editorial-v1">
-    <link rel="stylesheet" href="/assets/css/curation.css?v=20260912-curation-v3">
+    <link rel="stylesheet" href="/assets/css/curation.css?v=20260914-mobile">
     <link rel="stylesheet" href="assets/css/generator-v2.css?v=20260911">
-    <script src="assets/js/main.js?v=20260912-studio-session3" defer></script>
-    <script src="/assets/js/curation.js?v=20260912-curation-v3" defer></script>
+    <script src="assets/js/main.js?v=20260914-mobile" defer></script>
+    <script src="/assets/js/curation.js?v=20260914-mobile" defer></script>
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
@@ -480,6 +480,17 @@
                   </select>
                 </div>
 
+                <div class="designer-panel__group" data-piece-only="Ring">
+                  <label for="designer-accent-setting">Side-stone setting</label>
+                  <select id="designer-accent-setting" data-designer-field="accentSetting" aria-describedby="designer-accent-setting-help">
+                    <option value="Bezel" selected>Bezel — no prongs</option>
+                    <option value="Channel">Channel — no prongs</option>
+                    <option value="Prong">Prong — claws</option>
+                    <option value="Auto">Original band setting</option>
+                  </select>
+                  <small id="designer-accent-setting-help">Bezel and channel side stones have no individual prongs. Centre and halo settings stay unchanged. Recessed-style preview, not drilled production CAD.</small>
+                </div>
+
                 <div class="designer-panel__group" data-piece-only="Necklace,Bracelet">
                   <label for="designer-chain-type">Chain</label>
                   <select id="designer-chain-type" data-designer-field="chainType">
@@ -760,7 +771,7 @@
             <div class="gemstone-grid" data-reveal>
               <button class="gemstone-card is-active" type="button" data-gemstone="Clear Diamond">
                 <span class="gemstone-photo">
-                  <img src="assets/images/gemstones/clear-diamond.jpg" alt="Clear diamond gemstone" loading="lazy">
+                  <img src="assets/images/gemstones/clear-diamond.jpg" alt="Clear diamond gemstone" loading="lazy" decoding="async" srcset="/assets/images/responsive/clear-diamond-9277b4b7-160.webp 160w, /assets/images/responsive/clear-diamond-9277b4b7-320.webp 320w, /assets/images/responsive/clear-diamond-9277b4b7-480.webp 480w, /assets/images/responsive/clear-diamond-9277b4b7-780.webp 780w, /assets/images/responsive/clear-diamond-9277b4b7-889.webp 889w" sizes="(max-width: 700px) 100vw, 50vw">
                 </span>
                 <strong>Clear Diamond</strong>
                 <small>Bright, timeless, highest sparkle</small>
@@ -771,7 +782,7 @@
               </button>
               <button class="gemstone-card" type="button" data-gemstone="Blush Sapphire">
                 <span class="gemstone-photo">
-                  <img src="assets/images/gemstones/blush-sapphire.jpg" alt="Blush sapphire gemstone" loading="lazy">
+                  <img src="assets/images/gemstones/blush-sapphire.jpg" alt="Blush sapphire gemstone" loading="lazy" decoding="async" srcset="/assets/images/responsive/blush-sapphire-c5d2f644-160.webp 160w, /assets/images/responsive/blush-sapphire-c5d2f644-320.webp 320w, /assets/images/responsive/blush-sapphire-c5d2f644-480.webp 480w, /assets/images/responsive/blush-sapphire-c5d2f644-780.webp 780w, /assets/images/responsive/blush-sapphire-c5d2f644-1280.webp 1280w" sizes="(max-width: 700px) 100vw, 50vw">
                 </span>
                 <strong>Blush Sapphire</strong>
                 <small>Soft colour, romantic warmth</small>
@@ -782,7 +793,7 @@
               </button>
               <button class="gemstone-card" type="button" data-gemstone="Blue Sapphire">
                 <span class="gemstone-photo">
-                  <img src="assets/images/gemstones/blue-sapphire.jpg" alt="Blue sapphire gemstone" loading="lazy">
+                  <img src="assets/images/gemstones/blue-sapphire.jpg" alt="Blue sapphire gemstone" loading="lazy" decoding="async" srcset="/assets/images/responsive/blue-sapphire-5de8691e-160.webp 160w, /assets/images/responsive/blue-sapphire-5de8691e-320.webp 320w, /assets/images/responsive/blue-sapphire-5de8691e-480.webp 480w, /assets/images/responsive/blue-sapphire-5de8691e-780.webp 780w, /assets/images/responsive/blue-sapphire-5de8691e-1280.webp 1280w" sizes="(max-width: 700px) 100vw, 50vw">
                 </span>
                 <strong>Blue Sapphire</strong>
                 <small>Deep colour, polished contrast</small>
@@ -793,7 +804,7 @@
               </button>
               <button class="gemstone-card" type="button" data-gemstone="Emerald Green">
                 <span class="gemstone-photo">
-                  <img src="assets/images/gemstones/emerald-green.jpg" alt="Emerald green gemstone" loading="lazy">
+                  <img src="assets/images/gemstones/emerald-green.jpg" alt="Emerald green gemstone" loading="lazy" decoding="async" srcset="/assets/images/responsive/emerald-green-30f599c4-160.webp 160w, /assets/images/responsive/emerald-green-30f599c4-320.webp 320w, /assets/images/responsive/emerald-green-30f599c4-480.webp 480w, /assets/images/responsive/emerald-green-30f599c4-780.webp 780w, /assets/images/responsive/emerald-green-30f599c4-1280.webp 1280w" sizes="(max-width: 700px) 100vw, 50vw">
                 </span>
                 <strong>Emerald Green</strong>
                 <small>Rich tone, vintage character</small>

@@ -66,11 +66,25 @@ Use `--resolution 512 --samples 64 --device cpu` for a small proof. Output direc
 
 See [V3.2 construction and research notes](docs/generator-v3.2-construction.md), [advanced rendering details and limitations](docs/generator-v3-advanced.md), the [V2 foundation record](docs/generator-v2-foundation.md), and the [full roadmap](docs/jewellery-generator-upgrade-plan.md). Full spectral calibration and production CAD remain future work.
 
+The [editor metal and cathedral update](docs/metals-cathedral-2026-09-12.md) adds conductor-reflectance colours, clearer polished/brushed finish behaviour, continuous band texture mapping and curved cathedral shoulders attached to actual shank surfaces. Gem optics and the studio lighting are preserved. Run `node scripts/check_metals.mjs` and `node scripts/check_journeys.mjs --metals` for the focused checks.
+
 ### AR V1 wearable fitting
 
 AR now uses metre-normalised full models, stable hand selection, independent earring anchors, three-dimensional necklace wear paths, bounded pendant motion, and camera-background transmission. Coloured-stone absorption stays consistent across physical and display scales. Camera cancellation, opt-in placement storage, freeze/adjust, and diagnostics are included.
 
-The follow-up fitting pass adds capture-timestamp smoothing, motion-spike rejection, tracked face-depth occlusion, rounded neck wraps, automatic/manual neck-base placement, and length-preserving tennis/station bracelet fitting with an optional wrist-width reference. These corrections are checked with synthetic inputs; real-camera verification requires fresh permission.
+The follow-up fitting pass adds source-frame smoothing, motion-spike rejection, tracked face-depth occlusion, rounded neck wraps, automatic/manual neck-base placement, and length-preserving tennis/station bracelet fitting with an optional wrist-width reference. These corrections are checked with synthetic inputs; real-camera verification requires fresh permission.
+
+The [tracking timing pass](docs/ar-tracking-timing-2026-09-12.md) separates source-video intervals from callback/inference delays, prevents old-session transfers from disturbing a newer session, and adds bounded timing diagnostics. Run `node scripts/check_ar_tracking.mjs` for camera-free timing/race checks or `node scripts/check_journeys.mjs --ar-tracking` for generated-video checks through the real browser worker. These use synthetic tracking outputs and do not establish real-camera accuracy.
+
+The [ring contact pass](docs/ar-finger-contact-2026-09-12.md) fits the selected finger's depth body to tracked joints independently of ring size and placement adjustments. Run `node scripts/check_ar_contact.mjs` for geometry/projection checks or `node scripts/check_journeys.mjs --ar-contact` for actual WebGL depth and full-model checks using generated joints. Finger width and skin shape remain approximate.
+
+The [necklace/wrist continuation](docs/ar-necklace-wrist-2026-09-12.md) separates necklace orientation from head movement, adds **Place neck base** in a frozen preview, and gives bracelets independent wrist depth and rigid-band seating. Run `node scripts/check_ar_body_fit.mjs` and `node scripts/check_journeys.mjs --ar-body-fit` (optionally `--mobile`) for generated-body verification. Clothing surfaces remain outstanding; the later placement pass adds an optional forearm observation.
+
+The [shared render foundation](docs/ar-render-foundation-2026-09-12.md) batches repeated metal hardware while retaining model geometry, gemstone optics and articulation. Camera-free comparisons cover all 18 silhouettes; the Tennis product fixture drops from 1,493 to 83 draw calls. Run `node scripts/check_ar_render.mjs` and `node scripts/check_journeys.mjs --ar-rendering`. Tracking diagnostics now separate CPU rendering cost and render cadence from inference timing; real-device FPS remains unqualified.
+
+The [appearance lighting pass](docs/ar-appearance-lighting-2026-09-12.md) adapts HDR reflections and direct lights together from the visible camera crop, with linear-light statistics and stable frame-based smoothing. It preserves camera pixels and product materials, holds lighting while frozen, and avoids inferring light colour/direction from skin texture. Run `node scripts/check_ar_lighting.mjs` and `node scripts/check_journeys.mjs --ar-lighting` for generated-video checks across all 18 silhouettes.
+
+The [placement/contact continuation](docs/ar-placement-contact-2026-09-12.md) keeps the necklace's neck depth body independent of jewellery adjustments and lets bracelets follow a reliably matched elbow–wrist direction when visible. An optional, throttled Pose Lite task runs in the tracking worker with hand-only fallback. Run `node scripts/check_ar_placement.mjs` and `node scripts/check_journeys.mjs --ar-placement`; body browser verification now passes 181 assertions. The extra model's real-camera accuracy and mobile cost remain unqualified.
 
 Try-on remains an **approximate appearance preview, not a sizing guarantee**. See [implemented features and validation limits](docs/ar-tryon-v1.md) and the [remaining AR upgrade roadmap](docs/ar-tryon-upgrade-plan.md). Hair/clothing segmentation, more advanced body fitting, and real-mobile qualification remain outstanding.
 
@@ -155,7 +169,7 @@ These checks do not qualify live enquiry delivery, payments, real-device AR, ext
 
 ## Local performance baseline
 
-Run `node scripts/check_journeys.mjs --performance` to measure the homepage with local gzip compression and Google Fonts enabled. It records three samples at phone and desktop widths in `docs/performance-lab.json`. This command updates that report and requires network access to Google Fonts; it makes no form submissions. See [measurement method and limitations](docs/homepage-performance.md). It is a measurement mode, not the browser regression suite or a production performance score.
+Run `node scripts/check_journeys.mjs --performance` to measure the homepage with local gzip compression. It records three samples at phone and desktop widths in `docs/performance-lab.json`. Fonts are now served locally with the rest of the page assets. This command updates that report and makes no form submissions. See [current measurements and limitations](docs/mobile-storefront-2026-09-14.md). It is a measurement mode, not the browser regression suite or a production performance score.
 
 Run `node scripts/check_journeys.mjs --accessibility` for the focused keyboard, dialog, reduced-motion, phone-width, form-label, and 200% page-scale audit. It uses the same disposable browser and loopback server as the journey suite. See [the audit record](docs/accessibility-audit-2026-09-12.md); this does not replace real-device, screen-reader, or production testing.
 
@@ -163,4 +177,10 @@ Run `node scripts/check_journeys.mjs --screen-reader` for the Chrome accessibili
 
 Run `node scripts/check_design_session.mjs` for the dependency-free design-session reliability checks. It covers deterministic seeds and variations, locked fields, physical dimensions, undo/redo branching, v2 migration, v3 JSON round trips, version metadata, and malformed-document guards. It makes no network requests or browser changes.
 
+Ring **Fit & detail → Side-stone setting** offers bezel, channel, and prong hardware independently of the centre stone. New rings default to bezel; existing designs retain their original setting. Run `node scripts/check_side_settings.mjs` for geometry/session coverage and `node scripts/check_journeys.mjs --side-settings` for isolated desktop/mobile checks. See [construction details and limits](docs/side-stone-settings.md).
+
 Native Chrome review is recorded in [accessibility-native-2026-09-12.md](docs/accessibility-native-2026-09-12.md). Safari and Android coverage require connected, authorized device/browser access.
+
+Run `node scripts/check_journeys.mjs --mobile-site` for phone/landscape layout, SVG decoration, touch-target, swipe, dialog, search viewport, and responsive-photo regressions. It uses disposable Chrome touch emulation at 320–1440px and writes review screenshots to `/private/tmp/tjc-mobile-*.png`; it does not qualify physical iPhone Safari. See [mobile fixes and performance measurements](docs/mobile-storefront-2026-09-14.md).
+
+Product/editorial photographs use generated WebP sizes, while full-screen galleries retain original photos. Rebuild with `python3 scripts/optimize_storefront_images.py` in an environment with Pillow installed; `--force` rebuilds existing variants. The script updates static image markup and the source manifest in `main.js`, converts embedded colour profiles to sRGB, preserves orientation, and changes image URLs when source content changes. It never overwrites original photography. The existing Latin fonts are served locally with their SIL OFL notices in `assets/fonts/`.

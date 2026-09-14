@@ -4,9 +4,10 @@ import {
   mmToWorld,
   physicalMetadata
 } from "./jewellery-spec.js?v=20260911-construction-v32";
-import { createSeededRandom, normalizeSeed, createDesignVariation, createDesignDocument, readDesignDocument, createDesignHistory, designRevision } from "./design-session.js?v=20260912-studio-session3";
+import { createSeededRandom, normalizeSeed, createDesignVariation, createDesignDocument, readDesignDocument, createDesignHistory, designRevision } from "./design-session.js?v=20260912-side-settings";
 import { createGemstoneGeometry, gemstoneOutlinePoint } from "./gemstone-geometry.js?v=20260911-construction-v32";
-import { FINISH_PROFILES, gemOpticalParameters } from "./jewellery-materials.js?v=20260911-construction-v32";
+import { FINISH_PROFILES, gemOpticalParameters, metalReflectanceColor, metalFinishParameters } from "./jewellery-materials.js?v=20260912-metals";
+import { unwrapMetalBand, createCathedralShoulders } from "./metal-geometry.js?v=20260912-metals";
 import { downloadBlob } from "./design-export.js?v=20260911-construction-v32";
 import { installGemRayMaterial, setGemRayBounces, disposeGemRayMaterial } from "./gem-ray-material.js?v=20260911-construction-v32";
 import { capSweepEnds } from "./sweep-geometry.js?v=20260911-construction-v32";
@@ -14,7 +15,7 @@ import { resolvedGemProfile } from "./gem-appearance.js?v=20260911-construction-
 import { createPatinaMaps } from "./patina-material.js?v=20260911-construction-v32";
 import { stepDampedSway } from "./jewellery-motion.js?v=20260911-construction-v32";
 import { fitProngsToGems } from "./setting-contact.js?v=20260911-construction-v32";
-import { createJewelleryAssemblies } from "./jewellery-assemblies.js?v=20260911-ar-live3";
+import { createJewelleryAssemblies, resolveAccentSetting } from "./jewellery-assemblies.js?v=20260912-side-settings";
 
 const METAL_COLORS = {
   "White Gold": "#e8eef1",
@@ -424,6 +425,7 @@ const DESIGN_DEFAULTS = {
   haloMeleeDiameterMm: "",
   symmetryMode: "Precision",
   accentStone: "Clear Diamond",
+  accentSetting: "Bezel",
   seed: "atelier-001",
   variationIndex: "0",
   designFamily: "Classic",
@@ -1330,6 +1332,7 @@ function sanitizeDesignState(input = {}) {
     setRotation: normalizeRangeValue(input.setRotation, 0, 180, DESIGN_DEFAULTS.setRotation, 0),
     stoneTilt: normalizeRangeValue(input.stoneTilt, -15, 15, DESIGN_DEFAULTS.stoneTilt, 0),
     accentDensity: ["Auto", "Sparse", "Dense"].includes(input.accentDensity) ? input.accentDensity : DESIGN_DEFAULTS.accentDensity,
+    accentSetting: ["Auto", "Prong", "Bezel", "Channel"].includes(input.accentSetting) ? input.accentSetting : "Auto",
     haloGap: normalizeRangeValue(input.haloGap, 0.05, 2.0, DESIGN_DEFAULTS.haloGap, 2),
     haloCount: input.haloCount === "Auto" || /^\d+$/.test(String(input.haloCount || ""))
       ? String(input.haloCount)
@@ -1485,6 +1488,7 @@ function applyDesignState(root, state) {
   setField("setRotation", cleanState.setRotation);
   setField("stoneTilt", cleanState.stoneTilt);
   setField("accentDensity", cleanState.accentDensity);
+  setField("accentSetting", cleanState.accentSetting);
   setField("haloGap", cleanState.haloGap);
   setField("haloCount", cleanState.haloCount);
   setField("prongHeight", cleanState.prongHeight);
@@ -1774,7 +1778,7 @@ function createSummary(state) {
     `${state.setting} setting`,
     `${spec.setting.culetClearanceMm.toFixed(2)} mm culet clearance`,
     state.halo ? `${spec.halo.meleeDiameterMm.toFixed(2)} mm melee halo` : "unframed centre stone",
-    state.accent ? "side stones" : "clean band"
+    state.accent ? (state.piece === "Ring" ? `${resolveAccentSetting(state)} side stones` : "side stones") : "clean band"
   ];
 
   if (spec.piece === "Ring") {
@@ -1873,6 +1877,7 @@ function getState(root) {
     setRotation: field("setRotation")?.value,
     stoneTilt: field("stoneTilt")?.value,
     accentDensity: field("accentDensity")?.value,
+    accentSetting: field("accentSetting")?.value,
     haloGap: field("haloGap")?.value,
     haloCount: field("haloCount")?.value,
     prongHeight: field("prongHeight")?.value,
@@ -1968,7 +1973,7 @@ function fillRequestForm(state) {
   setValue("#piece-type", `${state.piece} (${state.silhouette})`);
   setValue("#metal-preference", `${state.metal}, ${state.finish}`);
   setValue("#stone-preference", `${state.size} ct feel ${state.stone}, ${state.shape}`);
-  setValue("#finish-preference", `${state.setting} setting, ${state.halo ? "diamond frame" : "unframed center stone"}, ${state.accent ? "side stones" : "clean band"}${state.hiddenHalo ? ", hidden halo" : ""}`);
+  setValue("#finish-preference", `${state.setting} setting, ${state.halo ? "diamond frame" : "unframed center stone"}, ${state.accent ? (state.piece === "Ring" ? `${resolveAccentSetting(state)} side stones` : "side stones") : "clean band"}${state.hiddenHalo ? ", hidden halo" : ""}`);
   setValue("#dimensions", `${state.piece} designer scale: ${state.size} ct feel, ${getWeightLabel(state.weight).toLowerCase()} proportion`);
 
   if (guideContext) {
@@ -3121,7 +3126,7 @@ async function createThreeStudio(root, canvas) {
       const image = context.createImageData(width, height);
 
       for (let index = 0; index < image.data.length; index += 4) {
-        const grain = 242 + random() * 13;
+        const grain = 232 + random() * 10;
         image.data[index] = grain;
         image.data[index + 1] = grain;
         image.data[index + 2] = grain;
@@ -3132,7 +3137,7 @@ async function createThreeStudio(root, canvas) {
       context.globalAlpha = 0.04;
 
       for (let y = 0; y < height; y += 6) {
-        context.fillStyle = y % 12 === 0 ? "#f2f2f2" : "#6e6e6e";
+        context.fillStyle = y % 12 === 0 ? "#efefef" : "#e8e8e8";
         context.fillRect(0, y, width, 1);
       }
 
@@ -3148,7 +3153,7 @@ async function createThreeStudio(root, canvas) {
       // mathematical mirror sweep. Kept low-amplitude (alpha ≤ 0.22) so
       // they never read as actual damage — only as the soft sheen
       // discontinuity real macro photos show.
-      context.globalAlpha = 0.035;
+      context.globalAlpha = 0.18;
       context.lineCap = "round";
       // 220 long scratches, mostly horizontal-ish (real polishing wheel
       // direction is the dominant axis but never perfectly uniform).
@@ -3165,7 +3170,7 @@ async function createThreeStudio(root, canvas) {
         const len = Math.exp(random() * 3.2 + 2.4); // ~11 .. 320 px
         const dx = Math.cos(angle) * len * 0.5;
         const dy = Math.sin(angle) * len * 0.5;
-        const brightness = 180 + random() * 60; // raise local roughness
+        const brightness = 246 + random() * 9; // raise local roughness
         context.strokeStyle = `rgb(${brightness},${brightness},${brightness})`;
         context.lineWidth = random() < 0.85 ? 0.6 : 1.2;
         context.beginPath();
@@ -3173,12 +3178,11 @@ async function createThreeStudio(root, canvas) {
         context.lineTo(cx + dx, cy + dy);
         context.stroke();
       }
-      // 90 micro-pits (tiny dark points → locally smoother) — represent
-      // micro-craters from polishing compound particles. Reads as
-      // "pinpoint sparkles" on the metal in motion.
-      context.globalAlpha = 0.025;
+      // Sparse finishing marks increase roughness locally; they must not
+      // turn pits into smoother, mirror-bright points.
+      context.globalAlpha = 0.12;
       for (let i = 0; i < 90; i += 1) {
-        const tone = 60 + random() * 50; // dark = lower roughness
+        const tone = 246 + random() * 9; // light = higher roughness
         context.fillStyle = `rgb(${tone},${tone},${tone})`;
         const sz = random() < 0.7 ? 1 : 2;
         context.fillRect(random() * width, random() * height, sz, sz);
@@ -4150,7 +4154,7 @@ async function createThreeStudio(root, canvas) {
     if (note) note.textContent = bracelet
       ? "Bracelets use calibrated round stones, not a ring-sized centre head. Set stone diameter, flexible length or bangle section under Extras & precision. Tennis has a box clasp; station bracelets use your chosen chain and clasp."
       : piece === "Necklace" ? "Complete necklace at real chain proportions. Macro focuses on the pendant or a station. Station styles interrupt the chain with round bezels; lariats close through the front slider."
-      : piece === "Ring" ? "Side stones use full faceted diamonds by default. Choose Match Center under Fit & detail for coloured accents." : "";
+      : piece === "Ring" ? "Fit & detail offers bezel, channel or prong side-stone settings, independently of the centre and halo. Choose Match Center for coloured accents. Enclosed settings are visual assemblies, not drilled production CAD." : "";
 
     // Rebuild the silhouette dropdown with the chosen piece's sub-types so
     // the user can pick e.g. "Cigar Band" for rings or "Y-Drop" for
@@ -4628,105 +4632,6 @@ async function createThreeStudio(root, canvas) {
   // Instantiate the post chain now that scene/camera/renderer/lights exist.
   post = createPostChain();
 
-  // Goldsmith reference colors per metal + karat. These are the linear-sRGB
-  // base colors that real jewelers see; they're what drives the *base* color
-  // of the metal before any environment reflection / specular tint.
-  const METAL_KARAT_COLORS = {
-    "Yellow Gold": {
-      "10K": 0xd9c071,
-      "14K": 0xe2b85a,
-      "18K": 0xeab64a,
-      "22K": 0xf5c441,
-      default: 0xeab64a
-    },
-    "Rose Gold": {
-      "10K": 0xd2a292,
-      "14K": 0xcd8c7c,
-      "18K": 0xc1786a,
-      "22K": 0xba6f5f,
-      default: 0xc1786a
-    },
-    "White Gold": {
-      "10K": 0xe6e9ec,
-      "14K": 0xeaedf0,
-      "18K": 0xeef1f3,
-      "22K": 0xf1f4f6,
-      default: 0xeef1f3
-    },
-    "Platinum": {
-      "950": 0xe1e6ea,
-      default: 0xd6dee2
-    },
-    // Champagne Gold - pale warm gold, less saturated than yellow gold.
-    "Champagne Gold": {
-      "10K": 0xe6d0a1,
-      "14K": 0xddc18a,
-      "18K": 0xd4b574,
-      "22K": 0xceac66,
-      default: 0xd4b574
-    },
-    // Black Gold (black rhodium plating over gold) - very dark gunmetal with
-    // a faint warm undertone. Keep base color extremely dark so the highly
-    // metallic F0 reads as a near-mirror black surface.
-    "Black Gold": {
-      "10K": 0x2a2622,
-      "14K": 0x232020,
-      "18K": 0x1d1b1c,
-      "22K": 0x171516,
-      default: 0x1d1b1c
-    },
-    // Mirror Silver - hyper-reflective bright argentium / rhodium look
-    "Mirror Silver": {
-      "950": 0xf2f5f8,
-      default: 0xeef2f5
-    },
-    // Bronze Patina - warm coppery brown with greenish oxidation hint
-    "Bronze Patina": {
-      "10K": 0x8a6a44,
-      "14K": 0x7a5a3a,
-      "18K": 0x6e4f30,
-      default: 0x7a5a3a
-    },
-    // Two-Tone Mix - warm/cool blend, body reads as soft champagne so the
-    // contrasting sheen tint (when twoTone toggle is on) reads cleanly.
-    "Two-Tone Mix": {
-      "14K": 0xd6c2a2,
-      "18K": 0xd6c2a2,
-      default: 0xd6c2a2
-    }
-  };
-  // Specular tint - the color of the reflection highlight. Real gold reflects
-  // light back with its own hue (warm), while white gold/platinum reflect
-  // nearly pure white.
-  const METAL_SPECULAR_TINT = {
-    "Yellow Gold": 0xfff0c0,
-    "Rose Gold":   0xffd5c4,
-    "White Gold":  0xfafcff,
-    "Platinum":    0xf4f7fa,
-    "Champagne Gold": 0xffe9b8,
-    "Black Gold":  0x8a8082,
-    "Mirror Silver": 0xffffff,
-    "Bronze Patina": 0xffd9a0,
-    "Two-Tone Mix": 0xfff0d0
-  };
-  // Attenuation/rim color for transmissive clearcoat - subtle warming.
-  const METAL_SHEEN_TINT = {
-    "Yellow Gold": 0xffdf86,
-    "Rose Gold":   0xf9b4a0,
-    "White Gold":  0xeef4ff,
-    "Platinum":    0xe7eef3,
-    "Champagne Gold": 0xffd896,
-    "Black Gold":  0x6a5f60,
-    "Mirror Silver": 0xf0f6ff,
-    "Bronze Patina": 0xffc888,
-    "Two-Tone Mix": 0xffd9a0
-  };
-
-  function metalBaseColor(metal, karat) {
-    const table = METAL_KARAT_COLORS[metal] || METAL_KARAT_COLORS["White Gold"];
-    return new THREE.Color(table[karat] ?? table.default);
-  }
-
   function materialForMetal(metalOverride = currentState.metal, karatOverride = currentState.karat) {
     const calibratedFinish = FINISH_PROFILES[currentState.finish] || FINISH_PROFILES["High Polish"];
     const finishStrength = Number(currentState.finishStrength);
@@ -4753,16 +4658,20 @@ async function createThreeStudio(root, canvas) {
     const finishNormalMap = currentState.finish === "Hammered" ? runtimeTextures.hammeredNormal
       : ["Sandblast", "Stardust"].includes(currentState.finish) ? runtimeTextures.sandblastNormal || runtimeTextures.metalNormal
       : runtimeTextures.brushNormal || runtimeTextures.metalNormal;
-    return new THREE.MeshPhysicalMaterial({
-      color: metalBaseColor(metal, karat),
-      metalness: 1, roughness: calibratedFinish.roughness,
+    const finish = metalFinishParameters(currentState.finish, finishStrength);
+    const material = new THREE.MeshPhysicalMaterial({
+      color: metalReflectanceColor(THREE, metal, karat),
+      metalness: 1, roughness: finish.roughness,
       roughnessMap: finishStrength > 0 ? runtimeTextures.microRoughness || null : null,
-      normalMap: finishNormalMap,
-      normalScale: new THREE.Vector2(calibratedFinish.normal * finishStrength, calibratedFinish.normal * finishStrength),
-      anisotropy: Math.min(1, calibratedFinish.anisotropy * finishStrength),
-      anisotropyRotation: metal === "Rose Gold" ? 0.18 : metal === "Yellow Gold" ? 0.08 : -0.06,
+      normalMap: finish.normal > 0 ? finishNormalMap : null,
+      normalScale: new THREE.Vector2(finish.normal, finish.normal),
+      anisotropy: finish.anisotropy,
+      anisotropyRotation: 0,
       clearcoat: 0, envMapIntensity: 1, sheen: 0, iridescence: 0
     });
+    material.name = `${metal} · ${karat} · ${currentState.finish}`;
+    material.userData.metalAppearance = { metal, karat, finish: currentState.finish, reflectance: "conductor-srgb-reference" };
+    return material;
   }
 
   function stoneProfile() {
@@ -6335,7 +6244,9 @@ async function createThreeStudio(root, canvas) {
       positions[idx + 2] += nz * microAmp;
     }
     geometry.computeVertexNormals();
-    return geometry;
+    const finishScale = mmToWorld(Number(currentState.finishScaleMm));
+    return unwrapMetalBand(THREE, geometry, cols, rows,
+      Math.PI * 2 * majorRadius / finishScale, Math.PI * (profileWidth + profileHeight) / finishScale);
   }
 
   function makeEllipticalTubeAlongCurve(curve, radialThickness, axialWidth, material, options = {}) {
@@ -7750,6 +7661,8 @@ async function createThreeStudio(root, canvas) {
       group.add(band);
     }
 
+    const shankMeshes = [...group.children];
+
     // ---- Phase 2: hallmark engraving on inside of band ----
     // Real fine jewelry always carries a karat / maker stamp inside the
     // band. We mount a thin cylindrical patch at the band's inner radius
@@ -7861,26 +7774,8 @@ async function createThreeStudio(root, canvas) {
     // ---- head: prongs + basket holding the center stone ----
     addAlgorithmicSetting(headGroup, G, headCenterX, headCenterY, settingMetal);
 
-    // Cathedral shoulders: structural ramps from band up to the head.
-    // Base points are derived from bandCrownAt() so they physically sit on
-    // the band's outer ridge — the old hardcoded (±0.55*bandMajorR, …)
-    // anchors were inside the finger hole and read as floating arches.
     if (currentState.setting === "Cathedral") {
-      const tube = 0.028 * G.W;
-      const shoulderΔ = 0.62; // ~35° each side of the head
-      const baseL = bandCrownAt(Math.PI / 2 + shoulderΔ, G).pos;
-      const baseR = bandCrownAt(Math.PI / 2 - shoulderΔ, G).pos;
-      // After the head sub-group's -90° X rotation the basket lower rail
-      // (head-local z = 0) lives in world at y = bandTopY. The basket
-      // circle's ends in head-local ±X map to world ±X. So the head's
-      // contact patches sit at world (±basketLowerR, bandTopY, 0).
-      const headHalfWidth = G.basketLowerR * 0.92;
-      const headL = new THREE.Vector3(-headHalfWidth, G.bandOuterR, 0);
-      const headR = new THREE.Vector3( headHalfWidth, G.bandOuterR, 0);
-      group.add(
-        makeCylinderBetween(baseL, headL, tube, settingMetal),
-        makeCylinderBetween(baseR, headR, tube, settingMetal)
-      );
+      group.add(createCathedralShoulders(THREE, shankMeshes, G, currentState, settingMetal));
     }
 
     // ---- halo: arc-length packed around the certified stone outline ----
@@ -9302,7 +9197,7 @@ async function setupDesigner(root = document.querySelector("[data-design-studio]
       }
 
       flushHistory();
-      applyDesignState(root, preset);
+      applyDesignState(root, { ...preset, accentSetting: DESIGN_DEFAULTS.accentSetting });
       setDesignerStatus(status, `${button.textContent.trim()} design loaded.`);
       update();
     });

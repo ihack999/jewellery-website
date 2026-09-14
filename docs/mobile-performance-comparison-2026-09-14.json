@@ -1,0 +1,44 @@
+{
+  "method": "Local gzip server; cache disabled; unthrottled Chrome; 4-second window; 3 samples per width; Google Fonts allowed, other external requests blocked. Not production metrics.",
+  "limitations": "390px/1440px at DPR 1. Resource Timing did not include external font binary bytes in the baseline; compare imageBytes, not total resourceBytes, across the font-hosting change. Chrome local lab, not real-device Safari or production Web Vitals.",
+  "beforeMeasuredAt": "2026-09-14T03:54:04.628Z",
+  "afterMeasuredAt": "2026-09-14T04:21:15.243Z",
+  "before": {
+    "390": {
+      "imageBytes": 247635,
+      "lcpMedianMs": 156,
+      "clsMax": 0,
+      "resourceBytes": 347420,
+      "thirdPartyResponses": [
+        "fonts.googleapis.com",
+        "fonts.gstatic.com"
+      ]
+    },
+    "1440": {
+      "imageBytes": 917517,
+      "lcpMedianMs": 212,
+      "clsMax": 0.002268928400152178,
+      "resourceBytes": 1017302,
+      "thirdPartyResponses": [
+        "fonts.googleapis.com",
+        "fonts.gstatic.com"
+      ]
+    }
+  },
+  "after": {
+    "390": {
+      "imageBytes": 117407,
+      "lcpMedianMs": 68,
+      "clsMax": 0,
+      "resourceBytes": 322408,
+      "thirdPartyResponses": []
+    },
+    "1440": {
+      "imageBytes": 247163,
+      "lcpMedianMs": 52,
+      "clsMax": 0.006858491941015088,
+      "resourceBytes": 452164,
+      "thirdPartyResponses": []
+    }
+  }
+}

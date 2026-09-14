@@ -40,7 +40,7 @@
         <div class="personal-edit-results"></div>
         <div class="personal-edit-dialog__footer">
           <p>Budget matches use published or starting CAD prices. Custom details can change the final price. Inquiry-only pieces appear when you select Any budget.</p>
-          <a class="atelier-link" href="/shop.html">Explore all pieces <span aria-hidden="true">↗</span></a>
+          <a class="atelier-link" href="/shop.html">Explore all pieces <span aria-hidden="true"><svg class="ui-icon ui-icon--arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false"><path d="M5 19 19 5M5 5h14v14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></a>
         </div>
       </div>`;
     document.body.appendChild(dialog);
@@ -79,7 +79,8 @@
         link.className = "personal-edit-result";
         link.href = productUrl(product);
         const image = document.createElement("img");
-        image.src = product.slug === "rise-ring" ? "/assets/images/products/rise-ring/rise-ring-polished.jpeg" : product.heroImage;
+        setResponsivePhoto(image, product.slug === "rise-ring" ? "/assets/images/products/rise-ring/rise-ring-polished.jpeg" : product.heroImage, "(max-width: 700px) 100px, 30vw");
+        image.decoding = "async";
         image.alt = product.name;
         image.width = 400;
         image.height = 400;
@@ -91,7 +92,7 @@
         const price = document.createElement("span");
         price.textContent = productPriceLabel(product);
         const arrow = document.createElement("span");
-        arrow.textContent = "↗";
+        arrow.innerHTML = '<svg class="ui-icon ui-icon--arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false"><path d="M5 19 19 5M5 5h14v14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
         arrow.setAttribute("aria-hidden", "true");
         price.appendChild(arrow);
         link.append(image, title, materials, price);
@@ -101,7 +102,7 @@
       if (!selection.length) {
         const empty = document.createElement("div");
         empty.className = "personal-edit-empty";
-        empty.innerHTML = '<h3>Maybe yours hasn’t been made yet.</h3><p>Tell us the piece you have in mind, and we’ll explore the possibilities together.</p><a class="atelier-link" href="/customs.html#request-form">Start with an idea <span aria-hidden="true">↗</span></a>';
+        empty.innerHTML = '<h3>Maybe yours hasn’t been made yet.</h3><p>Tell us the piece you have in mind, and we’ll explore the possibilities together.</p><a class="atelier-link" href="/customs.html#request-form">Start with an idea <span aria-hidden="true"><svg class="ui-icon ui-icon--arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false"><path d="M5 19 19 5M5 5h14v14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></a>';
         if (type.value !== "all") {
           const names = { rings: "Ring", necklaces: "Necklace", bracelets: "Bracelet", earrings: "Earrings" };
           empty.querySelector("a").href = `/customs.html?piece=${encodeURIComponent(names[type.value])}#request-form`;
@@ -143,7 +144,7 @@
     if (!container || container.querySelector(".footer-signature")) return;
     const signature = document.createElement("div");
     signature.className = "footer-signature";
-    signature.innerHTML = '<p>Made personal.</p><a class="atelier-link" href="/customs.html#request-form">Begin your story <span aria-hidden="true">↗</span></a>';
+    signature.innerHTML = '<p>Made personal.</p><a class="atelier-link" href="/customs.html#request-form">Begin your story <span aria-hidden="true"><svg class="ui-icon ui-icon--arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false"><path d="M5 19 19 5M5 5h14v14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></a>';
     container.prepend(signature);
   }
 

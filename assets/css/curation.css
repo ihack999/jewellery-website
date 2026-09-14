@@ -43,7 +43,7 @@ body[data-experience="atelier"] .eyebrow { font-size: 11px; color: var(--muted);
 .primary-nav a { font-size: 11px; letter-spacing: .04em; }
 .primary-nav a::after { background: var(--primary); }
 .header-actions .header-cta { font-size: 11px; }
-.header-actions .icon-button, .header-actions .menu-toggle { color: var(--ink); }
+.header-actions .icon-button, .header-actions .menu-toggle { color: var(--ink); width: 44px; height: 44px; }
 .header-actions .icon-button:hover, .header-actions .menu-toggle:hover { background: #ede4da; }
 .atelier-container { width: var(--container); }
 .atelier-section { padding-block: clamp(76px, 8vw, 128px); }
@@ -62,7 +62,8 @@ body[data-experience="atelier"] .eyebrow { font-size: 11px; color: var(--muted);
 .campaign-hero { grid-template-columns: 47% 53%; background: #251c1d; color: #fff7ea; min-height: 720px; }
 .campaign-hero .editorial-hero__copy { padding: 50px 40px 30px 8%; position: relative; z-index: 1; }
 .campaign-hero .editorial-kicker { display: flex; align-items: center; gap: 16px; font-size: 10px; color: #e1d1c4; letter-spacing: .11em; margin: 0; }
-.campaign-star { font-size: 28px; color: #cba591; line-height: 1; }
+.campaign-star { display: inline-flex; flex: 0 0 24px; color: #cba591; line-height: 1; }
+.campaign-star svg { width: 24px; height: 24px; }
 body[data-experience="atelier"] .campaign-hero h1 { color: #fff7ea; font-size: clamp(96px, 9.2vw, 150px); line-height: .83; letter-spacing: -.055em; margin: 67px 0 32px; font-weight: 400; text-wrap: initial; }
 .campaign-hero h1 em { color: #d2aa9a; display: inline-block; margin-left: .32em; font-weight: 400; }
 .campaign-hero .editorial-hero__intro { color: #dfcfc5; font-size: 14px; line-height: 1.85; margin: 0 0 29px; }
@@ -91,6 +92,11 @@ body[data-experience="atelier"] .campaign-hero h1 { color: #fff7ea; font-size: c
 .edit-categories a { font-size: 13px; min-height: 44px; }
 .edit-categories a.is-active { color: var(--primary); border-color: var(--primary); }
 body[data-experience="atelier"] .product-grid { gap: 40px 22px; }
+body[data-experience="atelier"] .product-card { display: flex; flex-direction: column; min-width: 0; }
+body[data-experience="atelier"] .product-card__link { height: auto; display: flex; flex: 1; flex-direction: column; }
+body[data-experience="atelier"] .product-card__media { flex: 0 0 auto; }
+body[data-experience="atelier"] .product-card__gallery { flex-wrap: nowrap; overflow-x: auto; max-width: 100%; overscroll-behavior-x: contain; }
+body[data-experience="atelier"] .product-card__thumb { flex-shrink: 0; box-shadow: none; }
 body[data-experience="atelier"] .product-card__media { background: #eee8df; }
 body[data-experience="atelier"] .product-card__media img { transition: opacity .25s ease; }
 body[data-experience="atelier"] .product-card__body { padding-top: 18px; }
@@ -129,7 +135,8 @@ body[data-experience="atelier"] .shop-view-toggle button.is-active { background:
 .personal-edit-invitation h2 em { color: #8f6268; }
 .personal-edit-invitation > div { z-index: 1; }
 .personal-edit-invitation p { color: #72645c; font-size: 14px; line-height: 1.8; margin-bottom: 24px; }
-.invitation-star { position: absolute; right: -20px; bottom: -82px; color: #e8ded2; font: 250px Georgia, serif; pointer-events: none; }
+.invitation-star { position: absolute; right: -40px; bottom: -65px; width: 260px; height: 260px; color: #e8ded2; pointer-events: none; z-index: 0; }
+.invitation-star svg { width: 100%; height: 100%; }
 .personal-edit-dialog { width: min(1050px, calc(100% - 48px)); max-width: none; max-height: calc(100dvh - 48px); margin: auto; padding: 0; border: 1px solid #d4c5b8; background: #fbf7f0; color: var(--ink); box-shadow: 0 30px 100px #160e0e40; overflow: auto; }
 .personal-edit-dialog::backdrop { background: #251c1daa; backdrop-filter: blur(6px); }
 .personal-edit-dialog__header { padding: 26px 40px 22px; border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; gap: 25px; align-items: flex-start; position: sticky; top: 0; z-index: 2; background: #fbf7f0; }
@@ -303,14 +310,14 @@ body[data-experience="atelier"] .cart-modal__footer p { font-size: 12px; line-he
   .brand { width: min(218px, 54vw); }
   .primary-nav a { font-size: 34px; }
   .campaign-hero { display: flex; flex-direction: column; min-height: 0; }
-  .campaign-hero .editorial-hero__copy { padding: 34px 25px 36px; }
+  .campaign-hero .editorial-hero__copy { padding: 26px 25px 28px; }
   .campaign-hero .editorial-kicker { font-size: 8px; letter-spacing: .07em; max-width: none; }
-  body[data-experience="atelier"] .campaign-hero h1 { font-size: clamp(89px,23vw,150px); margin: 35px 0 27px; line-height: .82; }
+  body[data-experience="atelier"] .campaign-hero h1 { font-size: clamp(68px,20vw,112px); margin: 26px 0 24px; line-height: .9; }
   .campaign-hero h1 em { margin-left: .6em; }
-  .campaign-hero .editorial-hero__intro { font-size: 13px; margin-bottom: 23px; }
+  .campaign-hero .editorial-hero__intro { font-size: 14px; line-height: 1.7; margin-bottom: 20px; }
   .campaign-hero .editorial-actions { gap: 10px; }
   .campaign-hero .atelier-button { min-height: 50px; font-size: 12px; gap: 35px; padding: 13px 20px; }
-  .campaign-hero .atelier-link { min-height: 40px; font-size: 11px; }
+  .campaign-hero .atelier-link { min-height: 44px; font-size: 12px; }
   .campaign-hero .editorial-hero__visual { min-height: 0; aspect-ratio: 1.1; }
   .campaign-hero .editorial-hero__visual > img { object-position: 50% 66%; }
   .campaign-hero .editorial-hero__side { display: none; }
@@ -406,8 +413,6 @@ body[data-experience="atelier"] .cart-modal__footer p { font-size: 12px; line-he
 }
 @media (max-width: 370px) {
   .brand { width: 174px; }
-  .header-actions .icon-button, .header-actions .menu-toggle { width: 31px; }
-  body[data-experience="atelier"] .campaign-hero h1 { font-size: 82px; }
   .campaign-hero .editorial-kicker { font-size: 7px; gap: 8px; }
   .campaign-hero .editorial-hero__copy { padding-inline: 20px; }
   .campaign-hero .editorial-hero__caption { inset-inline: 15px; font-size: 21px; }
@@ -425,4 +430,65 @@ body[data-experience="atelier"] .cart-modal__footer p { font-size: 12px; line-he
 @media (prefers-reduced-motion: reduce) {
   .atelier-world > img, .product-card__media img { transition: none !important; }
   .atelier-world:hover > img { transform: none; }
+}
+
+/* Native-size icons never depend on an operating system's emoji font. */
+.ui-icon { display: inline-block; width: 20px; height: 20px; max-width: none; flex: 0 0 auto; vertical-align: middle; }
+.atelier-button > span[aria-hidden], .atelier-link > span[aria-hidden] { display: inline-flex; align-items: center; }
+.ui-icon--arrow { transition: transform 180ms ease; }
+.scroll-progress { width: 100%; transform: scaleX(0); transform-origin: left; transition: none; }
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+.page-shell { padding-left: env(safe-area-inset-left); padding-right: env(safe-area-inset-right); }
+.site-header, .site-header.is-scrolled { -webkit-backdrop-filter: none; backdrop-filter: none; }
+.personal-edit-invitation { isolation: isolate; overflow: clip; }
+.personal-edit-invitation > div { min-width: 0; }
+.personal-edit-dialog { max-height: calc(100vh - 48px); max-height: calc(100dvh - 48px); overscroll-behavior: contain; }
+.search-modal { top: var(--search-top, 0px); bottom: auto; height: var(--search-height, 100dvh); padding-top: max(16px, env(safe-area-inset-top)); padding-bottom: max(16px, env(safe-area-inset-bottom)); }
+.search-modal__panel { max-height: 100%; display: flex; flex-direction: column; }
+.search-modal__bar, .search-modal__footer { flex-shrink: 0; }
+.search-modal__input { min-width: 0; }
+.search-modal__results { min-height: 0; overscroll-behavior: contain; }
+.search-modal__empty { overflow-y: auto; }
+.product-lightbox__stage, .gallery-main > img, .quick-view-modal__stage { touch-action: pan-y pinch-zoom; }
+.product-lightbox__stage img { -webkit-user-drag: none; user-select: none; }
+.cart-modal__panel { max-height: 100vh; max-height: 100dvh; min-height: 0; }
+.cart-modal__footer { padding-bottom: max(1.5rem, env(safe-area-inset-bottom)); }
+.product-lightbox__panel { padding: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left)); }
+.back-to-top { bottom: max(24px, calc(env(safe-area-inset-bottom) + 12px)); }
+@media (hover: hover) and (pointer: fine) {
+  :is(.atelier-button, .atelier-link, .product-card__checkout):hover .ui-icon--arrow { transform: translate(2px, -2px); }
+}
+@media (prefers-reduced-motion: no-preference) {
+  :is(.atelier-button, .button, .button-secondary, .signature-finish button, .product-card__checkout):active { transform: translateY(1px); }
+  .personal-edit-dialog[open] { animation: edit-arrive 200ms ease-out; }
+  .personal-edit-results > * { animation: edit-arrive 180ms ease-out; }
+  @keyframes edit-arrive { from { opacity: .6; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+}
+@media (max-width: 1180px) {
+  body.nav-open { overflow: hidden; }
+  .primary-nav { height: calc(100vh - var(--navigation-top, 120px)); height: calc(100dvh - var(--navigation-top, 120px)); padding-bottom: max(40px, env(safe-area-inset-bottom)); transition: opacity 180ms ease, visibility 180ms; }
+}
+@media (max-width: 700px) {
+  .site-header__inner { grid-template-columns: minmax(0, 1fr) auto; gap: 6px; }
+  .brand { width: min(218px, 100%); min-width: 0; }
+  .header-actions .icon-button, .header-actions .menu-toggle { width: 44px; height: 44px; flex-shrink: 0; }
+  body[data-experience="atelier"] :is(input:not([type="radio"]):not([type="checkbox"]):not([type="range"]), select, textarea) { font-size: 16px; }
+  .personal-edit-dialog { width: calc(100% - 20px); max-height: calc(100vh - 20px); max-height: calc(100dvh - 20px - env(safe-area-inset-top) - env(safe-area-inset-bottom)); }
+  .personal-edit-invitation .invitation-star { width: 190px; height: 190px; right: -62px; bottom: -55px; opacity: .6; }
+  .personal-edit-invitation h2 { font-size: clamp(34px, 9.3vw, 42px); }
+  .personal-edit-invitation .atelier-button { max-width: 100%; gap: 22px; padding-inline: 18px; }
+  .campaign-hero .editorial-hero__caption { background: #2b1f22ed; -webkit-backdrop-filter: none; backdrop-filter: none; }
+  .quick-view-modal__panel { overflow-y: auto; overscroll-behavior: contain; padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom); }
+  .quick-view-modal__close { top: max(12px, env(safe-area-inset-top)); }
+}
+@media (pointer: coarse) {
+  body[data-experience="atelier"] .product-card .favorite-button,
+  body[data-experience="atelier"] .product-card .quick-view-button { width: 44px; height: 44px; }
+  body[data-experience="atelier"] .product-card .compare-button { min-height: 44px; top: 57px; }
+  body[data-experience="atelier"] .product-card__thumb { width: 44px; min-width: 44px; height: 44px; }
+  .thumbnail-button, .product-lightbox__thumbs button, .quick-view-modal__thumb { min-width: 44px; min-height: 44px; }
+  .personal-edit-dialog::backdrop { -webkit-backdrop-filter: none; backdrop-filter: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ui-icon--arrow, .primary-nav { transition: none; }
 }

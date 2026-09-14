@@ -7,6 +7,29 @@ import { createNecklaceWearPath, createBraceletWearPath } from "./ar/wearable-pa
 const clamp = (value, minimum, maximum) => Math.min(maximum, Math.max(minimum, value));
 const TAU = Math.PI * 2;
 
+export function resolveAccentSetting(state) {
+  return ["Prong", "Bezel", "Channel"].includes(state.accentSetting)
+    ? state.accentSetting : state.band === "Channel" ? "Channel" : "Prong";
+}
+
+function offsetAccentOutline(outline, distance) {
+  const area = outline.reduce((sum, point, index) => {
+    const next = outline[(index + 1) % outline.length];
+    return sum + point[0] * next[1] - next[0] * point[1];
+  }, 0);
+  const direction = Math.sign(area);
+  const normal = (start, end) => {
+    const length = Math.hypot(end[0] - start[0], end[1] - start[1]);
+    return [direction * (end[1] - start[1]) / length, direction * (start[0] - end[0]) / length];
+  };
+  return outline.map((point, index) => {
+    const before = normal(outline[(index + outline.length - 1) % outline.length], point);
+    const after = normal(point, outline[(index + 1) % outline.length]);
+    const divisor = 1 + before[0] * after[0] + before[1] * after[1];
+    return point.map((value, axis) => value + distance * (before[axis] + after[axis]) / divisor);
+  });
+}
+
 export function calibratedAccentStone(reference, diameter, shape = "Round", material = "Clear Diamond") {
   const defaults = CUT_DEFAULTS[shape] || CUT_DEFAULTS.Round;
   const stone = { ...reference, ...defaults, material, shape, widthMm: diameter,
@@ -110,7 +133,7 @@ export function createJewelleryAssemblies(THREE, { spec, state, metal, stoneMate
     return mesh(geometry, metal, name);
   };
 
-  function basket(stone, bezel = false) {
+  function basket(stone, bezel = false, enclosed = false) {
     const group = new THREE.Group();
     group.name = bezel ? "open-back-bezel" : "open-gallery-basket";
     const radius = clamp(stone.widthMm * 0.048, 0.075, 0.30);
@@ -122,6 +145,11 @@ export function createJewelleryAssemblies(THREE, { spec, state, metal, stoneMate
     gem.userData.gemMaterial = stone.material;
     gem.userData.isAccent = stone !== spec.centerStone;
     group.add(gem);
+    if (enclosed) {
+      group.userData.baseZ = baseZ;
+      group.userData.stoneWidthMm = stone.widthMm;
+      return group;
+    }
     const ring = (factor, height, wireRadius, name) => wire(outline.map(([horizontal, vertical]) => vector(horizontal * factor, vertical * factor, height)), wireRadius, true, name, false, outline.length <= 8);
     group.add(ring(0.50, -solution.pavilionHeightMm * 0.72, radius, "lower-gallery"));
     group.add(ring(1 + (radius * 2.2 + 0.035) / stone.widthMm, -solution.girdleThicknessMm / 2 - radius, radius, "girdle-gallery"));
@@ -509,12 +537,14 @@ export function createJewelleryAssemblies(THREE, { spec, state, metal, stoneMate
   function ringAccents(geometry) {
     const group = root("shoulder-settings");
     const style = state.band;
+    const accentSetting = resolveAccentSetting(state);
     const material = state.accentStone === "Match Center" ? state.stone : "Clear Diamond";
     const bandRadius = geometry.bandOuterR / WORLD_UNITS_PER_MM;
     const bandWidth = geometry.bandHeight / WORLD_UNITS_PER_MM;
     const special = style === "Three-Stone" || style === "Tapered Baguette";
+    const doubleRow = style === "Pavé" && bandWidth > 3.3 && accentSetting !== "Channel";
     const diamondWidth = special ? clamp(spec.centerStone.widthMm * 0.48, 1.8, 4.3)
-      : clamp(bandWidth * (style === "Pavé" && bandWidth > 3.3 ? 0.35 : 0.66), 0.8, 2.0);
+      : clamp(bandWidth * (doubleRow ? 0.35 : 0.66), 0.8, 2.0);
     const shape = style === "Tapered Baguette" ? "Baguette" : "Round";
     const stone = calibratedAccentStone(spec.centerStone, diamondWidth, shape, material);
     if (shape === "Baguette") {
@@ -526,8 +556,11 @@ export function createJewelleryAssemblies(THREE, { spec, state, metal, stoneMate
     const excluded = Math.asin(clamp((headWidth + tangentSize * 0.6 + 0.35) / bandRadius, 0, 0.92));
     const shouldBuild = state.accent || ["Pavé", "Channel", "Eternity", "Three-Stone", "Tapered Baguette"].includes(style);
     if (!shouldBuild) return group;
-    const rows = style === "Pavé" && bandWidth > 3.3 ? [-diamondWidth * 0.60, diamondWidth * 0.60] : [0];
-    const pitch = (shape === "Baguette" ? stone.lengthMm : diamondWidth) + (state.accentDensity === "Sparse" ? 0.6 : 0.22);
+    const wallThickness = clamp(diamondWidth * 0.085, 0.12, 0.24);
+    const rowOffset = accentSetting === "Bezel" ? (diamondWidth + wallThickness * 2 + 0.14) / 2 : diamondWidth * 0.60;
+    const rows = doubleRow ? [-rowOffset, rowOffset] : [0];
+    const spacing = Math.max(state.accentDensity === "Sparse" ? 0.6 : 0.22, accentSetting === "Bezel" ? wallThickness * 2 + 0.14 : 0);
+    const pitch = tangentSize + spacing;
     const endAngle = state.accentDensity === "Dense" ? 1.65 : 1.32;
     const span = Math.max(0, endAngle - excluded);
     const count = special ? 1 : Math.max(1, Math.floor(span * bandRadius / pitch) + 1);
@@ -539,13 +572,27 @@ export function createJewelleryAssemblies(THREE, { spec, state, metal, stoneMate
       for (let index = 0; index < total; index += 1) angles[index] = Math.PI / 2 + excluded + index * (TAU - excluded * 2) / Math.max(1, total - 1);
     } else for (const side of [-1, 1]) for (let index = 0; index < count; index += 1) angles.push(Math.PI / 2 + side * (excluded + index * pitch / bandRadius));
     for (const lateral of rows) for (const angle of angles) {
-      const setting = basket(stone);
-      if (style === "Channel") {
+      const setting = basket(stone, accentSetting === "Bezel", accentSetting === "Bezel");
+      if (accentSetting === "Channel") {
         for (const child of setting.children.filter((child) => child.userData.isProng)) {
           setting.remove(child); child.geometry.dispose();
         }
       }
-      seatFeet(setting, stone);
+      if (accentSetting === "Bezel") {
+        const outline = stone.outlinePointsMm || gemstoneOutline(stone.shape, stone.widthMm, stone.lengthMm);
+        const inner = offsetAccentOutline(outline, 0.025);
+        const outer = offsetAccentOutline(outline, 0.025 + wallThickness);
+        const sleeve = new THREE.Shape(outer.map((point) => new THREE.Vector2(...point)));
+        sleeve.holes.push(new THREE.Path([...inner].reverse().map((point) => new THREE.Vector2(...point))));
+        const bottom = setting.userData.baseZ - 0.12;
+        const top = stone.cutSolution.girdleThicknessMm / 2;
+        const sleeveGeometry = new THREE.ExtrudeGeometry(sleeve, { depth: top - bottom, bevelEnabled: false, steps: 1 });
+        sleeveGeometry.translate(0, 0, bottom);
+        setting.add(mesh(sleeveGeometry, metal, "enclosing-bezel-wall"));
+        const lip = offsetAccentOutline(outline, 0.025 + wallThickness / 2);
+        setting.add(wire(lip.map((point) => vector(...point, top)), wallThickness / 2, true, "bezel-lip", false, outline.length <= 8));
+      } else seatFeet(setting, stone);
+      setting.userData.accentSetting = accentSetting;
       const normal = vector(Math.cos(angle), Math.sin(angle), 0);
       const tangent = vector(-Math.sin(angle), Math.cos(angle), 0);
       const radial = bandRadius - geometry.bandWidth / WORLD_UNITS_PER_MM * 0.5 * (1 - Math.sqrt(Math.max(0, 1 - (lateral * 2 / bandWidth) ** 2)));
@@ -553,20 +600,36 @@ export function createJewelleryAssemblies(THREE, { spec, state, metal, stoneMate
       if (shape === "Baguette") setting.rotateZ(angle < Math.PI / 2 ? Math.PI / 2 : -Math.PI / 2);
       group.add(setting);
     }
-    if (style === "Channel") {
+    if (accentSetting === "Channel") {
       const railRadius = clamp(diamondWidth * 0.11, 0.11, 0.22);
       const baseZ = -stone.cutSolution.pavilionHeightMm - stone.cutSolution.girdleThicknessMm / 2 - clamp(stone.widthMm * 0.048, 0.075, 0.30) - 0.06;
-      for (const side of [-1, 1]) for (const lateral of [-1, 1]) {
+      const arcs = style === "Eternity" ? [[Math.PI / 2 + excluded, Math.PI / 2 + TAU - excluded]]
+        : [-1, 1].map((side) => {
+          const limits = [excluded - pitch / bandRadius * 0.42, excluded + pitch / bandRadius * (count - 0.58)];
+          return limits.map((angle) => Math.PI / 2 + side * angle).sort((first, second) => first - second);
+        });
+      for (const [start, end] of arcs) for (const lateral of [-1, 1]) {
         const points = Array.from({ length: 40 }, (_, index) => {
-          const angle = Math.PI / 2 + side * (excluded - pitch / bandRadius * 0.42 + index / 39 * pitch / bandRadius * (count - 0.16));
+          const angle = start + index / 39 * (end - start);
           const radius = bandRadius - baseZ + stone.cutSolution.girdleThicknessMm / 2;
           return vector(Math.cos(angle) * radius, Math.sin(angle) * radius, lateral * (diamondWidth / 2 + railRadius + 0.03));
         });
         group.add(wire(points, railRadius, false, "continuous-channel-wall"));
+        if (state.accentSetting === "Channel") {
+          const upperRadius = bandRadius - baseZ + stone.cutSolution.girdleThicknessMm / 2;
+          const wall = new THREE.Shape();
+          wall.absarc(0, 0, upperRadius, start, end, false);
+          wall.absarc(0, 0, bandRadius - 0.12, end, start, true);
+          wall.closePath();
+          const wallGeometry = new THREE.ExtrudeGeometry(wall, { depth: railRadius * 2, bevelEnabled: false, curveSegments: 48, steps: 1 });
+          wallGeometry.translate(0, 0, lateral * (diamondWidth / 2 + railRadius + 0.03) - railRadius);
+          group.add(mesh(wallGeometry, metal, "channel-shoulder-wall"));
+        }
       }
     }
     group.userData.construction.stoneCount = angles.length * rows.length;
     group.userData.construction.accentMaterial = material;
+    group.userData.construction.accentSetting = accentSetting;
     return group;
   }
   return { necklace, bracelet, ringAccents, basket };

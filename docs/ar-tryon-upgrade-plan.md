@@ -2,6 +2,18 @@
 
 Status: implementation in progress. The first all-type browser fitting pass is recorded in [AR V1 implementation and validation](ar-tryon-v1.md). The remaining phases and real-device release gates below are not yet complete.
 
+Current user priority, 12 September: **necklace → bracelet → ring → earrings**, from worst to best in supplied screenshots. The [necklace/wrist continuation](ar-necklace-wrist-2026-09-12.md) removes face-driven necklace rotation, adds a torso-relative neck-base correction, and separates wrist depth from rigid-band seating. The later [placement/contact continuation](ar-placement-contact-2026-09-12.md) adds optional elbow–wrist observations and independent neck depth. Clothing perception and real-world quality remain unresolved.
+
+12 September update: the [tracking timing and ownership batch](ar-tracking-timing-2026-09-12.md) implements source-media filter intervals, explicit frame-age provenance, bounded local diagnostics, and one-job ownership across session changes. Twenty-one synthetic scenario groups and 34 generated-video browser assertions passed. Neural surface/segmentation additions and real-camera qualification remain pending.
+
+12 September contact update: the [joint-fitted ring body](ar-finger-contact-2026-09-12.md) replaces the selected finger's product-parented sleeve with a body surface fitted to MCP/PIP joints. Ring size and placement controls no longer determine that skin geometry. Geometry, projection, depth-pixel and full-model browser checks use generated joints; the width/shape prior and real-camera limits remain explicit.
+
+12 September render update: the [shared render foundation](ar-render-foundation-2026-09-12.md) adds identical-metal instancing, source-hierarchy synchronization, explicit instance cleanup and bounded render diagnostics. Paired GPU image checks cover all 18 silhouettes; Tennis product draws fall from 1,493 to 83 while geometry, material identities and triangle counts are preserved. This removes submission overhead; neural perception, lighting and real-device performance remain separate work.
+
+12 September appearance update: [shared camera appearance lighting](ar-appearance-lighting-2026-09-12.md) controls the HDR and direct lights coherently, samples only the displayed crop in linear light, bounds local clothing influence, and holds frozen-frame lighting. The final generated-video run passes 275 assertions across 18 silhouettes, including isolated custom-ray response and camera-pixel preservation. This is a bounded appearance heuristic; learned illumination and anatomical contact remain outstanding.
+
+12 September placement update: [body contact and forearm fitting](ar-placement-contact-2026-09-12.md) separates the neck depth mask from jewellery controls and uses a matched elbow–wrist vector to reduce hand-flexion influence on bracelets. The optional worker-only Pose Lite observer is throttled and preserves hand-only fallback. Five new Node groups, 15 native-worker assertions and 181 body browser assertions pass; the actual auxiliary model and mobile inference cost remain unqualified.
+
 Prepared: 11 September 2026, against the current V3.2 generator and existing browser AR implementation.
 
 ## 1. Goal and priority

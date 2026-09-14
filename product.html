@@ -2,7 +2,7 @@
 <html lang="en-CA">
   <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="description" content="Browse fine jewellery and diamond pieces from Toronto Jewels Curation.">
     <meta name="robots" content="noindex, follow">
     <meta name="theme-color" content="#272f26">
@@ -10,15 +10,15 @@
     <link rel="canonical" href="https://torontojewelscuration.com/shop.html">
     <link rel="icon" type="image/svg+xml" href="assets/images/logo-emblem.svg">
     <link rel="manifest" href="site.webmanifest">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="preload" href="/assets/fonts/cormorant-garamond-latin-normal.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="/assets/fonts/manrope-latin-normal.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="stylesheet" href="/assets/css/fonts.css?v=20260914-mobile">
     <link rel="stylesheet" href="assets/css/styles.css?v=20260831-responsive-images">
     <link rel="stylesheet" href="/assets/css/atelier.css?v=20260911-editorial-v1">
-    <link rel="stylesheet" href="/assets/css/curation.css?v=20260912-curation-v3">
+    <link rel="stylesheet" href="/assets/css/curation.css?v=20260914-mobile">
     <link rel="stylesheet" href="/assets/css/product-refinement.css?v=20260912-curation-v3">
-    <script src="assets/js/main.js?v=20260912-curation-v3" defer></script>
-    <script src="/assets/js/curation.js?v=20260912-curation-v3" defer></script>
+    <script src="assets/js/main.js?v=20260914-mobile" defer></script>
+    <script src="/assets/js/curation.js?v=20260914-mobile" defer></script>
   </head>
   <body data-experience="atelier" data-page="shop">
     <div class="page-shell">
@@ -83,7 +83,7 @@
             <div class="product-layout">
               <div class="product-gallery"><div class="product-gallery__heading"><span>A closer look</span><span>The collection</span></div>
                 <div class="gallery-main">
-                  <img src="assets/images/drive/img-8503.jpg" alt="Product image" data-product-main-image>
+                  <img src="assets/images/drive/img-8503.jpg" alt="Product image" data-product-main-image decoding="async" srcset="/assets/images/responsive/img-8503-595221dc-160.webp 160w, /assets/images/responsive/img-8503-595221dc-320.webp 320w, /assets/images/responsive/img-8503-595221dc-480.webp 480w, /assets/images/responsive/img-8503-595221dc-780.webp 780w, /assets/images/responsive/img-8503-595221dc-1280.webp 1280w" sizes="(max-width: 700px) 100vw, 50vw">
                 </div>
                 <div class="thumbnail-grid" data-product-thumbnails aria-label="Product image views"></div><p class="product-gallery__caption">The piece, in focus.</p>
               </div>
@@ -108,16 +108,16 @@
                   <li><strong>Care</strong><span data-product-care>Store in a soft pouch and clean gently.</span></li>
                 </ul>
                 <nav class="product-detail-links" aria-label="About this piece">
-                  <a href="#piece-story">The story <span aria-hidden="true">↗</span></a>
-                  <a href="#piece-specifications">Specifications <span aria-hidden="true">↗</span></a>
-                  <a href="#piece-care">Care &amp; delivery <span aria-hidden="true">↗</span></a>
+                  <a href="#piece-story">The story <span aria-hidden="true"><svg class="ui-icon ui-icon--arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false"><path d="M5 19 19 5M5 5h14v14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></a>
+                  <a href="#piece-specifications">Specifications <span aria-hidden="true"><svg class="ui-icon ui-icon--arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false"><path d="M5 19 19 5M5 5h14v14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></a>
+                  <a href="#piece-care">Care &amp; delivery <span aria-hidden="true"><svg class="ui-icon ui-icon--arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false"><path d="M5 19 19 5M5 5h14v14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></a>
                 </nav>
               </div>
             </div>
           </div>
         </section>
 
-        <section class="section product-details-section" id="product-details"><div class="container"><div class="product-details__heading"><div><p class="product-section-label">Considered from every angle</p><h2>The finer <em>details.</em></h2></div><a class="product-return-link" href="#product-actions">Return to the piece <span aria-hidden="true">↑</span></a></div><div class="details-stack product-details__grid"><article class="info-panel product-detail-panel product-detail-panel--story" id="piece-story"><span class="product-detail-panel__number" aria-hidden="true">01</span><div>
+        <section class="section product-details-section" id="product-details"><div class="container"><div class="product-details__heading"><div><p class="product-section-label">Considered from every angle</p><h2>The finer <em>details.</em></h2></div><a class="product-return-link" href="#product-actions">Return to the piece <span aria-hidden="true"><svg class="ui-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false"><path d="M12 20V4m-6 6 6-6 6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></a></div><div class="details-stack product-details__grid"><article class="info-panel product-detail-panel product-detail-panel--story" id="piece-story"><span class="product-detail-panel__number" aria-hidden="true">01</span><div>
               <h3>Description</h3>
               <p data-product-long-description>
                 Each piece in the collection is chosen for proportion, wearability, and a polished finish.
@@ -132,7 +132,7 @@
                 Each order is packed in a gift-ready keepsake box and shipped with tracking.
                 Care instructions are included so the finish stays bright over time.
               </p>
-            <div class="product-policy-links"><a href="/shipping-returns.html">Delivery &amp; return terms <span aria-hidden="true">↗</span></a><a href="/jewellery-care.html">Read the care guide <span aria-hidden="true">↗</span></a></div></div></article></div><a class="product-return-link product-return-link--mobile" href="#product-actions">Back to your piece <span aria-hidden="true">↑</span></a></div></section>
+            <div class="product-policy-links"><a href="/shipping-returns.html">Delivery &amp; return terms <span aria-hidden="true"><svg class="ui-icon ui-icon--arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false"><path d="M5 19 19 5M5 5h14v14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></a><a href="/jewellery-care.html">Read the care guide <span aria-hidden="true"><svg class="ui-icon ui-icon--arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false"><path d="M5 19 19 5M5 5h14v14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></a></div></div></article></div><a class="product-return-link product-return-link--mobile" href="#product-actions">Back to your piece <span aria-hidden="true"><svg class="ui-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false"><path d="M12 20V4m-6 6 6-6 6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></a></div></section>
 
         <section class="section section--soft">
           <div class="container">

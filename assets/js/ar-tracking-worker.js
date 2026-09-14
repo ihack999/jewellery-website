@@ -9,6 +9,40 @@
 let tracker = null;
 let mode = "hand";
 let initialized = false;
+let trackerSession = 0;
+let forearmTracker = null;
+let forearmObservation = null;
+let forearmGeneration = null;
+let forearmNextAt = -Infinity;
+
+function resetForearm() {
+  forearmTracker?.close?.(); forearmTracker = null;
+  forearmObservation = null; forearmGeneration = null; forearmNextAt = -Infinity;
+}
+
+function sampleForearm(bitmap, message, hasHands, handCost) {
+  if (message.generation !== forearmGeneration) {
+    forearmObservation = null; forearmNextAt = -Infinity; forearmGeneration = message.generation;
+  }
+  // Never queue a second bitmap or run this auxiliary model on the main
+  // thread. Its cost is included in the existing result/age diagnostics.
+  if (forearmTracker && hasHands && handCost < 45 && message.timestamp >= forearmNextAt) {
+    const started = performance.now();
+    try {
+      const pose = forearmTracker.detectForVideo(bitmap, message.timestamp);
+      forearmObservation = { landmarks: cloneLandmarkGroups(pose?.landmarks),
+        worldLandmarks: cloneLandmarkGroups(pose?.worldLandmarks), timestamp: message.timestamp };
+    } catch {
+      // Losing the auxiliary task must not interrupt precise hand tracking.
+      resetForearm();
+    }
+    const cost = performance.now() - started;
+    forearmNextAt = message.timestamp + Math.max(220, Math.min(1500, cost * 6));
+  }
+  const age = message.timestamp - (forearmObservation?.timestamp ?? -Infinity);
+  if (!hasHands || age < 0 || age >= 350) return null;
+  return { landmarks: forearmObservation.landmarks, worldLandmarks: forearmObservation.worldLandmarks, ageMs: age };
+}
 
 function clonePoint(point) {
   if (!point) return null;
@@ -52,16 +86,16 @@ function serializeResult(result) {
   };
 }
 
-async function createTracker(config) {
+async function createTracker(config, session) {
   const vision = await import(/* @vite-ignore */ `${config.mediaPipeBase}/vision_bundle.mjs`);
   const fileset = await vision.FilesetResolver.forVisionTasks(config.wasmBase);
-  mode = config.mode;
+  const requestedMode = config.mode;
 
   // CPU is intentional here. Inference is isolated from rendering, while the
   // Three.js context remains the sole high-priority GPU client on mobile.
   const baseOptions = (modelAssetPath) => ({ modelAssetPath, delegate: "CPU" });
 
-  if (mode === "face") {
+  if (requestedMode === "face") {
     return vision.FaceLandmarker.createFromOptions(fileset, {
       baseOptions: baseOptions(config.faceModelUrl),
       runningMode: "VIDEO",
@@ -74,7 +108,7 @@ async function createTracker(config) {
     });
   }
 
-  if (mode === "pose") {
+  if (requestedMode === "pose") {
     return vision.PoseLandmarker.createFromOptions(fileset, {
       baseOptions: baseOptions(config.poseModelUrl),
       runningMode: "VIDEO",
@@ -85,7 +119,7 @@ async function createTracker(config) {
     });
   }
 
-  return vision.HandLandmarker.createFromOptions(fileset, {
+  const hand = await vision.HandLandmarker.createFromOptions(fileset, {
     baseOptions: baseOptions(config.handModelUrl),
     runningMode: "VIDEO",
     numHands: 2,
@@ -93,18 +127,39 @@ async function createTracker(config) {
     minHandPresenceConfidence: 0.50,
     minTrackingConfidence: 0.50
   });
+  if (config.trackForearm && session === trackerSession) {
+    // Start hand tracking immediately. The optional elbow/wrist observer may
+    // load later or fail; neither condition changes the primary tracker.
+    Promise.resolve().then(() => vision.PoseLandmarker.createFromOptions(fileset, {
+      baseOptions: baseOptions(config.forearmModelUrl), runningMode: "VIDEO", numPoses: 1,
+      minPoseDetectionConfidence: .6, minPosePresenceConfidence: .6, minTrackingConfidence: .6,
+      outputSegmentationMasks: false
+    })).then((pose) => {
+      if (session !== trackerSession) pose.close();
+      else forearmTracker = pose;
+    }).catch(() => { /* Hand-only fitting remains available. */ });
+  }
+  return hand;
 }
 
 self.onmessage = async (event) => {
   const message = event.data || {};
 
   if (message.type === "init") {
+    const session = ++trackerSession;
+    initialized = false;
+    resetForearm();
+    mode = message.config.mode;
     try {
       tracker?.close?.();
-      tracker = await createTracker(message.config);
+      tracker = null;
+      const next = await createTracker(message.config, session);
+      if (session !== trackerSession) { next.close(); return; }
+      tracker = next;
       initialized = true;
       self.postMessage({ type: "ready", mode });
     } catch (error) {
+      if (session !== trackerSession) return;
       initialized = false;
       self.postMessage({
         type: "error",
@@ -122,15 +177,20 @@ self.onmessage = async (event) => {
       self.postMessage({
         type: "error",
         phase: "frame",
-        message: "Tracking worker received a frame before initialization."
+        message: "Tracking worker received a frame before initialization.",
+        frameId: message.frameId,
+        timestamp: message.timestamp,
+        generation: message.generation
       });
       return;
     }
 
     const startedAt = performance.now();
     try {
-      const result = tracker.detectForVideo(bitmap, Number(message.timestamp) || performance.now());
+      if (!Number.isFinite(message.timestamp)) throw new Error("Tracking frame requires a finite sample timestamp.");
+      const result = tracker.detectForVideo(bitmap, message.timestamp);
       const serialized = serializeResult(result);
+      if (mode === "hand") serialized.forearmPose = sampleForearm(bitmap, message, serialized.landmarks.length > 0, performance.now() - startedAt);
       self.postMessage({
         type: "result",
         result: serialized,
@@ -155,6 +215,8 @@ self.onmessage = async (event) => {
   }
 
   if (message.type === "close") {
+    trackerSession++;
+    resetForearm();
     tracker?.close?.();
     tracker = null;
     initialized = false;

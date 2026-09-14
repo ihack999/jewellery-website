@@ -1,12 +1,20 @@
 import * as THREE from "./three.module.js";
 import { RGBELoader } from "./RGBELoader.js";
-import { createWearableAsset } from "./ar/wearable-asset.js?v=20260911-ar-live3";
+import { AppearanceLighting, cameraProbeRegion, measureCameraAppearance, applyAppearanceLighting } from "./ar/appearance-lighting.js?v=20260912-ar-lighting";
+import { RenderTiming } from "./ar/render-timing.js?v=20260912-ar-render";
+import { createWearableAsset } from "./ar/wearable-asset.js?v=20260912-ar-render";
 import { configureWearableGemOptics } from "./ar/gem-optics.js?v=20260911-ar-live2";
 import { disposeGemRayMaterial } from "./gem-ray-material.js?v=20260911-ar-live2";
 import { weightedCenter, shoulderProjection, palmScale } from "./ar/body-fit.js?v=20260911-ar-live3";
 import { OneEuro, predictionSeconds } from "./ar/pose-filter.js?v=20260911-ar-live3";
 import { createFaceOccluder, updateFaceOccluder, earFacingVisible, updateEarOpenings } from "./ar/face-occlusion.js?v=20260911-ar-live3";
 import { HandIdentity, TrackingFrameGate, estimateHandRoll, handLandmarkValidity } from "./ar/tracking.js?v=20260911-ar-live3";
+import { VideoFrameClock, TrackingTiming, frameIsFresh, MAX_TRACKING_AGE_MS } from "./ar/frame-timing.js?v=20260912-ar-timing";
+import { FingerContactBody, fingerContactWeight } from "./ar/finger-contact.js?v=20260912-ar-contact";
+import { torsoFrame, neckPlacementOffset } from "./ar/torso-fit.js?v=20260912-ar-torso-wrist";
+import { WristContactBody, rigidWristSeat, wristOrientation } from "./ar/wrist-contact.js?v=20260912-ar-torso-wrist";
+import { observeForearm, fitForearmOrientation } from "./ar/forearm-fit.js?v=20260912-ar-placement";
+import { NeckContactBody, neckOrientation, neckContactWeight } from "./ar/neck-contact.js?v=20260912-ar-placement";
 import { WearableArticulation } from "./ar/articulation.js?v=20260911-ar-v1";
 import { CameraTexture } from "./ar/camera-texture.js?v=20260911-ar-v1";
 import {
@@ -26,6 +34,7 @@ const MAX_PIXEL_RATIO = 1.5;
 const MEDIAPIPE_BASE = "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14";
 const WASM_BASE = `${MEDIAPIPE_BASE}/wasm`;
 const MODEL_URL = "https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task";
+const FOREARM_MODEL_URL = "https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task";
 const FACE_MODEL_URL = "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task";
 const POSE_MODEL_URL = "https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_full/float16/1/pose_landmarker_full.task";
 
@@ -68,10 +77,9 @@ const RING_PIP = 14;
 const INDEX_MCP = 5;
 const PINKY_MCP = 17;
 
-/* Per-finger anthropometric ratios: finger diameter at the proximal phalanx
- * (where rings sit) as a fraction of the knuckle-bone hand width (index MCP
- * ↔ pinky MCP). Sourced from adult hand measurement studies; treat as a
- * coarse first-pass calibration with ±1 US ring size of error. */
+// Fallback finger-width priors relative to the index–pinky knuckle span.
+// A manual hand width improves the scale reference, but these ratios still
+// cannot measure the wearer's finger diameter or establish ring-size accuracy.
 const FINGER_DIAMETER_RATIO = {
   index:  0.205,
   middle: 0.220,
@@ -89,29 +97,8 @@ const FINGER_RING_SEAT_T = {
   pinky:  0.32
 };
 
-// §5 contact body: per-finger anatomical taper for the depth-only occluder.
-// `distal` ≈ R_PIP / R_proximal-mid, `proximal` ≈ R_MCP / R_proximal-mid.
-// Sourced from adult hand morphometrics (Greiner 1991; Buryanov & Kotiuk
-// 2010). Pinky has the tightest taper (shorter, slimmer phalanx); middle
-// is the most cylindrical. Per-finger silhouettes eliminate the residual
-// "index occluder looks too round / pinky occluder looks too thick" tells.
-const FINGER_OCCLUDER_TAPER = {
-  index:  { distal: 0.93, proximal: 1.11 },
-  middle: { distal: 0.95, proximal: 1.09 },
-  ring:   { distal: 0.94, proximal: 1.10 },
-  pinky:  { distal: 0.91, proximal: 1.08 }
-};
-
-// §13 manufacturability / §5 fit: a real ring's outer radius is finger radius
-// plus metal wall thickness. This lets AR scale to the actual tracked hand
-// instead of a fixed one-size-fits-all 19 mm outer diameter.
-const RING_WALL_THICKNESS_M = 0.00135;
-const RING_CONTACT_CLEARANCE_M = 0.00025;
-
-/* §5 contact fit — bracelet anthropometrics. Wrist diameter on adults is
- * a fairly tight ratio of the knuckle-line hand width (mean across mixed-
- * sex samples ≈ 0.62). Wall thickness is a touch more than a ring because
- * a bracelet's structural cross-section is larger. */
+// Uncalibrated wrist-width prior. The optional manual wrist reference takes
+// precedence; this ratio is not a measured property of the wearer.
 const WRIST_DIAMETER_RATIO = 0.62;
 const BRACELET_WALL_THICKNESS_M = 0.0021;
 const BRACELET_CONTACT_CLEARANCE_M = 0.0014;
@@ -147,6 +134,7 @@ function readCalibration() {
     earSpan: 1,
     neckHeightMm: 40,
     neckHeightAuto: true,
+    neckBaseOffsetMm: { x: 0, y: 0 },
     facingMode: "user"
   };
   try {
@@ -168,6 +156,10 @@ function readCalibration() {
       earSpan: clamp(Number(raw.earSpan) || defaults.earSpan, 0.82, 1.18),
       neckHeightMm: Number.isFinite(raw.neckHeightMm) ? clamp(raw.neckHeightMm, 0, 90) : defaults.neckHeightMm,
       neckHeightAuto: typeof raw.neckHeightAuto === "boolean" ? raw.neckHeightAuto : !Number.isFinite(raw.neckHeightMm),
+      neckBaseOffsetMm: {
+        x: clamp(Number(raw.neckBaseOffsetMm?.x) || 0, -100, 100),
+        y: clamp(Number(raw.neckBaseOffsetMm?.y) || 0, -120, 120)
+      },
       earOffsets: Object.fromEntries(["Left", "Right"].map((side) => [side,
         [0, 1, 2].map((index) => clamp(Number(raw.earOffsets?.[side]?.[index]) || 0, -0.02, 0.02))
       ])),
@@ -187,17 +179,16 @@ function writeCalibration(calibration) {
 }
 
 function disposeObjectTree(object) {
+  const geometries = new Set(), materials = new Set();
   object?.traverse?.((node) => {
     disposeGemRayMaterial(node);
-    node.geometry?.dispose?.();
+    if (node.geometry) geometries.add(node.geometry);
     if (node.isInstancedMesh) node.dispose();
 
-    if (Array.isArray(node.material)) {
-      node.material.forEach(material => material.dispose?.());
-    } else {
-      node.material?.dispose?.();
-    }
+    for (const material of [node.material].flat().filter(Boolean)) materials.add(material);
   });
+  for (const geometry of geometries) geometry.dispose();
+  for (const material of materials) material.dispose();
 }
 
 /* Build the soft-shadow texture once and cache it. A 256² radial gradient
@@ -235,41 +226,6 @@ function makeShadowTexture() {
   return tex;
 }
 
-/**
- * Rounded, tapered, elliptical proxy for a finger or wrist. It is rendered
- * depth-only, so it need not reproduce skin colour; it only needs a plausible
- * local surface for front/back ordering. Compared with the former open-ended
- * cylinder this removes hard clipping at the proxy ends and acknowledges that
- * a digit is wider side-to-side than it is deep.
- */
-function makeAnatomicalOccluderGeometry({
-  radius,
-  length,
-  distal = 0.94,
-  proximal = 1.10,
-  depthRatio = 0.82
-}) {
-  const safeRadius = Math.max(1e-4, radius);
-  const totalLength = Math.max(length, safeRadius * 4);
-  const bodyLength = Math.max(safeRadius * 2, totalLength - safeRadius * 2);
-  const geometry = new THREE.CapsuleGeometry(safeRadius, bodyLength, 8, 48);
-  geometry.rotateX(Math.PI / 2); // capsule axis: local +Z (MCP → PIP)
-
-  const position = geometry.getAttribute("position");
-  for (let i = 0; i < position.count; i++) {
-    const x = position.getX(i);
-    const y = position.getY(i);
-    const z = position.getZ(i);
-    const t = clamp((z + totalLength * 0.5) / totalLength, 0, 1);
-    const taper = lerp(proximal, distal, t);
-    position.setXYZ(i, x * taper, y * taper * depthRatio, z);
-  }
-  position.needsUpdate = true;
-  geometry.computeVertexNormals();
-  geometry.computeBoundingBox();
-  geometry.computeBoundingSphere();
-  return geometry;
-}
 
 function readDesignState() {
   try {
@@ -608,6 +564,10 @@ export class ARTryOn {
   constructor() {
     this._closed = false;
     this._frameGate = new TrackingFrameGate();
+    this._frameClock = new VideoFrameClock();
+    this._trackingTiming = new TrackingTiming();
+    this._renderTiming = new RenderTiming();
+    this._pendingTrackingFrame = null;
     this._handIdentity = new HandIdentity();
     this._lastHandRoll = 0;
     this._frozen = false;
@@ -640,12 +600,22 @@ export class ARTryOn {
     for (const side of ["Left", "Right"]) if (this.calibration.earOffsets?.[side]) this._earOffsets[side].fromArray(this.calibration.earOffsets[side]);
     this.facingMode = this.calibration.facingMode;
     this.detectInterval = 1000 / TARGET_DETECTION_FPS;
-    this._lastLightSample = 0;
+    this._lastLightSample = -Infinity;
+    this._appearanceLighting = new AppearanceLighting();
     this._lightProbe = null;
     this._handMaskCanvas = null;
     this._handMaskCtx = null;
     this._handMaskTexture = null;
     this._handMaskMesh = null;
+    this._fingerContactBody = null;
+    this._wristContactBody = null;
+    this._neckContactBody = null;
+    this._neckContactSourceInverse = null;
+    this._neckDisplayCorrection = new THREE.Matrix4();
+    this._forearmSource = "palm estimate";
+    this._neckPlacementReference = null;
+    this._placingNeckBase = false;
+    this._handDisplayCorrection = new THREE.Matrix4();
     this._isRestartingCamera = false;
     this._designState = null;
     this._physicalSpec = null;
@@ -660,9 +630,6 @@ export class ARTryOn {
     this._badPoseFrames = 0;
     this._lastPoseForDelta = null;
     this._lastStageNorm = null;
-    this._localBrightness = 0.55;
-    this._localLightColor = new THREE.Color(1, 1, 1);
-    this._lightGradient = { x: 0, y: -0.25 };
     this._targetFingerLocalRadius = 1;
     this._targetShadowOpacity = 0;
     this._targetShadowScaleX = 1;
@@ -708,8 +675,7 @@ export class ARTryOn {
     this.filtWristWidth = new OneEuro(0.5, 0.01, 1, 8, 15);
     this.filtPitch = new OneEuro(1.2, 0.18, 1, 0.4, 5);
     this.filtRoll = new OneEuro(1.2, 0.20, 1, 0.45, 5);
-    // Finger diameter (meters) filtered hard — the digit display would
-    // flicker between sizes otherwise. Low cutoff + low beta = lazy lock.
+    // Body width is a slowly varying estimate, independent of fast pose.
     this.filtFingerDia = new OneEuro(0.3, 0.005);
     // Confidence gets filtered too, so a single bad MediaPipe frame fades the
     // contact shadow / sparkle instead of popping the whole ring.
@@ -741,19 +707,11 @@ export class ARTryOn {
     this._hasTarget = false;
     this._lastRafTime = 0;
 
-    /* §4 forward-predictive pose extrapolation (constant-velocity Kalman
-     * lite). The detection pipeline (video decode → MediaPipe inference →
-     * JS post-process) introduces ≈30–60 ms of latency between the real
-     * hand position and the pose that reaches the renderer. Rather than
-     * letting the lerp catch up reactively, we track the velocity of the
-     * smoothed target pose across detection frames and push the lerp
-     * target forward at each rAF by `velocity × t_predict` where
-     * t_predict = clamp(now − last_detection_time, 0, 60 ms) · confidence.
-     * That hides the latency: the displayed pose is where the hand will
-     * be by the time the photons hit the display, not where it was when
-     * the last detection finished. Confidence-gated and capped so a noisy
-     * detection can't run away. */
+    // Velocity uses source-media intervals; prediction age uses the main
+    // thread clock. Extrapolation remains limited to 25 ms / six pixels,
+    // fading to zero at 150 ms. This is not measured display latency.
     this._lastDetectionTime = 0;
+    this._lastVelocityTime = null;
     this._velPx = 0;
     this._velPy = 0;
     this._velScale = 0;
@@ -811,7 +769,7 @@ export class ARTryOn {
       this.modal.setAttribute("aria-label", "AR bracelet try-on");
       if (this.fingerSelectEl) this.fingerSelectEl.hidden = true;
       if (this.sizeEl) this.sizeEl.hidden = true;
-      if (this.hintEl) this.hintEl.textContent = "Show your wrist to the camera";
+      if (this.hintEl) this.hintEl.textContent = "Show your wrist; include your elbow when possible";
     } else if (this.pieceType === "Earrings") {
       this.modal.setAttribute("aria-label", "AR earring try-on");
       if (this.fingerSelectEl) this.fingerSelectEl.hidden = true;
@@ -847,6 +805,8 @@ export class ARTryOn {
       this.calibration.earSpan = 1;
       this.calibration.neckHeightMm = 40;
       this.calibration.neckHeightAuto = true;
+      this.calibration.neckBaseOffsetMm = { x: 0, y: 0 };
+      this.cancelNeckPlacement();
       this._earOffsets.Left.set(0, 0, 0);
       this._earOffsets.Right.set(0, 0, 0);
       this.modal.querySelector("[data-ar-ear-x]").value = "0";
@@ -870,6 +830,9 @@ export class ARTryOn {
         this.persistCalibration();
         this.syncCalibrationLabels();
         this.updateCameraProjection();
+        // Placement controls are deliberate edits. A partly filtered edit
+        // would temporarily displace the body when undoing the raw ring pose.
+        if (["Ring", "Bracelet", "Necklace"].includes(this.pieceType)) this.resetTrackingFilters();
         if (this._frozen && this._lastTrackingResult) this.applyTrackingResult(this._lastTrackingResult);
       });
     });
@@ -878,15 +841,18 @@ export class ARTryOn {
         this.modal.querySelectorAll(".ar-tryon-finger-select button").forEach(b => b.classList.remove("is-active"));
         btn.classList.add("is-active");
         this.activeFinger = btn.dataset.finger;
-        // §5 swap the depth-only occluder to the new finger's anatomical
-        // taper so the silhouette cutout always matches the real digit.
-        this.rebuildOccluderGeometry();
+        // The next accepted joints rebuild the selected finger's body fit.
         this.resetTrackingFilters();
         if (this.ring) this.ring.visible = false;
       });
     });
     document.addEventListener("keydown", this._onKey = (event) => {
-      if (event.key === "Escape") this.close();
+      if (event.key === "Escape") {
+        if (this._placingNeckBase) {
+          event.preventDefault(); this.cancelNeckPlacement(); this.setPlacementOpen(true); this.setStatus("");
+          this.modal.querySelector("[data-ar-place-neck]").focus();
+        } else this.close();
+      }
       if (event.key === "Tab") {
         const controls = [...this.modal.querySelectorAll("button, input, select")].filter((control) => !control.disabled && control.getClientRects().length);
         const first = controls[0], last = controls[controls.length - 1];
@@ -898,8 +864,9 @@ export class ARTryOn {
       if (!document.hidden || this._closed) return;
       if (!this._initialized) { this.close(); return; }
       this._suspended = true;
+      this._renderTiming.pause();
       this._frozen = true;
-      this._frameGate.reset();
+      this.resetFrameSession();
       this._cameraAbort?.abort();
       this.stream?.getTracks().forEach((track) => track.stop());
       this.stream = null;
@@ -912,7 +879,7 @@ export class ARTryOn {
 
     try {
       this.setStatus("Preparing your selected design…");
-      const designer = await import("./designer.js?v=20260911-ar-live3");
+      const designer = await import("./designer.js?v=20260912-metals");
       await designer.prepareDesignerForAR();
       if (this._closed) return;
       this._designState = readDesignState() || this._designState;
@@ -955,6 +922,10 @@ export class ARTryOn {
       <label data-ar-neck-control>Neck circumference (mm, estimate)<input data-ar-neck type="number" min="240" max="520" step="5" value="320"></label>
       <label data-ar-neck-auto-control><input data-ar-neck-auto type="checkbox"> Estimate neck base from pose</label>
       <label data-ar-neck-height-control>Manual neck base above shoulders (mm)<input data-ar-neck-height type="number" min="0" max="90" step="2" value="40"></label>
+      <div data-ar-neck-placement hidden>
+        <button type="button" class="ar-tryon-btn" data-ar-place-neck>Place neck base</button>
+        <p data-ar-place-neck-help>Freeze the preview, then mark the hollow at the base of your throat. The necklace will follow that point as you move.</p>
+      </div>
       <div data-ar-independent-ears hidden>
         <label>Adjust ear <select data-ar-ear-side><option>Left</option><option>Right</option></select></label>
         <label>Outward (mm)<input data-ar-ear-x type="range" min="-20" max="20" value="0" step="0.5"></label>
@@ -967,6 +938,27 @@ export class ARTryOn {
     options.querySelector("[data-ar-neck-control]").hidden = this.pieceType !== "Necklace";
     options.querySelector("[data-ar-neck-height-control]").hidden = this.pieceType !== "Necklace";
     options.querySelector("[data-ar-neck-auto-control]").hidden = this.pieceType !== "Necklace";
+    options.querySelector("[data-ar-neck-placement]").hidden = this.pieceType !== "Necklace";
+    options.querySelector("[data-ar-place-neck]").addEventListener("click", () => {
+      if (this._placingNeckBase) { this.cancelNeckPlacement(); return; }
+      if (!this._frozen || !this._hasTarget || !this.ring?.visible
+        || this._neckPlacementReference?.trackingResult !== this._lastTrackingResult) {
+        this.setStatus("Freeze a tracked preview first, then choose Place neck base."); return;
+      }
+      this._placingNeckBase = true;
+      this.canvas.style.pointerEvents = "auto";
+      this.canvas.style.cursor = "crosshair";
+      this.modal.querySelector("[data-ar-place-neck]").textContent = "Cancel placement";
+      this.setPlacementOpen(false);
+      this.modal.querySelector("[data-ar-adjust]").focus();
+      this.setStatus("Tap the hollow at the base of your throat. Press Escape to cancel placement.");
+    });
+    this.canvas.addEventListener("pointerdown", event => {
+      if (!this._placingNeckBase) return;
+      event.preventDefault();
+      const rect = this.canvas.getBoundingClientRect();
+      this.placeNeckBase({ x: event.clientX - rect.left - rect.width / 2, y: rect.height / 2 - (event.clientY - rect.top) });
+    });
     const neckAuto = options.querySelector("[data-ar-neck-auto]");
     const neckHeight = options.querySelector("[data-ar-neck-height]");
     neckAuto.checked = this.calibration.neckHeightAuto;
@@ -1048,6 +1040,7 @@ export class ARTryOn {
       if (this._frozen && this._lastTrackingResult) this.applyTrackingResult(this._lastTrackingResult);
     });
     this.modal.querySelector("[data-ar-freeze]").addEventListener("click", async (event) => {
+      this.cancelNeckPlacement();
       if (this._isRestartingCamera) return;
       if (this._suspended) {
         try {
@@ -1062,8 +1055,7 @@ export class ARTryOn {
         return;
       }
       this._frozen = !this._frozen;
-      this._frameGate.reset();
-      this._trackingWorkerBusy = false;
+      this.resetFrameSession(this._frozen);
       if (this._frozen) { this.video.pause(); this.setPlacementOpen(true); }
       else { await this.video.play(); this.resetTrackingFilters(); }
       event.target.textContent = this._frozen ? "Resume live" : "Freeze / adjust";
@@ -1073,25 +1065,71 @@ export class ARTryOn {
   startVideoFrames() {
     if (!this.video?.requestVideoFrameCallback || this._closed) return;
     if (this._videoCallback) this.video.cancelVideoFrameCallback(this._videoCallback);
-    const process = (timestamp) => {
+    const process = (timestamp, metadata) => {
       if (this._closed) return;
-      this.processVideoFrame(timestamp);
+      this.processVideoFrame(timestamp, metadata);
       this._videoCallback = this.video.requestVideoFrameCallback(process);
     };
     this._videoCallback = this.video.requestVideoFrameCallback(process);
   }
 
-  processVideoFrame(timestamp) {
+  cancelNeckPlacement() {
+    this._placingNeckBase = false;
+    if (this.canvas?.style) { this.canvas.style.pointerEvents = ""; this.canvas.style.cursor = ""; }
+    const button = this.modal?.querySelector("[data-ar-place-neck]");
+    if (button) button.textContent = "Place neck base";
+  }
+
+  placeNeckBase(point) {
+    if (!this._frozen || !this._hasTarget || !this.ring?.visible || !this._lastTrackingResult
+      || this._neckPlacementReference?.trackingResult !== this._lastTrackingResult) return false;
+    const offset = neckPlacementOffset(point, this._neckPlacementReference);
+    if (!offset) { this.setStatus("Choose a point near the base of your throat."); return false; }
+    this.calibration.neckBaseOffsetMm = offset;
+    this.calibration.neckHeightMm = this._neckPlacementReference.neckHeightMm;
+    this.calibration.neckHeightAuto = false;
+    this.calibration.side = 0;
+    this.calibration.lift = 0;
+    this.cancelNeckPlacement();
+    this.persistCalibration();
+    this.syncCalibrationControls();
+    this.applyTrackingResult(this._lastTrackingResult);
+    this.setPlacementOpen(true);
+    this.setStatus("Neck base placed. Resume live when ready.");
+    return true;
+  }
+
+  resetFrameSession(preserveTiming = false) {
+    this._frameGate.reset();
+    this._frameClock.reset();
+    if (!preserveTiming) this._trackingTiming.reset();
+    this.lastVideoTime = -1;
+    this.lastDetectMs = -Infinity;
+    this._lastResultAt = null;
+    // An old worker job still owns its slot until it completes. Clearing busy
+    // here would queue a second job behind it after freeze or a camera switch.
+  }
+
+  processVideoFrame(timestamp, metadata) {
     if (this._closed || this._frozen || this._suspended || this._isRestartingCamera || this.video?.readyState < 2) return;
-    if (timestamp - this.lastDetectMs < this.detectInterval || this.lastVideoTime === this.video.currentTime) return;
     const tracker = this.pieceType === "Earrings" ? this.faceLandmarker : this.pieceType === "Necklace" ? this.poseLandmarker : this.handLandmarker;
     if (!this._trackingWorkerReady && !tracker) return;
-    this.lastVideoTime = this.video.currentTime;
-    this.lastDetectMs = timestamp;
-    if (this._trackingWorkerReady) this.sendFrameToTrackingWorker(timestamp);
+    if (this._trackingWorkerReady && this._trackingWorkerBusy) {
+      this._trackingTiming.skippedBusy++;
+      return;
+    }
+    const sampledAt = performance.now();
+    if (sampledAt - this.lastDetectMs < this.detectInterval) return;
+    const frame = this._frameClock.next(this.video, sampledAt, metadata, timestamp);
+    if (!frame) return;
+    frame.mirrored = this.isMirrored;
+    if (!frameIsFresh(frame, sampledAt)) { this._trackingTiming.droppedStale++; return; }
+    this.lastVideoTime = frame.mediaTime;
+    this.lastDetectMs = sampledAt;
+    if (this._trackingWorkerReady) this.sendFrameToTrackingWorker(frame);
     else {
       const started = performance.now();
-      try { this.applyTrackingResult(tracker.detectForVideo(this.video, timestamp), performance.now() - started, timestamp); }
+      try { this.applyTrackingResult(tracker.detectForVideo(this.video, sampledAt), performance.now() - started, sampledAt, frame); }
       catch { this.setStatus("Tracking interrupted. Close and reopen try-on."); }
     }
   }
@@ -1173,34 +1211,20 @@ export class ARTryOn {
     this.syncCalibrationLabels();
   }
 
-  /* Rebuild the depth-only anatomical proxy when the selected finger
-   * changes. The proxy has rounded caps, a side-to-depth ellipse and a
-   * per-finger MCP→PIP taper. */
-  rebuildOccluderGeometry() {
-    if (!this._occluder || !this._occluderBaseRadius || !this._occluderBaseLength) return;
-    const isBracelet = this.pieceType === "Bracelet";
-    const taper = isBracelet
-      ? { distal: 0.96, proximal: 1.00 }
-      : (FINGER_OCCLUDER_TAPER[this.activeFinger] || FINGER_OCCLUDER_TAPER.ring);
-    const next = makeAnatomicalOccluderGeometry({
-      radius: this._occluderBaseRadius,
-      length: this._occluderBaseLength,
-      distal: taper.distal,
-      proximal: taper.proximal,
-      depthRatio: isBracelet ? 0.72 : 0.82
-    });
-    this._occluder.geometry.dispose();
-    this._occluder.geometry = next;
-  }
-
   resetTrackingFilters() {
+    this.hideHandSilhouetteOccluder();
     this._earAnchors = null;
     this._earVisibility = {};
     this._earPoseQuaternion = null;
     this._pendingEarRotation = null;
     this._lastDirection = null;
     this._lastSourceTimestamp = null;
+    this._lastVelocityTime = null;
+    this._earAnchorTime = null;
+    this._braceletFitAt = -Infinity;
     this._lastHandRoll = 0;
+    this._forearmSource = "palm estimate";
+    this._neckContactSourceInverse = null;
     if (this._faceOccluder) this._faceOccluder.visible = false;
     this._articulation?.reset();
     [
@@ -1255,7 +1279,7 @@ export class ARTryOn {
     debug.hidden = !this.modal.querySelector("[data-ar-diagnostics]").checked;
     if (!debug.hidden) {
       const optics = this.ring?.userData.arOptics;
-      debug.textContent = `${this.pieceType} · metres · ${Math.round(this._detectCostEMA)} ms inference · ${Math.round(performance.now() - (this._lastResultAt || performance.now()))} ms result age · ${this._handIdentity.previous?.handedness || "body"} · ${this._measuredHandWidthMm ? "manual knuckle reference" : "approximate scale"} · ${optics ? `${optics.traced} ray gems / ${optics.fallback} crystal fallbacks` : "loading environment"}`;
+      debug.textContent = `${this.pieceType} · metres · ${this._trackingTiming.describe(performance.now(), this._frozen)} · ${this._handIdentity.previous?.handedness || "body"} · ${this._measuredHandWidthMm ? "manual knuckle reference" : "approximate scale"} · ${this.pieceType === "Bracelet" ? this._forearmSource : "body estimate"} · ${this._appearanceLighting.describe()} · ${this._renderTiming.describe(performance.now())} · ${this._wearable?.renderBatches.report.sourceDraws || 0} metal parts in ${this._wearable?.renderBatches.report.batches || 0} batches · ${optics ? `${optics.traced} ray gems / ${optics.fallback} crystal fallbacks` : "loading environment"}`;
     }
   }
 
@@ -1273,9 +1297,18 @@ export class ARTryOn {
     this._handProxyTransform = new THREE.Object3D();
     this._handProxyAxis = new THREE.Vector3(0, 1, 0);
     this.scene.add(this._handMaskMesh);
+    if (this.pieceType === "Ring") {
+      this._fingerContactBody = new FingerContactBody();
+      this.scene.add(this._fingerContactBody);
+    } else {
+      this._wristContactBody = new WristContactBody();
+      this.scene.add(this._wristContactBody);
+    }
   }
 
   setupCameraBackground() {
+    this._appearanceLighting.reset();
+    this._lastLightSample = -Infinity;
     this._cameraTexture?.dispose();
     this._cameraTexture = new CameraTexture(this.video);
     this.scene.background = this._cameraTexture;
@@ -1288,9 +1321,12 @@ export class ARTryOn {
 
   hideHandSilhouetteOccluder() {
     if (this._handMaskMesh) this._handMaskMesh.visible = false;
+    if (this._fingerContactBody) this._fingerContactBody.visible = false;
+    if (this._wristContactBody) this._wristContactBody.visible = false;
+    if (this._neckContactBody) this._neckContactBody.visible = false;
   }
 
-  updateHandSilhouetteOccluder(landmarks, metrics, handWidthPx, rawX, rawY, rawScale, directionX, directionY, pitch, roll) {
+  updateHandSilhouetteOccluder(landmarks, metrics, handWidthPx, rawX, rawY, rawScale, directionX, directionY, pitch, roll, fingerRadiusPx, wristFit) {
     if (!this._handMaskMesh || !landmarks?.length) return;
     const units = this.worldUnitsPerPixelAtZ();
     const selectedBase = this.pieceType === "Ring" ? this.fingerLandmarks()[0] : 0;
@@ -1303,13 +1339,32 @@ export class ARTryOn {
     const basis = new THREE.Matrix4().makeBasis(
       side.clone().multiplyScalar(Math.cos(roll)).addScaledVector(up, -Math.sin(roll)),
       side.multiplyScalar(Math.sin(roll)).addScaledVector(up, Math.cos(roll)), along);
+    const rawOrigin = this.stageToWorld(rawX, rawY);
+    rawOrigin.z += wristFit?.depth || 0;
     this._handMaskSourceInverse = new THREE.Matrix4().compose(
-      this.stageToWorld(rawX, rawY), new THREE.Quaternion().setFromRotationMatrix(basis),
+      rawOrigin, new THREE.Quaternion().setFromRotationMatrix(basis),
       new THREE.Vector3().setScalar(this.pixelScaleToWorld(rawScale))).invert();
     const position = (point) => {
       const stage = this.landmarkToStage(point, metrics);
-      return this.stageToWorld(stage.x, stage.y, -(point.z - depthOrigin) * metrics.drawWidth * units);
+      return this.stageToWorld(stage.x, stage.y, this._arPlaneZ - (point.z - depthOrigin) * metrics.drawWidth * units);
     };
+    if (this._fingerContactBody) {
+      // Ring pose includes the user's tilt adjustment; skin orientation does
+      // not. The depth proxy remains fitted to the detected joint centres.
+      const bodyRoll = roll - THREE.MathUtils.degToRad(this.calibration.roll || 0);
+      const dorsal = new THREE.Vector3(-directionY, directionX, 0).multiplyScalar(Math.sin(bodyRoll))
+        .addScaledVector(up, Math.cos(bodyRoll));
+      this._fingerContactBody.updateSource({
+        start: position(landmarks[selectedBase]), end: position(landmarks[selectedBase + 1]),
+        dorsal, radius: fingerRadiusPx * units,
+        finger: this.activeFinger, seat: FINGER_RING_SEAT_T[this.activeFinger] || FINGER_RING_SEAT_T.ring
+      });
+    }
+    if (this._wristContactBody && wristFit) {
+      this._wristContactBody.updateSource(this.stageToWorld(wristFit.x, wristFit.y),
+        wristOrientation(directionX, directionY, pitch, roll - THREE.MathUtils.degToRad(this.calibration.roll || 0)),
+        wristFit.radiusPx * units, wristFit.pixelsPerMeter * units);
+    }
     let count = 0;
     for (const base of [1, 5, 9, 13, 17]) {
       for (let segment = 0; segment < 3; segment += 1) {
@@ -1332,6 +1387,24 @@ export class ARTryOn {
     this._handMaskMesh.count = count;
     this._handMaskMesh.instanceMatrix.needsUpdate = true;
     this._handMaskMesh.visible = this._hasTarget;
+  }
+
+  syncHandContactDisplay() {
+    if (this.ring && this._neckContactBody && this._neckContactSourceInverse) {
+      this.ring.updateMatrixWorld(true);
+      this._neckDisplayCorrection.copy(this.ring.matrixWorld).multiply(this._neckContactSourceInverse);
+      this._neckContactBody.syncDisplay(this._neckDisplayCorrection,this.ring.visible&&this._hasTarget);
+    }
+    if (!this.ring || !this._handMaskSourceInverse) return;
+    this.ring.updateMatrixWorld(true);
+    this._handDisplayCorrection.copy(this.ring.matrixWorld).multiply(this._handMaskSourceInverse);
+    if (this._handMaskMesh) {
+      this._handMaskMesh.visible = this.ring.visible && this._hasTarget && this._handMaskMesh.count > 0;
+      this._handMaskMesh.matrix.copy(this._handDisplayCorrection);
+      this._handMaskMesh.matrixWorldNeedsUpdate = true;
+    }
+    this._fingerContactBody?.syncDisplay(this._handDisplayCorrection, this.ring.visible && this._hasTarget);
+    this._wristContactBody?.syncDisplay(this._handDisplayCorrection, this.ring.visible && this._hasTarget);
   }
 
 
@@ -1381,8 +1454,8 @@ export class ARTryOn {
   }
 
   updatePoseVelocity(timestamp) {
-    const delta = (timestamp - this._lastDetectionTime) / 1000;
-    if (this._hasTarget && this._lastDetectionTime && delta > 0 && delta < 0.2) {
+    const delta = (timestamp - this._lastVelocityTime) / 1000;
+    if (this._hasTarget && this._lastVelocityTime != null && delta > 0 && delta < 0.2) {
       const blend = 1 - Math.exp(-delta / 0.06);
       const velocityX = (this._tgtPos.x - this._tgtPrevX) / delta;
       const velocityY = (this._tgtPos.y - this._tgtPrevY) / delta;
@@ -1393,7 +1466,8 @@ export class ARTryOn {
     } else {
       this._velPx = this._velPy = 0;
     }
-    this._lastDetectionTime = timestamp;
+    this._lastVelocityTime = timestamp;
+    this._lastDetectionTime = this._applyingFrame?.sourceTime ?? timestamp;
     this._tgtPrevX = this._tgtPos.x;
     this._tgtPrevY = this._tgtPos.y;
     this._tgtPrevScale = this._tgtScale;
@@ -1481,17 +1555,8 @@ export class ARTryOn {
     );
   }
 
-  /* Convert real-world hand width (meters) into an estimated ring size for
-   * the currently-selected finger and update the size chip UI. The math:
-   *
-   *   fingerDiameter_m = handWidth_m * ratio[finger]
-   *   circumference_mm = fingerDiameter_m * 1000 * π
-   *   US size        ≈ (innerDiameter_mm − 11.63) / 0.8128   (Wheatsheaf)
-   *   UK letter       = lookup table indexed by half-size
-   *   EU size        ≈ circumference_mm − 40                  (ISO 8653)
-   *
-   * Numbers are advisory ±1 US size; we surface this as "Estimated" so
-   * customers don't take a sizing screenshot as gospel. */
+  // Smooth the contact-width prior and show the selected product dimensions.
+  // The UI does not infer a personal ring size from these landmarks.
   _updateSizeReadout(handWidthM, now) {
     const ratio = FINGER_DIAMETER_RATIO[this.activeFinger] || FINGER_DIAMETER_RATIO.ring;
     const rawDia = handWidthM * ratio;                       // meters
@@ -1509,9 +1574,13 @@ export class ARTryOn {
 
 
   async startCamera() {
+    this.cancelNeckPlacement();
+    this._neckPlacementReference = null;
     if (!navigator.mediaDevices?.getUserMedia) throw new Error("Camera requires HTTPS and a supported browser.");
-    this._frameGate.reset();
-    this._trackingWorkerBusy = false;
+    this.resetFrameSession();
+    this.resetTrackingFilters();
+    if (this.ring) this.ring.visible = false;
+    this.hideHandSilhouetteOccluder();
     this._cameraAbort?.abort();
     this._cameraAbort = new AbortController();
     const signal = this._cameraAbort.signal;
@@ -1599,25 +1668,38 @@ export class ARTryOn {
     return "hand";
   }
 
-  applyTrackingResult(result, detectCost = 0, timestamp = performance.now()) {
+  applyTrackingResult(result, detectCost = 0, timestamp = performance.now(), frame = null) {
     if (!result || !this.ring || this._closed || !Number.isFinite(timestamp)) return;
     const arrival = performance.now();
-    if (!this._frozen && (arrival - timestamp > 450 || timestamp > arrival + 10
-      || (this._lastSourceTimestamp != null && timestamp <= this._lastSourceTimestamp))) return;
-    this._lastSourceTimestamp = timestamp;
+    if (!this._frozen && (arrival - timestamp > MAX_TRACKING_AGE_MS || timestamp > arrival + 10
+      || (frame && !frameIsFresh(frame, arrival))
+      || (frame && (frame.width !== this.video.videoWidth || frame.height !== this.video.videoHeight || frame.mirrored !== this.isMirrored))
+      || (this._lastSourceTimestamp != null && timestamp <= this._lastSourceTimestamp))) {
+      this._trackingTiming.droppedStale++;
+      return;
+    }
+    if (this._frozen) this.resetTrackingFilters();
+    if (!this._frozen) {
+      this._lastSourceTimestamp = timestamp;
+      this._lastResultAt = frame?.sourceTime ?? timestamp;
+      if (frame) this._trackingTiming.record(frame, arrival, detectCost);
+    }
     this._lastTrackingResult = result;
-    this._lastResultAt = timestamp;
+    this._applyingFrame = this._frozen ? null : frame;
+    const filterTimestamp = this._frozen ? timestamp : frame?.filterTimestamp ?? timestamp;
     const metrics = this.videoMetrics();
     this.filtPx.jump = this.filtPy.jump = Math.max(metrics.width, metrics.height) * 0.08;
-    if (this.pieceType === "Bracelet") {
-      this.applyResultBracelet(result, timestamp);
-    } else if (this.pieceType === "Earrings") {
-      this.applyResultEarrings(result, timestamp);
-    } else if (this.pieceType === "Necklace") {
-      this.applyResultNecklace(result, timestamp);
-    } else {
-      this.applyResult(result, timestamp);
-    }
+    try {
+      if (this.pieceType === "Bracelet") {
+        this.applyResultBracelet(result, filterTimestamp);
+      } else if (this.pieceType === "Earrings") {
+        this.applyResultEarrings(result, filterTimestamp);
+      } else if (this.pieceType === "Necklace") {
+        this.applyResultNecklace(result, filterTimestamp);
+      } else {
+        this.applyResult(result, filterTimestamp);
+      }
+    } finally { this._applyingFrame = null; }
     if (Number.isFinite(detectCost) && detectCost > 0) {
       this.updateDeltaBudget(detectCost);
     }
@@ -1639,9 +1721,10 @@ export class ARTryOn {
   async startTrackingWorker() {
     if (this._trackingWorkerReady) return;
 
-    const worker = new Worker(new URL("./ar-tracking-worker.js?v=20260911-ar-live3", import.meta.url), { type: "module" });
+    const worker = new Worker(new URL("./ar-tracking-worker.js?v=20260912-ar-placement", import.meta.url), { type: "module" });
     this._trackingWorker = worker;
     this._trackingWorkerBusy = false;
+    this._pendingTrackingFrame = null;
     this._trackingWorkerFallbackStarted = false;
 
     await new Promise((resolve, reject) => {
@@ -1671,15 +1754,19 @@ export class ARTryOn {
         }
 
         if (message.type === "result") {
-          if (message.generation !== this._frameGate.generation) return;
-          if (message.frameId === this._trackingFrameId) this._trackingWorkerBusy = false;
-          if (!this._frozen && this._frameGate.accept(message, performance.now())) this.applyTrackingResult(message.result, Number(message.detectCost) || 0, message.timestamp);
+          const pending = this.finishTrackingFrame(message, worker);
+          if (!pending || message.generation !== this._frameGate.generation) return;
+          if (!this._frozen && this._frameGate.accept(message, performance.now())) {
+            this.applyTrackingResult(message.result, Number(message.detectCost) || 0, message.timestamp, pending.frame);
+          } else if (!this._frozen) this._trackingTiming.droppedStale++;
           return;
         }
 
         if (message.type === "error") {
-          if (message.phase === "frame" && message.generation !== this._frameGate.generation) return;
-          this._trackingWorkerBusy = false;
+          if (message.phase === "frame") {
+            const pending = this.finishTrackingFrame(message, worker);
+            if (!pending || message.generation !== this._frameGate.generation) return;
+          }
           const error = new Error(message.message || "Tracking worker failed.");
           if (!this._trackingWorkerReady) {
             finishReject(error);
@@ -1691,6 +1778,7 @@ export class ARTryOn {
       };
 
       worker.onerror = (event) => {
+        if (this._closed || this._trackingWorker !== worker) return;
         const error = new Error(event?.message || "Tracking worker script failed.");
         if (!this._trackingWorkerReady) finishReject(error);
         else this.fallbackToMainThreadTracking(error);
@@ -1704,7 +1792,9 @@ export class ARTryOn {
           wasmBase: WASM_BASE,
           handModelUrl: MODEL_URL,
           faceModelUrl: FACE_MODEL_URL,
-          poseModelUrl: POSE_MODEL_URL
+          poseModelUrl: POSE_MODEL_URL,
+          trackForearm: this.pieceType === "Bracelet",
+          forearmModelUrl: FOREARM_MODEL_URL
         }
       });
     });
@@ -1715,6 +1805,7 @@ export class ARTryOn {
     this._trackingWorkerFallbackStarted = true;
     this._trackingWorkerReady = false;
     this._trackingWorkerBusy = false;
+    this._pendingTrackingFrame = null;
     this._trackingWorker?.terminate();
     this._trackingWorker = null;
 
@@ -1727,26 +1818,53 @@ export class ARTryOn {
     }
   }
 
-  sendFrameToTrackingWorker(now) {
+  finishTrackingFrame(message, worker) {
+    const pending = this._pendingTrackingFrame;
+    if (!pending || pending.worker !== worker || message.generation !== pending.generation
+      || message.frameId !== pending.frameId) return null;
+    this._pendingTrackingFrame = null;
+    this._trackingWorkerBusy = false;
+    return message.timestamp === pending.frame.sampledAt ? pending : null;
+  }
+
+  sendFrameToTrackingWorker(frame) {
     if (!this._trackingWorkerReady || !this._trackingWorker || this._trackingWorkerBusy) return;
     this._trackingWorkerBusy = true;
     const worker = this._trackingWorker;
     const frameId = ++this._trackingFrameId;
     const generation = this._frameGate.generation;
-
-    createImageBitmap(this.video).then((bitmap) => {
-      if (this._closed || generation !== this._frameGate.generation || !this._trackingWorkerReady || this._trackingWorker !== worker) {
-        bitmap.close?.();
-        if (generation === this._frameGate.generation && frameId === this._trackingFrameId) this._trackingWorkerBusy = false;
-        return;
-      }
-      try { worker.postMessage({ type: "frame", bitmap, timestamp: now, frameId, generation }, [bitmap]); }
-      catch (error) { bitmap.close(); throw error; }
-    }).catch((error) => {
+    const pending = { worker, frameId, generation, frame };
+    this._pendingTrackingFrame = pending;
+    const isCurrent = () => !this._closed && generation === this._frameGate.generation
+      && this._trackingWorkerReady && this._trackingWorker === worker && this._pendingTrackingFrame === pending;
+    const release = () => {
+      if (this._pendingTrackingFrame !== pending) return;
+      this._pendingTrackingFrame = null;
       this._trackingWorkerBusy = false;
+    };
+    const failed = (error) => {
+      const current = isCurrent();
+      release();
+      if (!current) return;
       console.warn("[AR] Could not transfer camera frame to tracking worker:", error);
       this.fallbackToMainThreadTracking(error);
-    });
+    };
+
+    // Invoke the snapshot while still processing this frame's callback. Guard
+    // both synchronous failure and late promise settlement by job ownership.
+    let snapshot;
+    try { snapshot = createImageBitmap(this.video); }
+    catch (error) { failed(error); return; }
+    Promise.resolve(snapshot).then((bitmap) => {
+      if (!isCurrent() || !frameIsFresh(frame, performance.now())) {
+        bitmap.close?.();
+        if (isCurrent()) this._trackingTiming.droppedStale++;
+        release();
+        return;
+      }
+      try { worker.postMessage({ type: "frame", bitmap, timestamp: frame.sampledAt, frame, frameId, generation }, [bitmap]); }
+      catch (error) { bitmap.close(); throw error; }
+    }).catch(failed);
   }
 
   async startMediaPipeOnMainThread() {
@@ -1770,18 +1888,10 @@ export class ARTryOn {
   addWearableBody() {
     const neck = this.ring.userData.wearable.neck;
     if (this.pieceType === "Necklace" && neck?.fits) {
-      const radius = neck.radiusMm * 0.00098;
-      const geometry = new THREE.LatheGeometry([
-        new THREE.Vector2(0, -0.035), new THREE.Vector2(radius * 0.65, -0.025),
-        new THREE.Vector2(radius, 0), new THREE.Vector2(radius, 0.06),
-        new THREE.Vector2(radius * 0.94, 0.12), new THREE.Vector2(0, 0.12)
-      ], 48);
-      geometry.scale(1, 1, neck.depthMm / neck.radiusMm);
-      const proxy = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({ colorWrite: false, depthWrite: true }));
-      proxy.name = "rounded-neck-depth-proxy";
-      proxy.position.set(0, 0, -neck.depthMm * 0.001);
-      proxy.renderOrder = -100;
-      this.ring.add(proxy);
+      if (!this._neckContactBody) {
+        this._neckContactBody = new NeckContactBody();
+        this.scene.add(this._neckContactBody);
+      }
     }
     if (this.pieceType === "Earrings") {
       const proxy = new THREE.Mesh(new THREE.SphereGeometry(1, 32, 24), new THREE.MeshBasicMaterial({ colorWrite: false, depthWrite: true }));
@@ -1802,6 +1912,7 @@ export class ARTryOn {
       next = createWearableAsset(piece, this._designState);
     } catch (error) { this.setStatus(error.message); return; }
     const previous = this.ring;
+    this._wearable?.renderBatches.dispose();
     this._wearable = next;
     this.ring = next.pose;
     const bounds = new THREE.Box3().setFromObject(this.ring);
@@ -1836,6 +1947,9 @@ export class ARTryOn {
     this.renderer.toneMappingExposure = 1.0;
 
     this.scene = new THREE.Scene();
+    this._renderTiming.reset();
+    // Runs before render-list collection, including freeze/adjust renders.
+    this.scene.onBeforeRender = () => this._wearable?.renderBatches.sync();
 
     // Perspective compositing camera. Landmark math remains in stage pixels,
     // then stageToWorld() projects those pixels onto a stable AR plane. Unlike
@@ -1851,24 +1965,22 @@ export class ARTryOn {
     this.camera.position.set(0, 0, 1);
     this.camera.lookAt(0, 0, this._arPlaneZ);
 
-    // Lighting rig — acts as a fallback before the HDR env loads, and
-    // adds shaped specular punch on top of the env's diffuse contribution.
-    // Static key/fill/rim lights cover the short interval before the room/HDR
-    // environment is ready. Motion-only facet accents are defined separately.
-    this._hemi = new THREE.HemisphereLight(0xffffff, 0x404a55, 0.55);
+    // Neutral reference rig: direction is a prior, not inferred from skin
+    // texture. Camera appearance scales this rig and the HDR together.
+    this._hemi = new THREE.HemisphereLight(0xffffff, 0x555555, 0.45);
     this.scene.add(this._hemi);
-    this._key = new THREE.DirectionalLight(0xffffff, 1.4);
+    this._key = new THREE.DirectionalLight(0xffffff, 1.05);
     this._key.position.set(0.8, 1.0, 0.6);
     this.scene.add(this._key);
-    this._fill = new THREE.DirectionalLight(0xc7d6ff, 0.55);
+    this._fill = new THREE.DirectionalLight(0xffffff, 0.35);
     this._fill.position.set(-0.7, 0.4, 0.5);
     this.scene.add(this._fill);
-    this._rim = new THREE.DirectionalLight(0xfff1d8, 0.7);
+    this._rim = new THREE.DirectionalLight(0xffffff, 0.25);
     this._rim.position.set(-0.2, 0.6, -1);
     this.scene.add(this._rim);
     this._lightProbe = document.createElement("canvas");
-    this._lightProbe.width = 28;
-    this._lightProbe.height = 18;
+    this._lightProbe.width = 48;
+    this._lightProbe.height = 32;
     this._lightProbeCtx = this._lightProbe.getContext("2d", { willReadFrequently: true });
     this.setupHandSilhouetteOccluder();
 
@@ -1897,76 +2009,12 @@ export class ARTryOn {
     this.scene.add(this.ring);
     this.ring.visible = false;
 
-    /* ----- finger occluder -----
-     * Skipped entirely for earrings: an earring hangs in air at the
-     * earlobe and does not need a depth-only sleeve, and a hard contact
-     * shadow would imply a surface the earring is resting on (none exists
-     * — the lobe is a thin flap, not a flat plane). All downstream
-     * references to `_occluder` / `_shadow` are null-guarded already, so
-     * the contact-visual lerp inside updateContactVisuals becomes a no-op. */
-    if (this.pieceType !== "Earrings" && this.pieceType !== "Necklace") {
-    /* ----- finger occluder body -----
-     * radius of the finger itself, parented to the ring so it inherits
-     * the same pose + scale. It writes ONLY to the depth buffer
-     * (colorWrite=false), so fragments of the ring band that fall behind
-     * the cylinder's near surface fail their depth test — i.e. the BACK
-     * HALF of the band (the portion that would be behind the finger
-     * flesh) disappears. The top of the band, the head, and the underside
-     * sit OUTSIDE the cylinder's screen footprint, so they remain fully
-     * visible. Render order is forced negative so it draws before the
-     * ring regardless of THREE's sort heuristics.
-     *
-     * Finger radius is approximated as 0.85 × ring outer radius (the band
-     * is ~15% thicker than the finger inner hole on a snug fit). Length
-     * is 8 × outer radius so the sleeve extends well past the PIP and MCP
-     * landmarks in either direction. */
-    const isBracelet = this.pieceType === "Bracelet";
+    // Finger and wrist depth bodies are owned by the scene, independently
+    // of the jewellery. Contact-shadow geometry remains local to the band.
+    if (this.pieceType === "Ring" || this.pieceType === "Bracelet") {
     const fingerR = this._ringLocalInnerR * 0.94;
-    const fingerL = isBracelet ? 0.11 : 0.055;
     this._occluderBaseRadius = fingerR;
-    this._occluderBaseLength = fingerL;
     this._targetFingerLocalRadius = fingerR;
-    /* §5 contact body: real proximal phalanges taper from MCP-wide to
-     * PIP-narrow. CylinderGeometry(top, bottom, …) → after rotateX(π/2)
-     * the +Y top maps to local +Z (= finger axis from base to tip, i.e.
-     * the distal/PIP direction). So radiusTop = PIP-narrow ≈ 0.94·R,
-     * radiusBottom = MCP-wide ≈ 1.10·R. This makes the depth-only
-     * occluder match the silhouette of a real digit, eliminating the
-     * "cylindrical sausage" cutout artefact at the band's near and far
-     * edges. Anatomical taper sourced from adult hand morphometrics
-     * (mean ratio R_PIP/R_MCP ≈ 0.85 per Greiner 1991 — we soften to
-     * 0.94/1.10 because the ring sits proximal-of-PIP, not at PIP itself).
-     *
-     * Bracelets sit on the wrist, which is much closer to a true cylinder
-     * with only a slight ulnar/radial taper toward the hand. Use a near-
-     * uniform 0.96 / 1.00 profile so the depth-only occluder hides the
-     * back half of the band without sculpting a finger-shape silhouette.
-     */
-    const taper = isBracelet
-      ? { distal: 0.96, proximal: 1.00 }
-      : (FINGER_OCCLUDER_TAPER[this.activeFinger] || FINGER_OCCLUDER_TAPER.ring);
-    const occluderGeom = makeAnatomicalOccluderGeometry({
-      radius: fingerR,
-      length: fingerL,
-      distal: taper.distal,
-      proximal: taper.proximal,
-      depthRatio: isBracelet ? 0.72 : 0.82
-    });
-    const occluderMat = new THREE.MeshBasicMaterial({
-      colorWrite: false,
-      depthWrite: true,
-      depthTest: true,
-      transparent: false,
-      side: THREE.FrontSide,
-      polygonOffset: true,
-      polygonOffsetFactor: -1,
-      polygonOffsetUnits: -1
-    });
-    this._occluder = new THREE.Mesh(occluderGeom, occluderMat);
-    this._occluder.renderOrder = -100;
-    this._occluder.frustumCulled = false;
-    this.ring.add(this._occluder);
-
     /* ----- soft contact shadow -----
      * A radial-gradient plane oriented in the ring's local XZ plane
      * (normal = +Y = stone direction). It draws between the occluder
@@ -2019,6 +2067,7 @@ export class ARTryOn {
       this.camera.aspect = r.width / Math.max(r.height, 1);
       this.camera.updateProjectionMatrix();
       this.syncHandSilhouettePlane();
+      if (this.pieceType === "Necklace" && this._frozen && this._lastTrackingResult) this.applyTrackingResult(this._lastTrackingResult);
     };
     window.addEventListener("resize", this._onResize);
   }
@@ -2030,9 +2079,9 @@ export class ARTryOn {
         const pmrem = new THREE.PMREMGenerator(this.renderer);
         pmrem.compileEquirectangularShader();
         const envRT = pmrem.fromEquirectangular(tex);
-        // Only take over if the live camera environment hasn't already
-        // kicked in — HDR is the fallback, not the override.
-        if (!this._envLive?.rt) this.scene.environment = envRT.texture;
+        // HDR supplies reflection structure; the shared camera appearance
+        // gain controls its intensity without rebuilding this texture.
+        this.scene.environment = envRT.texture;
         this._envRT = envRT;
         tex.dispose();
         pmrem.dispose();
@@ -2043,103 +2092,26 @@ export class ARTryOn {
   }
 
   sampleVideoLighting(now) {
-    if (!this.video || !this._lightProbeCtx || !this.renderer || now - this._lastLightSample < 260) {
-      return;
-    }
-
+    if (!this.video || !this._lightProbeCtx || !this.renderer || this._frozen || this._suspended
+      || this._isRestartingCamera || this.video.readyState < 2 || now - this._lastLightSample < 260
+      || this.video.currentTime === this._appearanceLighting.lastFrame) return;
+    this._lastLightSample = now;
+    const roi = this._hasTarget && this.ring?.visible ? this._lastStageNorm : null;
+    const region = cameraProbeRegion(this.video.videoWidth, this.video.videoHeight, this.videoMetrics(), roi, this.isMirrored);
+    if (!region) return;
     const { width, height } = this._lightProbe;
-
     try {
-      this._lightProbeCtx.drawImage(this.video, 0, 0, width, height);
+      this._lightProbeCtx.drawImage(this.video, region.sx, region.sy, region.sw, region.sh, 0, 0, width, height);
       const pixels = this._lightProbeCtx.getImageData(0, 0, width, height).data;
-      let red = 0;
-      let green = 0;
-      let blue = 0;
-      let count = 0;
-      let localRed = 0;
-      let localGreen = 0;
-      let localBlue = 0;
-      let localWeight = 0;
-      let gradX = 0;
-      let gradY = 0;
-
-      // §3/§5: sample lighting near the actual ring, not just the whole
-      // camera frame. The displayed selfie video is CSS-mirrored, while
-      // drawImage samples the raw camera pixels, so invert X for user-facing
-      // cameras. This gives the AR metal/gem the colour temperature and
-      // shadow density of the skin region it is sitting on.
-      const roi = this._lastStageNorm || { x: 0.5, y: 0.5 };
-      const metrics = this.videoMetrics();
-      const stageX = (this.isMirrored ? 1 - roi.x : roi.x) * metrics.width;
-      const roiX = clamp((stageX - metrics.offsetX) / metrics.drawWidth, 0, 1) * (width - 1);
-      const roiY = clamp((roi.y * metrics.height - metrics.offsetY) / metrics.drawHeight, 0, 1) * (height - 1);
-      const sigmaX = width * 0.17;
-      const sigmaY = height * 0.22;
-
-      for (let index = 0; index < pixels.length; index += 4) {
-        const pixel = index / 4;
-        const x = pixel % width;
-        const y = Math.floor(pixel / width);
-        const pr = pixels[index];
-        const pg = pixels[index + 1];
-        const pb = pixels[index + 2];
-        red += pr;
-        green += pg;
-        blue += pb;
-        count += 1;
-
-        const dx = (x - roiX) / sigmaX;
-        const dy = (y - roiY) / sigmaY;
-        const w = Math.exp(-0.5 * (dx * dx + dy * dy));
-        const luma = (0.2126 * pr + 0.7152 * pg + 0.0722 * pb) / 255;
-        localRed += pr * w;
-        localGreen += pg * w;
-        localBlue += pb * w;
-        localWeight += w;
-        gradX += dx * luma * w;
-        gradY += dy * luma * w;
+      const observation = measureCameraAppearance(pixels, width, height, region.roi);
+      if (this._appearanceLighting.observe(observation, this.video.currentTime)) {
+        applyAppearanceLighting(this.scene, this.renderer, {
+          hemi: this._hemi, key: this._key, fill: this._fill, rim: this._rim
+        }, this._appearanceLighting.gain);
       }
-
-      red /= count * 255;
-      green /= count * 255;
-      blue /= count * 255;
-
-      const invLocalWeight = 1 / Math.max(1, localWeight);
-      const lr = (localRed * invLocalWeight) / 255;
-      const lg = (localGreen * invLocalWeight) / 255;
-      const lb = (localBlue * invLocalWeight) / 255;
-      const frameBrightness = clamp((red + green + blue) / 3, 0.08, 0.92);
-      const localBrightness = clamp((lr + lg + lb) / 3, 0.06, 0.96);
-      const brightness = lerp(frameBrightness, localBrightness, 0.68);
-      const warmth = clamp(lr - lb, -0.28, 0.28);
-      const targetExposure = clamp(0.72 + brightness * 0.58, 0.78, 1.16);
-      const lightColor = new THREE.Color(
-        clamp(1 + warmth * 0.12, 0.96, 1.04),
-        clamp(1 + warmth * 0.04, 0.98, 1.02),
-        clamp(1 - warmth * 0.12, 0.96, 1.04)
-      );
-      const gNorm = Math.hypot(gradX, gradY) || 1;
-      const gx = clamp(gradX / gNorm, -1, 1);
-      const gy = clamp(gradY / gNorm, -1, 1);
-
-      this._localBrightness += (localBrightness - this._localBrightness) * 0.22;
-      this._localLightColor.lerp(lightColor, 0.20);
-      this._lightGradient.x += (gx - this._lightGradient.x) * 0.18;
-      this._lightGradient.y += (gy - this._lightGradient.y) * 0.18;
-
-      this.renderer.toneMappingExposure += (targetExposure - this.renderer.toneMappingExposure) * 0.2;
-      this._hemi.intensity += (clamp(0.42 + brightness * 0.48, 0.42, 0.84) - this._hemi.intensity) * 0.16;
-      this._key.intensity += (clamp(0.55 + brightness * 1.25, 0.65, 1.7) - this._key.intensity) * 0.16;
-      this._fill.intensity += (clamp(0.34 + brightness * 0.38, 0.34, 0.78) - this._fill.intensity) * 0.16;
-      this._rim.intensity += (clamp(0.22 + brightness * 0.50, 0.25, 0.70) - this._rim.intensity) * 0.16;
-      this._key.position.x += (this._lightGradient.x * 1.2 - this._key.position.x) * 0.12;
-      this._key.position.y += ((1.05 - this._lightGradient.y * 0.35) - this._key.position.y) * 0.12;
-      this._key.color.lerp(lightColor, 0.18);
-      this._fill.color.lerp(lightColor.clone().lerp(new THREE.Color(0xd9e6ff), 0.42), 0.14);
-      this._rim.color.lerp(lightColor.clone().lerp(new THREE.Color(0xfff1d8), 0.52), 0.14);
-      this._lastLightSample = now;
     } catch {
-      this._lastLightSample = now;
+      // An unavailable frame retains the last valid appearance, rather than
+      // brightening the object or reusing a failed measurement.
     }
   }
 
@@ -2213,12 +2185,15 @@ export class ARTryOn {
   loop = () => {
     if (this._closed || !this.renderer) return;
     this.rafId = requestAnimationFrame(this.loop);
-    if (!this.video || this.video.readyState < 2 || this._suspended) return;
+    if (!this.video || this.video.readyState < 2 || this._suspended) { this._renderTiming.pause(); return; }
+    if (!this.video.requestVideoFrameCallback) this.processVideoFrame(performance.now());
+    // Main-thread inference can block; render age and interpolation must use
+    // the clock after it returns, rather than the pre-inference rAF time.
     const now = performance.now();
     const dt = this._lastRafTime ? Math.min(0.1, (now - this._lastRafTime) / 1000) : 0.016;
-    if (!this.video.requestVideoFrameCallback) this.processVideoFrame(now);
-    if (!this._frozen && this._lastResultAt && now - this._lastResultAt > 450) {
+    if (!this._frozen && this._lastResultAt != null && now - this._lastResultAt > MAX_TRACKING_AGE_MS) {
       this.ring.visible = false;
+      this._lastResultAt = null;
       this.resetTrackingFilters();
       this.hideHandSilhouetteOccluder();
       this.setStatus("Tracking lost. Keep the target clearly in view.");
@@ -2244,13 +2219,8 @@ export class ARTryOn {
       const motionTighten = lerp(1.0, 0.55, clamp(this._motionEnergy, 0, 1) * conf);
       const followTau = baseTau * motionTighten;
       const alpha = 1 - Math.exp(-dt / followTau);
-      // §4 forward-predictive extrapolation. Push the lerp target ahead
-      // by velocity × t_predict so the visible ring is positioned where
-      // the hand will be when the photons reach the user's eye, instead
-      // of where the hand was when the last MediaPipe frame finished.
-      // Cap at 60ms forward (≈ 2 detection intervals) so a stale velocity
-      // can't drift far during a hand-lost spike. Scale by confidence so
-      // low-confidence frames extrapolate less.
+      // Bounded extrapolation from the last valid pose's observed frame time.
+      // Capture time is used only when the browser actually reports it.
       const prediction = predictionSeconds(now - this._lastDetectionTime, Math.min(conf, this._poseConfidenceTarget), this._frozen);
       const offsetX = this._velPx * prediction;
       const offsetY = this._velPy * prediction;
@@ -2264,17 +2234,15 @@ export class ARTryOn {
       this.ring.scale.setScalar(cs + (predScale - cs) * alpha);
     }
     this._lastRafTime = now;
-    if (this._handMaskMesh?.visible && this._handMaskSourceInverse) {
-      this.ring.updateMatrixWorld(true);
-      this._handMaskMesh.matrix.copy(this.ring.matrixWorld).multiply(this._handMaskSourceInverse);
-      this._handMaskMesh.matrixWorldNeedsUpdate = true;
-    }
+    this.syncHandContactDisplay();
     this._wearable?.updateOpticalScale();
     if (!this._frozen && this._hasTarget) this._articulation?.update(dt, this.modal.querySelector("[data-ar-motion]").checked);
     this.updateContactVisuals(dt);
     this.updateQualityReadout();
     this.sampleVideoLighting(now);
+    const renderStart = performance.now();
     this.renderer.render(this.scene, this.camera);
+    this._renderTiming.record(renderStart, performance.now(), this.renderer.info.render, this.renderer.getPixelRatio());
   };
 
   applyResult(result, now = performance.now()) {
@@ -2390,12 +2358,7 @@ export class ARTryOn {
     this.setStatus("");
     this.ring.visible = true;
 
-    /* --- scale ---
-     * §5 contact fit: outer radius = measured finger radius + metal wall.
-     * That minimizes both collision (ring sinking into finger) and floating
-     * (ring hovering larger than the finger) under the tracked hand body B.
-     * Designer ring's local outer R varies, so divide it out. */
-    const ringWallM = (this._physicalSpec?.ring?.shankThicknessMm || 1.75) * METERS_PER_MM;
+    /* --- physical product scale, separate from inferred body width --- */
     const localOuterR = this._ringLocalOuterR || 1.0;
     const localInnerR = this._ringLocalInnerR || localOuterR * 0.84;
     // The object already contains the selected physical ring dimensions. Scale
@@ -2495,14 +2458,15 @@ export class ARTryOn {
 
     const fingerRadiusPx = Math.max(1, fingerDiameterM * 0.5 * pxPerMeter);
     const fingerLocalRadius = fingerDiameterM * 0.5 / this.calibration.fit;
-    this._targetFingerLocalRadius = clamp(fingerLocalRadius, localOuterR * 0.48, localOuterR * 1.12);
+    this._targetFingerLocalRadius = fingerLocalRadius;
     const selectedInnerRadiusPx = localInnerR * s;
-    const selectedOuterRadiusPx = localOuterR * s;
     const fitError = (selectedInnerRadiusPx - fingerRadiusPx) / Math.max(fingerRadiusPx, 1);
     const contactError = Math.abs(fitError);
-    const contactScore = 1 - smoothstep(0.035, 0.18, contactError);
+    const contactScore = (1 - smoothstep(0.035, 0.18, contactError)) * fingerContactWeight({
+      side: this.calibration.side, lift: this.calibration.lift, directionX: fx, directionY: fy,
+      radius: fingerRadiusPx, length: imgLen, seat: tParam
+    });
     this._ringFitError = fitError;
-    const actualOuterPx = selectedOuterRadiusPx;
     this._targetShadowOpacity = (this._shadowBaseOpacity || 0.85) * contactScore * clamp(0.50 + confidence * 0.55, 0, 1);
     const occluderBase = this._occluderBaseRadius || this._targetFingerLocalRadius;
     this._targetShadowScaleX = clamp(this._targetFingerLocalRadius / occluderBase, 0.72, 1.42);
@@ -2511,37 +2475,13 @@ export class ARTryOn {
     this._targetShadowScaleY = 1;
     this._targetShadowScaleZ = clamp(0.94 + Math.abs(pitch) * 0.24 + this._motionEnergy * 0.16, 0.86, 1.42);
 
-    /* Stash as TARGET pose. The render loop lerps ring → target every
-     * rAF for smooth motion between detection frames. On first lock (or
-     * after hand-lost) snap directly to avoid an intro lerp from origin.
-     *
-     * §5 contact pressure dip — sink the ring INTO the finger by a small
-     * amount along the stone-down direction (−_vUp). Skin flesh compresses
-     * ≈0.3–0.6 mm under a real ring's weight; modeling it eliminates the
-     * "floating ring" look that AR overlays produce when the band geometry
-     * sits exactly tangent to the cylinder. Magnitude is gated by:
-     *   • contactScore — only dip when the fit is correct
-     *   • confidence  — don't dip during low-confidence frames
-     *   • motionGate  — relax the dip during fast motion (finger flexes)
-     *
-     * The dip is measured in camera pixels for stable contact tuning, then
-     * stageToWorld() projects the displaced anchor through the calibrated
-     * perspective camera onto the AR plane.
-     */
-    const dipMeters = 0;
-    const motionGate = 1 - smoothstep(0.18, 0.72, this._motionEnergy);
-    const dipPx = dipMeters * pxPerMeter
-      * clamp(contactScore, 0, 1)
-      * clamp(confidence, 0, 1)
-      * motionGate;
-    this.setTargetFromStage(
-      px - this._vUp.x * dipPx,
-      py - this._vUp.y * dipPx,
-      s
-    );
+    // Keep the jewellery target separate from the body; no artificial skin
+    // compression or product resizing is applied to manufacture a snug fit.
+    this.setTargetFromStage(px, py, s);
     this._tgtQuat.setFromRotationMatrix(this._mat);
     this._stoneNormalZ = this._vUp.z;
-    this.updateHandSilhouetteOccluder(landmarks, metrics, handWidthM * pxPerMeter, rawPx, rawPy, rawScale, fx, fy, rawPitch, rawRoll);
+    this.updateHandSilhouetteOccluder(landmarks, metrics, handWidthM * pxPerMeter, rawPx, rawPy, rawScale, fx, fy, rawPitch, rawRoll, fingerRadiusPx);
+    if (this._fingerContactBody && !this._fingerContactBody.valid) this._targetShadowOpacity = 0;
 
     // §4 predictor — update pose velocity from the inter-detection delta.
     // We track velocity of the FILTERED target pose (so velocity inherits
@@ -2605,42 +2545,30 @@ export class ARTryOn {
     const handWidthM = reference.widthM;
     const pxPerMeter = reference.pixelsPerMeter;
 
-    // Stage-space wrist + palm centre.  Forearm axis (in screen) runs
-    // from palm-centre → wrist; we extrapolate slightly past the wrist
-    // so the bracelet sits a bit proximal of landmark 0 (anatomically
-    // ~1cm into the forearm, which reads as natural).
     const wristPt = this.landmarkToStage(landmarks[0], metrics);
-    const midPt = this.landmarkToStage(landmarks[9], metrics);
-    const idxPt = this.landmarkToStage(idxImg, metrics);
-    const pkyPt = this.landmarkToStage(pkyImg, metrics);
-    const palmX = (idxPt.x + pkyPt.x + midPt.x) / 3;
-    const palmY = (idxPt.y + pkyPt.y + midPt.y) / 3;
-    const dx = wristPt.x - palmX;
-    const dy = wristPt.y - palmY;
-    const imgLen = Math.hypot(dx, dy) || 1;
-    const fx = dx / imgLen;
-    const fy = dy / imgLen;
-    const sideX = -fy;
-    const sideY = fx;
-
-    // Anchor with calibration: lift = along forearm (away from hand),
-    // side = perpendicular (radial vs ulnar).  Push slightly past the
-    // wrist landmark (≈ 8% of palm length) so the band centres on the
-    // forearm rather than straddling the wrist crease.
-    const seatOffset = imgLen * 0.08;
-    let rawPx = wristPt.x + fx * (seatOffset + this.calibration.lift * 0.6) + sideX * this.calibration.side;
-    let rawPy = wristPt.y + fy * (seatOffset + this.calibration.lift * 0.6) + sideY * this.calibration.side;
-
-    const wristWorld = world[0];
-    const middleWorld = {
-      x: (world[5].x + world[9].x + world[17].x) / 3,
-      y: (world[5].y + world[9].y + world[17].y) / 3,
-      z: (world[5].z + world[9].z + world[17].z) / 3
-    };
-    const worldLen = Math.hypot(wristWorld.x - middleWorld.x, wristWorld.y - middleWorld.y, wristWorld.z - middleWorld.z) || 0.09;
-    const rawPitch = Math.asin(clamp(-(wristWorld.z - middleWorld.z) / worldLen, -0.985, 0.985));
-    this._lastHandRoll = estimateHandRoll(world, selected.handedness, this.isMirrored, fx, fy, rawPitch, this._lastHandRoll);
-    const rawRoll = this._lastHandRoll + THREE.MathUtils.degToRad(this.calibration.roll || 0);
+    const palm = [5,9,17].map(index => this.landmarkToStage(landmarks[index],metrics));
+    const dx = wristPt.x - palm.reduce((sum,p)=>sum+p.x,0)/3;
+    const dy = wristPt.y - palm.reduce((sum,p)=>sum+p.y,0)/3;
+    const imgLen = Math.hypot(dx,dy)||1;
+    const wristWorld=world[0];
+    const middleWorld={x:(world[5].x+world[9].x+world[17].x)/3,
+      y:(world[5].y+world[9].y+world[17].y)/3,z:(world[5].z+world[9].z+world[17].z)/3};
+    const worldLen=Math.hypot(wristWorld.x-middleWorld.x,wristWorld.y-middleWorld.y,wristWorld.z-middleWorld.z)||.09;
+    const handPitch=Math.asin(clamp(-(wristWorld.z-middleWorld.z)/worldLen,-.985,.985));
+    this._lastHandRoll=estimateHandRoll(world,selected.handedness,this.isMirrored,dx/imgLen,dy/imgLen,handPitch,this._lastHandRoll);
+    const deliveryAge=this._applyingFrame ? Math.max(0,performance.now()-this._applyingFrame.sampledAt) : 0;
+    const observation=observeForearm(result.forearmPose,landmarks,metrics,this.isMirrored,deliveryAge);
+    const forearm=fitForearmOrientation({x:dx/imgLen,y:dy/imgLen,pitch:handPitch,roll:this._lastHandRoll},observation);
+    this._forearmSource=forearm.observed ? "elbow/wrist observation" : "palm estimate";
+    const fx=forearm.x,fy=forearm.y,rawPitch=forearm.pitch;
+    const rawRoll=forearm.roll+THREE.MathUtils.degToRad(this.calibration.roll||0);
+    const sideX=-fy,sideY=fx;
+    // Place the band 10 mm along the forearm from the observed wrist joint.
+    // Screen foreshortening changes the projected offset, not the real seat.
+    const seatOffset=.010*pxPerMeter*Math.cos(rawPitch);
+    const bodyPx=wristPt.x+fx*seatOffset,bodyPy=wristPt.y+fy*seatOffset;
+    let rawPx=bodyPx+fx*this.calibration.lift*.6+sideX*this.calibration.side;
+    let rawPy=bodyPy+fy*this.calibration.lift*.6+sideY*this.calibration.side;
 
     // Confidence: presence + edge-distance + on-screen size.
     const used = [0, 9, INDEX_MCP, PINKY_MCP];
@@ -2689,6 +2617,18 @@ export class ARTryOn {
     const rawScale = pxPerMeter * metersPerLocalUnit * this.calibration.fit;
 
     const flexible = ["Tennis", "Station"].includes(this._designState.silhouette);
+    const rawOrientation = wristOrientation(fx, fy, rawPitch, rawRoll);
+    const gravity = new THREE.Vector3(0, -1, 0).applyQuaternion(rawOrientation.clone().invert());
+    const seating = !flexible && Math.abs(this.calibration.roll || 0) < .01
+      ? rigidWristSeat({ wristRadius: wristDiameterM * .5 / this.calibration.fit,
+        innerRadius: this._physicalSpec.bracelet.innerDiameterMm * .0005,
+        thickness: this._physicalSpec.bracelet.tubeDiameterMm * .001,
+        gravityX: gravity.x, gravityY: gravity.y }) : { x: 0, y: 0, fits: true };
+    const seatShift = new THREE.Vector3(seating.x, seating.y, 0).applyQuaternion(rawOrientation);
+    rawPx += seatShift.x * rawScale;
+    rawPy += seatShift.y * rawScale;
+    const seatDepth = seatShift.z * this.pixelScaleToWorld(rawScale);
+    this._rigidWristSeating = seating;
     if (this.sizeEl) {
       this.sizeEl.textContent = flexible
         ? `${this._physicalSpec.bracelet.lengthMm} mm length · approximate wrist preview`
@@ -2775,7 +2715,9 @@ export class ARTryOn {
     this.setTargetFromStage(px, py, s);
     this._tgtQuat.setFromRotationMatrix(this._mat);
     this._stoneNormalZ = this._vUp.z;
-    this.updateHandSilhouetteOccluder(landmarks, metrics, handWidthM * pxPerMeter, rawPx, rawPy, rawScale, fx, fy, rawPitch, rawRoll);
+    this._tgtPos.z += seatDepth;
+    this.updateHandSilhouetteOccluder(landmarks, metrics, handWidthM * pxPerMeter, rawPx, rawPy, rawScale, fx, fy, rawPitch, rawRoll, null,
+      { x: bodyPx, y: bodyPy, radiusPx: wristRadiusPx, pixelsPerMeter: pxPerMeter, depth: seatDepth });
 
     // Predictor velocity (drives forward extrapolation in loop()).
     this.updatePoseVelocity(now);
@@ -3084,68 +3026,16 @@ export class ARTryOn {
     }
 
     const faceCenter = weightedCenter(weightedPoints, { x: shoulderMidX, y: shoulderMidY + shoulderPx * 0.50 });
-    const faceX = faceCenter.x;
-    const faceY = faceCenter.y;
     const faceWeight = faceCenter.weight;
     const faceScore = clamp(faceWeight, 0, 1);
 
-    let upX = 0;
-    let upY = 0;
-    if (faceScore > 0.05) {
-      const fx = faceX - shoulderMidX;
-      const fy = faceY - shoulderMidY;
-      const fl = Math.hypot(fx, fy) || 1;
-      upX += (fx / fl) * (0.72 + faceScore * 0.28);
-      upY += (fy / fl) * (0.72 + faceScore * 0.28);
-    }
-
-    const hipL = stageIfVisible(POSE_LEFT_HIP, 0.26);
-    const hipR = stageIfVisible(POSE_RIGHT_HIP, 0.26);
-    let hipScore = 0;
-    if (hipL && hipR) {
-      const hipX = (hipL.x + hipR.x) * 0.5;
-      const hipY = (hipL.y + hipR.y) * 0.5;
-      const tx = shoulderMidX - hipX;
-      const ty = shoulderMidY - hipY;
-      const tl = Math.hypot(tx, ty) || 1;
-      hipScore = Math.min(hipL.presence, hipR.presence);
-      upX += (tx / tl) * hipScore * 0.44;
-      upY += (ty / tl) * hipScore * 0.44;
-    }
-
-    if (Math.hypot(upX, upY) < 1e-4) {
-      upX = -dySh;
-      upY = dxSh;
-      if (upY < 0) { upX = -upX; upY = -upY; }
-    }
-    if (faceScore > 0.05 && (upX * (faceX - shoulderMidX) + upY * (faceY - shoulderMidY)) < 0) {
-      upX = -upX;
-      upY = -upY;
-    } else if (faceScore <= 0.05 && upY < 0) {
-      upX = -upX;
-      upY = -upY;
-    }
-    const rawUpLen = Math.hypot(upX, upY) || 1;
-    upX /= rawUpLen;
-    upY /= rawUpLen;
-
-    let rightX = dxSh / shoulderPx;
-    let rightY = dySh / shoulderPx;
-    const rawRightDotUp = rightX * upX + rightY * upY;
-    rightX -= upX * rawRightDotUp;
-    rightY -= upY * rawRightDotUp;
-    let rightLen = Math.hypot(rightX, rightY);
-    if (rightLen < 0.28) {
-      rightX = upY;
-      rightY = -upX;
-      rightLen = 1;
-    }
-    rightX /= rightLen;
-    rightY /= rightLen;
-    if (rightX < 0) {
-      rightX = -rightX;
-      rightY = -rightY;
-    }
+    const torso = torsoFrame(lSh, rSh, world, landmarks);
+    if (!torso) { this._poseConfidenceTarget = 0; return; }
+    let upX = torso.up.x, upY = torso.up.y;
+    let rightX = torso.right.x, rightY = torso.right.y;
+    let rightLen = 1;
+    const rawRightDotUp = 0;
+    const hipScore = torso.leanObserved ? 1 : 0;
 
     const projection = shoulderProjection(world?.[POSE_LEFT_SHOULDER], world?.[POSE_RIGHT_SHOULDER], this.isMirrored, dxSh);
     const shoulderPxPerMeter = shoulderPx / (SHOULDER_SPAN_M * projection.ratio);
@@ -3155,14 +3045,24 @@ export class ARTryOn {
     const neckHeightM = this.calibration.neckHeightAuto
       ? clamp(mouthHeight * 0.4, 0.035, 0.085)
       : (this.calibration.neckHeightMm ?? 40) * 0.001;
-    const neckOffsetPx = shoulderPxPerMeter * this.filtNeckHeight.filter(neckHeightM, now);
+    const filteredNeckHeight = this.filtNeckHeight.filter(neckHeightM, now);
+    const neckOffsetPx = shoulderPxPerMeter * filteredNeckHeight;
     const anchorX = shoulderMidX + upX * neckOffsetPx;
     const anchorY = shoulderMidY + upY * neckOffsetPx;
 
-    const sidePx = this.calibration.side || 0;
-    const liftPx = this.calibration.lift || 0;
-    const rawPx = anchorX + rightX * sidePx + upX * liftPx;
-    const rawPy = anchorY + rightY * sidePx + upY * liftPx;
+    // Corrections are stored in torso-local millimetres. The frame uses the
+    // shoulders and reliable torso depth, independently of head movement.
+    const rawCy = Math.cos(projection.yaw), rawSy = Math.sin(projection.yaw);
+    const rawCl = Math.cos(torso.lean), rawSl = Math.sin(torso.lean);
+    const bodyRight = { x: rightX * rawCy, y: rightY * rawCy };
+    const bodyUp = { x: upX * rawCl - rightX * rawSy * rawSl, y: upY * rawCl - rightY * rawSy * rawSl };
+    const neckReference = { x: anchorX, y: anchorY, right: bodyRight, up: bodyUp,
+      pixelsPerMeter: shoulderPxPerMeter, neckHeightMm: filteredNeckHeight * 1000, trackingResult: result };
+    const offset = this.calibration.neckBaseOffsetMm || { x: 0, y: 0 };
+    const sidePx = (this.calibration.side || 0) + offset.x * .001 * shoulderPxPerMeter;
+    const liftPx = (this.calibration.lift || 0) + offset.y * .001 * shoulderPxPerMeter;
+    const rawPx = anchorX + bodyRight.x * sidePx + bodyUp.x * liftPx;
+    const rawPy = anchorY + bodyRight.y * sidePx + bodyUp.y * liftPx;
 
     const neckMetersPerLocalUnit = METERS_PER_MM / Math.max(this._unitsPerMm, 1e-6);
     const rawScale = shoulderPxPerMeter * neckMetersPerLocalUnit * this.calibration.fit;
@@ -3198,6 +3098,7 @@ export class ARTryOn {
     this._badPoseFrames = 0;
     this.setStatus("");
     this.ring.visible = this.ring.userData.wearable.neck?.fits !== false;
+    if (this.ring.visible) this._neckPlacementReference = neckReference;
     if (!this.ring.visible) this.setStatus("This chain is too short for the current neck estimate. Choose a longer chain.");
     const chainLengthMm = Number(this._physicalSpec?.necklace?.chainLengthMm);
     if (this.sizeEl && Number.isFinite(chainLengthMm) && chainLengthMm > 0) {
@@ -3237,8 +3138,11 @@ export class ARTryOn {
     const yaw = this.filtPitch.filter(rawYaw, now);
     const cy = Math.cos(yaw);
     const sy = Math.sin(yaw);
+    const lean = this.filtRoll.filter(torso.lean, now);
     this._vRight.set(calRightX * cy, calRightY * cy, sy).normalize();
     this._vUp.set(calUpX, calUpY, 0).normalize();
+    this._vFwd.crossVectors(this._vRight, this._vUp).normalize();
+    this._vUp.multiplyScalar(Math.cos(lean)).addScaledVector(this._vFwd, Math.sin(lean)).normalize();
     this._vFwd.crossVectors(this._vRight, this._vUp).normalize();
     this._vRight.crossVectors(this._vUp, this._vFwd).normalize();
     this._mat.makeBasis(this._vRight, this._vUp, this._vFwd);
@@ -3283,10 +3187,26 @@ export class ARTryOn {
       this._vFwd.y * localAnchor.z
     ) * s;
     this.setTargetFromStage(px - anchorOffsetX, py - anchorOffsetY, s);
+    const bodyOffsetX=offset.x*.001*shoulderPxPerMeter;
+    const bodyOffsetY=offset.y*.001*shoulderPxPerMeter;
+    const bodyAnchor=this.stageToWorld(anchorX+bodyRight.x*bodyOffsetX+bodyUp.x*bodyOffsetY,
+      anchorY+bodyRight.y*bodyOffsetX+bodyUp.y*bodyOffsetY);
+    const rawRight={x:torso.right.x,y:torso.right.y},rawUp=torso.up;
+    const bodyOrientation=neckOrientation(rawRight,rawUp,rawYaw,torso.lean);
+    const rawOrientation=neckOrientation(rawRight,rawUp,rawYaw,torso.lean,rollCal);
+    const rawAnchorOffset=localAnchor.clone().applyQuaternion(rawOrientation).multiplyScalar(rawScale);
+    this._neckContactSourceInverse=new THREE.Matrix4().compose(
+      this.stageToWorld(rawPx-rawAnchorOffset.x,rawPy-rawAnchorOffset.y),rawOrientation,
+      new THREE.Vector3().setScalar(this.pixelScaleToWorld(rawScale))).invert();
+    const neckBody=this.ring.userData.wearable.neck;
+    if (neckBody && this._neckContactBody) this._neckContactBody.updateSource(bodyAnchor,bodyOrientation,
+      shoulderPxPerMeter*this.worldUnitsPerPixelAtZ(),neckBody.radiusMm*.00098,neckBody.depthMm*.00098);
+
     this._stoneNormalZ = this._vFwd.z;
     const motionGate = 1 - smoothstep(0.18, 0.72, this._motionEnergy);
     const contactScore = clamp(confidence * (0.64 + faceScore * 0.20 + axisScore * 0.16), 0, 1);
-    this._targetNeckShadowOpacity = this._neckShadowBaseOpacity * contactScore * (0.58 + motionGate * 0.42);
+    this._targetNeckShadowOpacity = this._neckShadowBaseOpacity * contactScore * (0.58 + motionGate * 0.42)
+      * neckContactWeight(this.calibration.side||0,this.calibration.lift||0,shoulderPxPerMeter,this.calibration.fit,this.calibration.roll||0);
     this._targetNeckShadowScaleX = clamp(0.88 + Math.abs(rawRightDotUp) * 0.22 + Math.abs(yaw) * 0.18, 0.82, 1.18);
     this._targetNeckShadowScaleY = clamp(0.74 + (1 - sizeScore) * 0.18, 0.72, 1.04);
 
@@ -3342,6 +3262,8 @@ export class ARTryOn {
   close() {
     if (this._closed) return;
     this._closed = true;
+    this.cancelNeckPlacement();
+    this._neckPlacementReference = null;
     this._frameGate.reset();
     this._cameraAbort?.abort();
     this._cancelWorkerInit?.();
@@ -3368,6 +3290,7 @@ export class ARTryOn {
     }
     this._trackingWorkerReady = false;
     this._trackingWorkerBusy = false;
+    this._pendingTrackingFrame = null;
     if (this.handLandmarker) {
       try { this.handLandmarker.close(); } catch {}
       this.handLandmarker = null;
@@ -3380,6 +3303,13 @@ export class ARTryOn {
       try { this.poseLandmarker.close(); } catch {}
       this.poseLandmarker = null;
     }
+    this._fingerContactBody?.dispose();
+    this._fingerContactBody = null;
+    this._wristContactBody?.dispose();
+    this._wristContactBody = null;
+    this._neckContactBody?.dispose();
+    this._neckContactBody = null;
+    this._neckContactSourceInverse = null;
     if (this._handMaskMesh) {
       this.scene?.remove?.(this._handMaskMesh);
       this._handMaskMesh.dispose();
@@ -3392,6 +3322,7 @@ export class ARTryOn {
       this._handMaskCtx = null;
     }
     if (this.renderer) {
+      this._wearable?.renderBatches.dispose();
       disposeObjectTree(this.ring);
       this.renderer.dispose();
       this.renderer.forceContextLoss?.();
@@ -3401,12 +3332,6 @@ export class ARTryOn {
       this._envRT.dispose();
       this._envRT = null;
     }
-    if (this._envLive) {
-      this._envLive.rt?.dispose();
-      this._envLive.pmrem?.dispose();
-      this._envLive = null;
-    }
-    this._envLiveFailed = false;
     if (this.modal && this.modal.parentNode) {
       this.modal.parentNode.removeChild(this.modal);
     }
@@ -3415,6 +3340,7 @@ export class ARTryOn {
     this.camera = null;
     this._lightProbe = null;
     this._lightProbeCtx = null;
+    this._appearanceLighting.reset();
     this._wearable = null;
     this._articulation = null;
     this._faceOccluder = null;

@@ -1,5 +1,6 @@
 import * as THREE from "../three.module.js";
 import { createBraceletFitter } from "./bracelet-fit.js?v=20260911-ar-live3";
+import { createRenderBatches } from "./render-batches.js?v=20260912-ar-render";
 import { WORLD_UNITS_PER_MM, buildJewellerySpec } from "../jewellery-spec.js?v=20260911-construction-v32";
 
 export function createWearableAsset(piece, state) {
@@ -54,8 +55,9 @@ export function createWearableAsset(piece, state) {
     : bracelet.innerDiameterMm * 0.0005;
   const outerRadius = spec.piece === "Ring" ? (spec.ring.innerRadiusMm + spec.ring.shankThicknessMm) * 0.001
     : Math.max(0.005, bounds.getSize(new THREE.Vector3()).x / 2);
+  const renderBatches = createRenderBatches(piece);
   return {
-    pose, piece, spec, innerRadius, outerRadius, earNodes, updateOpticalScale, fitBracelet,
+    pose, piece, spec, innerRadius, outerRadius, earNodes, updateOpticalScale, fitBracelet, renderBatches,
     registerPhysicalOptics(material, original) {
       opticalDistances.set(material, opticalDistances.get(original) ?? Infinity);
       physicalOptics.add(material);
