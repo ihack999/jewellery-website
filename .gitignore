@@ -8,3 +8,6 @@
 # Local offline render outputs
 renders/
 __pycache__/
+
+# Generated OpenAI Sites static output
+build/

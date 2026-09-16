@@ -342,6 +342,58 @@ body[data-experience="atelier"] .product-assurances__intro p,
 body[data-experience="atelier"] .product-assurances .assurance-accordion p { font-size: 14px; line-height: 1.85; }
 body[data-experience="atelier"] .product-assurances .assurance-accordion summary { font-size: 14px; }
 
+body[data-experience="atelier"] .product-media-section {
+  padding-block: 78px 86px;
+  background: #f7f3ec;
+  color: #2c2423;
+}
+body[data-experience="atelier"] .product-media-section .container {
+  width: min(1440px, calc(100% - 96px));
+  max-width: none;
+}
+.product-media-section__heading {
+  display: grid;
+  grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr);
+  gap: 12px clamp(36px, 7vw, 110px);
+  align-items: end;
+  margin-bottom: 38px;
+}
+.product-media-section__heading .product-section-label { grid-column: 1 / -1; }
+.product-media-section__heading h2 {
+  max-width: 720px;
+  margin: 0;
+  font: 400 clamp(40px, 4.3vw, 66px)/1.03 "Cormorant Garamond", Georgia, serif;
+  letter-spacing: -.025em;
+}
+.product-media-section__heading > p:last-child {
+  max-width: 52ch;
+  margin: 0 0 7px;
+  color: #655952;
+  font-size: 15px;
+  line-height: 1.8;
+}
+.product-video-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(18px, 2.5vw, 36px);
+}
+.product-video-grid figure { margin: 0; }
+.product-video-grid video {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  border: 1px solid #e1d7cb;
+  background: #eee7de;
+  object-fit: contain;
+}
+.product-video-grid figcaption {
+  padding-top: 12px;
+  color: #766b65;
+  font: 500 11px/1.5 "Manrope", sans-serif;
+  letter-spacing: .11em;
+  text-transform: uppercase;
+}
+
 @media (min-width: 1000px) and (min-height: 800px) {
   body[data-experience="atelier"] .product-gallery { position: sticky; top: 132px; }
   body[data-experience="atelier"] .product-gallery .gallery-main { height: min(44vw, 680px, calc(100svh - 325px)); }
@@ -354,6 +406,7 @@ body[data-experience="atelier"] .product-assurances .assurance-accordion summary
   body[data-experience="atelier"] [data-product-page] .product-info { padding-top: 24px; }
   body[data-experience="atelier"] [data-product-page] .product-info h1 { font-size: 44px; }
   body[data-experience="atelier"] .product-details__grid { gap: 0 34px; }
+  body[data-experience="atelier"] .product-media-section .container { width: calc(100% - 48px); }
 }
 
 @media (max-width: 760px) {
@@ -384,6 +437,14 @@ body[data-experience="atelier"] .product-assurances .assurance-accordion summary
   body[data-experience="atelier"] .product-details__grid .product-detail-panel { grid-template-columns: 20px minmax(0, 1fr); gap: 14px; padding-block: 26px 30px; scroll-margin-top: 130px; }
   body[data-experience="atelier"] .product-detail-panel h2,
   body[data-experience="atelier"] .product-detail-panel h3 { font-size: 30px; }
+  body[data-experience="atelier"] .product-media-section { padding-block: 48px 54px; }
+  body[data-experience="atelier"] .product-media-section .container { width: calc(100% - 36px); }
+  .product-media-section__heading { grid-template-columns: minmax(0, 1fr); gap: 14px; margin-bottom: 26px; }
+  .product-media-section__heading .product-section-label { grid-column: auto; margin-bottom: 0; }
+  .product-media-section__heading h2 { font-size: 44px; }
+  .product-media-section__heading > p:last-child { font-size: 14px; }
+  .product-video-grid { grid-template-columns: minmax(0, 1fr); }
+  .product-video-grid video { aspect-ratio: 4 / 5; }
 }
 
 @media (prefers-reduced-motion: reduce) {
