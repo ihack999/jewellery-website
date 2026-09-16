@@ -224,6 +224,17 @@ body[data-experience="atelier"] .shop-view-toggle button.is-active { background:
 .atelier-journal > a:not(.atelier-link) { font-size: 29px; }
 .atelier-journal > a small { font-size: 10px; color: #8b5964; }
 .atelier-stories { border-bottom: 1px solid var(--line); }
+.customer-video-showcase { padding-bottom: 0; background: #f6efe6; }
+.customer-video-showcase__heading { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: end; gap: 28px; }
+.customer-video-showcase__heading .atelier-section-heading { margin-bottom: 42px; }
+.customer-video-showcase__heading .atelier-section-heading > p { max-width: 330px; }
+.customer-video-reel { position: relative; padding-block: 24px; background: #482a33; border-color: #704851; }
+.customer-video-reel .reviews-banner__track { animation-duration: 64s; }
+.customer-video-reel .customer-story-card { width: clamp(220px, 21vw, 310px); aspect-ratio: 3 / 4; border-color: #fff3e24d; border-radius: 0; box-shadow: 0 22px 50px #28151b52; }
+.customer-video-reel .customer-story-card__label { right: 12px; bottom: 12px; left: 12px; padding: 11px 12px; border-color: #fff3e247; border-radius: 0; background: #2b1f22d9; color: #fff7ec; font-size: 10px; line-height: 1.45; letter-spacing: .08em; }
+.customer-video-reel__toggle { margin-bottom: 42px; min-height: 44px; padding: 10px 16px; border: 1px solid #9e7779; background: transparent; color: #68414a; font: 700 11px/1 "Manrope", sans-serif; letter-spacing: .12em; text-transform: uppercase; cursor: pointer; transition: background-color 180ms ease, color 180ms ease; }
+.customer-video-reel__toggle:hover, .customer-video-reel__toggle:focus-visible { background: #482a33; color: #fff5e7; }
+.customer-video-showcase.is-paused .reviews-banner__track { animation-play-state: paused; }
 body[data-experience="atelier"] .booking-section { padding-block: 90px; }
 body[data-experience="atelier"] .booking-intro p { font-size: 14px; }
 body[data-experience="atelier"] .booking-card { background: #fbf8f2; border-color: var(--line); padding: 36px; }
@@ -376,6 +387,11 @@ body[data-experience="atelier"] .cart-modal__footer p { font-size: 12px; line-he
   .atelier-estate h3 { font-size: 39px; }
   .atelier-journal > h3 { font-size: 41px; }
   .atelier-journal > a:not(.atelier-link) { font-size: 27px; }
+  .customer-video-showcase__heading { grid-template-columns: 1fr; gap: 0; }
+  .customer-video-showcase__heading .atelier-section-heading { margin-bottom: 20px; }
+  .customer-video-reel__toggle { margin: 0 0 24px; justify-self: start; }
+  .customer-video-reel { padding-block: 16px; }
+  .customer-video-reel .customer-story-card { width: min(72vw, 280px); }
   .collection-intro { padding: 35px 0 28px; }
   .collection-intro .atelier-container { display: block; }
   .collection-intro h1 { font-size: clamp(44px,12vw,70px); }

@@ -2405,12 +2405,33 @@ function setupLazyFeatureModules() {
 
 function setupViewportVideos() {
   const videos = [...document.querySelectorAll("video[muted][loop]")];
+  const reels = [...document.querySelectorAll("[data-video-reel]")];
+  const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   if (!videos.length) {
     return;
   }
 
-  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+  reels.forEach((reel) => {
+    const toggle = reel.querySelector("[data-video-reel-toggle]");
+    const reelVideos = [...reel.querySelectorAll("video")];
+    const setPaused = (paused) => {
+      reel.classList.toggle("is-paused", paused);
+      if (toggle) {
+        toggle.setAttribute("aria-pressed", String(paused));
+        toggle.textContent = paused ? "Play reel" : "Pause reel";
+      }
+      reelVideos.forEach((video) => {
+        if (paused) video.pause();
+        else video.play().catch(() => {});
+      });
+    };
+
+    toggle?.addEventListener("click", () => setPaused(!reel.classList.contains("is-paused")));
+    if (prefersReducedMotion) setPaused(true);
+  });
+
+  if (prefersReducedMotion) {
     videos.forEach((video) => video.pause());
     return;
   }
@@ -2424,7 +2445,7 @@ function setupViewportVideos() {
     entries.forEach((entry) => {
       const video = entry.target;
 
-      if (entry.isIntersecting) {
+      if (entry.isIntersecting && !video.closest("[data-video-reel]")?.classList.contains("is-paused")) {
         video.play().catch(() => {});
       } else {
         video.pause();
