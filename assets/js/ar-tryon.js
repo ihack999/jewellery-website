@@ -17,9 +17,11 @@ import { observeForearm, fitForearmOrientation } from "./ar/forearm-fit.js?v=202
 import { NeckContactBody, neckOrientation, neckContactWeight } from "./ar/neck-contact.js?v=20260912-ar-placement";
 import { WearableArticulation } from "./ar/articulation.js?v=20260911-ar-v1";
 import { CameraTexture } from "./ar/camera-texture.js?v=20260911-ar-v1";
-import { injectExperienceStyles, buildExperienceModal, createExperience, streamFromPhoto } from "./ar/experience.js?v=20260925-arx2";
-import { GlintLayer } from "./ar/glints.js?v=20260925-arx";
+import { injectExperienceStyles, buildExperienceModal, createExperience, streamFromPhoto } from "./ar/experience.js?v=20260926-real";
+import { GlintLayer } from "./ar/glints.js?v=20260926-real";
 import { HairOcclusion } from "./ar/hair-occlusion.js?v=20260925-arx2";
+import { CameraEnvironment } from "./ar/camera-environment.js?v=20260926-real";
+import { CameraMatchedRenderer, estimateNoiseSigma } from "./ar/camera-match.js?v=20260926-real";
 import {
   METERS_PER_MM
 } from "./jewellery-spec.js?v=20260911-construction-v32";
@@ -1708,6 +1710,14 @@ export class ARTryOn {
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
     this.renderer.toneMappingExposure = 1.0;
+    // Camera-matched compositing (grain, lens softness, motion blur). Falls
+    // back to the direct render where half-float targets aren't available.
+    try {
+      this._matcher = !window.__arClassicRender && !window.__arNoMatch && CameraMatchedRenderer.supported(this.renderer) ? new CameraMatchedRenderer(this.renderer) : null;
+    } catch (error) {
+      console.warn("[AR] camera-matched rendering unavailable:", error);
+      this._matcher = null;
+    }
 
     this.scene = new THREE.Scene();
     this._renderTiming.reset();
@@ -1853,8 +1863,15 @@ export class ARTryOn {
         // gain controls its intensity without rebuilding this texture.
         this.scene.environment = envRT.texture;
         this._envRT = envRT;
-        tex.dispose();
         pmrem.dispose();
+        // Live reflections of the real room, blended with the studio HDR.
+        try {
+          if (!window.__arClassicRender && !window.__arNoCameraEnv) this._cameraEnv = new CameraEnvironment(this.renderer, tex, envRT);
+        } catch (error) {
+          console.warn("[AR] camera reflections unavailable:", error);
+          this._cameraEnv = null;
+        }
+        if (!this._cameraEnv) tex.dispose();
         configureWearableGemOptics(this._wearable, this._designState);
         resolve();
       }, undefined, reject);
@@ -2010,16 +2027,86 @@ export class ARTryOn {
     this.updateContactVisuals(dt);
     this.updateQualityReadout();
     this.sampleVideoLighting(now);
+    this.updateCameraRealism(now, dt);
     this._glints?.update(dt, this.camera, this._appearanceLighting?.gain, this.ring?.visible && this._hasTarget);
     if (this._hairOcclusion) { this.updateHairRegions(dt); this.updateLimbOccluders(dt); }
     const renderStart = performance.now();
-    this.renderer.render(this.scene, this.camera);
+    if (this._matcher && this._cameraTexture) {
+      const metrics = this.videoMetrics();
+      this._matcher.render(this.scene, this.camera, {
+        cameraTexture: this._cameraTexture,
+        bufferPerVideoPixel: (metrics.drawWidth * this.renderer.getPixelRatio()) / Math.max(1, this.video?.videoWidth || metrics.drawWidth),
+        shadow: this.castShadowSpec(),
+        lightDir: this._key ? { x: this._key.position.x, y: this._key.position.y } : null
+      });
+    } else {
+      this.renderer.render(this.scene, this.camera);
+    }
     this._hairOcclusion?.render(this.renderer, this);
     const renderEnd = performance.now();
     this._renderTiming.record(renderStart, renderEnd, this.renderer.info.render, this.renderer.getPixelRatio());
     this.updateRenderScale(renderEnd - renderStart, now);
     if (this._captureRequest) this.completeCapture();
   };
+
+  /* Screen-space cast shadow of the piece on the body, in drawing-buffer
+   * pixels: short and soft, because jewellery sits on the skin. It grows
+   * with the piece's on-screen size and weakens in dim scenes (flat light
+   * casts soft shadows). */
+  castShadowSpec() {
+    if (!this.ring?.visible || !this._hasTarget) return null;
+    const pr = this.renderer.getPixelRatio();
+    const base = { Ring: [0.30, 2.2, 2.6], Bracelet: [0.30, 3.0, 3.6], Earrings: [0.34, 2.0, 2.6], Necklace: [0.26, 2.6, 3.2] }[this.pieceType] || [0.28, 2.4, 3];
+    const gain = this._appearanceLighting?.gain ?? 1;
+    const strength = base[0] * clamp(0.55 + gain * 0.45, 0.55, 1.1) * (this._presence ?? 1);
+    // On-screen size of the piece (CSS px radius) relative to a typical 36 px ring.
+    const radiusPx = (this.ring.scale.x * (this._ringLocalOuterR || 0.01)) / Math.max(1e-6, this.worldUnitsPerPixelAtZ());
+    const size = this.pieceType === "Necklace" ? 1 : clamp(radiusPx / 36, 0.6, 2.2);
+    return { strength, distance: base[1] * pr * size, radius: base[2] * pr * size };
+  }
+
+  /* Realism inputs sampled from the live camera: room reflections and white
+   * balance (CameraEnvironment), sensor grain and on-screen motion for the
+   * camera-matched composite. */
+  updateCameraRealism(now, dt) {
+    const video = this.video;
+    if (!video || video.readyState < 2 || this._suspended) return;
+    if (this._cameraEnv && !this._frozen) {
+      this._cameraEnv.update(now, video, { mirrored: this.isMirrored, videoAspect: (video.videoWidth || 4) / Math.max(1, video.videoHeight || 3), busy: (this._renderCostEMA || 0) > 14 });
+      // Lights follow the estimated white balance, gently.
+      const tint = this._cameraEnv.tint;
+      const k = 1 - Math.exp(-dt / 0.5);
+      for (const light of [this._key, this._fill, this._rim, this._hemi]) {
+        if (!light) continue;
+        light.color.r += (tint.x - light.color.r) * k;
+        light.color.g += (tint.y - light.color.g) * k;
+        light.color.b += (tint.z - light.color.b) * k;
+      }
+    }
+    if (!this._matcher) return;
+    if (now - (this._lastNoiseSample || -Infinity) > 1500 && video.videoWidth >= 160) {
+      this._lastNoiseSample = now;
+      try {
+        this._noiseProbe ||= Object.assign(document.createElement("canvas"), { width: 96, height: 72 });
+        const ctx = this._noiseProbeCtx ||= this._noiseProbe.getContext("2d", { willReadFrequently: true });
+        // 1:1 crop (no scaling, which would hide the grain) near the centre.
+        const sx = Math.floor(video.videoWidth / 2 - 48), sy = Math.floor(video.videoHeight * 0.4 - 36);
+        ctx.drawImage(video, sx, sy, 96, 72, 0, 0, 96, 72);
+        this._matcher.observeNoise(estimateNoiseSigma(ctx.getImageData(0, 0, 96, 72).data, 96, 72));
+      } catch { /* keep the last estimate */ }
+    }
+    // Screen-space velocity of the piece → motion blur length.
+    if (this.ring?.visible && this._hasTarget && !this._frozen && dt > 0) {
+      const p = this._vTmpA.copy(this.ring.position).project(this.camera);
+      const size = this.renderer.getDrawingBufferSize(this._matcher.size);
+      const x = (p.x + 1) / 2 * size.x, y = (p.y + 1) / 2 * size.y;
+      if (this._lastScreenPos) this._matcher.observeVelocity((x - this._lastScreenPos.x) / dt, (y - this._lastScreenPos.y) / dt, dt);
+      this._lastScreenPos = { x, y };
+    } else {
+      this._lastScreenPos = null;
+      this._matcher.observeVelocity(0, 0, Math.max(dt, 0.016));
+    }
+  }
 
   updateHairRegions(dt) {
     const hair = this._hairOcclusion;
@@ -2250,10 +2337,10 @@ export class ARTryOn {
     try {
       const metrics = this.videoMetrics();
       const scale = Math.min(2, Math.max(1, this.video.videoWidth / metrics.drawWidth) * (window.devicePixelRatio || 1));
-      const out = document.createElement("canvas");
+      let out = document.createElement("canvas");
       out.width = Math.round(metrics.width * scale);
       out.height = Math.round(metrics.height * scale);
-      const ctx = out.getContext("2d");
+      let ctx = out.getContext("2d");
       ctx.save();
       ctx.scale(scale, scale);
       if (this.isMirrored) { ctx.translate(metrics.width, 0); ctx.scale(-1, 1); }
@@ -2271,8 +2358,24 @@ export class ARTryOn {
         ctx.drawImage(this.canvas, 0, 0, out.width, out.height);
       }
       ctx.globalAlpha = 1;
+      // Photo mode: keep just the photo, not the letterbox around it.
+      const photoRect = this._photoMode ? this.stream?.photoRect : null;
+      if (photoRect) {
+        const cx = Math.round((metrics.offsetX + photoRect.x * metrics.drawWidth) * scale);
+        const cy = Math.round((metrics.offsetY + photoRect.y * metrics.drawHeight) * scale);
+        const cw = Math.round(photoRect.w * metrics.drawWidth * scale), ch = Math.round(photoRect.h * metrics.drawHeight * scale);
+        const x0 = Math.max(0, cx), y0 = Math.max(0, cy);
+        const w = Math.min(out.width, cx + cw) - x0, h = Math.min(out.height, cy + ch) - y0;
+        if (w > 16 && h > 16) {
+          const cropped = document.createElement("canvas");
+          cropped.width = w; cropped.height = h;
+          cropped.getContext("2d").drawImage(out, x0, y0, w, h, 0, 0, w, h);
+          out = cropped;
+          ctx = out.getContext("2d");
+        }
+      }
       if (watermark) {
-        const size = Math.round(out.width * 0.028);
+        const size = Math.round(Math.min(out.width, out.height * 0.8) * 0.034);
         ctx.font = `500 ${size}px Georgia, "Times New Roman", serif`;
         ctx.textAlign = "center";
         ctx.fillStyle = "rgba(255,255,255,0.86)";
@@ -3315,6 +3418,10 @@ export class ARTryOn {
     this._glints?.dispose();
     this._glints = null;
     this._hairOcclusion?.dispose();
+    this._cameraEnv?.dispose();
+    this._cameraEnv = null;
+    this._matcher?.dispose();
+    this._matcher = null;
     this._hairOcclusion = null;
     this._experience?.dispose();
     this._fingerContactBody?.dispose();

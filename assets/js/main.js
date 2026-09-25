@@ -2359,7 +2359,7 @@ function loadDesignerModule() {
 
 function loadArModule() {
   if (!arModulePromise) {
-    arModulePromise = import("/assets/js/ar-tryon.js?v=20260925-arx2");
+    arModulePromise = import("/assets/js/ar-tryon.js?v=20260926-real");
   }
 
   return arModulePromise;

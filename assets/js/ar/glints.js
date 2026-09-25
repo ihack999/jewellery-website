@@ -101,7 +101,12 @@ export class GlintLayer {
     gems.sort((a, b) => b.radius - a.radius);
     // Keep the centre stone(s) plus a spread of accents.
     const chosen = gems.length <= MAX_GLINTS ? gems : [...gems.slice(0, 4), ...gems.slice(4).filter((_, i, arr) => i % Math.ceil(arr.length / (MAX_GLINTS - 4)) === 0)].slice(0, MAX_GLINTS);
-    const material = () => new THREE.SpriteMaterial({ map: makeStarTexture(), color: 0xffffff, transparent: true, opacity: 0, depthWrite: false, depthTest: true, blending: THREE.AdditiveBlending });
+    // Additive light that leaves alpha untouched: a glint adds brightness but
+    // must not count as "jewellery coverage" (which would cast a shadow and
+    // hide the camera behind it in the camera-matched composite).
+    const material = () => new THREE.SpriteMaterial({ map: makeStarTexture(), color: 0xffffff, transparent: true, opacity: 0, depthWrite: false, depthTest: true,
+      blending: THREE.CustomBlending, blendEquation: THREE.AddEquation, blendSrc: THREE.SrcAlphaFactor, blendDst: THREE.OneFactor,
+      blendSrcAlpha: THREE.ZeroFactor, blendDstAlpha: THREE.OneFactor });
     chosen.forEach(({ mesh, radius }, index) => {
       const random = seeded(1000 + index * 7919);
       const facets = Array.from({ length: FACETS_PER_GEM }, () => {

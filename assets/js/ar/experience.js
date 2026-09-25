@@ -488,6 +488,8 @@ export async function streamFromPhoto(file, aspect = 0) {
   };
   paint();
   const stream = canvas.captureStream(15);
+  // Where the photo sits inside the letterboxed frame (for capture cropping).
+  stream.photoRect = { x: x / canvas.width, y: y / canvas.height, w: w / canvas.width, h: h / canvas.height };
   // Canvas streams only emit frames when the canvas changes; keep repainting
   // (identical pixels) so tracking keeps receiving frames.
   const timer = setInterval(paint, 66);

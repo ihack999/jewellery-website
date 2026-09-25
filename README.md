@@ -137,6 +137,7 @@ Every product with a `studio` field gets a **Try it on** button (on the photo, u
 
 - **Runs on the device, nothing uploaded.** Google MediaPipe runs in a Web Worker so the page stays smooth. Everything is self-hosted: the library in `assets/vendor/mediapipe-0.10.14/`, the models in `assets/models/` (checksums in `SHA256SUMS.txt`; `scripts/fetch-ar-models.sh` downloads them again). A public CDN is used only as a fallback.
 - **Experience** (`assets/js/ar/experience.js`): an intro screen with tips, **Use a photo instead** (no camera needed), metal/stone swatches that swap live without losing the fit, a before/after **Compare** slider, and a shutter that saves or shares a branded photo.
+- **Camera-matched realism**: metal and diamonds reflect the real room and follow its white balance (`ar/camera-environment.js`); the piece gets the camera's own grain, lens softness and motion blur, plus a soft shadow on the skin (`ar/camera-match.js`).
 - **Realism**: diamond glints that follow real facet/light geometry (`ar/glints.js`); hair in front of earrings or a necklace, and a hand raised in front of a necklace, hide the jewellery behind them (`ar/hair-occlusion.js`); the piece fades instead of blinking when tracking drops; true-to-scale sizing anchored to an adult hand.
 - Shoppers can fine-tune the fit with **Adjust**. It is a visual preview, not a sizing tool.
 
