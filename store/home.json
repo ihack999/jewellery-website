@@ -1,0 +1,111 @@
+{
+  "$comment": "The homepage is a list of sections, rendered top to bottom. Reorder, delete or duplicate them freely. Section types: hero, categoryTiles, productTabs, productRow, studioFeature, editorialSplit, priceTiles, clientMoments, services, quote, trust.",
+
+  "seo": {
+    "title": "Toronto Jewels Curation | Custom Fine Jewellery, Diamonds & Estate Pieces",
+    "description": "Women-led Toronto atelier for custom fine jewellery, signature diamond pieces and rare estate finds. Design your own piece in our 3D studio."
+  },
+
+  "sections": [
+    {
+      "type": "hero",
+      "eyebrow": "Toronto · Custom · Estate",
+      "title": "Jewellery made your way.",
+      "text": "Signature diamond pieces, one-of-a-kind estate finds and a 3D studio to design your own — all confirmed personally by our atelier.",
+      "ctas": [
+        { "label": "Shop Jewellery", "href": "/shop/" },
+        { "label": "Design Your Own", "href": "/design-studio/", "style": "ghost" }
+      ],
+      "images": [
+        { "src": "/assets/images/optimized/graduated-tennis-necklace-worn-1600.jpg", "alt": "Graduated diamond tennis necklace worn with an ivory blouse", "position": "50% 30%" },
+        { "src": "/assets/images/customer-stories/diamond-jewellery-portrait.jpeg", "alt": "Client wearing a diamond ring and tennis bracelet", "position": "50% 35%" }
+      ]
+    },
+    {
+      "type": "categoryTiles",
+      "title": "Shop by category",
+      "collections": ["rings", "necklaces", "bracelets", "earrings", "tennis", "estate"]
+    },
+    {
+      "type": "productTabs",
+      "eyebrow": "Most loved",
+      "title": "The Signatures",
+      "tabs": [
+        { "label": "Best Sellers", "collection": "signatures" },
+        { "label": "Tennis", "collection": "tennis" },
+        { "label": "Colour", "collection": "coloured-stones" },
+        { "label": "Estate & Rare", "collection": "estate" }
+      ],
+      "cta": { "label": "Shop all jewellery", "href": "/shop/" }
+    },
+    {
+      "type": "studioFeature",
+      "eyebrow": "The Design Studio",
+      "title": "Design it in real-time 3D.",
+      "text": "Choose the piece, silhouette, metal, stone shape and setting — then turn it, zoom in and see how it catches the light. When it feels right, send it straight to our atelier for a personal quote.",
+      "steps": ["Choose a silhouette", "Pick metal & stone", "Send it to our atelier"],
+      "cta": { "label": "Open the Studio", "href": "/design-studio/" },
+      "image": "/assets/images/store/studio-preview.jpg",
+      "fallbackImage": "/assets/images/optimized/studio-ring-pink-gemstone-1600.jpg"
+    },
+    {
+      "type": "editorialSplit",
+      "items": [
+        {
+          "eyebrow": "The Tennis Edit",
+          "title": "An unbroken line of light.",
+          "text": "Classic, graduated and bezel-set — in natural and lab-grown diamonds.",
+          "cta": { "label": "Shop Tennis", "href": "/collections/tennis/" },
+          "image": "/assets/images/products/classic-tennis-necklace/classic-tennis-necklace-worn-portrait.jpeg"
+        },
+        {
+          "eyebrow": "Estate & Rare",
+          "title": "Found once. Kept forever.",
+          "text": "Estate diamonds and diamond-set watches from private collections, viewed by appointment in Toronto.",
+          "cta": { "label": "Explore Estate", "href": "/collections/estate/" },
+          "image": "/assets/images/drive/img-4406.jpg"
+        }
+      ]
+    },
+    {
+      "type": "priceTiles",
+      "title": "Shop by price",
+      "items": [
+        { "label": "Under", "amount": "$2,500", "href": "/collections/under-2500/", "image": "/assets/images/studio/half-eternity-pinky-band.webp" },
+        { "label": "From", "amount": "$2,500", "sub": "to $10,000", "href": "/collections/2500-to-10000/", "image": "/assets/images/studio/oval-bezel-diamond-bracelet.webp" },
+        { "label": "From", "amount": "$10,000", "sub": "& above", "href": "/collections/10000-and-above/", "image": "/assets/images/studio/graduated-diamond-necklace.webp" }
+      ]
+    },
+    {
+      "type": "clientMoments",
+      "eyebrow": "Worn, not stored",
+      "title": "Client moments",
+      "text": "Real pieces, real people — filmed by our clients.",
+      "videos": [
+        { "src": "/assets/videos/customer-15-carat-graduated-tennis-necklace-01.mp4", "poster": "/assets/images/store/posters/customer-15-carat-graduated-tennis-necklace-01.jpg", "label": "15 ct graduated tennis necklace", "href": "/products/15-carat-graduated-diamond-tennis-necklace/" },
+        { "src": "/assets/videos/customer-oval-diamond-ring.mp4", "poster": "/assets/images/store/posters/customer-oval-diamond-ring.jpg", "label": "Oval diamond ring", "href": "/design-studio/" },
+        { "src": "/assets/videos/customer-15-carat-graduated-tennis-necklace-02.mp4", "poster": "/assets/images/store/posters/customer-15-carat-graduated-tennis-necklace-02.jpg", "label": "Graduated tennis necklace", "href": "/products/15-carat-graduated-diamond-tennis-necklace/" },
+        { "src": "/assets/videos/customer-story-green-clover-ring.mp4", "poster": "/assets/images/store/posters/customer-story-green-clover-ring.jpg", "label": "Green clover ring", "href": "/collections/coloured-stones/" },
+        { "src": "/assets/videos/customer-review-styling-01.mp4", "poster": "/assets/images/store/posters/customer-review-styling-01.jpg", "label": "Everyday styling", "href": "/shop/" },
+        { "src": "/assets/videos/customer-15-carat-graduated-tennis-necklace-03.mp4", "poster": "/assets/images/store/posters/customer-15-carat-graduated-tennis-necklace-03.jpg", "label": "Tennis necklace detail", "href": "/collections/tennis/" },
+        { "src": "/assets/videos/blue-stone-ring-styling.mp4", "poster": "/assets/images/store/posters/blue-stone-ring-styling.jpg", "label": "Blue stone ring", "href": "/products/rare-blue-diamond-ring/" },
+        { "src": "/assets/videos/customer-review-styling-02.mp4", "poster": "/assets/images/store/posters/customer-review-styling-02.jpg", "label": "Styled by a client", "href": "/shop/" }
+      ]
+    },
+    {
+      "type": "services",
+      "title": "The atelier, at your service",
+      "items": [
+        { "title": "Custom engagement rings", "text": "Compare natural and lab-grown centre stones, settings and proportions with personal guidance.", "cta": "Start a ring", "href": "/pages/custom-engagement-rings-toronto/", "image": "/assets/images/customer-stories/diamond-halo-ring.jpeg" },
+        { "title": "Private estate sourcing", "text": "Rare diamonds, watches and luxury pieces sourced quietly on request.", "cta": "Request sourcing", "href": "/pages/estate-jewellery-toronto/", "image": "/assets/images/estate-luxuries/audemars-piguet-royal-oak-01.jpeg" },
+        { "title": "Appointments in Toronto", "text": "View pieces privately, in person or virtually, with no pressure to decide.", "cta": "Book a consultation", "href": "/pages/contact/", "image": "/assets/images/customer-stories/diamond-earrings-and-ring.jpeg" }
+      ]
+    },
+    {
+      "type": "quote",
+      "text": "Jewellery made your way. Jewellery made to last. Jewellery made to wear — not to store in a box.",
+      "cite": "Toronto Jewels Curation"
+    },
+    { "type": "trust" }
+  ]
+}

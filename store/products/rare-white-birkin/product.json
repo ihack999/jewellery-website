@@ -1,0 +1,27 @@
+{
+  "name": "Rare White Birkin",
+  "subtitle": "Private estate edit",
+  "category": "handbags",
+  "tags": ["estate", "estate-luxury"],
+  "availability": "sold",
+  "badge": "Sold",
+  "price": null,
+  "images": [
+    {
+      "src": "/assets/images/studio/white-birkin.webp",
+      "alt": "Rare White Birkin — studio view",
+      "note": "AI-restyled studio view. Original photographs follow."
+    },
+    {
+      "src": "/assets/images/customer-stories/rare-white-birkin.jpeg",
+      "alt": "White Birkin, original photograph"
+    }
+  ],
+  "videos": [
+    { "src": "/assets/videos/customer-story-rare-white-birkin.mp4", "label": "Original video" }
+  ],
+  "summary": "A rare white Birkin from the private estate edit — now sold. Ask us to source something similar.",
+  "description": "A rare white Birkin from the private estate edit, now sold.\n\nWe privately source rare handbags, watches and jewellery on request — tell us what you are looking for.",
+  "details": { "Category": "Estate luxury handbag", "Colour": "White", "Availability": "Sold" },
+  "sort": 40
+}

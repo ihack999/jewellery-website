@@ -1,0 +1,50 @@
+{
+  "name": "Audemars Piguet Royal Oak Diamond Watch",
+  "subtitle": "Audemars Piguet",
+  "category": "watches",
+  "tags": ["estate", "estate-luxury"],
+  "availability": "one-of-a-kind",
+  "badge": "Estate",
+  "price": null,
+  "metals": ["yellow-gold"],
+  "stones": ["natural-diamond"],
+  "images": [
+    {
+      "src": "/assets/images/studio/royal-oak-detail.webp",
+      "alt": "Audemars Piguet Royal Oak Diamond Watch — studio view",
+      "note": "AI-restyled studio view. Original photographs follow."
+    },
+    {
+      "src": "/assets/images/estate-luxuries/audemars-piguet-royal-oak-01.jpeg",
+      "alt": "Audemars Piguet Royal Oak Diamond Watch, original photograph"
+    },
+    {
+      "src": "/assets/images/estate-luxuries/audemars-piguet-royal-oak-02.jpeg",
+      "alt": "Audemars Piguet Royal Oak Diamond Watch, view 3"
+    },
+    {
+      "src": "/assets/images/estate-luxuries/audemars-piguet-royal-oak-03.jpeg",
+      "alt": "Audemars Piguet Royal Oak Diamond Watch, view 4"
+    },
+    {
+      "src": "/assets/images/estate-luxuries/audemars-piguet-royal-oak-04.jpeg",
+      "alt": "Audemars Piguet Royal Oak Diamond Watch, view 5"
+    },
+    {
+      "src": "/assets/images/estate-luxuries/audemars-piguet-royal-oak-05.jpeg",
+      "alt": "Audemars Piguet Royal Oak Diamond Watch, view 6"
+    }
+  ],
+  "summary": "An Audemars Piguet Royal Oak with its signature octagonal silhouette, diamond-set bezel, textured dial, and integrated warm-gold bracelet.",
+  "description": "An Audemars Piguet Royal Oak with its signature octagonal silhouette, diamond-set bezel, textured dial, and integrated warm-gold bracelet.\n\nReference and condition details are confirmed during your private appointment in Toronto.",
+  "details": {
+    "Brand": "Audemars Piguet",
+    "Details": "Diamond bezel · Integrated bracelet",
+    "Reference": "To be confirmed",
+    "Viewing": "Private appointment in Toronto"
+  },
+  "care": "Servicing history and care recommendations are reviewed during the appointment.",
+  "shipping": "Viewing, final availability, payment, and delivery details are confirmed directly before purchase.",
+  "maxQuantity": 1,
+  "sort": 26
+}

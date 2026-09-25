@@ -1,0 +1,54 @@
+{
+  "name": "Yellow Diamond Oval Studs",
+  "subtitle": "1.00 ct Double Halo",
+  "category": "earrings",
+  "tags": ["coloured", "halo"],
+  "availability": "made-to-order",
+  "price": null,
+  "metals": ["yellow-gold"],
+  "stones": ["coloured-diamond"],
+  "images": [
+    {
+      "src": "/assets/images/studio/yellow-diamond-oval-studs.webp",
+      "alt": "Yellow diamond oval stud earrings — studio view",
+      "note": "AI-restyled studio view. Original photographs follow."
+    },
+    {
+      "src": "/assets/images/optimized/yellow-diamond-earrings-1600.jpg",
+      "alt": "Yellow diamond studs worn"
+    },
+    { "src": "/assets/images/drive/img-4403.jpg", "alt": "Yellow diamond studs styled" },
+    { "src": "/assets/images/drive/img-1784.jpg", "alt": "Yellow diamond studs portrait" },
+    { "src": "/assets/images/drive/img-2897.jpg", "alt": "Yellow diamond jewellery styled" }
+  ],
+  "summary": "A 1.00 ct oval yellow diamond centre framed by a yellow diamond halo and an outer halo of white diamonds.",
+  "description": "Yellow diamond oval stud earrings featuring a 1.00 ct oval-shaped yellow diamond centre stone in a double halo setting, with yellow diamonds around the centre and an outer white diamond halo. Available in 14K gold with natural or lab-grown diamond options.",
+  "details": {
+    "Stone": "1.00 ct oval-shaped yellow diamond centre stone",
+    "Design": "Double halo — yellow diamond inner halo, white diamond outer halo",
+    "Metal": "14K gold",
+    "Options": "Natural or lab-grown diamonds"
+  },
+  "options": [
+    {
+      "name": "Diamonds",
+      "type": "button",
+      "values": [
+        { "label": "Lab-grown" },
+        { "label": "Natural" }
+      ]
+    }
+  ],
+  "care": "Store separately and clean gently around the double halo setting.",
+  "shipping": "Made to order; timeline and delivery details are confirmed during inquiry.",
+  "studio": {
+    "piece": "Earrings",
+    "silhouette": "Stud",
+    "shape": "Oval",
+    "stone": "Citrine Yellow",
+    "halo": "1",
+    "karat": "14K"
+  },
+  "maxQuantity": 5,
+  "sort": 10
+}

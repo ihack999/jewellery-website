@@ -1,0 +1,65 @@
+{
+  "name": "The Oval Bezel Diamond Bracelet",
+  "subtitle": "10.00 ct TW Oval Diamonds",
+  "category": "bracelets",
+  "tags": ["tennis"],
+  "availability": "made-to-order",
+  "badge": "New",
+  "price": 8200,
+  "metals": ["yellow-gold", "white-gold"],
+  "stones": ["natural-diamond"],
+  "images": [
+    {
+      "src": "/assets/images/studio/oval-bezel-diamond-bracelet.webp",
+      "alt": "The Oval Bezel Diamond Bracelet — studio view",
+      "note": "AI-restyled studio view. Original photographs follow."
+    },
+    {
+      "src": "/assets/images/products/oval-bezel-diamond-bracelet/yellow-gold-worn.jpeg",
+      "alt": "Oval bezel bracelet in yellow gold, worn"
+    },
+    {
+      "src": "/assets/images/products/oval-bezel-diamond-bracelet/white-gold-angled.jpeg",
+      "alt": "Oval bezel bracelet in white gold, angled"
+    },
+    {
+      "src": "/assets/images/products/oval-bezel-diamond-bracelet/white-gold-front.jpeg",
+      "alt": "Oval bezel bracelet in white gold"
+    },
+    {
+      "src": "/assets/images/products/oval-bezel-diamond-bracelet/yellow-gold-front.jpeg",
+      "alt": "Oval bezel bracelet in yellow gold"
+    }
+  ],
+  "summary": "A continuous row of oval-cut diamonds in smooth bezel settings, with 10.00 ct total diamond weight and a secure clasp with safety closures.",
+  "description": "A modern take on the classic tennis bracelet, designed with a continuous row of luminous oval-cut diamonds, each individually framed in a smooth bezel setting.\n\nThe bezel design gives the bracelet a stronger gold presence while keeping every diamond securely enclosed, creating a clean, substantial look with beautiful brilliance from every angle. With 10 carats total diamond weight, it has noticeable presence on the wrist without losing its refined feel. Finished with a secure clasp and safety closures, it is designed for both statement wear and everyday luxury.",
+  "details": {
+    "Diamond shape": "Oval",
+    "Setting": "Bezel",
+    "Total diamond weight": "10.00 ct TW",
+    "Metal": "14K yellow gold or 14K white gold",
+    "Closure": "Secure clasp with safety closures"
+  },
+  "options": [
+    {
+      "name": "Metal",
+      "type": "swatch",
+      "values": [
+        { "label": "14K Yellow Gold", "metal": "yellow-gold", "image": 4 },
+        { "label": "14K White Gold", "metal": "white-gold", "image": 3 }
+      ]
+    }
+  ],
+  "care": "Store flat and separately, and clean gently around each bezel setting.",
+  "shipping": "Availability, bracelet length and delivery timing are confirmed during inquiry.",
+  "studio": {
+    "piece": "Bracelet",
+    "silhouette": "Tennis",
+    "setting": "Bezel",
+    "shape": "Oval",
+    "karat": "14K",
+    "stone": "Clear Diamond"
+  },
+  "maxQuantity": 5,
+  "sort": 8
+}

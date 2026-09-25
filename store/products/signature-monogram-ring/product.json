@@ -1,0 +1,59 @@
+{
+  "name": "The Signature Monogram Ring",
+  "category": "rings",
+  "tags": ["signature", "personalized", "pinky", "best-seller"],
+  "availability": "made-to-order",
+  "badge": "Personalize",
+  "price": 900,
+  "metals": ["yellow-gold"],
+  "stones": ["none"],
+  "images": [
+    {
+      "src": "/assets/images/studio/signature-monogram-ring.webp",
+      "alt": "The Signature Monogram Ring — studio view",
+      "note": "AI-restyled studio view. Original photographs follow."
+    },
+    {
+      "src": "/assets/images/products/signature-monogram-ring/signature-monogram-ring-worn-neutral.jpeg",
+      "alt": "Monogram ring worn"
+    },
+    {
+      "src": "/assets/images/products/signature-monogram-ring/signature-monogram-ring-product-angled.jpeg",
+      "alt": "Monogram ring, angled"
+    },
+    {
+      "src": "/assets/images/products/signature-monogram-ring/signature-monogram-ring-product-front.jpeg",
+      "alt": "Monogram ring, front engraving"
+    },
+    {
+      "src": "/assets/images/products/signature-monogram-ring/signature-monogram-ring-stacked-closeup.jpeg",
+      "alt": "Monogram ring stacked"
+    },
+    {
+      "src": "/assets/images/products/signature-monogram-ring/signature-monogram-ring-stacked-hand.jpeg",
+      "alt": "Monogram ring stacked on the hand"
+    }
+  ],
+  "summary": "A polished solid-gold pinky ring personalized with your own monogram — a timeless signature made wearable.",
+  "description": "A polished solid-gold pinky ring personalized with your own monogram — a timeless signature made wearable. Each ring is made to order in solid 9K yellow gold.",
+  "details": {
+    "Metal": "Solid 9K yellow gold",
+    "Personalization": "Custom monogram engraving",
+    "Made to order": "Your initials are confirmed with you before engraving"
+  },
+  "options": [
+    {
+      "name": "Initials",
+      "type": "text",
+      "maxLength": 3,
+      "required": true,
+      "placeholder": "e.g. JMC",
+      "help": "Up to 3 letters, engraved in script."
+    },
+    { "name": "Ring size", "type": "size", "values": "ringSizes", "required": true }
+  ],
+  "care": "Store separately and polish gently with a soft jewellery cloth to preserve the gold finish and engraving.",
+  "shipping": "Made to order; initials, ring size, production timing, and insured delivery are confirmed in writing before payment.",
+  "maxQuantity": 5,
+  "sort": 2
+}

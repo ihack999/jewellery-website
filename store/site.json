@@ -1,0 +1,276 @@
+{
+  "$comment": "Brand settings. Everything customer-facing that is not a product lives here. Change it, run `npm run build`, done.",
+
+  "brand": {
+    "name": "Toronto Jewels Curation",
+    "shortName": "TJC",
+    "monogram": "TJC",
+    "logoText": "Toronto Jewels Curation",
+    "logoImage": "",
+    "tagline": "Fine jewellery, designed your way.",
+    "description": "Custom fine jewellery, signature diamond pieces and rare estate finds from a women-led Toronto atelier.",
+    "url": "https://torontojewelscuration.com",
+    "locale": "en-CA",
+    "currency": "CAD",
+    "ogImage": "/assets/images/seo/toronto-jewels-curation-og.jpg"
+  },
+
+  "theme": {
+    "colors": {
+      "background": "#ffffff",
+      "surface": "#faf9f7",
+      "tile": "#f5f2ec",
+      "ink": "#111111",
+      "text": "#2b2b2b",
+      "muted": "#6f6a64",
+      "line": "#e7e3dc",
+      "accent": "#a88a5c",
+      "accentSoft": "#efe6d8",
+      "inverse": "#ffffff",
+      "success": "#2f6b4f",
+      "danger": "#9b2c2c"
+    },
+    "fonts": {
+      "display": "\"Cormorant Garamond\", \"Times New Roman\", serif",
+      "body": "\"Manrope\", \"Helvetica Neue\", Arial, sans-serif"
+    },
+    "fontFiles": [
+      { "family": "Cormorant Garamond", "style": "normal", "weight": "300 700", "src": "/assets/fonts/cormorant-garamond-latin-normal.woff2", "preload": true },
+      { "family": "Cormorant Garamond", "style": "italic", "weight": "300 700", "src": "/assets/fonts/cormorant-garamond-latin-italic.woff2" },
+      { "family": "Manrope", "style": "normal", "weight": "200 800", "src": "/assets/fonts/manrope-latin-normal.woff2", "preload": true }
+    ],
+    "radius": "0px",
+    "productImageRatio": "4 / 5"
+  },
+
+  "announcements": [
+    { "text": "Women-led Toronto atelier · Custom, signature & estate fine jewellery", "href": "/pages/about/" },
+    { "text": "Design your own piece in our 3D Studio", "href": "/design-studio/" },
+    { "text": "Private appointments in Toronto — book a consultation", "href": "/pages/contact/" }
+  ],
+
+  "contact": {
+    "email": "info@torontojewelscuration.com",
+    "phone": "",
+    "whatsapp": "14164518578",
+    "whatsappLabel": "WhatsApp 416-451-8578",
+    "city": "Toronto, Ontario",
+    "hours": "By appointment · Mon–Sat",
+    "instagram": "https://www.instagram.com/torontojewelscuration/",
+    "tiktok": "https://www.tiktok.com/@torontojewelscuration",
+    "pinterest": ""
+  },
+
+  "navigation": [
+    {
+      "label": "Jewellery",
+      "href": "/shop/",
+      "mega": {
+        "columns": [
+          { "title": "Shop by category", "links": [
+            { "label": "All Jewellery", "href": "/shop/" },
+            { "label": "Rings", "href": "/collections/rings/" },
+            { "label": "Necklaces", "href": "/collections/necklaces/" },
+            { "label": "Bracelets", "href": "/collections/bracelets/" },
+            { "label": "Earrings", "href": "/collections/earrings/" }
+          ]},
+          { "title": "Collections", "links": [
+            { "label": "Signatures", "href": "/collections/signatures/" },
+            { "label": "Tennis", "href": "/collections/tennis/" },
+            { "label": "Lab-Grown Diamonds", "href": "/collections/lab-grown/" },
+            { "label": "Coloured Stones", "href": "/collections/coloured-stones/" },
+            { "label": "Personalized", "href": "/collections/personalized/" }
+          ]},
+          { "title": "Shop by price", "links": [
+            { "label": "Under $2,500", "href": "/collections/under-2500/" },
+            { "label": "$2,500 – $10,000", "href": "/collections/2500-to-10000/" },
+            { "label": "$10,000 & above", "href": "/collections/10000-and-above/" }
+          ]}
+        ],
+        "features": [
+          { "title": "The Tennis Edit", "href": "/collections/tennis/", "image": "/assets/images/optimized/graduated-tennis-necklace-worn-1600.jpg" },
+          { "title": "Signatures", "href": "/collections/signatures/", "image": "/assets/images/products/rise-ring/rise-ring-worn.jpeg" }
+        ]
+      }
+    },
+    {
+      "label": "Estate & Rare",
+      "href": "/collections/estate/",
+      "mega": {
+        "columns": [
+          { "title": "Estate", "links": [
+            { "label": "All Estate & Rare", "href": "/collections/estate/" },
+            { "label": "Estate Jewellery", "href": "/collections/estate-jewellery/" },
+            { "label": "Luxury Watches", "href": "/collections/watches/" },
+            { "label": "Recently Sold", "href": "/collections/sold/" }
+          ]},
+          { "title": "Services", "links": [
+            { "label": "Private Sourcing", "href": "/pages/estate-jewellery-toronto/" },
+            { "label": "Book an Appointment", "href": "/pages/contact/" }
+          ]}
+        ],
+        "features": [
+          { "title": "Rare Watches", "href": "/collections/watches/", "image": "/assets/images/studio/royal-oak-detail.webp" },
+          { "title": "Estate Jewellery", "href": "/collections/estate-jewellery/", "image": "/assets/images/studio/estate-cushion-halo.webp" }
+        ]
+      }
+    },
+    {
+      "label": "Design Studio",
+      "href": "/design-studio/",
+      "mega": {
+        "columns": [
+          { "title": "Create", "links": [
+            { "label": "Open the 3D Design Studio", "href": "/design-studio/" },
+            { "label": "Custom Engagement Rings", "href": "/pages/custom-engagement-rings-toronto/" },
+            { "label": "Custom Jewellery", "href": "/pages/custom-jewellery-toronto/" },
+            { "label": "Start a Custom Request", "href": "/design-studio/#request-form" }
+          ]},
+          { "title": "Learn", "links": [
+            { "label": "Natural vs Lab-Grown", "href": "/pages/natural-vs-lab-grown-diamonds/" },
+            { "label": "Tennis Necklace Guide", "href": "/pages/diamond-tennis-necklace-buying-guide/" },
+            { "label": "Jewellery Care", "href": "/pages/jewellery-care/" }
+          ]}
+        ],
+        "features": [
+          { "title": "Design it in 3D", "href": "/design-studio/", "image": "/assets/images/optimized/studio-ring-pink-gemstone-1600.jpg" }
+        ]
+      }
+    },
+    { "label": "About", "href": "/pages/about/" }
+  ],
+
+  "headerRight": [
+    { "label": "Book an Appointment", "href": "/pages/contact/" }
+  ],
+
+  "trust": [
+    { "icon": "certificate", "title": "GIA / IGI certified", "text": "Certification available for all diamonds." },
+    { "icon": "shield", "title": "Lifetime warranty", "text": "Craftsmanship warranty with written order coverage." },
+    { "icon": "ring", "title": "Complimentary resizing", "text": "First ring resize included where the design permits." },
+    { "icon": "document", "title": "Appraisal certificate", "text": "Documentation prepared for your completed piece." }
+  ],
+
+  "productPromises": [
+    { "icon": "document", "text": "Confirmed in writing before payment" },
+    { "icon": "shield", "text": "Lifetime craftsmanship warranty" },
+    { "icon": "certificate", "text": "GIA / IGI certification available" }
+  ],
+
+  "newsletter": {
+    "enabled": true,
+    "title": "5% off your first piece",
+    "text": "Join the private list for first access to new signatures, estate arrivals and studio previews.",
+    "formName": "vip-welcome",
+    "button": "Join the list"
+  },
+
+  "checkout": {
+    "$comment": "mode: 'request' = customers send the bag as an order request and you confirm in writing before payment (current policy). 'stripe' = instant card checkout through netlify/functions/create-checkout-session.js (needs STRIPE_SECRET_KEY).",
+    "mode": "request",
+    "requestFormName": "order-request",
+    "requestNote": "Every order is confirmed with you in writing — availability, sizing, timing and final price — before any payment is taken.",
+    "shippingCountries": ["CA", "US"]
+  },
+
+  "studio": {
+    "enabled": true,
+    "path": "/design-studio/",
+    "title": "The Design Studio",
+    "intro": "Build your piece in real-time 3D — silhouette, metal, stone and setting — then send it to our atelier for a personal quote."
+  },
+
+  "footer": {
+    "about": "A women-led Toronto atelier for custom fine jewellery, signature diamond pieces and rare estate finds. Jewellery made to wear — not to store in a box.",
+    "columns": [
+      { "title": "Shop", "links": [
+        { "label": "All Jewellery", "href": "/shop/" },
+        { "label": "Rings", "href": "/collections/rings/" },
+        { "label": "Necklaces", "href": "/collections/necklaces/" },
+        { "label": "Bracelets", "href": "/collections/bracelets/" },
+        { "label": "Earrings", "href": "/collections/earrings/" },
+        { "label": "Estate & Rare", "href": "/collections/estate/" }
+      ]},
+      { "title": "Custom", "links": [
+        { "label": "3D Design Studio", "href": "/design-studio/" },
+        { "label": "Custom Engagement Rings", "href": "/pages/custom-engagement-rings-toronto/" },
+        { "label": "Custom Jewellery Toronto", "href": "/pages/custom-jewellery-toronto/" },
+        { "label": "Estate Sourcing", "href": "/pages/estate-jewellery-toronto/" }
+      ]},
+      { "title": "Client Care", "links": [
+        { "label": "Contact & Appointments", "href": "/pages/contact/" },
+        { "label": "Shipping & Returns", "href": "/pages/shipping-returns/" },
+        { "label": "Jewellery Care", "href": "/pages/jewellery-care/" },
+        { "label": "Guides", "href": "/pages/guides/" },
+        { "label": "Wishlist", "href": "/wishlist/" }
+      ]}
+    ],
+    "legal": [
+      { "label": "Privacy", "href": "/pages/privacy/" },
+      { "label": "Shipping & Returns", "href": "/pages/shipping-returns/" }
+    ]
+  },
+
+  "vocabulary": {
+    "$comment": "Filter values products can use. Add a new metal or stone here once, then reference its key from any product.",
+    "categories": {
+      "rings": "Rings",
+      "necklaces": "Necklaces",
+      "bracelets": "Bracelets",
+      "earrings": "Earrings",
+      "watches": "Watches",
+      "handbags": "Handbags"
+    },
+    "metals": {
+      "yellow-gold": { "label": "Yellow Gold", "swatch": "#d8b46a" },
+      "white-gold": { "label": "White Gold", "swatch": "#dcdcdc" },
+      "rose-gold": { "label": "Rose Gold", "swatch": "#e2b3a1" },
+      "platinum": { "label": "Platinum", "swatch": "#c9ccd1" },
+      "silver": { "label": "Sterling Silver", "swatch": "#d9dadc" }
+    },
+    "stones": {
+      "natural-diamond": "Natural Diamond",
+      "lab-diamond": "Lab-Grown Diamond",
+      "coloured-diamond": "Coloured Diamond",
+      "gemstone": "Coloured Gemstone",
+      "none": "No Stone"
+    },
+    "availability": {
+      "ready": "Ready to ship",
+      "made-to-order": "Made to order",
+      "one-of-a-kind": "One of a kind",
+      "sold": "Sold"
+    },
+    "priceRanges": [
+      { "label": "Under $2,500", "min": 0, "max": 2500 },
+      { "label": "$2,500 – $10,000", "min": 2500, "max": 10000 },
+      { "label": "$10,000 – $30,000", "min": 10000, "max": 30000 },
+      { "label": "$30,000 & above", "min": 30000, "max": null }
+    ],
+    "ringSizes": ["3", "3.5", "4", "4.5", "5", "5.5", "6", "6.5", "7", "7.5", "8", "8.5", "9", "9.5", "10", "Not sure — help me size"]
+  },
+
+  "redirects": [
+    { "from": "/shop.html", "to": "/shop/" },
+    { "from": "/customs.html", "to": "/design-studio/" },
+    { "from": "/dream-design.html", "to": "/design-studio/" },
+    { "from": "/jewellery-editor/*", "to": "/design-studio/" },
+    { "from": "/curated-luxuries.html", "to": "/collections/estate/" },
+    { "from": "/rings/", "to": "/collections/rings/" },
+    { "from": "/necklaces/", "to": "/collections/necklaces/" },
+    { "from": "/bracelets/", "to": "/collections/bracelets/" },
+    { "from": "/earrings/", "to": "/collections/earrings/" },
+    { "from": "/about.html", "to": "/pages/about/" },
+    { "from": "/contact.html", "to": "/pages/contact/" },
+    { "from": "/jewellery-care.html", "to": "/pages/jewellery-care/" },
+    { "from": "/shipping-returns.html", "to": "/pages/shipping-returns/" },
+    { "from": "/privacy.html", "to": "/pages/privacy/" },
+    { "from": "/checkout-success.html", "to": "/order/success/" },
+    { "from": "/guides/", "to": "/pages/guides/" },
+    { "from": "/guides/natural-vs-lab-grown-diamonds/", "to": "/pages/natural-vs-lab-grown-diamonds/" },
+    { "from": "/guides/diamond-tennis-necklace-buying-guide/", "to": "/pages/diamond-tennis-necklace-buying-guide/" },
+    { "from": "/custom-jewellery-toronto/", "to": "/pages/custom-jewellery-toronto/" },
+    { "from": "/custom-engagement-rings-toronto/", "to": "/pages/custom-engagement-rings-toronto/" },
+    { "from": "/estate-jewellery-toronto/", "to": "/pages/estate-jewellery-toronto/" }
+  ]
+}

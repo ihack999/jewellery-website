@@ -1,0 +1,60 @@
+{
+  "name": "1 Carat Cushion Cut Diamond Ring",
+  "category": "rings",
+  "tags": ["engagement", "solitaire"],
+  "availability": "made-to-order",
+  "price": 2500,
+  "priceFrom": true,
+  "metals": ["yellow-gold", "white-gold"],
+  "stones": ["lab-diamond"],
+  "images": [
+    {
+      "src": "/assets/images/studio/cushion-cut-diamond-ring.webp",
+      "alt": "Cushion cut diamond ring — studio view",
+      "note": "AI-restyled studio view. Original photographs follow."
+    },
+    { "src": "/assets/images/products/cushion-diamond-ring-1.jpeg", "alt": "Cushion cut diamond ring worn" },
+    {
+      "src": "/assets/images/products/cushion-diamond-ring-2.jpeg",
+      "alt": "Cushion cut diamond ring detail"
+    },
+    {
+      "src": "/assets/images/products/cushion-diamond-ring-3.jpeg",
+      "alt": "Cushion cut diamond ring on the hand"
+    }
+  ],
+  "summary": "A classic 1.00 ct cushion cut diamond ring with a four-prong setting and pavé diamonds set halfway down the band.",
+  "description": "A classic 1.00 ct cushion cut diamond ring featuring a four-prong setting and pavé diamonds set halfway down the band for added sparkle. Available in 14K yellow gold or 14K white gold with a lab-grown diamond centre stone.",
+  "details": {
+    "Stone": "1.00 ct cushion cut lab-grown diamond",
+    "Design": "Four-prong setting with pavé diamonds set halfway down the band",
+    "Metal": "14K yellow gold or 14K white gold"
+  },
+  "options": [
+    {
+      "name": "Metal",
+      "type": "swatch",
+      "values": [
+        { "label": "14K Yellow Gold", "metal": "yellow-gold" },
+        { "label": "14K White Gold", "metal": "white-gold" }
+      ]
+    },
+    { "name": "Ring size", "type": "size", "values": "ringSizes", "required": true }
+  ],
+  "care": "Store separately and clean with a soft jewellery cloth after wear.",
+  "shipping": "Made to order with timing confirmed during inquiry.",
+  "studio": {
+    "piece": "Ring",
+    "metal": "Yellow Gold",
+    "karat": "14K",
+    "setting": "Prong",
+    "band": "Pavé",
+    "shape": "Cushion",
+    "size": "1",
+    "stone": "Clear Diamond",
+    "halo": "0",
+    "accent": "1"
+  },
+  "maxQuantity": 5,
+  "sort": 6
+}

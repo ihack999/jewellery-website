@@ -1,0 +1,38 @@
+{
+  "name": "Half Eternity Pinky Band",
+  "category": "rings",
+  "tags": ["signature", "pinky", "stacking"],
+  "availability": "made-to-order",
+  "price": 900,
+  "stones": ["lab-diamond"],
+  "images": [
+    {
+      "src": "/assets/images/studio/half-eternity-pinky-band.webp",
+      "alt": "Half Eternity Pinky Band — studio view",
+      "note": "AI-restyled studio view. Original photographs follow."
+    },
+    {
+      "src": "/assets/images/products/half-eternity-pinky-band/half-eternity-pinky-band-worn.jpeg",
+      "alt": "Half eternity band worn on the pinky"
+    },
+    {
+      "src": "/assets/images/products/half-eternity-pinky-band/half-eternity-pinky-band-product.jpeg",
+      "alt": "Half eternity band detail"
+    }
+  ],
+  "summary": "A refined half-eternity band set with lab-grown diamonds and proportioned for effortless pinky-ring styling.",
+  "description": "A fine line of lab-grown diamonds brings light to the pinky in an easy half-eternity profile. Wear it alone for a clean sparkle or stack it alongside your signature rings.",
+  "details": {
+    "Diamonds": "Lab-grown diamonds",
+    "Design": "Half-eternity pinky band",
+    "Style": "Wear alone or stack with other rings"
+  },
+  "options": [
+    { "name": "Ring size", "type": "size", "values": "ringSizes", "required": true }
+  ],
+  "care": "Store separately and clean gently with a soft jewellery cloth to protect the diamond setting and polished finish.",
+  "shipping": "Made to order; ring size, production timing, and insured delivery are confirmed in writing before payment.",
+  "studio": { "piece": "Ring", "band": "Eternity", "shape": "Round", "size": "0.8", "halo": "0", "accent": "1" },
+  "maxQuantity": 5,
+  "sort": 5
+}

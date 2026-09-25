@@ -1,0 +1,544 @@
+<section class="design-studio" id="design-studio" data-design-studio>
+  <div class="container design-studio__shell">
+  <div class="design-studio__split">
+  <div class="design-studio__stage" data-designer-stage aria-label="Custom jewellery design preview">
+    <canvas class="design-studio__canvas" data-designer-canvas aria-label="Interactive custom jewellery preview"></canvas>
+    <div class="design-studio__fallback" data-designer-fallback hidden>
+      <canvas data-designer-fallback-canvas aria-label="Simplified jewellery sketch, not the 3D preview"></canvas>
+    </div>
+
+    <div class="design-studio__preview-status" data-designer-preview-status role="status" aria-live="polite">
+      <span data-designer-preview-message>Preparing your 3D jewellery…</span>
+      <button type="button" data-designer-retry hidden>Retry 3D preview</button>
+    </div>
+
+    <!-- Expand button — top-right of viewer -->
+    <button class="studio-expand-btn" type="button" data-inspect-design aria-pressed="false" aria-label="Expand 3D view">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+        <path d="M1 6V1h5M10 1h5v5M15 10v5h-5M6 15H1v-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+
+    <!-- Reality Score (Realism Engine §14): exp(−E_real) over the
+         current design state. Pure UI; updates whenever the design
+         state changes. -->
+    <div class="reality-score" data-reality-score aria-live="polite" title="Heuristic parameter checks, not manufacturing certification">
+      <span class="reality-score__label">Checks</span>
+      <span class="reality-score__value" data-reality-score-value>—</span>
+      <span class="reality-score__bar"><span class="reality-score__fill" data-reality-score-fill></span></span>
+      <span class="reality-score__sep" aria-hidden="true"></span>
+      <span class="reality-score__cost" data-reality-cost title="Section 13 — manufacturability cost estimate">—</span>
+      <button type="button" class="reality-score__fix" data-reality-fix aria-label="Auto-balance (Gate-C minimal correction, Section 9)" title="Gate-C §9 — apply the minimal correction that reduces the largest realism penalty">Fix</button>
+    </div>
+
+    <!-- Fullscreen Inspect 3D HUD (only visible when inspecting) -->
+    <div class="inspect-hud" data-inspect-hud aria-hidden="true">
+      <div class="inspect-hud__top">
+        <div class="inspect-hud__title">
+          <span class="inspect-hud__eyebrow">Inspect</span>
+          <strong data-inspect-title>3D Studio</strong>
+        </div>
+        <div class="inspect-hud__readout" data-inspect-readout>—</div>
+        <button class="inspect-hud__close" type="button" data-inspect-exit aria-label="Exit inspect mode">Close ✕</button>
+      </div>
+
+      <div class="inspect-hud__hint" data-inspect-hint>
+        Drag to orbit · shift + drag to pan up/down · scroll to zoom · arrows to nudge · double-click to reset
+      </div>
+
+      <div class="inspect-hud__rail inspect-hud__rail--left" aria-label="Camera presets">
+        <button class="inspect-chip" type="button" data-inspect-view="Three-Quarter">3/4</button>
+        <button class="inspect-chip" type="button" data-inspect-view="Macro">Macro</button>
+        <button class="inspect-chip" type="button" data-inspect-view="Top-Down">Top</button>
+        <button class="inspect-chip" type="button" data-inspect-view="Profile">Profile</button>
+      </div>
+
+      <div class="inspect-hud__panel" aria-label="Inspect controls">
+        <button class="inspect-chip" type="button" data-inspect-action="orbit" aria-pressed="false" title="Auto-orbit">
+          <span class="inspect-chip__dot"></span>Orbit
+        </button>
+        <button class="inspect-chip" type="button" data-inspect-action="lighting" title="Cycle lighting">
+          <span data-inspect-lighting-label>Daylight</span>
+        </button>
+        <button class="inspect-chip" type="button" data-inspect-action="reset" title="Reset camera">Reset</button>
+        <button class="inspect-chip" type="button" data-inspect-action="screenshot" title="Download a still image">Save Image</button>
+      </div>
+    </div>
+  </div><!-- /.design-studio__stage -->
+
+  <div class="design-studio__overlay">
+    <div class="design-studio__intro" data-reveal>
+      <span class="eyebrow">Design studio</span>
+      <div class="accent-rule"></div>
+      <h2>Your piece, your way.</h2>
+      <p>
+        Choose the piece, metal, stone, size, and detail direction. Send the design into the request form when it feels right.
+      </p>
+    </div>
+
+    <form class="designer-panel" data-designer-controls data-reveal>
+      <details class="designer-step" open>
+        <summary><strong>Start with a look</strong><small>tap a style · everything below updates</small></summary>
+        <div class="designer-step__body">
+      <div class="designer-presets" aria-label="Design presets">
+        <button class="designer-preset designer-preset--accent" type="button" data-randomize-design>Create Variation</button>
+        <button class="designer-preset" type="button" data-designer-preset="classic">Classic Engagement</button>
+        <button class="designer-preset" type="button" data-designer-preset="cocktail">Bold Cocktail</button>
+        <button class="designer-preset" type="button" data-designer-preset="pendant">Minimal Pendant</button>
+        <button class="designer-preset" type="button" data-designer-preset="vintage">Vintage Halo</button>
+        <button class="designer-preset" type="button" data-designer-preset="estate">Emerald-cut Estate</button>
+        <button class="designer-preset" type="button" data-designer-preset="princessPave">Princess Pavé</button>
+        <button class="designer-preset" type="button" data-designer-preset="trinity">Rose Twist</button>
+        <button class="designer-preset" type="button" data-designer-preset="celestial">Celestial Drop</button>
+        <button class="designer-preset" type="button" data-designer-preset="brutalist">Brutalist Hex</button>
+        <button class="designer-preset" type="button" data-designer-preset="neonCyber">Neon Cyber</button>
+        <button class="designer-preset" type="button" data-designer-preset="punkSpike">Onyx Punk</button>
+        <button class="designer-preset" type="button" data-designer-preset="sunsetGlow">Sunset Glow</button>
+        <button class="designer-preset" type="button" data-designer-preset="alexandrite">Alexandrite Night</button>
+        <button class="designer-preset" type="button" data-designer-preset="paraibaHalo">Paraiba Glow</button>
+        <button class="designer-preset" type="button" data-designer-preset="moonlitDrop">Moonlit Drop</button>
+      </div>
+      <div class="generator-variation">
+        <div class="generator-control-grid">
+          <label for="designer-family">Design direction
+            <select id="designer-family" data-designer-field="designFamily">
+              <option>Classic</option><option>Art Deco</option><option>Romantic</option><option>Sculptural</option><option>Vintage</option>
+            </select>
+          </label>
+          <label for="designer-seed">Variation seed
+            <input id="designer-seed" data-designer-field="seed" value="atelier-001" maxlength="48" pattern="[a-zA-Z0-9_-]+" spellcheck="false" autocomplete="off">
+          </label>
+        </div>
+        <input type="hidden" data-designer-field="variationIndex" value="0">
+        <fieldset class="generator-locks">
+          <legend>Keep these when creating variations</legend>
+          <label><input type="checkbox" data-designer-field="lockStone"> Stone &amp; cut</label>
+          <label><input type="checkbox" data-designer-field="lockMetal"> Metal &amp; finish</label>
+          <label><input type="checkbox" data-designer-field="lockStructure"> Structure</label>
+        </fieldset>
+      </div>
+        </div>
+      </details>
+
+      <div class="designer-smart-summary" aria-label="Current design snapshot">
+        <span><small>Piece</small><strong data-designer-smart-piece>Ring</strong></span>
+        <span><small>Metal</small><strong data-designer-smart-metal>White Gold</strong></span>
+        <span><small>Stone</small><strong data-designer-smart-stone>Clear Diamond</strong></span>
+      </div>
+
+      <details class="designer-step" open>
+        <summary><strong>The essentials</strong><small>piece · metal · stone</small></summary>
+        <div class="designer-step__body">
+      <div class="designer-panel__split">
+        <div class="designer-panel__group">
+          <label for="designer-piece">Piece</label>
+          <select id="designer-piece" data-designer-field="piece">
+            <option>Ring</option>
+            <option>Necklace</option>
+            <option>Bracelet</option>
+            <option>Earrings</option>
+          </select>
+        </div>
+
+        <div class="designer-panel__group">
+          <label for="designer-silhouette">Style</label>
+          <select id="designer-silhouette" data-designer-field="silhouette">
+            <!-- options injected by JS based on the selected piece -->
+          </select>
+        </div>
+      </div>
+
+      <fieldset class="designer-panel__group">
+        <legend>Metal</legend>
+        <div class="swatch-row">
+          <label class="swatch-option"><input type="radio" name="designer-metal" value="White Gold" data-designer-field="metal"><span style="--swatch:#e8eef1;"></span>White Gold</label>
+          <label class="swatch-option"><input type="radio" name="designer-metal" value="Platinum" data-designer-field="metal"><span style="--swatch:#d9e1e5;"></span>Platinum</label>
+          <label class="swatch-option"><input type="radio" name="designer-metal" value="Yellow Gold" data-designer-field="metal" checked><span style="--swatch:#d5a647;"></span>Yellow Gold</label>
+          <label class="swatch-option"><input type="radio" name="designer-metal" value="Rose Gold" data-designer-field="metal"><span style="--swatch:#c98778;"></span>Rose Gold</label>
+          <label class="swatch-option"><input type="radio" name="designer-metal" value="Champagne Gold" data-designer-field="metal"><span style="--swatch:#d4b574;"></span>Champagne Gold</label>
+          <label class="swatch-option"><input type="radio" name="designer-metal" value="Black Gold" data-designer-field="metal"><span style="--swatch:#3a3438;"></span>Black Gold</label>
+          <label class="swatch-option"><input type="radio" name="designer-metal" value="Mirror Silver" data-designer-field="metal"><span style="--swatch:#f4f6f8;"></span>Mirror Silver</label>
+          <label class="swatch-option"><input type="radio" name="designer-metal" value="Bronze Patina" data-designer-field="metal"><span style="--swatch:#7a5a3a;"></span>Bronze Patina</label>
+          <label class="swatch-option"><input type="radio" name="designer-metal" value="Two-Tone Mix" data-designer-field="metal"><span style="--swatch:linear-gradient(90deg,#d5a647 0%,#d5a647 50%,#e8eef1 50%,#e8eef1 100%);"></span>Two-Tone Mix</label>
+        </div>
+      </fieldset>
+
+      <div class="designer-panel__split">
+        <div class="designer-panel__group">
+          <label for="designer-setting">Setting</label>
+          <select id="designer-setting" data-designer-field="setting">
+            <option title="Classic claw prongs — the most secure, traditional way to set a stone. Maximum light return.">Prong</option>
+            <option title="A continuous metal rim wraps the girdle. Sleekest, safest profile — ideal for active wear.">Bezel</option>
+            <option title="Side metal flares rise like an arch under the centre stone, lifting it dramatically off the band.">Cathedral</option>
+            <option title="Curved arms cross under the gem in an interwoven X — a romantic vintage look with great finger flow.">Trellis</option>
+            <option title="Two solid arms grip the stone under metal pressure — modern, architectural, no visible prongs.">Tension</option>
+          </select>
+        </div>
+
+        <div class="designer-panel__group">
+          <label for="designer-finish">Finish</label>
+          <select id="designer-finish" data-designer-field="finish">
+            <option>High Polish</option>
+            <option>Soft Satin</option>
+            <option>Milgrain Edge</option>
+            <option>Hammered</option>
+            <option>Sandblast</option>
+            <option title="Long parallel directional grain — modern matte sheen">Brushed</option>
+            <option title="Texturized micro-stipple that catches light like crushed crystal">Stardust</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="designer-panel__split">
+        <div class="designer-panel__group">
+          <label for="designer-shape">Stone Shape</label>
+          <select id="designer-shape" data-designer-field="shape">
+            <option>Round</option>
+            <option>Princess</option>
+            <option>Cushion</option>
+            <option>Oval</option>
+            <option>Emerald</option>
+            <option>Asscher</option>
+            <option>Marquise</option>
+            <option>Pear</option>
+            <option>Heart</option>
+            <option title="Triangular brilliant — three sharp points, exceptional fire">Trillion</option>
+            <option title="Long rectangular step-cut — Art Deco architectural">Baguette</option>
+            <option title="Six-sided geometric — modern contemporary edge">Hexagon</option>
+            <option title="Elongated diamond/rhombus — unconventional sculptural">Kite</option>
+          </select>
+        </div>
+
+        <div class="designer-panel__group">
+          <label for="designer-stone">Center Stone</label>
+          <select id="designer-stone" data-designer-field="stone">
+            <option>Clear Diamond</option>
+            <option>Blush Sapphire</option>
+            <option>Blue Sapphire</option>
+            <option>Emerald Green</option>
+            <option>Ruby Red</option>
+            <option>Amethyst Purple</option>
+            <option>Aquamarine</option>
+            <option title="Opaque jet-black — mirror sheen, ultimate contrast">Black Onyx</option>
+            <option title="Milky play-of-color rainbow shift across the surface">Fire Opal</option>
+            <option title="Sun-yellow champagne brilliance">Citrine Yellow</option>
+            <option title="Romantic peachy-pink, soft warmth">Morganite Peach</option>
+            <option title="Vivid violet-blue with strong fire">Tanzanite Violet</option>
+            <option title="Smoky diamond with characterful inclusions — one-of-a-kind">Salt &amp; Pepper</option>
+            <option title="Colour-change chrysoberyl — teal green in daylight, raspberry red under candlelight">Alexandrite Shift</option>
+            <option title="Neon copper-bearing tourmaline with an electric glow">Paraiba Tourmaline</option>
+            <option title="Billowy blue adularescence floating over a milky body">Moonstone Glow</option>
+            <option title="Rare lotus sapphire balancing pink and orange">Padparadscha</option>
+          </select>
+        </div>
+      </div>
+        </div>
+      </details>
+
+      <details class="designer-step">
+        <summary><strong>Fit &amp; detail</strong><small>karat · band · chain</small></summary>
+        <div class="designer-step__body">
+      <div class="designer-panel__split">
+        <div class="designer-panel__group">
+          <label for="designer-karat">Karat</label>
+          <select id="designer-karat" data-designer-field="karat">
+            <option>10K</option>
+            <option>14K</option>
+            <option selected>18K</option>
+            <option>22K</option>
+            <option>950</option>
+          </select>
+        </div>
+
+        <div class="designer-panel__group" data-piece-only="Ring">
+          <label for="designer-band">Band Style</label>
+          <select id="designer-band" data-designer-field="band">
+            <option>Solitaire</option>
+            <option>Pavé</option>
+            <option>Channel</option>
+            <option>Three-Stone</option>
+            <option>Tapered Baguette</option>
+            <option>Twist</option>
+            <option>Knife-Edge</option>
+            <option>Eternity</option>
+            <option>Bypass</option>
+          </select>
+        </div>
+
+        <div class="designer-panel__group" data-piece-only="Ring">
+          <label for="designer-accent-stone">Side &amp; halo stones</label>
+          <select id="designer-accent-stone" data-designer-field="accentStone">
+            <option>Clear Diamond</option>
+            <option>Match Center</option>
+          </select>
+        </div>
+
+        <div class="designer-panel__group" data-piece-only="Ring">
+          <label for="designer-accent-setting">Side-stone setting</label>
+          <select id="designer-accent-setting" data-designer-field="accentSetting" aria-describedby="designer-accent-setting-help">
+            <option value="Bezel" selected>Bezel — no prongs</option>
+            <option value="Channel">Channel — no prongs</option>
+            <option value="Prong">Prong — claws</option>
+            <option value="Auto">Original band setting</option>
+          </select>
+          <small id="designer-accent-setting-help">Bezel and channel side stones have no individual prongs. Centre and halo settings stay unchanged. Recessed-style preview, not drilled production CAD.</small>
+        </div>
+
+        <div class="designer-panel__group" data-piece-only="Necklace,Bracelet">
+          <label for="designer-chain-type">Chain</label>
+          <select id="designer-chain-type" data-designer-field="chainType">
+            <option>Cable</option>
+            <option>Curb</option>
+            <option>Box</option>
+            <option>Rope</option>
+            <option>Snake</option>
+            <option>Figaro</option>
+            <option>Wheat</option>
+            <option>Herringbone</option>
+            <option>Byzantine</option>
+            <option>Mariner</option>
+          </select>
+        </div>
+
+        <div class="designer-panel__group" data-piece-only="Necklace,Bracelet">
+          <label for="designer-clasp">Clasp</label>
+          <select id="designer-clasp" data-designer-field="clasp">
+            <option>Lobster</option>
+            <option>Spring Ring</option>
+            <option>Toggle</option>
+            <option>Box</option>
+            <option>S-Hook</option>
+            <option>Hidden</option>
+          </select>
+        </div>
+      </div>
+        </div>
+      </details>
+
+      <details class="designer-step">
+        <summary><strong>Scene &amp; lighting</strong><small>light · backdrop · camera</small></summary>
+        <div class="designer-step__body">
+      <fieldset class="designer-panel__group">
+        <legend>Lighting</legend>
+        <div class="lighting-row">
+          <label class="light-option"><input type="radio" name="designer-lighting" value="Daylight" data-designer-field="lighting"><span>Daylight</span></label>
+          <label class="light-option"><input type="radio" name="designer-lighting" value="Candlelight" data-designer-field="lighting"><span>Candlelight</span></label>
+          <label class="light-option"><input type="radio" name="designer-lighting" value="Showroom" data-designer-field="lighting"><span>Showroom</span></label>
+          <label class="light-option"><input type="radio" name="designer-lighting" value="Flash" data-designer-field="lighting"><span>Flash</span></label>
+          <label class="light-option"><input type="radio" name="designer-lighting" value="Sunset" data-designer-field="lighting"><span>Sunset</span></label>
+          <label class="light-option"><input type="radio" name="designer-lighting" value="Moonlight" data-designer-field="lighting"><span>Moonlight</span></label>
+          <label class="light-option"><input type="radio" name="designer-lighting" value="Neon" data-designer-field="lighting"><span>Neon</span></label>
+          <label class="light-option"><input type="radio" name="designer-lighting" value="Softbox" data-designer-field="lighting" checked><span>Softbox</span></label>
+          <label class="light-option"><input type="radio" name="designer-lighting" value="Gallery" data-designer-field="lighting"><span>Gallery</span></label>
+        </div>
+      </fieldset>
+
+      <fieldset class="designer-panel__group">
+        <legend>Backdrop</legend>
+        <div class="lighting-row">
+          <label class="light-option"><input type="radio" name="designer-backdrop" value="Studio White" data-designer-field="backdrop"><span>Studio White</span></label>
+          <label class="light-option"><input type="radio" name="designer-backdrop" value="Velvet" data-designer-field="backdrop" checked><span>Velvet</span></label>
+          <label class="light-option"><input type="radio" name="designer-backdrop" value="Marble" data-designer-field="backdrop"><span>Marble</span></label>
+          <label class="light-option"><input type="radio" name="designer-backdrop" value="Onyx" data-designer-field="backdrop"><span>Onyx</span></label>
+          <label class="light-option"><input type="radio" name="designer-backdrop" value="Linen" data-designer-field="backdrop"><span>Linen</span></label>
+          <label class="light-option"><input type="radio" name="designer-backdrop" value="Sweep" data-designer-field="backdrop"><span>Sweep</span></label>
+          <label class="light-option"><input type="radio" name="designer-backdrop" value="Concrete" data-designer-field="backdrop"><span>Concrete</span></label>
+          <label class="light-option"><input type="radio" name="designer-backdrop" value="Driftwood" data-designer-field="backdrop"><span>Driftwood</span></label>
+          <label class="light-option"><input type="radio" name="designer-backdrop" value="Holographic" data-designer-field="backdrop"><span>Holographic</span></label>
+          <label class="light-option"><input type="radio" name="designer-backdrop" value="Smoke" data-designer-field="backdrop"><span>Smoke</span></label>
+          <label class="light-option"><input type="radio" name="designer-backdrop" value="Ivory" data-designer-field="backdrop"><span>Ivory</span></label>
+        </div>
+      </fieldset>
+
+      <fieldset class="designer-panel__group">
+        <legend>Camera View</legend>
+        <div class="lighting-row">
+          <label class="light-option"><input type="radio" name="designer-view" value="Three-Quarter" data-designer-field="view" checked><span>Three-Quarter</span></label>
+          <label class="light-option"><input type="radio" name="designer-view" value="Macro" data-designer-field="view"><span>Macro</span></label>
+          <label class="light-option"><input type="radio" name="designer-view" value="Top-Down" data-designer-field="view"><span>Top-Down</span></label>
+          <label class="light-option"><input type="radio" name="designer-view" value="Profile" data-designer-field="view"><span>Profile</span></label>
+        </div>
+      </fieldset>
+        </div>
+      </details>
+
+      <details class="designer-step" open>
+        <summary><strong>Size &amp; presence</strong><small>carat · weight · accents</small></summary>
+        <div class="designer-step__body">
+      <div class="designer-panel__group">
+        <label for="designer-size">Stone Size <span data-designer-size-label>1.2 ct feel</span></label>
+        <input id="designer-size" type="range" min="0.8" max="2.4" step="0.1" value="1.2" data-designer-field="size">
+      </div>
+
+      <div class="designer-panel__group">
+        <label for="designer-weight">Band / Chain Weight <span data-designer-weight-label>Classic</span></label>
+        <input id="designer-weight" type="range" min="0.85" max="1.35" step="0.05" value="1" data-designer-field="weight">
+      </div>
+
+      <div class="designer-panel__split">
+        <label class="toggle-option"><input type="checkbox" data-designer-field="halo" checked><span>Diamond frame</span></label>
+        <label class="toggle-option"><input type="checkbox" data-designer-field="accent" checked><span>Side stones</span></label>
+        <label class="toggle-option" data-piece-only="Ring"><input type="checkbox" data-designer-field="hiddenHalo"><span>Hidden halo</span></label>
+        <label class="toggle-option" data-piece-only="Ring"><input type="checkbox" data-designer-field="milgrain"><span>Milgrain edges</span></label>
+      </div>
+        </div>
+      </details>
+
+      <details class="designer-step">
+        <summary><strong>Extras &amp; precision</strong><small>surface · engraving · millimetres</small></summary>
+        <div class="designer-step__body">
+      <div class="generator-control-grid">
+        <label for="designer-appearance">Rendering style
+          <select id="designer-appearance" data-designer-field="appearance"><option>Photographic</option><option>Expressive</option></select>
+        </label>
+        <label for="designer-optics">Gem light transport
+          <select id="designer-optics" data-designer-field="opticsMode"><option value="Ray Traced">Ray Traced · internal gem paths</option><option value="Fast">Fast · raster transmission</option></select>
+        </label>
+        <label for="designer-gem-bounces">Internal ray budget
+          <select id="designer-gem-bounces" data-designer-field="gemBounces"><option value="8">8 bounces · responsive</option><option value="12" selected>12 bounces · balanced</option><option value="20">20 bounces · quality</option></select>
+        </label>
+        <label for="designer-dispersion">Dispersion strength
+          <input id="designer-dispersion" type="range" min="0" max="2" step="0.05" value="1" data-designer-field="dispersionStrength">
+        </label>
+        <label for="designer-absorption">Body-colour absorption
+          <input id="designer-absorption" type="range" min="0.1" max="3" step="0.05" value="1" data-designer-field="absorptionStrength">
+        </label>
+        <label for="designer-inclusions">Natural inclusion density
+          <input id="designer-inclusions" type="range" min="0" max="2" step="0.1" value="1" data-designer-field="inclusionDensity">
+        </label>
+        <label for="designer-finish-strength">Surface detail
+          <input id="designer-finish-strength" type="range" min="0" max="2" step="0.05" value="1" data-designer-field="finishStrength">
+        </label>
+        <label for="designer-finish-scale">Finish spacing (mm)
+          <input id="designer-finish-scale" type="number" min="0.25" max="6" step="0.05" value="1.5" data-designer-field="finishScaleMm">
+        </label>
+        <label for="designer-patina">Bronze patina coverage
+          <input id="designer-patina" type="range" min="0" max="1" step="0.05" value="0.45" data-designer-field="patinaCoverage">
+        </label>
+      </div>
+      <fieldset class="designer-panel__group">
+        <legend>Expressive effects <small style="font-weight:normal;opacity:0.7;">— glow and sparkle use Expressive rendering</small></legend>
+        <div class="designer-panel__split">
+          <label class="toggle-option" title="Stone self-illuminates with its own hue — magical glow"><input type="checkbox" data-designer-field="emissiveGlow"><span>Emissive glow</span></label>
+          <label class="toggle-option" title="Layer a contrasting metal sheen across the band"><input type="checkbox" data-designer-field="twoTone"><span>Two-tone metal</span></label>
+          <label class="toggle-option" title="Pump the room sparkle for a hero shot"><input type="checkbox" data-designer-field="sparkleBurst"><span>Sparkle burst</span></label>
+        </div>
+      </fieldset>
+
+      <div class="designer-panel__group" data-piece-only="Ring">
+        <label for="designer-prong-count">Prong count</label>
+        <select id="designer-prong-count" data-designer-field="prongCount">
+          <option>Auto</option>
+          <option>4</option>
+          <option>6</option>
+          <option>8</option>
+        </select>
+      </div>
+
+      <div class="designer-panel__group">
+        <label for="designer-engraving">Engraving</label>
+        <input id="designer-engraving" type="text" maxlength="32" placeholder="Initials, date, or short phrase" data-designer-field="engraving">
+      </div>
+
+      <details class="designer-fine-tune">
+        <summary>Fine-tune <small>· optional adjustments</small></summary>
+        <div class="designer-fine-tune__grid">
+          <div class="designer-fine-tune__field" data-piece-only="Ring">
+            <label for="designer-set-rotation">Setting rotation <span data-designer-output-for="setRotation">0°</span></label>
+            <input id="designer-set-rotation" type="range" min="0" max="180" step="5" value="0" data-designer-field="setRotation" data-designer-output-suffix="°">
+          </div>
+          <div class="designer-fine-tune__field" data-piece-only="Ring">
+            <label for="designer-stone-tilt">Stone tilt <span data-designer-output-for="stoneTilt">0°</span></label>
+            <input id="designer-stone-tilt" type="range" min="-15" max="15" step="1" value="0" data-designer-field="stoneTilt" data-designer-output-suffix="°">
+          </div>
+          <div class="designer-fine-tune__field" data-piece-only="Ring">
+            <label for="designer-prong-height">Prong height <span data-designer-output-for="prongHeight">1.00×</span></label>
+            <input id="designer-prong-height" type="range" min="0.7" max="1.3" step="0.05" value="1" data-designer-field="prongHeight" data-designer-output-suffix="×">
+          </div>
+          <div class="designer-fine-tune__field" data-piece-only="Ring">
+            <label for="designer-accent-density">Side stone density</label>
+            <select id="designer-accent-density" data-designer-field="accentDensity">
+              <option>Auto</option>
+              <option>Sparse</option>
+              <option>Dense</option>
+            </select>
+          </div>
+          <div class="designer-fine-tune__field" data-piece-only="Ring">
+            <label for="designer-halo-gap">Halo gap <span data-designer-output-for="haloGap">0.00 mm</span></label>
+            <input id="designer-halo-gap" type="range" min="0.05" max="2" step="0.05" value="0.25" data-designer-field="haloGap" data-designer-output-suffix=" mm">
+          </div>
+          <div class="designer-fine-tune__field" data-piece-only="Ring">
+            <label for="designer-halo-count">Halo count</label>
+            <select id="designer-halo-count" data-designer-field="haloCount">
+              <option>Auto</option>
+              <option>8</option>
+              <option>12</option>
+              <option>16</option>
+              <option>20</option>
+            </select>
+          </div>
+        </div>
+        <p class="designer-fine-tune__hint">Only applies to rings. Resets when you load a preset.</p>
+      </details>
+
+      <div data-physical-slot></div>
+      <output class="generator-cut-report" data-cut-diagnostics aria-live="polite"></output>
+      <output class="generator-cut-report" data-optics-report aria-live="polite"></output>
+      <output class="generator-cut-report" data-setting-contact-report aria-live="polite"></output>
+        </div>
+      </details>
+
+      <div class="designer-summary" data-designer-summary></div>
+      <p class="generator-v2-note" data-construction-report role="status"></p>
+
+      <div class="designer-saved-card" data-designer-saved-card hidden>
+        <span>Saved Design</span>
+        <p data-designer-saved-summary></p>
+      </div>
+    </form>
+  </div><!-- /.design-studio__overlay -->
+  </div><!-- /.design-studio__split -->
+
+  <div class="design-studio__actions">
+    <div class="button-row">
+      <button class="button" type="button" data-send-design>Send Design to Request Form</button>
+      <button class="button-secondary" type="button" data-ar-tryon title="Try the piece on with your camera">Try On (AR)</button>
+      <details class="designer-more-actions">
+        <summary>More actions</summary>
+        <div class="button-row designer-more-actions__row">
+          <button class="button-secondary" type="button" data-undo-design title="Undo (⌘Z / Ctrl+Z)" disabled>Undo</button>
+          <button class="button-secondary" type="button" data-redo-design title="Redo (⌘⇧Z / Ctrl+Shift+Z)" disabled>Redo</button>
+          <button class="button-secondary" type="button" data-save-design>Save Design</button>
+          <button class="button-secondary" type="button" data-share-design>Share Link</button>
+          <button class="button-secondary" type="button" data-compare-design>Compare Saved</button>
+          <button class="button-secondary" type="button" data-download-design title="Download a PNG of the current view">Download PNG</button>
+          <button class="button-secondary" type="button" data-export-design>Export Design File</button>
+          <button class="button-secondary" type="button" data-import-design>Open Design File</button>
+          <input type="file" accept=".json,application/json" data-design-file hidden aria-label="Open a jewellery design file">
+          <button class="button-secondary" type="button" data-export-glb>Export 3D Preview</button>
+          <button class="button-secondary" type="button" data-audit-mesh>Download Mesh Audit</button>
+          <a class="button-secondary" href="#request-form">Skip to Form</a>
+        </div>
+      </details>
+    </div>
+    <p class="designer-action-status" data-designer-share-status aria-live="polite"></p>
+    <p class="generator-export-note">Design files preserve your settings. 3D previews use GLB; workshop validation is needed before manufacture.</p>
+    <details class="generator-offline-output">
+      <summary>Advanced studio output · Blender Cycles</summary>
+      <p>Export a self-contained GLB render job for the local Cycles renderer. Full-scene path tracing adds setting reflections, contact shadows and multi-bounce light transport. This is a local workflow, not a cloud rendering service.</p>
+      <div class="generator-control-grid">
+        <label>Offline resolution<select data-render-resolution><option value="512">512 px · proof</option><option value="1024">1024 px</option><option value="2048" selected>2048 px</option><option value="4096">4096 px · final</option></select></label>
+        <label>Offline sample budget<select data-render-samples><option value="64">64 · draft</option><option value="256" selected>256 · studio</option><option value="1024">1024 · fine detail</option></select></label>
+        <label>Offline light transport<select data-render-transport><option value="RGB">RGB path tracing</option><option value="Three-Band">Three-band dispersion · 3 renders</option></select></label>
+        <label>Offline camera<select data-render-view><option>Three-Quarter</option><option>Profile</option><option>Top</option></select></label>
+        <label>Offline background<select data-render-background><option>Charcoal</option><option>Ivory</option><option>Transparent</option></select></label>
+        <label>Macro depth of field<select data-render-aperture><option value="0">Off · entire piece sharp</option><option value="8">f/8</option><option value="16">f/16</option><option value="32">f/32</option></select></label>
+      </div>
+      <button class="button-secondary" type="button" data-export-render-job>Export Cycles Render Job</button>
+      <p class="generator-export-note">Run from the repository with Blender 4.2+ installed:</p>
+      <pre><code>blender --background --factory-startup --python-exit-code 1 --python scripts/render_jewellery.py -- design.glb --output renders/design</code></pre>
+      <p class="generator-export-note">Produces a PNG, linear EXR, editable Blender scene and provenance manifest. Three-band dispersion is an approximation, not full spectral simulation. Render time depends on hardware and quality settings.</p>
+    </details>
+  </div>
+  </div><!-- /.design-studio__shell -->
+</section>

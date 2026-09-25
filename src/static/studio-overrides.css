@@ -1,0 +1,44 @@
+/* ---- Storefront overrides for the 3D studio (appended to the generated studio.css) ---- */
+body[data-page="customs"] {
+  --bg: var(--color-bg);
+  --surface: var(--color-bg);
+  --surface-alt: var(--color-surface);
+  --surface-muted: var(--color-surface);
+  --ink: var(--color-ink);
+  --text: var(--color-text);
+  --heading: var(--color-ink);
+  --muted: var(--color-muted);
+  --primary: var(--color-ink);
+  --primary-deep: #000;
+  --accent: var(--color-accent);
+  --gold: var(--color-accent);
+  --champagne: var(--color-accent-soft);
+  --line: var(--color-line);
+  --line-strong: #cfc9bf;
+  --hairline: var(--color-line);
+  --radius: 0px;
+  --radius-sm: 0px;
+  --container: min(1440px, calc(100vw - 32px));
+}
+@media (min-width: 700px) { body[data-page="customs"] { --container: min(1440px, calc(100vw - 64px)); } }
+@media (min-width: 1200px) { body[data-page="customs"] { --container: min(1440px, calc(100vw - 96px)); } }
+
+.studio-shell { background: var(--color-surface); border-bottom: 1px solid var(--color-line); }
+.studio-shell .design-studio { scroll-margin-top: var(--header-h, 76px); }
+.studio-shell .eyebrow { color: var(--color-muted); }
+.studio-shell .accent-rule { display: none; }
+.studio-shell h2 { font-family: var(--font-display); font-weight: 400; }
+.studio-shell .button,
+.studio-shell .button-secondary {
+  border-radius: 0; min-height: 46px; font-family: var(--font-body);
+  font-size: 11.5px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; box-shadow: none;
+}
+.studio-shell .button { background: var(--color-ink); color: var(--color-inverse); border: 1px solid var(--color-ink); }
+.studio-shell .button:hover { background: #333; transform: none; }
+.studio-shell .button-secondary { background: transparent; color: var(--color-ink); border: 1px solid var(--color-ink); }
+.studio-shell .button-secondary:hover { background: var(--color-ink); color: var(--color-inverse); transform: none; }
+.studio-shell select, .studio-shell input[type="text"], .studio-shell input[type="number"], .studio-shell textarea { border-radius: 0; }
+.studio-shell .designer-preset { border-radius: 999px; }
+.studio-shell .designer-preset--accent { background: var(--color-ink); color: var(--color-inverse); border-color: var(--color-ink); }
+.studio-shell details > summary strong { font-family: var(--font-body); font-weight: 700; letter-spacing: .08em; text-transform: uppercase; font-size: 12px; }
+.studio-shell .design-studio { padding-block: clamp(24px, 3vw, 40px) clamp(40px, 5vw, 64px); }

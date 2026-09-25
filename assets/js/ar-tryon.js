@@ -21,7 +21,7 @@ import {
   METERS_PER_MM
 } from "./jewellery-spec.js?v=20260911-construction-v32";
 
-const HDR_URL = "assets/textures/studio_small_08_1k.hdr";
+const HDR_URL = "/assets/textures/studio_small_08_1k.hdr";
 
 const TRIGGER_SELECTOR = "[data-ar-tryon]";
 const STATE_KEY = "tj-custom-design-state";

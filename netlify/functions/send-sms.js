@@ -1,9 +1,13 @@
 function buildMessage(formName, fields) {
-  const title = formName === "custom-request"
-    ? "New custom request"
-    : formName === "contact-inquiry"
-      ? "New contact inquiry"
-      : "New site submission";
+  const titles = {
+    "custom-request": "New custom request",
+    "order-request": "New order request",
+    "product-inquiry": "New product enquiry",
+    contact: "New contact message",
+    "contact-inquiry": "New contact inquiry",
+    "vip-welcome": "New private-list signup"
+  };
+  const title = titles[formName] || "New site submission";
 
   const lines = [title];
 

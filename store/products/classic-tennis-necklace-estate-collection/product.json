@@ -1,0 +1,54 @@
+{
+  "name": "The Classic Tennis Necklace",
+  "subtitle": "Estate Collection · 15 CTW",
+  "category": "necklaces",
+  "tags": ["estate", "tennis"],
+  "availability": "one-of-a-kind",
+  "badge": "Estate",
+  "price": 20000,
+  "metals": ["white-gold", "yellow-gold"],
+  "stones": ["natural-diamond"],
+  "images": [
+    {
+      "src": "/assets/images/products/classic-tennis-necklace/classic-tennis-necklace-white-gold.jpeg",
+      "alt": "Classic tennis necklace in white gold",
+      "note": "Product render — explore the white- and yellow-gold finishes."
+    },
+    {
+      "src": "/assets/images/products/classic-tennis-necklace/classic-tennis-necklace-worn-portrait.jpeg",
+      "alt": "Classic tennis necklace worn"
+    },
+    {
+      "src": "/assets/images/products/classic-tennis-necklace/classic-tennis-necklace-yellow-gold.jpeg",
+      "alt": "Classic tennis necklace in yellow gold",
+      "note": "Product render — explore the white- and yellow-gold finishes."
+    },
+    {
+      "src": "/assets/images/products/classic-tennis-necklace/classic-tennis-necklace-worn-layered.jpeg",
+      "alt": "Classic tennis necklace layered"
+    }
+  ],
+  "summary": "Approximately 15 CTW of natural round brilliant diamonds, individually set in a timeless four-prong setting.",
+  "description": "A true forever piece. The Classic Tennis Necklace features approximately 15 carats total weight of natural round brilliant diamonds, individually set in a timeless four-prong setting for an uninterrupted line of brilliance.\n\nPart of our Estate Collection, it was selected for its exceptional presence, craftsmanship, and enduring appeal.",
+  "details": {
+    "Diamonds": "Approximately 15 CTW natural diamonds",
+    "Cut": "Round brilliant",
+    "Setting": "Four-prong",
+    "Metal": "14K white or yellow gold",
+    "Collection": "Estate Collection"
+  },
+  "options": [
+    {
+      "name": "Metal",
+      "type": "swatch",
+      "values": [
+        { "label": "14K White Gold", "metal": "white-gold", "image": 0 },
+        { "label": "14K Yellow Gold", "metal": "yellow-gold", "image": 2 }
+      ]
+    }
+  ],
+  "care": "Store flat and separate from other pieces, and clean gently to protect the diamonds and four-prong settings.",
+  "shipping": "Viewing, final availability, payment, and insured delivery details are confirmed directly before purchase.",
+  "maxQuantity": 1,
+  "sort": 22
+}

@@ -1,0 +1,35 @@
+{
+  "name": "Diamond Hand Chain Bracelet",
+  "subtitle": "14K Gold · Three Bezel Diamonds",
+  "category": "bracelets",
+  "tags": ["dainty"],
+  "availability": "made-to-order",
+  "price": 750,
+  "priceFrom": true,
+  "currency": "USD",
+  "metals": ["yellow-gold"],
+  "stones": ["natural-diamond"],
+  "images": [
+    {
+      "src": "/assets/images/studio/diamond-hand-chain.webp",
+      "alt": "Diamond hand chain bracelet — studio view",
+      "note": "AI-restyled studio view. Original photographs follow."
+    },
+    { "src": "/assets/images/products/diamond-hand-chain-1.jpeg", "alt": "Hand chain worn" },
+    { "src": "/assets/images/drive/hand-chain-2.png", "alt": "Hand chain detail" },
+    { "src": "/assets/images/drive/hand-chain-3.png", "alt": "Hand chain on the hand" },
+    { "src": "/assets/images/drive/hand-chain-1.png", "alt": "Hand chain styled" }
+  ],
+  "summary": "A delicate 14K yellow gold hand chain with three tiny bezel-set natural diamonds, connecting wrist to hand.",
+  "description": "A delicate 14K yellow gold diamond hand chain bracelet featuring three tiny natural diamonds, each approximately 0.10–0.20 ct. This elegant piece connects beautifully from the wrist toward the hand, creating a soft, feminine, and eye-catching handpiece.",
+  "details": {
+    "Stones": "Three natural diamonds, approximately 0.10–0.20 ct each",
+    "Design": "Hand chain connecting from the wrist toward the hand, three bezel-set diamonds",
+    "Metal": "14K yellow gold"
+  },
+  "options": [],
+  "care": "Store flat, avoid moisture, and fasten before placing in its pouch.",
+  "shipping": "Made to order with delivery details confirmed during inquiry.",
+  "maxQuantity": 5,
+  "sort": 9
+}

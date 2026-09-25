@@ -1,0 +1,66 @@
+{
+  "name": "The Rise Ring",
+  "subtitle": "1 ct Oval Lab-Grown Diamond",
+  "category": "rings",
+  "tags": ["signature", "best-seller", "pinky"],
+  "availability": "made-to-order",
+  "badge": "Signature",
+  "price": 2200,
+  "metals": ["yellow-gold"],
+  "stones": ["lab-diamond"],
+  "images": [
+    {
+      "src": "/assets/images/studio/rise-ring-polished.webp",
+      "alt": "The Rise Ring — studio view",
+      "note": "AI-restyled studio view. Original photographs follow."
+    },
+    {
+      "src": "/assets/images/products/rise-ring/rise-ring-worn.jpeg",
+      "alt": "The Rise Ring worn on the pinky"
+    },
+    {
+      "src": "/assets/images/products/rise-ring/rise-ring-polished.jpeg",
+      "alt": "The Rise Ring, polished finish"
+    },
+    {
+      "src": "/assets/images/products/rise-ring/rise-ring-satin.jpeg",
+      "alt": "The Rise Ring, satin finish"
+    },
+    { "src": "/assets/images/products/rise-ring/rise-ring-styled.jpeg", "alt": "The Rise Ring styled" }
+  ],
+  "summary": "A bold pinky ring with a certified 1.00 ct oval lab-grown diamond set into a sculptural 14K gold profile — a reminder to rise, shine, and take up space.",
+  "description": "A bold reminder to rise, shine, and take up space. The Rise Ring pairs a certified 1.00 ct oval lab-grown diamond with a smooth, sculptural 14K gold setting designed for pinky-ring presence.\n\nNatural diamond and coloured gemstone versions are available by request.",
+  "details": {
+    "Stone": "Certified 1.00 ct oval lab-grown diamond",
+    "Design": "Sculptural bezel-set pinky ring",
+    "Metal": "14K gold",
+    "Other stones": "Natural diamond and coloured gemstone options by request"
+  },
+  "options": [
+    {
+      "name": "Finish",
+      "type": "button",
+      "values": [
+        { "label": "High polish", "image": 2 },
+        { "label": "Satin", "image": 3 }
+      ]
+    },
+    { "name": "Ring size", "type": "size", "values": "ringSizes", "required": true }
+  ],
+  "care": "Store separately and clean gently with a soft jewellery cloth to protect the polished gold and stone setting.",
+  "shipping": "Made to order; ring size, gold colour, production timing, and insured delivery are confirmed in writing before payment.",
+  "studio": {
+    "piece": "Ring",
+    "metal": "Yellow Gold",
+    "karat": "14K",
+    "setting": "Bezel",
+    "shape": "Oval",
+    "size": "1",
+    "stone": "Clear Diamond",
+    "band": "Solitaire",
+    "halo": "0",
+    "accent": "0"
+  },
+  "maxQuantity": 5,
+  "sort": 1
+}

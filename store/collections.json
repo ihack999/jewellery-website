@@ -1,0 +1,55 @@
+{
+  "$comment": "Every collection becomes a page at /collections/<handle>/ (or `path`). `match` decides which products appear: category, tags, stones, metals, availability, minPrice, maxPrice. All keys must match; list values mean 'any of'. `tiles` = the image row under the title.",
+
+  "defaultTiles": ["rings", "necklaces", "bracelets", "earrings", "tennis", "estate"],
+
+  "collections": [
+    {
+      "handle": "all",
+      "path": "/shop/",
+      "title": "Fine Jewellery",
+      "description": "Signature diamond pieces, custom-made favourites and rare estate finds — each one confirmed personally before it's yours.",
+      "match": { "excludeTags": ["estate-luxury"] },
+      "image": "/assets/images/optimized/graduated-tennis-necklace-worn-1600.jpg",
+      "promo": { "after": 6, "title": "Can't find it? Design it.", "text": "Build your own ring, necklace or bracelet in real-time 3D.", "cta": "Open the Design Studio", "href": "/design-studio/", "image": "/assets/images/optimized/studio-ring-pink-gemstone-1600.jpg" }
+    },
+    { "handle": "rings", "title": "Rings", "tileLabel": "Rings", "match": { "category": "rings" }, "image": "/assets/images/studio/rise-ring-polished.webp",
+      "description": "Sculptural pinky rings, cushion and oval solitaires, rare coloured diamonds and personalised signets.",
+      "promo": { "after": 4, "title": "Your ring, from scratch", "text": "Choose the silhouette, stone, metal and setting in the 3D Studio.", "cta": "Design a ring", "href": "/design-studio/?piece=Ring#design-studio", "image": "/assets/images/products/rise-ring/rise-ring-worn.jpeg" } },
+    { "handle": "necklaces", "title": "Necklaces", "tileLabel": "Necklaces", "match": { "category": "necklaces" }, "image": "/assets/images/studio/diamond-tennis-necklace.webp",
+      "description": "Tennis necklaces and graduated diamond lines designed to be worn every day — not saved for someday." },
+    { "handle": "bracelets", "title": "Bracelets", "tileLabel": "Bracelets", "match": { "category": "bracelets" }, "image": "/assets/images/studio/oval-bezel-diamond-bracelet.webp",
+      "description": "Tennis bracelets, bezel-set ovals and delicate hand chains for the perfect stack." },
+    { "handle": "earrings", "title": "Earrings", "tileLabel": "Earrings", "match": { "category": "earrings" }, "image": "/assets/images/studio/yellow-diamond-oval-studs.webp",
+      "description": "Halo studs and statement drops with natural, lab-grown and coloured stones." },
+    { "handle": "tennis", "title": "The Tennis Edit", "tileLabel": "Tennis", "match": { "tags": ["tennis"] }, "image": "/assets/images/studio/quiet-power-tennis-bracelet.webp",
+      "description": "An unbroken line of light. Tennis necklaces and bracelets in natural and lab-grown diamonds." },
+    { "handle": "signatures", "title": "Signatures", "tileLabel": "Signatures", "match": { "tags": ["signature"] }, "image": "/assets/images/studio/signature-monogram-ring.webp",
+      "description": "The pieces our clients come back for — designed in-house, made to order for you." },
+    { "handle": "lab-grown", "title": "Lab-Grown Diamonds", "tileLabel": "Lab-Grown", "match": { "stones": ["lab-diamond"] }, "image": "/assets/images/studio/cushion-cut-diamond-ring.webp",
+      "description": "Certified lab-grown diamonds: the same fire and brilliance, with more room for size." },
+    { "handle": "coloured-stones", "title": "Coloured Stones", "tileLabel": "Colour", "match": { "stones": ["coloured-diamond", "gemstone"] }, "image": "/assets/images/studio/rare-blue-diamond-ring.webp",
+      "description": "Blue and yellow diamonds, emeralds and more — for when white isn't the whole story." },
+    { "handle": "personalized", "title": "Personalized", "tileLabel": "Personalized", "match": { "tags": ["personalized"] }, "image": "/assets/images/studio/signature-monogram-ring.webp",
+      "description": "Monograms, engravings and made-to-measure details." },
+    { "handle": "under-2500", "title": "Under $2,500", "tileLabel": "Under $2,500", "match": { "maxPrice": 2500, "excludeAvailability": ["sold"] }, "image": "/assets/images/studio/half-eternity-pinky-band.webp",
+      "description": "Everyday fine jewellery with real diamonds and solid gold." },
+    { "handle": "2500-to-10000", "title": "$2,500 – $10,000", "match": { "minPrice": 2500, "maxPrice": 10000, "excludeAvailability": ["sold"] }, "image": "/assets/images/studio/oval-bezel-diamond-bracelet.webp" },
+    { "handle": "10000-and-above", "title": "$10,000 & Above", "match": { "minPrice": 10000, "excludeAvailability": ["sold"] }, "image": "/assets/images/studio/graduated-diamond-necklace.webp" },
+    {
+      "handle": "estate",
+      "title": "Estate & Rare",
+      "tileLabel": "Estate",
+      "match": { "tags": ["estate"] },
+      "image": "/assets/images/studio/estate-cushion-halo.webp",
+      "description": "Individually selected estate jewellery, rare watches and luxury finds. Viewed by private appointment in Toronto.",
+      "tiles": ["estate-jewellery", "watches", "sold"],
+      "promo": { "after": 3, "title": "Looking for something specific?", "text": "We privately source rare diamonds, watches and luxury pieces on request.", "cta": "Request sourcing", "href": "/pages/contact/?topic=sourcing", "image": "/assets/images/estate-luxuries/ladies-piaget.jpeg" }
+    },
+    { "handle": "estate-jewellery", "title": "Estate Jewellery", "tileLabel": "Estate Jewellery", "match": { "tags": ["estate"], "category": ["rings", "necklaces", "bracelets", "earrings"] }, "image": "/assets/images/studio/graduated-diamond-necklace.webp", "tiles": ["estate", "watches", "sold"] },
+    { "handle": "watches", "title": "Luxury Watches", "tileLabel": "Watches", "match": { "category": "watches" }, "image": "/assets/images/studio/patek-philippe-detail.webp", "tiles": ["estate", "estate-jewellery", "sold"],
+      "description": "Diamond-set Patek Philippe, Piaget and Audemars Piguet from private collections." },
+    { "handle": "sold", "title": "Recently Sold", "tileLabel": "Sold", "match": { "availability": ["sold"] }, "image": "/assets/images/studio/white-birkin.webp", "tiles": ["estate", "estate-jewellery", "watches"],
+      "description": "A record of rare pieces that have found their next owner. Ask us to source something similar." }
+  ]
+}

@@ -1,0 +1,777 @@
+{
+  "generatedAt": "2026-09-25T04:25:41.775Z",
+  "currency": "CAD",
+  "checkoutMode": "request",
+  "shippingCountries": [
+    "CA",
+    "US"
+  ],
+  "products": {
+    "the-rise-ring": {
+      "name": "The Rise Ring",
+      "price": 2200,
+      "currency": "CAD",
+      "purchasable": true,
+      "maxQuantity": 5,
+      "image": "https://torontojewelscuration.com/media/rise-ring-polished-da22590a-720.webp",
+      "options": [
+        {
+          "name": "Finish",
+          "type": "button",
+          "required": true,
+          "values": [
+            {
+              "value": "High polish",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "Satin",
+              "add": 0,
+              "inquire": false
+            }
+          ]
+        },
+        {
+          "name": "Ring size",
+          "type": "size",
+          "required": true,
+          "values": [
+            {
+              "value": "3",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "3.5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "4",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "4.5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "5.5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "6",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "6.5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "7",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "7.5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "8",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "8.5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "9",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "9.5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "10",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "Not sure — help me size",
+              "add": 0,
+              "inquire": false
+            }
+          ]
+        }
+      ]
+    },
+    "signature-monogram-ring": {
+      "name": "The Signature Monogram Ring",
+      "price": 900,
+      "currency": "CAD",
+      "purchasable": true,
+      "maxQuantity": 5,
+      "image": "https://torontojewelscuration.com/media/signature-monogram-ring-ba3f7458-720.webp",
+      "options": [
+        {
+          "name": "Initials",
+          "type": "text",
+          "required": true,
+          "maxLength": 3
+        },
+        {
+          "name": "Ring size",
+          "type": "size",
+          "required": true,
+          "values": [
+            {
+              "value": "3",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "3.5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "4",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "4.5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "5.5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "6",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "6.5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "7",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "7.5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "8",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "8.5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "9",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "9.5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "10",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "Not sure — help me size",
+              "add": 0,
+              "inquire": false
+            }
+          ]
+        }
+      ]
+    },
+    "diamond-tennis-necklace": {
+      "name": "The She’s Unstoppable Tennis Necklace",
+      "price": 11000,
+      "currency": "CAD",
+      "purchasable": true,
+      "maxQuantity": 5,
+      "image": "https://torontojewelscuration.com/media/diamond-tennis-necklace-7f4fd549-720.webp",
+      "options": [
+        {
+          "name": "Metal",
+          "type": "swatch",
+          "required": true,
+          "values": [
+            {
+              "value": "14K White Gold",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "14K Yellow Gold",
+              "add": 0,
+              "inquire": false
+            }
+          ]
+        },
+        {
+          "name": "Diamonds",
+          "type": "button",
+          "required": true,
+          "values": [
+            {
+              "value": "Lab-grown",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "Natural",
+              "add": 0,
+              "inquire": true
+            }
+          ]
+        }
+      ]
+    },
+    "diamond-tennis-bracelet": {
+      "name": "The Quiet Power Tennis Bracelet",
+      "price": 2500,
+      "currency": "CAD",
+      "purchasable": true,
+      "maxQuantity": 5,
+      "image": "https://torontojewelscuration.com/media/quiet-power-tennis-bracelet-68215224-720.webp",
+      "options": [
+        {
+          "name": "Diamonds",
+          "type": "button",
+          "required": true,
+          "values": [
+            {
+              "value": "Lab-grown",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "Natural",
+              "add": 0,
+              "inquire": true
+            }
+          ]
+        }
+      ]
+    },
+    "half-eternity-band-for-your-pinky": {
+      "name": "Half Eternity Pinky Band",
+      "price": 900,
+      "currency": "CAD",
+      "purchasable": true,
+      "maxQuantity": 5,
+      "image": "https://torontojewelscuration.com/media/half-eternity-pinky-band-98edba64-720.webp",
+      "options": [
+        {
+          "name": "Ring size",
+          "type": "size",
+          "required": true,
+          "values": [
+            {
+              "value": "3",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "3.5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "4",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "4.5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "5.5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "6",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "6.5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "7",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "7.5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "8",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "8.5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "9",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "9.5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "10",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "Not sure — help me size",
+              "add": 0,
+              "inquire": false
+            }
+          ]
+        }
+      ]
+    },
+    "cushion-cut-diamond-ring": {
+      "name": "1 Carat Cushion Cut Diamond Ring",
+      "price": 2500,
+      "currency": "CAD",
+      "purchasable": true,
+      "maxQuantity": 5,
+      "image": "https://torontojewelscuration.com/media/cushion-cut-diamond-ring-ff19b675-720.webp",
+      "options": [
+        {
+          "name": "Metal",
+          "type": "swatch",
+          "required": true,
+          "values": [
+            {
+              "value": "14K Yellow Gold",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "14K White Gold",
+              "add": 0,
+              "inquire": false
+            }
+          ]
+        },
+        {
+          "name": "Ring size",
+          "type": "size",
+          "required": true,
+          "values": [
+            {
+              "value": "3",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "3.5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "4",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "4.5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "5.5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "6",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "6.5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "7",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "7.5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "8",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "8.5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "9",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "9.5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "10",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "Not sure — help me size",
+              "add": 0,
+              "inquire": false
+            }
+          ]
+        }
+      ]
+    },
+    "rare-blue-diamond-ring": {
+      "name": "Rare Blue Diamond Ring",
+      "price": null,
+      "currency": "CAD",
+      "purchasable": false,
+      "maxQuantity": 5,
+      "image": "https://torontojewelscuration.com/media/rare-blue-diamond-ring-c8d2c003-720.webp",
+      "options": [
+        {
+          "name": "Blue diamond",
+          "type": "button",
+          "required": true,
+          "values": [
+            {
+              "value": "Lab-grown",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "Natural",
+              "add": 0,
+              "inquire": false
+            }
+          ]
+        },
+        {
+          "name": "Ring size",
+          "type": "size",
+          "required": true,
+          "values": [
+            {
+              "value": "3",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "3.5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "4",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "4.5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "5.5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "6",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "6.5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "7",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "7.5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "8",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "8.5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "9",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "9.5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "10",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "Not sure — help me size",
+              "add": 0,
+              "inquire": false
+            }
+          ]
+        }
+      ]
+    },
+    "oval-bezel-diamond-bracelet": {
+      "name": "The Oval Bezel Diamond Bracelet",
+      "price": 8200,
+      "currency": "CAD",
+      "purchasable": true,
+      "maxQuantity": 5,
+      "image": "https://torontojewelscuration.com/media/oval-bezel-diamond-bracelet-9a163449-720.webp",
+      "options": [
+        {
+          "name": "Metal",
+          "type": "swatch",
+          "required": true,
+          "values": [
+            {
+              "value": "14K Yellow Gold",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "14K White Gold",
+              "add": 0,
+              "inquire": false
+            }
+          ]
+        }
+      ]
+    },
+    "diamond-hand-chain-bracelet": {
+      "name": "Diamond Hand Chain Bracelet",
+      "price": 750,
+      "currency": "USD",
+      "purchasable": true,
+      "maxQuantity": 5,
+      "image": "https://torontojewelscuration.com/media/diamond-hand-chain-596e1e48-720.webp",
+      "options": []
+    },
+    "yellow-diamond-oval-stud-earrings": {
+      "name": "Yellow Diamond Oval Studs",
+      "price": null,
+      "currency": "CAD",
+      "purchasable": false,
+      "maxQuantity": 5,
+      "image": "https://torontojewelscuration.com/media/yellow-diamond-oval-studs-600fbcb7-720.webp",
+      "options": [
+        {
+          "name": "Diamonds",
+          "type": "button",
+          "required": true,
+          "values": [
+            {
+              "value": "Lab-grown",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "Natural",
+              "add": 0,
+              "inquire": false
+            }
+          ]
+        }
+      ]
+    },
+    "estate-cushion-halo-diamond-ring": {
+      "name": "Cushion Halo Estate Ring",
+      "price": 60000,
+      "currency": "CAD",
+      "purchasable": true,
+      "maxQuantity": 1,
+      "image": "https://torontojewelscuration.com/media/estate-cushion-halo-5911c50d-720.webp",
+      "options": []
+    },
+    "15-carat-graduated-diamond-tennis-necklace": {
+      "name": "15 Carat Graduated Diamond Tennis Necklace",
+      "price": 35000,
+      "currency": "CAD",
+      "purchasable": true,
+      "maxQuantity": 1,
+      "image": "https://torontojewelscuration.com/media/graduated-diamond-necklace-526c63fe-720.webp",
+      "options": []
+    },
+    "classic-tennis-necklace-estate-collection": {
+      "name": "The Classic Tennis Necklace",
+      "price": 20000,
+      "currency": "CAD",
+      "purchasable": true,
+      "maxQuantity": 1,
+      "image": "https://torontojewelscuration.com/media/classic-tennis-necklace-white-gold-e0aaef0c-720.webp",
+      "options": [
+        {
+          "name": "Metal",
+          "type": "swatch",
+          "required": true,
+          "values": [
+            {
+              "value": "14K White Gold",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "14K Yellow Gold",
+              "add": 0,
+              "inquire": false
+            }
+          ]
+        }
+      ]
+    },
+    "green-gemstone-diamond-floral-drop-earrings": {
+      "name": "Green Gemstone & Diamond Floral Drop Earrings",
+      "price": null,
+      "currency": "CAD",
+      "purchasable": false,
+      "maxQuantity": 1,
+      "image": "https://torontojewelscuration.com/media/emerald-floral-earring-7a839199-720.webp",
+      "options": []
+    },
+    "ladies-patek-philippe-diamond-watch": {
+      "name": "Ladies Patek Philippe Diamond Watch",
+      "price": null,
+      "currency": "CAD",
+      "purchasable": false,
+      "maxQuantity": 1,
+      "image": "https://torontojewelscuration.com/media/patek-philippe-detail-03864430-720.webp",
+      "options": []
+    },
+    "ladies-piaget-diamond-watch": {
+      "name": "Ladies Piaget Diamond Watch",
+      "price": null,
+      "currency": "CAD",
+      "purchasable": false,
+      "maxQuantity": 1,
+      "image": "https://torontojewelscuration.com/media/piaget-detail-b828b58c-720.webp",
+      "options": []
+    },
+    "audemars-piguet-royal-oak-diamond-watch": {
+      "name": "Audemars Piguet Royal Oak Diamond Watch",
+      "price": null,
+      "currency": "CAD",
+      "purchasable": false,
+      "maxQuantity": 1,
+      "image": "https://torontojewelscuration.com/media/royal-oak-detail-124bde60-720.webp",
+      "options": []
+    },
+    "rare-white-birkin": {
+      "name": "Rare White Birkin",
+      "price": null,
+      "currency": "CAD",
+      "purchasable": false,
+      "maxQuantity": 5,
+      "image": "https://torontojewelscuration.com/media/white-birkin-f94383f2-720.webp",
+      "options": []
+    }
+  }
+}

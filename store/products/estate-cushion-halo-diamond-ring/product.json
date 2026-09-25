@@ -1,0 +1,35 @@
+{
+  "name": "Cushion Halo Estate Ring",
+  "category": "rings",
+  "tags": ["estate"],
+  "availability": "one-of-a-kind",
+  "badge": "Estate",
+  "price": 60000,
+  "stones": ["natural-diamond"],
+  "images": [
+    {
+      "src": "/assets/images/studio/estate-cushion-halo.webp",
+      "alt": "Cushion Halo Estate Ring — studio view",
+      "note": "AI-restyled studio view. Original photographs follow."
+    },
+    {
+      "src": "/assets/images/estate-luxuries/estate-cushion-halo-ring-source.png",
+      "alt": "Cushion halo estate ring, original photograph"
+    }
+  ],
+  "videos": [
+    { "src": "/assets/videos/estate-cushion-halo-ring.mp4", "label": "Original video" }
+  ],
+  "summary": "A warm-toned cushion-cut diamond centre wrapped in a layered diamond halo — offered by private appointment in Toronto.",
+  "description": "A distinctive estate ring with a warm-toned cushion-cut diamond centre and layered diamond halo.\n\nThe piece is offered through private appointment, where condition, measurements, documentation, and current availability can be discussed before purchase.",
+  "details": {
+    "Category": "Estate diamond ring",
+    "Centre": "Cushion-cut diamond",
+    "Setting": "Layered diamond halo",
+    "Viewing": "Private appointment in Toronto"
+  },
+  "care": "Care recommendations will be confirmed after the setting and current condition have been reviewed.",
+  "shipping": "Viewing, final availability, payment, and delivery details are confirmed directly before purchase.",
+  "maxQuantity": 1,
+  "sort": 20
+}

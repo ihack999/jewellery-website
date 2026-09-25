@@ -1,0 +1,65 @@
+{
+  "$help": "Copy this folder (or run: npm run new -- \"Product Name\"). Folder name = URL: /products/<folder-name>/. Keys starting with $ are ignored. Delete any line you don't need.",
+  "name": "Product Name",
+  "subtitle": "Short line under the name, e.g. 1 ct Oval Lab-Grown Diamond",
+  "category": "rings",
+  "$category": "One of the keys in store/site.json → vocabulary.categories",
+  "price": 2500,
+  "$price": "Number in the store currency, no $ or commas. Use null for 'Price on request'.",
+  "priceFrom": false,
+  "$priceFrom": "true shows 'From $2,500'",
+  "compareAtPrice": null,
+  "availability": "made-to-order",
+  "$availability": "ready | made-to-order | one-of-a-kind | sold | hidden",
+  "badge": "New",
+  "tags": ["signature"],
+  "$tags": "Free-form labels used by collections (e.g. signature, tennis, estate, best-seller)",
+  "metals": ["yellow-gold", "white-gold"],
+  "stones": ["lab-diamond"],
+  "$metals/stones": "Keys from store/site.json → vocabulary. Used for filters and swatches.",
+  "images": [
+    { "src": "01.jpg", "alt": "Describe the photo for screen readers" },
+    { "src": "02.jpg", "alt": "Worn on the hand" }
+  ],
+  "$images": "Optional! Leave 'images' out and every photo in this folder is used, in filename order. The 2nd image is shown on hover. Paths starting with / point into the site (e.g. /assets/images/...).",
+  "summary": "One or two sentences shown near the price and in search.",
+  "description": "The full story of the piece.\n\nLeave a blank line between paragraphs. **Bold** and [links](/pages/contact/) work.",
+  "details": { "Stone": "1.00 ct oval lab-grown diamond", "Metal": "14K gold", "Setting": "Bezel" },
+  "options": [
+    {
+      "name": "Metal",
+      "type": "swatch",
+      "values": [
+        { "label": "14K Yellow Gold", "metal": "yellow-gold", "image": 0 },
+        { "label": "14K White Gold", "metal": "white-gold", "image": 1 }
+      ]
+    },
+    {
+      "name": "Diamond",
+      "type": "button",
+      "values": [
+        { "label": "Lab-grown" },
+        { "label": "Natural", "inquire": true },
+        { "label": "2 ct upgrade", "add": 1500 }
+      ]
+    },
+    { "name": "Ring size", "type": "size", "values": "ringSizes", "required": true },
+    {
+      "name": "Engraving",
+      "type": "text",
+      "maxLength": 12,
+      "required": false,
+      "placeholder": "Initials or a date"
+    }
+  ],
+  "$options": "type: swatch (metal colour dots) | button | size (dropdown) | text. 'add' adds to the price, 'inquire' switches the button to Enquire, 'image' jumps to that photo (counting from 0).",
+  "care": "Store separately and clean with a soft jewellery cloth.",
+  "shipping": "Made to order; timing and insured delivery are confirmed in writing before payment.",
+  "studio": { "piece": "Ring", "metal": "Yellow Gold", "shape": "Oval", "setting": "Bezel" },
+  "$studio": "Optional. Adds a 'Make it yours in 3D' button that opens the Design Studio with these settings.",
+  "related": [],
+  "maxQuantity": 5,
+  "sort": 100,
+  "$sort": "Lower numbers appear first in 'Featured' order.",
+  "seo": { "title": "", "description": "" }
+}

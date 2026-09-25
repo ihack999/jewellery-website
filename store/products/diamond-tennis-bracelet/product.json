@@ -1,0 +1,52 @@
+{
+  "name": "The Quiet Power Tennis Bracelet",
+  "subtitle": "1.50 ct Lab-Grown Diamonds",
+  "category": "bracelets",
+  "tags": ["tennis", "signature", "best-seller", "stacking"],
+  "availability": "made-to-order",
+  "badge": "Best Seller",
+  "price": 2500,
+  "priceFrom": true,
+  "metals": ["yellow-gold"],
+  "stones": ["lab-diamond"],
+  "images": [
+    {
+      "src": "/assets/images/studio/quiet-power-tennis-bracelet.webp",
+      "alt": "The Quiet Power Tennis Bracelet — studio view",
+      "note": "AI-restyled studio view. Original photographs follow."
+    },
+    { "src": "/assets/images/products/quiet-power-tennis-bracelet-1.jpeg", "alt": "Tennis bracelet worn" },
+    { "src": "/assets/images/products/quiet-power-tennis-bracelet-2.jpeg", "alt": "Tennis bracelet detail" },
+    {
+      "src": "/assets/images/products/quiet-power-tennis-bracelet-3.jpeg",
+      "alt": "Tennis bracelet stacked"
+    },
+    {
+      "src": "/assets/images/products/quiet-power-tennis-bracelet-4.jpeg",
+      "alt": "Tennis bracelet on the wrist"
+    }
+  ],
+  "summary": "1.50 ct of VS, F–G lab-grown diamonds in 14K gold — quiet confidence, strength and effortless beauty.",
+  "description": "A refined and elegant tennis bracelet featuring 1.50 ct total carat weight lab-grown diamonds in VS clarity and F–G colour. Set in 14K gold, this piece is designed to represent quiet confidence, strength, and effortless beauty.\n\nNatural diamonds are available by request.",
+  "details": {
+    "Stone": "1.50 ct total carat weight lab-grown diamonds",
+    "Diamond quality": "VS clarity, F–G colour",
+    "Design": "Classic tennis bracelet",
+    "Metal": "14K gold"
+  },
+  "options": [
+    {
+      "name": "Diamonds",
+      "type": "button",
+      "values": [
+        { "label": "Lab-grown" },
+        { "label": "Natural", "inquire": true }
+      ]
+    }
+  ],
+  "care": "Store flat and separate from harder pieces to protect the tennis setting.",
+  "shipping": "Made to order with timing confirmed during inquiry.",
+  "studio": { "piece": "Bracelet", "silhouette": "Tennis", "setting": "Prong", "karat": "14K", "stone": "Clear Diamond" },
+  "maxQuantity": 5,
+  "sort": 4
+}

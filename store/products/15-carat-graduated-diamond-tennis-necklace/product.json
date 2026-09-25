@@ -1,0 +1,44 @@
+{
+  "name": "15 Carat Graduated Diamond Tennis Necklace",
+  "category": "necklaces",
+  "tags": ["estate", "tennis"],
+  "availability": "one-of-a-kind",
+  "badge": "Estate",
+  "price": 35000,
+  "stones": ["natural-diamond"],
+  "images": [
+    {
+      "src": "/assets/images/studio/graduated-diamond-necklace.webp",
+      "alt": "15 Carat Graduated Diamond Tennis Necklace — studio view",
+      "note": "AI-restyled studio view. Original photographs follow."
+    },
+    {
+      "src": "/assets/images/optimized/graduated-tennis-necklace-worn-1600.jpg",
+      "alt": "Graduated tennis necklace worn"
+    },
+    {
+      "src": "/assets/images/optimized/graduated-tennis-necklace-editorial-1600.jpg",
+      "alt": "Graduated tennis necklace laid flat"
+    },
+    {
+      "src": "/assets/images/optimized/graduated-tennis-necklace-detail-1600.jpg",
+      "alt": "Graduated tennis necklace detail"
+    }
+  ],
+  "videos": [
+    { "src": "/assets/videos/estate-graduated-tennis-necklace-client-view-01.mp4", "label": "Client view" },
+    { "src": "/assets/videos/estate-graduated-tennis-necklace-client-view-02.mp4", "label": "Client view" }
+  ],
+  "summary": "15 carats total of natural diamonds, graduated from a bold centre line to a delicate taper. By private appointment in Toronto.",
+  "description": "An estate graduated tennis necklace featuring 15 carats total of natural diamonds. Larger diamonds create a defined centre line and taper gradually toward the sides for a balanced, classic silhouette.",
+  "details": {
+    "Category": "Estate diamond necklace",
+    "Diamonds": "15 carats total, natural",
+    "Design": "Graduated tennis necklace",
+    "Viewing": "Private appointment in Toronto"
+  },
+  "care": "Store the necklace flat and separate from other pieces. Setting and cleaning guidance will be confirmed during the appointment.",
+  "shipping": "Viewing, final availability, payment, and delivery details are confirmed directly before purchase.",
+  "maxQuantity": 1,
+  "sort": 21
+}

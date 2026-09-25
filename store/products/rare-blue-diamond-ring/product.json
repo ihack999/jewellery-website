@@ -1,0 +1,56 @@
+{
+  "name": "Rare Blue Diamond Ring",
+  "category": "rings",
+  "tags": ["coloured", "halo"],
+  "availability": "made-to-order",
+  "badge": "Rare",
+  "price": null,
+  "metals": ["white-gold"],
+  "stones": ["coloured-diamond"],
+  "images": [
+    {
+      "src": "/assets/images/studio/rare-blue-diamond-ring.webp",
+      "alt": "Rare Blue Diamond Ring — studio view",
+      "note": "AI-restyled studio view. Original photographs follow."
+    },
+    { "src": "/assets/images/products/rare-blue-diamond-ring-1.jpeg", "alt": "Blue diamond ring worn" },
+    { "src": "/assets/images/products/rare-blue-diamond-ring-2.jpeg", "alt": "Blue diamond ring detail" },
+    {
+      "src": "/assets/images/products/rare-blue-diamond-ring-3.jpeg",
+      "alt": "Blue diamond ring on the hand"
+    }
+  ],
+  "summary": "A 1.00 ct pear-shaped blue diamond in a double halo of white diamonds, set in 18K white gold.",
+  "description": "A rare and elegant blue diamond ring featuring a 1.00 ct pear-shaped blue diamond set in a double halo design with 18K white gold. Available in natural or lab-grown blue diamond options.",
+  "details": {
+    "Stone": "1.00 ct pear-shaped blue diamond",
+    "Design": "Double halo ring",
+    "Metal": "18K white gold",
+    "Options": "Natural or lab-grown blue diamond"
+  },
+  "options": [
+    {
+      "name": "Blue diamond",
+      "type": "button",
+      "values": [
+        { "label": "Lab-grown" },
+        { "label": "Natural" }
+      ]
+    },
+    { "name": "Ring size", "type": "size", "values": "ringSizes", "required": true }
+  ],
+  "care": "Professional care guidance is provided with the final stone and setting selection.",
+  "shipping": "Made to order; timeline and delivery details are confirmed during inquiry.",
+  "studio": {
+    "piece": "Ring",
+    "metal": "White Gold",
+    "karat": "18K",
+    "shape": "Pear",
+    "size": "1",
+    "stone": "Blue Sapphire",
+    "halo": "1",
+    "band": "Pavé"
+  },
+  "maxQuantity": 5,
+  "sort": 7
+}

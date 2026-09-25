@@ -1,0 +1,39 @@
+{
+  "name": "Green Gemstone & Diamond Floral Drop Earrings",
+  "category": "earrings",
+  "tags": ["estate", "coloured"],
+  "availability": "one-of-a-kind",
+  "badge": "Estate",
+  "price": null,
+  "stones": ["gemstone", "natural-diamond"],
+  "images": [
+    {
+      "src": "/assets/images/studio/emerald-floral-earring.webp",
+      "alt": "Green gemstone floral drop earring — studio view",
+      "note": "AI-restyled studio view. Original photographs follow."
+    },
+    {
+      "src": "/assets/images/estate-luxuries/emerald-diamond-floral-earrings-01.jpeg",
+      "alt": "Floral drop earrings, original photograph"
+    },
+    {
+      "src": "/assets/images/estate-luxuries/emerald-diamond-floral-earrings-02.jpeg",
+      "alt": "Floral drop earrings detail"
+    },
+    {
+      "src": "/assets/images/estate-luxuries/emerald-diamond-floral-earrings-03.jpeg",
+      "alt": "Floral drop earrings pair"
+    }
+  ],
+  "summary": "Vivid oval green gemstones framed in diamonds, finished with intricate floral diamond drops.",
+  "description": "Elegant drop earrings centred by vivid oval green gemstones, framed with diamonds and finished with intricate floral diamond drops. Specifications are confirmed during your private appointment.",
+  "details": {
+    "Style": "Floral drop earrings",
+    "Stones": "Green gemstone and diamond details",
+    "Specifications": "To be confirmed"
+  },
+  "care": "Coloured gemstones can be sensitive to heat and chemicals — use a dry soft cloth and request professional cleaning guidance.",
+  "shipping": "Viewing, final availability, payment, and delivery details are confirmed directly before purchase.",
+  "maxQuantity": 1,
+  "sort": 23
+}

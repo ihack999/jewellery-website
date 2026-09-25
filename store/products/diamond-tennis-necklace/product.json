@@ -1,0 +1,51 @@
+{
+  "name": "The She’s Unstoppable Tennis Necklace",
+  "subtitle": "10.00 ct Diamond Tennis Necklace",
+  "category": "necklaces",
+  "tags": ["tennis", "signature", "best-seller"],
+  "availability": "made-to-order",
+  "badge": "Best Seller",
+  "price": 11000,
+  "priceFrom": true,
+  "metals": ["white-gold", "yellow-gold"],
+  "stones": ["lab-diamond", "natural-diamond"],
+  "images": [
+    {
+      "src": "/assets/images/studio/diamond-tennis-necklace.webp",
+      "alt": "The She’s Unstoppable Tennis Necklace — studio view",
+      "note": "AI-restyled studio view. Original photographs follow."
+    },
+    { "src": "/assets/images/optimized/diamond-tennis-necklace-1600.jpg", "alt": "Tennis necklace worn" }
+  ],
+  "summary": "A timeless and empowering tennis necklace with 10.00 ct total diamond weight — designed to symbolize confidence, strength and elegance.",
+  "description": "A timeless and empowering tennis necklace featuring 10.00 ct total carat weight diamonds, designed to symbolize confidence, strength, and elegance.\n\nAvailable in 14K white gold or yellow gold, with natural or lab-grown diamond options. The lab-grown diamond version starts at $11,000; natural diamond pricing is quoted on request.",
+  "details": {
+    "Stone": "10.00 ct total carat weight diamonds",
+    "Design": "Classic tennis necklace",
+    "Metal": "14K white gold or 14K yellow gold",
+    "Options": "Natural or lab-grown diamonds"
+  },
+  "options": [
+    {
+      "name": "Metal",
+      "type": "swatch",
+      "values": [
+        { "label": "14K White Gold", "metal": "white-gold" },
+        { "label": "14K Yellow Gold", "metal": "yellow-gold" }
+      ]
+    },
+    {
+      "name": "Diamonds",
+      "type": "button",
+      "values": [
+        { "label": "Lab-grown" },
+        { "label": "Natural", "inquire": true }
+      ]
+    }
+  ],
+  "care": "Store flat, avoid fragrance contact, and clean gently to protect the diamond setting.",
+  "shipping": "Made to order with timing confirmed after diamond and metal selection.",
+  "studio": { "piece": "Necklace", "metal": "White Gold", "karat": "14K", "stone": "Clear Diamond" },
+  "maxQuantity": 5,
+  "sort": 3
+}

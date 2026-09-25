@@ -1,0 +1,34 @@
+{
+  "name": "Ladies Patek Philippe Diamond Watch",
+  "subtitle": "Patek Philippe",
+  "category": "watches",
+  "tags": ["estate", "estate-luxury"],
+  "availability": "one-of-a-kind",
+  "badge": "Estate",
+  "price": null,
+  "metals": ["yellow-gold"],
+  "stones": ["natural-diamond"],
+  "images": [
+    {
+      "src": "/assets/images/studio/patek-philippe-detail.webp",
+      "alt": "Ladies Patek Philippe Diamond Watch — studio view",
+      "note": "AI-restyled studio view. Original photographs follow."
+    },
+    {
+      "src": "/assets/images/estate-luxuries/ladies-patek-philippe.jpeg",
+      "alt": "Ladies Patek Philippe Diamond Watch, original photograph"
+    }
+  ],
+  "summary": "An elegant ladies Patek Philippe with a softly sculpted case, diamond-set bezel, white dial, and an intricate warm-gold bracelet.",
+  "description": "An elegant ladies Patek Philippe with a softly sculpted case, diamond-set bezel, white dial, and an intricate warm-gold bracelet.\n\nReference and condition details are confirmed during your private appointment in Toronto.",
+  "details": {
+    "Brand": "Patek Philippe",
+    "Details": "Diamond bezel · Gold bracelet",
+    "Reference": "To be confirmed",
+    "Viewing": "Private appointment in Toronto"
+  },
+  "care": "Servicing history and care recommendations are reviewed during the appointment.",
+  "shipping": "Viewing, final availability, payment, and delivery details are confirmed directly before purchase.",
+  "maxQuantity": 1,
+  "sort": 24
+}

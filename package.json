@@ -1,0 +1,16 @@
+{
+  "name": "jewellery-storefront",
+  "version": "2.0.0",
+  "private": true,
+  "description": "White-label static jewellery storefront with a real-time 3D design studio. Products live in /store; `npm run build` generates /dist.",
+  "engines": { "node": ">=18" },
+  "scripts": {
+    "build": "node src/build.mjs",
+    "dev": "node src/dev.mjs",
+    "new": "node src/new-product.mjs",
+    "check": "node src/check.mjs"
+  },
+  "optionalDependencies": {
+    "sharp": "^0.33.5"
+  }
+}

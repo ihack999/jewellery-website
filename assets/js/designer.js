@@ -325,16 +325,16 @@ const STONE_COLORS = Object.fromEntries(
 );
 
 const STONE_IMAGE_URLS = {
-  "Clear Diamond": "assets/images/gemstones/clear-diamond.jpg",
-  "Blush Sapphire": "assets/images/gemstones/blush-sapphire.jpg",
-  "Blue Sapphire": "assets/images/gemstones/blue-sapphire.jpg",
-  "Emerald Green": "assets/images/gemstones/emerald-green.jpg"
+  "Clear Diamond": "/assets/images/gemstones/clear-diamond.jpg",
+  "Blush Sapphire": "/assets/images/gemstones/blush-sapphire.jpg",
+  "Blue Sapphire": "/assets/images/gemstones/blue-sapphire.jpg",
+  "Emerald Green": "/assets/images/gemstones/emerald-green.jpg"
 };
 
 const TEXTURE_URLS = {
-  studioHdr: "assets/textures/studio_small_08_1k.hdr",
-  metalNormal: "assets/textures/Metal002/Metal002_1K-JPG_NormalGL.jpg",
-  metalRoughness: "assets/textures/Metal002/Metal002_1K-JPG_Roughness.jpg"
+  studioHdr: "/assets/textures/studio_small_08_1k.hdr",
+  metalNormal: "/assets/textures/Metal002/Metal002_1K-JPG_NormalGL.jpg",
+  metalRoughness: "/assets/textures/Metal002/Metal002_1K-JPG_Roughness.jpg"
 };
 
 const DESIGN_STUDIO_HASH = "#design-studio";
@@ -2100,7 +2100,7 @@ function composeDesignScreenshot(sourceCanvas, state) {
 
   context.fillStyle = "rgba(255, 255, 255, 0.9)";
   context.font = "600 34px Georgia, serif";
-  context.fillText("Toronto Jewels Curation", 56, 84);
+  context.fillText(window.STORE?.brand || "Toronto Jewels Curation", 56, 84);
   context.font = "700 18px Arial, sans-serif";
   context.letterSpacing = "2px";
   context.fillText(`${state.piece} / ${state.stone} / ${state.metal}`.toUpperCase(), 58, 122);
@@ -2117,7 +2117,7 @@ async function attachDesignScreenshot(sourceCanvas, state) {
 
   const screenshot = composeDesignScreenshot(sourceCanvas, state);
   const blob = await canvasToBlob(screenshot);
-  const fileName = `toronto-jewels-${fileSafeName(state.piece)}-${fileSafeName(state.stone)}-design.png`;
+  const fileName = `${fileSafeName(window.STORE?.brand || "toronto-jewels")}-${fileSafeName(state.piece)}-${fileSafeName(state.stone)}-design.png`;
   const file = new File([blob], fileName, { type: "image/png" });
   const attachedToInput = attachFileToInput(input, file);
 
@@ -7735,10 +7735,11 @@ async function createThreeStudioScene(root, canvas, THREE, renderer, cleanup, op
     if (style !== "Bypass" && silhouette !== "Split Shank" && silhouette !== "Stacked Double") {
       const karat = currentState.karat || "";
       const metalName = currentState.metal || "";
+      const mark = (typeof window !== "undefined" && window.STORE?.monogram) || "TJC";
       const stamp = metalName === "Platinum"
-        ? `PT ${karat} \u00b7 TJC`
-        : metalName.includes("Gold") ? `${karat} \u00b7 TJC \u00b7 AU`
-        : metalName === "Mirror Silver" ? "TJC \u00b7 AG" : "TJC";
+        ? `PT ${karat} \u00b7 ${mark}`
+        : metalName.includes("Gold") ? `${karat} \u00b7 ${mark} \u00b7 AU`
+        : metalName === "Mirror Silver" ? `${mark} \u00b7 AG` : mark;
       const hallmarkTex = createHallmarkTexture(stamp);
       const hallmarkMat = materialForMetal();
       hallmarkMat.bumpMap = hallmarkTex;

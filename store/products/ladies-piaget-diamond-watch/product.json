@@ -1,0 +1,34 @@
+{
+  "name": "Ladies Piaget Diamond Watch",
+  "subtitle": "Piaget",
+  "category": "watches",
+  "tags": ["estate", "estate-luxury"],
+  "availability": "one-of-a-kind",
+  "badge": "Estate",
+  "price": null,
+  "metals": ["yellow-gold"],
+  "stones": ["natural-diamond"],
+  "images": [
+    {
+      "src": "/assets/images/studio/piaget-detail.webp",
+      "alt": "Ladies Piaget Diamond Watch — studio view",
+      "note": "AI-restyled studio view. Original photographs follow."
+    },
+    {
+      "src": "/assets/images/estate-luxuries/ladies-piaget.jpeg",
+      "alt": "Ladies Piaget Diamond Watch, original photograph"
+    }
+  ],
+  "summary": "A refined ladies Piaget pairing a champagne-toned dial with a diamond-set case and an integrated warm-gold bracelet.",
+  "description": "A refined ladies Piaget pairing a champagne-toned dial with a diamond-set case and an integrated warm-gold bracelet.\n\nReference and condition details are confirmed during your private appointment in Toronto.",
+  "details": {
+    "Brand": "Piaget",
+    "Details": "Diamond setting · Gold bracelet",
+    "Reference": "To be confirmed",
+    "Viewing": "Private appointment in Toronto"
+  },
+  "care": "Servicing history and care recommendations are reviewed during the appointment.",
+  "shipping": "Viewing, final availability, payment, and delivery details are confirmed directly before purchase.",
+  "maxQuantity": 1,
+  "sort": 25
+}
