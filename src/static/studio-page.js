@@ -34,7 +34,7 @@ document.addEventListener("click", async (event) => {
   event.preventDefault();
   event.stopImmediatePropagation();
   try {
-    arLoading ||= import("/assets/js/ar-tryon.js?v=20260925-arx");
+    arLoading ||= import("/assets/js/ar-tryon.js?v=20260925-arx2");
     await arLoading;
     window.__arModuleReady = true;
     trigger.click();

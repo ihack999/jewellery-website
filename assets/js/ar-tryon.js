@@ -17,7 +17,7 @@ import { observeForearm, fitForearmOrientation } from "./ar/forearm-fit.js?v=202
 import { NeckContactBody, neckOrientation, neckContactWeight } from "./ar/neck-contact.js?v=20260912-ar-placement";
 import { WearableArticulation } from "./ar/articulation.js?v=20260911-ar-v1";
 import { CameraTexture } from "./ar/camera-texture.js?v=20260911-ar-v1";
-import { injectExperienceStyles, buildExperienceModal, createExperience, streamFromPhoto } from "./ar/experience.js?v=20260925-arx";
+import { injectExperienceStyles, buildExperienceModal, createExperience, streamFromPhoto } from "./ar/experience.js?v=20260925-arx2";
 import { GlintLayer } from "./ar/glints.js?v=20260925-arx";
 import { HairOcclusion } from "./ar/hair-occlusion.js?v=20260925-arx2";
 import {
@@ -614,37 +614,51 @@ export class ARTryOn {
     })();
     prepare.catch(() => {});
 
-    const choice = await this._experience.waitForStart();
-    if (this._closed) return;
-    try {
-      if (choice.mode === "photo") {
-        this._photoMode = true;
-        this._photoStreamFactory = () => streamFromPhoto(choice.file, (this.canvas?.clientWidth || innerWidth) / Math.max(1, this.canvas?.clientHeight || innerHeight));
-        this.modal.querySelector("[data-ar-flip]").hidden = true;
+    // Loop so a refused or missing camera returns to the intro (retry, or
+    // use a photo) instead of leaving a dead end.
+    for (;;) {
+      const choice = await this._experience.waitForStart();
+      if (this._closed) return;
+      let cameraStarted = false;
+      try {
+        this._photoMode = choice.mode === "photo";
+        this._photoStreamFactory = this._photoMode
+          ? () => streamFromPhoto(choice.file, (this.canvas?.clientWidth || innerWidth) / Math.max(1, this.canvas?.clientHeight || innerHeight))
+          : null;
+        this.modal.querySelector("[data-ar-flip]").hidden = this._photoMode;
         this.applyCameraClass();
+        this._experience.dismissOnboarding();
+        this.setStatus(this._photoMode ? "Reading your photo…" : "Requesting camera…");
+        await this.startCamera();
+        cameraStarted = true;
+        if (this._closed) return;
+        this.setStatus("Almost ready…");
+        await prepare;
+        if (this._closed) return;
+        this.setupCameraBackground();
+        this._initialized = true;
+        this.modal.querySelectorAll("[data-ar-flip], [data-ar-freeze], [data-ar-snapshot]").forEach((button) => { button.disabled = false; });
+        this.setStatus("");
+        this._experience.onTargetState(false);
+        this.startVideoFrames();
+        this.loop();
+        return;
+      } catch (error) {
+        if (this._closed) return;
+        this.stream?.getTracks().forEach((track) => track.stop());
+        this.stream = null;
+        const denied = error?.name === "NotAllowedError" || error?.name === "SecurityError";
+        const missing = error?.name === "NotFoundError" || error?.name === "OverconstrainedError" || error?.name === "NotReadableError";
+        if (!cameraStarted && (denied || missing)) {
+          this.setStatus("");
+          this._experience.reopenOnboarding(denied
+            ? "Camera access was declined. Allow it in your browser settings and try again — or use a photo instead."
+            : "No camera is available right now. Close other apps using it and try again — or use a photo instead.");
+          continue;
+        }
+        this.setStatus(`Could not start try-on: ${error.message || error}. Close and try again.`);
+        return;
       }
-      this._experience.dismissOnboarding();
-      this.setStatus(this._photoMode ? "Reading your photo…" : "Requesting camera…");
-      await this.startCamera();
-      if (this._closed) return;
-      this.setStatus("Almost ready…");
-      await prepare;
-      if (this._closed) return;
-      this.setupCameraBackground();
-      this._initialized = true;
-      this.modal.querySelectorAll("[data-ar-flip], [data-ar-freeze], [data-ar-snapshot]").forEach((button) => { button.disabled = false; });
-      this.setStatus("");
-      this._experience.onTargetState(false);
-      this.startVideoFrames();
-      this.loop();
-    } catch (error) {
-      if (this._closed) return;
-      this.stream?.getTracks().forEach((track) => track.stop());
-      this.stream = null;
-      const denied = error?.name === "NotAllowedError" || error?.name === "SecurityError";
-      this.setStatus(denied
-        ? "Camera access was declined. You can allow it in your browser settings, or close and choose “Use a photo instead”."
-        : `Could not start try-on: ${error.message || error}. Close and try again.`);
     }
   }
 

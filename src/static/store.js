@@ -584,7 +584,7 @@
     const warm = (link) => {
       const url = new URL(link.href, location.href);
       const piece = url.searchParams.get("piece") || "Ring";
-      const files = ["/assets/js/ar-tryon.js?v=20260925-arx", "/assets/js/designer.js?v=20260914-studio", "/assets/vendor/mediapipe-0.10.14/vision_bundle.mjs",
+      const files = ["/assets/js/ar-tryon.js?v=20260925-arx2", "/assets/js/designer.js?v=20260914-studio", "/assets/vendor/mediapipe-0.10.14/vision_bundle.mjs",
         "/assets/vendor/mediapipe-0.10.14/wasm/vision_wasm_internal.js", "/assets/vendor/mediapipe-0.10.14/wasm/vision_wasm_internal.wasm",
         ...({ Ring: ["hand_landmarker.task"], Bracelet: ["hand_landmarker.task", "pose_landmarker_lite.task"], Earrings: ["face_landmarker.task", "hair_segmenter.tflite"], Necklace: ["pose_landmarker_full.task", "hair_segmenter.tflite"] }[piece] || []).map((f) => `/assets/models/${f}`)];
       for (const href of files) {

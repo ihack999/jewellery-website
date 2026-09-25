@@ -180,6 +180,7 @@ export function injectExperienceStyles() {
   .arx-progress { width: 100%; height: 2px; border-radius: 2px; background: rgba(255,255,255,.14); overflow: hidden; }
   .arx-progress span { display: block; height: 100%; width: var(--p, 8%); background: linear-gradient(90deg, var(--arx-accent), #fff); transition: width .4s ease; }
   .arx-progress-label { font-size: 11px; color: rgba(255,255,255,.6); letter-spacing: .04em; }
+  .arx-progress-label.is-error { font-size: 13px; color: #ffd9c7; max-width: 34ch; line-height: 1.45; }
 
   /* capture sheet */
   .arx-sheet { position: absolute; inset: 0; z-index: 9; display: grid; place-items: center; padding: 16px; background: rgba(5,5,5,.86);
@@ -412,17 +413,37 @@ export function createExperience(app, context) {
   }
   function waitForStart() {
     return new Promise((resolve) => {
-      $("[data-arx-start]").addEventListener("click", () => resolve({ mode: "camera" }), { once: true });
-      $("[data-arx-photo]").addEventListener("change", (event) => {
+      const start = $("[data-arx-start]"), photo = $("[data-arx-photo]");
+      const done = (choice) => {
+        start.removeEventListener("click", onStart);
+        photo.removeEventListener("change", onPhoto);
+        resolve(choice);
+      };
+      const onStart = () => done({ mode: "camera" });
+      const onPhoto = (event) => {
         const file = event.target.files?.[0];
-        if (file) resolve({ mode: "photo", file });
-      });
-      requestAnimationFrame(() => $("[data-arx-start]").focus());
+        if (file) done({ mode: "photo", file });
+      };
+      start.addEventListener("click", onStart);
+      photo.addEventListener("change", onPhoto);
+      requestAnimationFrame(() => start.focus());
     });
   }
   function dismissOnboarding() {
     onboard.hidden = true;
     modal.classList.remove("is-preparing");
+  }
+  // Camera refused (or unavailable): back to the intro with the reason, so
+  // the shopper can retry or continue with a photo instead of a dead end.
+  function reopenOnboarding(message) {
+    modal.classList.add("is-preparing");
+    onboard.hidden = false;
+    guide.hidden = true;
+    const photo = $("[data-arx-photo]");
+    if (photo) photo.value = "";
+    const label = $("[data-arx-start] span");
+    if (label) label.textContent = "Try the camera again";
+    if (progressLabel) { progressLabel.textContent = message; progressLabel.classList.add("is-error"); }
   }
 
   // Shows the silhouette guide only after the target has been missing for a
@@ -434,7 +455,7 @@ export function createExperience(app, context) {
   }
 
   return {
-    setProgress, waitForStart, dismissOnboarding, onTargetState,
+    setProgress, waitForStart, dismissOnboarding, reopenOnboarding, onTargetState,
     get compareActive() { return !compare.hidden; },
     dispose() {
       clearTimeout(guideTimer);
