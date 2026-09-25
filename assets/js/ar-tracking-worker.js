@@ -6,6 +6,22 @@
  * inference spike cannot freeze the camera overlay or calibration controls.
  */
 
+// MediaPipe loads its WASM glue with importScripts(), which throws inside
+// module workers. Provide a synchronous equivalent so inference really runs
+// off the main thread (previously every session silently fell back to the
+// main thread, competing with rendering).
+try { self.importScripts("data:text/javascript,"); } catch {
+  self.importScripts = (...urls) => {
+    for (const url of urls) {
+      const request = new XMLHttpRequest();
+      request.open("GET", String(url), false);
+      request.send();
+      if (request.status >= 400) throw new Error(`Could not load ${url} (${request.status})`);
+      (0, eval)(`${request.responseText}\n//# sourceURL=${url}`);
+    }
+  };
+}
+
 let tracker = null;
 let mode = "hand";
 let initialized = false;
@@ -14,6 +30,42 @@ let forearmTracker = null;
 let forearmObservation = null;
 let forearmGeneration = null;
 let forearmNextAt = -Infinity;
+let hairSegmenter = null;
+let hairNextAt = -Infinity;
+
+function resetHair() {
+  hairSegmenter?.close?.(); hairSegmenter = null; hairNextAt = -Infinity;
+}
+
+// Low-rate hair segmentation for earrings/necklaces (hair in front of the
+// jewellery). Runs every ~120–400 ms depending on its own cost, never when
+// the primary tracker is already slow, and downsamples the mask for transfer.
+function sampleHair(bitmap, message, primaryCost) {
+  if (!hairSegmenter || primaryCost > 60 || message.timestamp < hairNextAt) return null;
+  const started = performance.now();
+  let output = null;
+  try {
+    const result = hairSegmenter.segmentForVideo(bitmap, message.timestamp);
+    const masks = result?.confidenceMasks || [];
+    const mask = masks[masks.length - 1];
+    if (mask) {
+      const source = mask.getAsFloat32Array();
+      const step = Math.max(1, Math.ceil(mask.width / 192));
+      const width = Math.floor(mask.width / step), height = Math.floor(mask.height / step);
+      const data = new Uint8Array(width * height);
+      for (let y = 0; y < height; y++) {
+        for (let x = 0; x < width; x++) data[y * width + x] = Math.round(Math.min(1, Math.max(0, source[(y * step) * mask.width + x * step])) * 255);
+      }
+      output = { width, height, data, timestamp: message.timestamp };
+    }
+    result?.close?.();
+  } catch {
+    resetHair(); // optional feature: never interrupt tracking
+  }
+  const cost = performance.now() - started;
+  hairNextAt = message.timestamp + Math.max(120, Math.min(400, cost * 5));
+  return output;
+}
 
 function resetForearm() {
   forearmTracker?.close?.(); forearmTracker = null;
@@ -95,6 +147,16 @@ async function createTracker(config, session) {
   // Three.js context remains the sole high-priority GPU client on mobile.
   const baseOptions = (modelAssetPath) => ({ modelAssetPath, delegate: "CPU" });
 
+  if ((requestedMode === "face" || requestedMode === "pose") && config.hairModelUrl && session === trackerSession) {
+    Promise.resolve().then(() => vision.ImageSegmenter.createFromOptions(fileset, {
+      baseOptions: baseOptions(config.hairModelUrl), runningMode: "VIDEO",
+      outputCategoryMask: false, outputConfidenceMasks: true
+    })).then((segmenter) => {
+      if (session !== trackerSession) segmenter.close();
+      else hairSegmenter = segmenter;
+    }).catch(() => { /* hair occlusion is optional */ });
+  }
+
   if (requestedMode === "face") {
     return vision.FaceLandmarker.createFromOptions(fileset, {
       baseOptions: baseOptions(config.faceModelUrl),
@@ -149,11 +211,20 @@ self.onmessage = async (event) => {
     const session = ++trackerSession;
     initialized = false;
     resetForearm();
+    resetHair();
     mode = message.config.mode;
     try {
       tracker?.close?.();
       tracker = null;
-      const next = await createTracker(message.config, session);
+      let next;
+      try {
+        next = await createTracker(message.config, session);
+      } catch (localError) {
+        // Self-hosted runtime/models missing from this deployment: retry the
+        // official MediaPipe hosts before giving up.
+        if (!message.config.fallback || session !== trackerSession) throw localError;
+        next = await createTracker({ ...message.config, ...message.config.fallback, fallback: null }, session);
+      }
       if (session !== trackerSession) { next.close(); return; }
       tracker = next;
       initialized = true;
@@ -191,14 +262,16 @@ self.onmessage = async (event) => {
       const result = tracker.detectForVideo(bitmap, message.timestamp);
       const serialized = serializeResult(result);
       if (mode === "hand") serialized.forearmPose = sampleForearm(bitmap, message, serialized.landmarks.length > 0, performance.now() - startedAt);
+      const hairMask = mode !== "hand" ? sampleHair(bitmap, message, performance.now() - startedAt) : null;
       self.postMessage({
         type: "result",
         result: serialized,
+        hairMask,
         detectCost: performance.now() - startedAt,
         frameId: message.frameId,
         timestamp: message.timestamp,
         generation: message.generation
-      });
+      }, hairMask ? [hairMask.data.buffer] : []);
     } catch (error) {
       self.postMessage({
         type: "error",
@@ -217,6 +290,7 @@ self.onmessage = async (event) => {
   if (message.type === "close") {
     trackerSession++;
     resetForearm();
+    resetHair();
     tracker?.close?.();
     tracker = null;
     initialized = false;

@@ -5,10 +5,10 @@ import { RenderTiming } from "./ar/render-timing.js?v=20260912-ar-render";
 import { createWearableAsset } from "./ar/wearable-asset.js?v=20260912-ar-render";
 import { configureWearableGemOptics } from "./ar/gem-optics.js?v=20260911-ar-live2";
 import { disposeGemRayMaterial } from "./gem-ray-material.js?v=20260911-ar-live2";
-import { weightedCenter, shoulderProjection, palmScale } from "./ar/body-fit.js?v=20260911-ar-live3";
+import { weightedCenter, shoulderProjection, palmScale } from "./ar/body-fit.js?v=20260925-arx";
 import { OneEuro, predictionSeconds } from "./ar/pose-filter.js?v=20260911-ar-live3";
 import { createFaceOccluder, updateFaceOccluder, earFacingVisible, updateEarOpenings } from "./ar/face-occlusion.js?v=20260911-ar-live3";
-import { HandIdentity, TrackingFrameGate, estimateHandRoll, handLandmarkValidity } from "./ar/tracking.js?v=20260911-ar-live3";
+import { HandIdentity, TrackingFrameGate, estimateHandRoll, handLandmarkValidity } from "./ar/tracking.js?v=20260925-arx";
 import { VideoFrameClock, TrackingTiming, frameIsFresh, MAX_TRACKING_AGE_MS } from "./ar/frame-timing.js?v=20260912-ar-timing";
 import { FingerContactBody, fingerContactWeight } from "./ar/finger-contact.js?v=20260912-ar-contact";
 import { torsoFrame, neckPlacementOffset } from "./ar/torso-fit.js?v=20260912-ar-torso-wrist";
@@ -17,6 +17,9 @@ import { observeForearm, fitForearmOrientation } from "./ar/forearm-fit.js?v=202
 import { NeckContactBody, neckOrientation, neckContactWeight } from "./ar/neck-contact.js?v=20260912-ar-placement";
 import { WearableArticulation } from "./ar/articulation.js?v=20260911-ar-v1";
 import { CameraTexture } from "./ar/camera-texture.js?v=20260911-ar-v1";
+import { injectExperienceStyles, buildExperienceModal, createExperience, streamFromPhoto } from "./ar/experience.js?v=20260925-arx";
+import { GlintLayer } from "./ar/glints.js?v=20260925-arx";
+import { HairOcclusion } from "./ar/hair-occlusion.js?v=20260925-arx2";
 import {
   METERS_PER_MM
 } from "./jewellery-spec.js?v=20260911-construction-v32";
@@ -31,12 +34,26 @@ const MIN_DETECTION_FPS = 16;
 const MAX_DETECTION_FPS = 42;
 const MAX_PIXEL_RATIO = 1.5;
 
-const MEDIAPIPE_BASE = "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14";
+// Runtime + models are self-hosted (pinned, integrity-checked in
+// assets/models/SHA256SUMS.txt) so try-on never depends on third-party CDNs.
+// If a deployment is missing them, the worker retries Google's official hosts.
+const siteUrl = (path) => new URL(path, typeof location !== "undefined" ? location.href : "http://localhost/").href;
+const MEDIAPIPE_BASE = siteUrl("/assets/vendor/mediapipe-0.10.14");
 const WASM_BASE = `${MEDIAPIPE_BASE}/wasm`;
-const MODEL_URL = "https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task";
-const FOREARM_MODEL_URL = "https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task";
-const FACE_MODEL_URL = "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task";
-const POSE_MODEL_URL = "https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_full/float16/1/pose_landmarker_full.task";
+const MODEL_URL = siteUrl("/assets/models/hand_landmarker.task");
+const FOREARM_MODEL_URL = siteUrl("/assets/models/pose_landmarker_lite.task");
+const FACE_MODEL_URL = siteUrl("/assets/models/face_landmarker.task");
+const POSE_MODEL_URL = siteUrl("/assets/models/pose_landmarker_full.task");
+const HAIR_MODEL_URL = siteUrl("/assets/models/hair_segmenter.tflite");
+const CDN_FALLBACK = {
+  mediaPipeBase: "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14",
+  wasmBase: "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm",
+  handModelUrl: "https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task",
+  forearmModelUrl: "https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task",
+  faceModelUrl: "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task",
+  poseModelUrl: "https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_full/float16/1/pose_landmarker_full.task",
+  hairModelUrl: "https://storage.googleapis.com/mediapipe-models/image_segmenter/hair_segmenter/float32/latest/hair_segmenter.tflite"
+};
 
 const FACE_EAR_RIGHT = 234;
 const FACE_EAR_LEFT = 454;
@@ -238,327 +255,33 @@ function readDesignState() {
   }
 }
 
-function injectStyles() {
-  if (document.getElementById("ar-tryon-styles")) return;
-  const style = document.createElement("style");
-  style.id = "ar-tryon-styles";
-  style.textContent = `
-    .ar-tryon-modal {
-      position: fixed; inset: 0; z-index: 9999;
-      background: #000;
-      display: flex; flex-direction: column;
-      align-items: stretch; justify-content: center;
-      animation: ar-fade-in 200ms ease-out;
-      font-family: system-ui, sans-serif;
-    }
-    @keyframes ar-fade-in { from { opacity: 0; } to { opacity: 1; } }
-    .ar-tryon-stage {
-      position: relative; flex: 1 1 auto;
-      width: 100%; overflow: hidden;
-      background: #0a0a0a;
-    }
-    .ar-tryon-modal [hidden] { display: none !important; }
-    .ar-tryon-toolbar { max-width: calc(100% - 24px); flex-wrap: wrap; justify-content: flex-end; }
-    .ar-tryon-video,
-    .ar-tryon-canvas {
-      position: absolute; inset: 0;
-      width: 100%; height: 100%;
-      object-fit: cover;
-    }
-    /* Mirror the video for a selfie experience. The three.js overlay is NOT
-       css-mirrored — we mirror landmark X in JS, which keeps the 3D ring's
-       rotation/depth math consistent with what the user sees. */
-    .ar-tryon-video { transform: scaleX(-1); }
-    .ar-tryon-modal.is-world-camera .ar-tryon-video { transform: none; }
-    .ar-tryon-canvas { pointer-events: none; }
-    .ar-tryon-status {
-      position: absolute;
-      top: 50%; left: 50%;
-      transform: translate(-50%, -50%);
-      color: #fff;
-      font: 500 14px/1.5 system-ui, -apple-system, sans-serif;
-      text-align: center;
-      padding: 18px 24px;
-      background: rgba(0,0,0,0.55);
-      border-radius: 12px;
-      backdrop-filter: blur(8px);
-      max-width: 360px;
-      pointer-events: none;
-    }
-    .ar-tryon-status.is-hidden { display: none; }
-    .ar-tryon-hint {
-      position: absolute;
-      bottom: 18px; left: 50%;
-      transform: translateX(-50%);
-      color: #fff;
-      font: 500 13px/1.4 system-ui, sans-serif;
-      padding: 10px 16px;
-      background: rgba(0,0,0,0.5);
-      border-radius: 999px;
-      backdrop-filter: blur(8px);
-      letter-spacing: 0.02em;
-      white-space: nowrap;
-    }
-    .ar-tryon-toolbar {
-      position: absolute;
-      top: 16px; right: 16px;
-      display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px;
-      z-index: 2;
-      max-width: min(520px, calc(100vw - 32px));
-    }
-    .ar-tryon-btn {
-      appearance: none;
-      border: 1px solid rgba(255,255,255,0.25);
-      background: rgba(0,0,0,0.5);
-      color: #fff;
-      font: 500 13px/1 system-ui, sans-serif;
-      padding: 10px 16px;
-      border-radius: 999px;
-      cursor: pointer;
-      backdrop-filter: blur(8px);
-      transition: background 120ms, border-color 120ms;
-    }
-    .ar-tryon-btn:hover { background: rgba(255,255,255,0.15); border-color: rgba(255,255,255,0.45); }
-    .ar-tryon-calibration {
-      position: absolute;
-      left: 50%;
-      bottom: 112px;
-      z-index: 2;
-      transform: translateX(-50%);
-	      display: grid;
-	      grid-template-columns: repeat(5, minmax(88px, 1fr)) auto;
-      gap: 8px;
-      width: min(720px, calc(100vw - 28px));
-      padding: 8px;
-      border: 1px solid rgba(255,255,255,0.16);
-      border-radius: 16px;
-      background: rgba(0,0,0,0.48);
-      color: #fff;
-      backdrop-filter: blur(12px);
-      box-shadow: 0 18px 60px rgba(0,0,0,0.24);
-    }
-    .ar-tryon-calibration { max-height: 42vh; overflow-y: auto; }
-    .ar-tryon-calibration [hidden] { display: none !important; }
-    .ar-wearable-options { grid-column: 1 / -1; font-size: 12px; }
-    .ar-wearable-options summary { padding: 8px; cursor: pointer; }
-    .ar-wearable-options[open] { display: grid; gap: 12px; }
-    .ar-wearable-options p { line-height: 1.5; margin: 0; }
-    .ar-wearable-options input, .ar-wearable-options select { min-height: 32px; max-width: 100%; }
-    .ar-wearable-options input[type="checkbox"] { width: 18px; height: 18px; min-height: 18px; }
-    .ar-wearable-options label:has(input[type="checkbox"]) { display: flex; align-items: center; }
-    .ar-tryon-btn:focus-visible, .ar-tryon-calibration :focus-visible { outline: 2px solid #ead8a6; outline-offset: 3px; }
-    @media (prefers-reduced-motion: reduce) { .ar-tryon-modal { animation: none; } }
-    .ar-tryon-calibration label {
-      display: grid;
-      gap: 4px;
-      min-width: 0;
-      font: 600 10px/1.1 system-ui, -apple-system, sans-serif;
-      letter-spacing: 0.11em;
-      text-transform: uppercase;
-      color: rgba(255,255,255,0.72);
-    }
-    .ar-tryon-calibration output {
-      color: #fff;
-      font-size: 11px;
-      letter-spacing: 0;
-      text-transform: none;
-      font-variant-numeric: tabular-nums;
-    }
-    .ar-tryon-calibration input[type="range"] {
-      width: 100%;
-      accent-color: #fff;
-    }
-    .ar-tryon-reset {
-      align-self: end;
-      min-height: 34px;
-      padding-inline: 12px;
-      font-size: 11px;
-    }
-    .ar-tryon-finger-select {
-      position: absolute;
-      bottom: 64px; left: 50%;
-      transform: translateX(-50%);
-      display: flex; gap: 6px;
-      background: rgba(0,0,0,0.5);
-      padding: 6px;
-      border-radius: 999px;
-      backdrop-filter: blur(8px);
-    }
-    .ar-tryon-finger-select button {
-      appearance: none;
-      border: none;
-      background: transparent;
-      color: rgba(255,255,255,0.7);
-      font: 500 12px/1 system-ui, sans-serif;
-      padding: 8px 14px;
-      border-radius: 999px;
-      cursor: pointer;
-      letter-spacing: 0.02em;
-    }
-    .ar-tryon-finger-select button.is-active {
-      background: #fff;
-      color: #111;
-    }
-    .ar-tryon-size {
-      position: absolute;
-      top: 16px; left: 16px;
-      display: flex; flex-direction: column; align-items: flex-start;
-      gap: 2px;
-      padding: 10px 14px;
-      background: rgba(0,0,0,0.55);
-      color: #fff;
-      border-radius: 12px;
-      backdrop-filter: blur(8px);
-      font-family: system-ui, -apple-system, sans-serif;
-      pointer-events: none;
-      z-index: 2;
-      min-width: 132px;
-    }
-    .ar-tryon-size-label {
-      font-size: 10px;
-      font-weight: 500;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: rgba(255,255,255,0.7);
-    }
-    .ar-tryon-size-value {
-      font-size: 18px;
-      font-weight: 600;
-      letter-spacing: 0.01em;
-      font-variant-numeric: tabular-nums;
-    }
-	    .ar-tryon-size-sub {
-	      font-size: 11px;
-	      color: rgba(255,255,255,0.75);
-	      font-variant-numeric: tabular-nums;
-	    }
-	    .ar-tryon-quality {
-	      position: absolute;
-	      top: 94px; left: 16px;
-	      z-index: 2;
-	      display: grid;
-	      grid-template-columns: auto auto;
-	      gap: 6px 10px;
-	      min-width: 132px;
-	      padding: 10px 14px 12px;
-	      border: 1px solid rgba(255,255,255,0.14);
-	      border-radius: 12px;
-	      background: rgba(0,0,0,0.50);
-	      color: #fff;
-	      backdrop-filter: blur(8px);
-	      pointer-events: none;
-	      font-family: system-ui, -apple-system, sans-serif;
-	    }
-	    .ar-tryon-quality[hidden] { display: none; }
-	    .ar-tryon-quality span {
-	      font-size: 10px;
-	      font-weight: 600;
-	      letter-spacing: 0.12em;
-	      text-transform: uppercase;
-	      color: rgba(255,255,255,0.68);
-	    }
-	    .ar-tryon-quality b {
-	      justify-self: end;
-	      font-size: 12px;
-	      font-weight: 700;
-	      font-variant-numeric: tabular-nums;
-	    }
-	    .ar-tryon-quality i {
-	      grid-column: 1 / -1;
-	      position: relative;
-	      height: 3px;
-	      border-radius: 999px;
-	      background: rgba(255,255,255,0.16);
-	      overflow: hidden;
-	    }
-	    .ar-tryon-quality i::before {
-	      content: "";
-	      position: absolute;
-	      inset: 0;
-	      width: var(--ar-lock, 0%);
-	      border-radius: inherit;
-	      background: linear-gradient(90deg, #ffdf9a, #ffffff);
-	      transition: width 160ms ease;
-	    }
-    @media (max-width: 620px) {
-      .ar-tryon-toolbar {
-        top: 10px;
-        right: 10px;
-        left: 10px;
-        max-width: none;
-      }
-      .ar-tryon-btn {
-        padding: 9px 12px;
-      }
-      .ar-tryon-calibration {
-        bottom: 110px;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        width: min(420px, calc(100vw - 20px));
-      }
-      .ar-tryon-reset {
-        justify-self: stretch;
-      }
-      .ar-tryon-finger-select {
-        bottom: 58px;
-      }
-      .ar-tryon-hint {
-        display: none;
-      }
-    }
-  `;
-  document.head.appendChild(style);
-}
+const METAL_SWATCHES = { "Yellow Gold": "#d5a647", "White Gold": "#e3e6e8", "Rose Gold": "#c98778", "Platinum": "#cfd6da", "Champagne Gold": "#d4b574" };
+const STONE_SWATCHES = { "Clear Diamond": "#eef3fb", "Blush Sapphire": "#f0a3b6", "Blue Sapphire": "#2f53b0", "Emerald Green": "#1f8a5b", "Ruby Red": "#b3203c", "Citrine Yellow": "#e7b52b", "Aquamarine": "#8fd3e8", "Amethyst Purple": "#8d5bc1", "Morganite Peach": "#f1b9a0" };
+const DEFAULT_METALS = ["Yellow Gold", "White Gold", "Rose Gold", "Platinum"];
+const DEFAULT_STONES = ["Clear Diamond", "Blush Sapphire", "Blue Sapphire", "Emerald Green", "Ruby Red", "Citrine Yellow"];
 
-function buildModal() {
-  const modal = document.createElement("div");
-  modal.className = "ar-tryon-modal";
-  modal.setAttribute("role", "dialog");
-  modal.setAttribute("aria-modal", "true");
-  modal.setAttribute("aria-label", "AR ring try-on");
-  modal.innerHTML = `
-    <div class="ar-tryon-stage">
-      <video class="ar-tryon-video" playsinline muted autoplay></video>
-      <canvas class="ar-tryon-canvas"></canvas>
-      <div class="ar-tryon-toolbar">
-        <button type="button" class="ar-tryon-btn" data-ar-flip disabled>Flip Camera</button>
-        <button type="button" class="ar-tryon-btn" data-ar-freeze disabled>Freeze / adjust</button>
-        <button type="button" class="ar-tryon-btn" data-ar-adjust aria-expanded="false" aria-controls="ar-placement-panel">Adjust placement</button>
-        <button type="button" class="ar-tryon-btn" data-ar-snapshot disabled>Save Snapshot</button>
-        <button type="button" class="ar-tryon-btn" data-ar-close aria-label="Close AR try-on">Close ✕</button>
-      </div>
-      <div class="ar-tryon-calibration" id="ar-placement-panel" aria-label="Adjust approximate jewellery placement" hidden>
-	        <label>Preview scale <output data-ar-fit-value>100%</output><input type="range" min="78" max="126" step="1" value="100" data-ar-fit></label>
-	        <label>Lift <output data-ar-lift-value>0px</output><input type="range" min="-48" max="48" step="1" value="0" data-ar-lift></label>
-	        <label>Side <output data-ar-side-value>0px</output><input type="range" min="-48" max="48" step="1" value="0" data-ar-side></label>
-	        <label>Tilt <output data-ar-roll-value>0°</output><input type="range" min="-35" max="35" step="1" value="0" data-ar-roll></label>
-	        <label>Camera <output data-ar-fov-value>50°</output><input type="range" min="38" max="88" step="1" value="50" data-ar-fov></label>
-	        <label data-ar-ear-calibration hidden>Lobe <output data-ar-ear-drop-value>0px</output><input type="range" min="-40" max="40" step="1" value="0" data-ar-ear-drop></label>
-	        <label data-ar-ear-calibration hidden>Ear span <output data-ar-ear-span-value>100%</output><input type="range" min="82" max="118" step="1" value="100" data-ar-ear-span></label>
-	        <button type="button" class="ar-tryon-btn ar-tryon-reset" data-ar-reset-fit>Reset</button>
-	      </div>
-      <div class="ar-tryon-finger-select" role="group" aria-label="Choose finger">
-        <button type="button" data-finger="index">Index</button>
-        <button type="button" data-finger="middle">Middle</button>
-        <button type="button" data-finger="ring" class="is-active">Ring</button>
-        <button type="button" data-finger="pinky">Pinky</button>
-      </div>
-	      <div class="ar-tryon-size" data-ar-size hidden>
-	        <span class="ar-tryon-size-label">Estimated size</span>
-	        <span class="ar-tryon-size-value" data-ar-size-value>—</span>
-	        <span class="ar-tryon-size-sub" data-ar-size-sub></span>
-	      </div>
-	      <div class="ar-tryon-quality" data-ar-quality hidden>
-	        <span>Tracking</span>
-	        <b data-ar-quality-value>0%</b>
-	        <i data-ar-quality-bar></i>
-	      </div>
-      <div class="ar-tryon-status" role="status" aria-live="polite" data-ar-status>Preparing private camera preview…</div>
-      <div class="ar-tryon-hint">Hold your hand up to the camera</div>
-    </div>
-  `;
-  return modal;
+/** Presentation context: what is being tried on and which variants to offer. */
+function buildTryOnContext(input, pieceType, state) {
+  const nouns = { Ring: "ring", Bracelet: "bracelet", Earrings: "earrings", Necklace: "necklace" };
+  const metals = (input.metals || DEFAULT_METALS).filter((m) => METAL_SWATCHES[m]);
+  const stones = input.stones === null ? [] : (input.stones || DEFAULT_STONES).filter((s) => STONE_SWATCHES[s]);
+  if (state?.metal && METAL_SWATCHES[state.metal] && !metals.includes(state.metal)) metals.unshift(state.metal);
+  if (state?.stone && STONE_SWATCHES[state.stone] && stones.length && !stones.includes(state.stone)) stones.unshift(state.stone);
+  return {
+    title: input.title || `Your ${nouns[pieceType] || "piece"}`,
+    shortTitle: input.shortTitle || input.title || nouns[pieceType] || "jewellery",
+    subtitle: input.subtitle || "Live 3D try-on",
+    brand: input.brand || window.STORE?.brand || "",
+    shareText: input.shareText,
+    pieceType,
+    returnUrl: input.returnUrl || "",
+    onVariant: input.onVariant,
+    onClose: input.onClose,
+    metals: metals.map((value) => ({ value, label: value.replace(" Gold", ""), swatch: METAL_SWATCHES[value] })),
+    stones: stones.map((value) => ({ value, label: value.replace(/ (Diamond|Sapphire|Green|Red|Yellow|Purple|Peach)$/, "").replace("Clear", "Diamond"), swatch: STONE_SWATCHES[value] })),
+    current: { metal: state?.metal, stone: state?.stone }
+  };
 }
-
 
 export class ARTryOn {
   constructor() {
@@ -572,6 +295,8 @@ export class ARTryOn {
     this._lastHandRoll = 0;
     this._frozen = false;
     this._suspended = false;
+    this._presence = 0;
+    this._presenceTarget = 0;
     this._earOffsets = { Left: new THREE.Vector3(), Right: new THREE.Vector3() };
     this.modal = null;
     this.video = null;
@@ -721,11 +446,24 @@ export class ARTryOn {
     this._predTgtPos = new THREE.Vector3();
   }
 
-  async open() {
+  async open(context = {}) {
     this._previousFocus = document.activeElement;
     this._previousOverflow = document.body.style.overflow;
-    injectStyles();
-    this.modal = buildModal();
+
+    /* Piece dispatch — read the current design state to decide which
+     * tracking strategy + UI affordances to use. Rings show a finger picker
+     * + size readout. Bracelets anchor at the wrist, earrings at the ears,
+     * necklaces at the neck. Any unknown piece falls back to ring. */
+    const stateEarly = readDesignState();
+    this._designState = stateEarly || {};
+    this.pieceType = stateEarly?.piece === "Bracelet" ? "Bracelet"
+      : stateEarly?.piece === "Earrings" ? "Earrings"
+      : stateEarly?.piece === "Necklace" ? "Necklace"
+      : "Ring";
+    this._context = buildTryOnContext(context, this.pieceType, this._designState);
+
+    injectExperienceStyles();
+    this.modal = buildExperienceModal(this._context);
     document.body.appendChild(this.modal);
     document.body.style.overflow = "hidden";
 
@@ -755,41 +493,20 @@ export class ARTryOn {
     this.fingerSelectEl = this.modal.querySelector(".ar-tryon-finger-select");
     this.hintEl = this.modal.querySelector(".ar-tryon-hint");
 
-    /* Piece dispatch — read the last saved design state to decide which
-     * tracking strategy + UI affordances to use. Rings show a finger picker
-     * + US/EU size readout. Bracelets hide those, anchor at the wrist, and
-     * relabel the hint. Any unknown piece falls back to ring. */
-    const stateEarly = readDesignState();
-    this._designState = stateEarly || {};
-    this.pieceType = stateEarly?.piece === "Bracelet" ? "Bracelet"
-      : stateEarly?.piece === "Earrings" ? "Earrings"
-      : stateEarly?.piece === "Necklace" ? "Necklace"
-      : "Ring";
-    if (this.pieceType === "Bracelet") {
-      this.modal.setAttribute("aria-label", "AR bracelet try-on");
+    if (this.pieceType !== "Ring") {
       if (this.fingerSelectEl) this.fingerSelectEl.hidden = true;
       if (this.sizeEl) this.sizeEl.hidden = true;
-      if (this.hintEl) this.hintEl.textContent = "Show your wrist; include your elbow when possible";
-    } else if (this.pieceType === "Earrings") {
-      this.modal.setAttribute("aria-label", "AR earring try-on");
-      if (this.fingerSelectEl) this.fingerSelectEl.hidden = true;
-      if (this.sizeEl) this.sizeEl.hidden = true;
+    }
+    if (this.pieceType === "Earrings") {
       this.modal.querySelectorAll("[data-ar-ear-calibration]").forEach((label) => { label.hidden = false; });
-      if (this.hintEl) this.hintEl.textContent = "Face the camera so both ears are visible";
-    } else if (this.pieceType === "Necklace") {
-      this.modal.setAttribute("aria-label", "AR necklace try-on");
-      if (this.fingerSelectEl) this.fingerSelectEl.hidden = true;
-      if (this.sizeEl) this.sizeEl.hidden = true;
-      if (this.hintEl) this.hintEl.textContent = "Step back so head and shoulders are visible";
     }
 
     this.applyCameraClass();
     this.syncCalibrationControls();
     this.setupWearableControls();
-    this.modal.querySelector("[data-ar-close]").focus();
+    this._experience = createExperience(this, this._context);
 
     this.modal.querySelector("[data-ar-close]").addEventListener("click", () => this.close());
-    this.modal.querySelector("[data-ar-snapshot]").addEventListener("click", () => this.snapshot());
     this.modal.querySelector("[data-ar-flip]").addEventListener("click", () => this.flipCamera());
     this.modal.querySelector("[data-ar-adjust]").addEventListener("click", () => {
       this.setPlacementOpen(this.modal.querySelector(".ar-tryon-calibration").hidden);
@@ -843,7 +560,7 @@ export class ARTryOn {
         this.activeFinger = btn.dataset.finger;
         // The next accepted joints rebuild the selected finger's body fit.
         this.resetTrackingFilters();
-        if (this.ring) this.ring.visible = false;
+        this.hidePiece(true);
       });
     });
     document.addEventListener("keydown", this._onKey = (event) => {
@@ -851,10 +568,12 @@ export class ARTryOn {
         if (this._placingNeckBase) {
           event.preventDefault(); this.cancelNeckPlacement(); this.setPlacementOpen(true); this.setStatus("");
           this.modal.querySelector("[data-ar-place-neck]").focus();
+        } else if (!this.modal.querySelector("[data-arx-sheet]").hidden) {
+          this.modal.querySelector("[data-arx-sheet]").hidden = true;
         } else this.close();
       }
       if (event.key === "Tab") {
-        const controls = [...this.modal.querySelectorAll("button, input, select")].filter((control) => !control.disabled && control.getClientRects().length);
+        const controls = [...this.modal.querySelectorAll("button, input, select, [tabindex='0']")].filter((control) => !control.disabled && control.getClientRects().length);
         const first = controls[0], last = controls[controls.length - 1];
         if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last?.focus(); }
         else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus(); }
@@ -862,7 +581,7 @@ export class ARTryOn {
     });
     document.addEventListener("visibilitychange", this._onVisibility = () => {
       if (!document.hidden || this._closed) return;
-      if (!this._initialized) { this.close(); return; }
+      if (!this._initialized) return;
       this._suspended = true;
       this._renderTiming.pause();
       this._frozen = true;
@@ -871,37 +590,61 @@ export class ARTryOn {
       this.stream?.getTracks().forEach((track) => track.stop());
       this.stream = null;
       this.resetTrackingFilters();
-      if (this.ring) this.ring.visible = false;
+      this.hidePiece(true);
       this.hideHandSilhouetteOccluder();
       this.modal.querySelector("[data-ar-freeze]").textContent = "Resume camera";
+      this.setPlacementOpen(true);
       this.setStatus("Camera paused. Choose Resume camera to continue.");
     });
 
-    try {
-      this.setStatus("Preparing your selected design…");
+    // Build the 3D piece and load on-device tracking while the visitor reads
+    // the introduction, so tracking is ready the moment the camera starts.
+    const progress = (fraction, label) => this._experience?.setProgress(fraction, label);
+    const prepare = (async () => {
+      progress(0.12, "Preparing your piece in 3D…");
       const designer = await import("./designer.js?v=20260914-studio");
       await designer.prepareDesignerForAR();
       if (this._closed) return;
       this._designState = readDesignState() || this._designState;
       if (this._designState.piece !== this.pieceType) throw new Error("The design changed. Close and reopen try-on.");
       this.startThree();
-      this.setStatus("Requesting camera…");
+      progress(0.46, "Loading private, on-device tracking…");
+      await this.startMediaPipe();
+      progress(1, "Ready when you are");
+    })();
+    prepare.catch(() => {});
+
+    const choice = await this._experience.waitForStart();
+    if (this._closed) return;
+    try {
+      if (choice.mode === "photo") {
+        this._photoMode = true;
+        this._photoStreamFactory = () => streamFromPhoto(choice.file, (this.canvas?.clientWidth || innerWidth) / Math.max(1, this.canvas?.clientHeight || innerHeight));
+        this.modal.querySelector("[data-ar-flip]").hidden = true;
+        this.applyCameraClass();
+      }
+      this._experience.dismissOnboarding();
+      this.setStatus(this._photoMode ? "Reading your photo…" : "Requesting camera…");
       await this.startCamera();
       if (this._closed) return;
-      this.setupCameraBackground();
-      this.setStatus("Loading private, on-device tracking…");
-      await this.startMediaPipe();
+      this.setStatus("Almost ready…");
+      await prepare;
       if (this._closed) return;
+      this.setupCameraBackground();
       this._initialized = true;
       this.modal.querySelectorAll("[data-ar-flip], [data-ar-freeze], [data-ar-snapshot]").forEach((button) => { button.disabled = false; });
       this.setStatus("");
+      this._experience.onTargetState(false);
       this.startVideoFrames();
       this.loop();
     } catch (error) {
       if (this._closed) return;
       this.stream?.getTracks().forEach((track) => track.stop());
       this.stream = null;
-      this.setStatus(`Could not start AR: ${error.message || error}. Close and retry.`);
+      const denied = error?.name === "NotAllowedError" || error?.name === "SecurityError";
+      this.setStatus(denied
+        ? "Camera access was declined. You can allow it in your browser settings, or close and choose “Use a photo instead”."
+        : `Could not start try-on: ${error.message || error}. Close and try again.`);
     }
   }
 
@@ -1002,13 +745,13 @@ export class ARTryOn {
       this._handIdentity.preference = event.target.value;
       this._handIdentity.reset();
       this.resetTrackingFilters();
-      if (this.ring) this.ring.visible = false;
+      this.hidePiece(true);
     });
     options.querySelector("[data-ar-measure]").addEventListener("input", (event) => {
       const value = Number(event.target.value);
       this._measuredHandWidthMm = value >= 40 && value <= 110 ? value : 0;
       this.resetTrackingFilters();
-      if (this.ring) this.ring.visible = false;
+      this.hidePiece(true);
     });
     options.querySelector("[data-ar-remember]").addEventListener("change", (event) => {
       this._rememberCalibration = event.target.checked;
@@ -1123,7 +866,8 @@ export class ARTryOn {
     const frame = this._frameClock.next(this.video, sampledAt, metadata, timestamp);
     if (!frame) return;
     frame.mirrored = this.isMirrored;
-    if (!frameIsFresh(frame, sampledAt)) { this._trackingTiming.droppedStale++; return; }
+    // A still photo never goes stale, so slow devices still get a stable fit in photo mode.
+    if (!this._photoMode && !frameIsFresh(frame, sampledAt)) { this._trackingTiming.droppedStale++; return; }
     this.lastVideoTime = frame.mediaTime;
     this.lastDetectMs = sampledAt;
     if (this._trackingWorkerReady) this.sendFrameToTrackingWorker(frame);
@@ -1149,15 +893,17 @@ export class ARTryOn {
     this.modal.querySelector(".ar-tryon-calibration").hidden = !open;
     const button = this.modal.querySelector("[data-ar-adjust]");
     button.setAttribute("aria-expanded", String(open));
-    button.textContent = open ? "Hide adjustments" : "Adjust placement";
+    const label = button.querySelector("span");
+    if (label) label.textContent = open ? "Done" : "Adjust";
   }
 
   applyCameraClass() {
-    this.modal?.classList.toggle("is-world-camera", this.facingMode === "environment");
+    this.modal?.classList.toggle("is-world-camera", !this.isMirrored);
   }
 
   get isMirrored() {
-    return this.facingMode !== "environment";
+    // Selfie cameras are shown mirrored; rear cameras and uploaded photos are not.
+    return !this._photoMode && this.facingMode !== "environment";
   }
 
   persistCalibration() {
@@ -1576,10 +1322,10 @@ export class ARTryOn {
   async startCamera() {
     this.cancelNeckPlacement();
     this._neckPlacementReference = null;
-    if (!navigator.mediaDevices?.getUserMedia) throw new Error("Camera requires HTTPS and a supported browser.");
+    if (!this._photoMode && !navigator.mediaDevices?.getUserMedia) throw new Error("Camera requires HTTPS and a supported browser.");
     this.resetFrameSession();
     this.resetTrackingFilters();
-    if (this.ring) this.ring.visible = false;
+    this.hidePiece(true);
     this.hideHandSilhouetteOccluder();
     this._cameraAbort?.abort();
     this._cameraAbort = new AbortController();
@@ -1588,7 +1334,7 @@ export class ARTryOn {
     this.stream = null;
     const video = this.video;
     video.srcObject = null;
-    const request = navigator.mediaDevices.getUserMedia({
+    const request = this._photoMode ? this._photoStreamFactory() : navigator.mediaDevices.getUserMedia({
       video: { facingMode: { ideal: this.facingMode }, width: { ideal: 1280 }, height: { ideal: 720 }, frameRate: { ideal: 30, max: 30 } },
       audio: false
     });
@@ -1650,7 +1396,7 @@ export class ARTryOn {
       this.syncCalibrationControls();
       this.updateCameraProjection();
       this.resetTrackingFilters();
-      if (this.ring) this.ring.visible = false;
+      this.hidePiece(true);
       this.setStatus("");
     } catch (error) {
       this.facingMode = this.facingMode === "user" ? "environment" : "user";
@@ -1671,8 +1417,8 @@ export class ARTryOn {
   applyTrackingResult(result, detectCost = 0, timestamp = performance.now(), frame = null) {
     if (!result || !this.ring || this._closed || !Number.isFinite(timestamp)) return;
     const arrival = performance.now();
-    if (!this._frozen && (arrival - timestamp > MAX_TRACKING_AGE_MS || timestamp > arrival + 10
-      || (frame && !frameIsFresh(frame, arrival))
+    if (!this._frozen && ((!this._photoMode && arrival - timestamp > MAX_TRACKING_AGE_MS) || timestamp > arrival + 10
+      || (frame && !this._photoMode && !frameIsFresh(frame, arrival))
       || (frame && (frame.width !== this.video.videoWidth || frame.height !== this.video.videoHeight || frame.mirrored !== this.isMirrored))
       || (this._lastSourceTimestamp != null && timestamp <= this._lastSourceTimestamp))) {
       this._trackingTiming.droppedStale++;
@@ -1721,7 +1467,7 @@ export class ARTryOn {
   async startTrackingWorker() {
     if (this._trackingWorkerReady) return;
 
-    const worker = new Worker(new URL("./ar-tracking-worker.js?v=20260912-ar-placement", import.meta.url), { type: "module" });
+    const worker = new Worker(new URL("./ar-tracking-worker.js?v=20260925-arx", import.meta.url), { type: "module" });
     this._trackingWorker = worker;
     this._trackingWorkerBusy = false;
     this._pendingTrackingFrame = null;
@@ -1754,9 +1500,10 @@ export class ARTryOn {
         }
 
         if (message.type === "result") {
+          if (message.hairMask) this._hairOcclusion?.updateMask(message.hairMask);
           const pending = this.finishTrackingFrame(message, worker);
           if (!pending || message.generation !== this._frameGate.generation) return;
-          if (!this._frozen && this._frameGate.accept(message, performance.now())) {
+          if (!this._frozen && this._frameGate.accept(message, performance.now(), this._photoMode ? Infinity : undefined)) {
             this.applyTrackingResult(message.result, Number(message.detectCost) || 0, message.timestamp, pending.frame);
           } else if (!this._frozen) this._trackingTiming.droppedStale++;
           return;
@@ -1794,7 +1541,9 @@ export class ARTryOn {
           faceModelUrl: FACE_MODEL_URL,
           poseModelUrl: POSE_MODEL_URL,
           trackForearm: this.pieceType === "Bracelet",
-          forearmModelUrl: FOREARM_MODEL_URL
+          forearmModelUrl: FOREARM_MODEL_URL,
+          hairModelUrl: this.pieceType === "Earrings" || this.pieceType === "Necklace" ? HAIR_MODEL_URL : "",
+          fallback: CDN_FALLBACK
         }
       });
     });
@@ -1856,7 +1605,7 @@ export class ARTryOn {
     try { snapshot = createImageBitmap(this.video); }
     catch (error) { failed(error); return; }
     Promise.resolve(snapshot).then((bitmap) => {
-      if (!isCurrent() || !frameIsFresh(frame, performance.now())) {
+      if (!isCurrent() || (!this._photoMode && !frameIsFresh(frame, performance.now()))) {
         bitmap.close?.();
         if (isCurrent()) this._trackingTiming.droppedStale++;
         release();
@@ -1978,6 +1727,8 @@ export class ARTryOn {
     this._rim = new THREE.DirectionalLight(0xffffff, 0.25);
     this._rim.position.set(-0.2, 0.6, -1);
     this.scene.add(this._rim);
+    this._glints = new GlintLayer(this.scene, [this._key, this._fill]);
+    if (this.pieceType === "Earrings" || this.pieceType === "Necklace") this._hairOcclusion = new HairOcclusion();
     this._lightProbe = document.createElement("canvas");
     this._lightProbe.width = 48;
     this._lightProbe.height = 32;
@@ -2008,6 +1759,7 @@ export class ARTryOn {
 
     this.scene.add(this.ring);
     this.ring.visible = false;
+    this._glints.setTarget(this._wearable, state);
 
     // Finger and wrist depth bodies are owned by the scene, independently
     // of the jewellery. Contact-shadow geometry remains local to the band.
@@ -2031,6 +1783,29 @@ export class ARTryOn {
      *
      * Texture is a 256² radial gradient baked once into a CanvasTexture
      * — no runtime cost beyond a single tex sample per shadow fragment. */
+    this.attachContactShadow();
+    }
+    this.addWearableBody();
+
+
+    // Async HDR environment for PBR reflections — the ring looks plasticky
+    // without it. Don't block ring visibility on the load; lights cover until
+    // PMREM is ready.
+    this._loadEnvironment().catch(err => console.warn("[AR] env load failed:", err));
+
+    this._onResize = () => {
+      const r = stage.getBoundingClientRect();
+      this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, MAX_PIXEL_RATIO));
+      this.renderer.setSize(r.width, r.height, false);
+      this.camera.aspect = r.width / Math.max(r.height, 1);
+      this.camera.updateProjectionMatrix();
+      this.syncHandSilhouettePlane();
+      if (this.pieceType === "Necklace" && this._frozen && this._lastTrackingResult) this.applyTrackingResult(this._lastTrackingResult);
+    };
+    window.addEventListener("resize", this._onResize);
+  }
+
+  attachContactShadow() {
     const shadowTex = makeShadowTexture();
     const shadowGeom = new THREE.PlaneGeometry(this._ringLocalOuterR * 2.6, this._ringLocalOuterR * 4.8);
     shadowGeom.rotateX(-Math.PI / 2);  // lay flat in local XZ
@@ -2051,25 +1826,6 @@ export class ARTryOn {
     this._targetShadowScaleX = 1;
     this._targetShadowScaleZ = 1;
     this.ring.add(this._shadow);
-    }
-    this.addWearableBody();
-
-
-    // Async HDR environment for PBR reflections — the ring looks plasticky
-    // without it. Don't block ring visibility on the load; lights cover until
-    // PMREM is ready.
-    this._loadEnvironment().catch(err => console.warn("[AR] env load failed:", err));
-
-    this._onResize = () => {
-      const r = stage.getBoundingClientRect();
-      this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, MAX_PIXEL_RATIO));
-      this.renderer.setSize(r.width, r.height, false);
-      this.camera.aspect = r.width / Math.max(r.height, 1);
-      this.camera.updateProjectionMatrix();
-      this.syncHandSilhouettePlane();
-      if (this.pieceType === "Necklace" && this._frozen && this._lastTrackingResult) this.applyTrackingResult(this._lastTrackingResult);
-    };
-    window.addEventListener("resize", this._onResize);
   }
 
   async _loadEnvironment() {
@@ -2191,13 +1947,13 @@ export class ARTryOn {
     // the clock after it returns, rather than the pre-inference rAF time.
     const now = performance.now();
     const dt = this._lastRafTime ? Math.min(0.1, (now - this._lastRafTime) / 1000) : 0.016;
-    if (!this._frozen && this._lastResultAt != null && now - this._lastResultAt > MAX_TRACKING_AGE_MS) {
-      this.ring.visible = false;
+    if (!this._frozen && !this._photoMode && this._lastResultAt != null && now - this._lastResultAt > MAX_TRACKING_AGE_MS) {
+      this.hidePiece();
       this._lastResultAt = null;
       this.resetTrackingFilters();
       this.hideHandSilhouetteOccluder();
-      this.setStatus("Tracking lost. Keep the target clearly in view.");
     }
+    this.updatePresence(dt);
 
 
     /* Per-rAF pose interpolation toward the latest target. Exponential
@@ -2240,10 +1996,282 @@ export class ARTryOn {
     this.updateContactVisuals(dt);
     this.updateQualityReadout();
     this.sampleVideoLighting(now);
+    this._glints?.update(dt, this.camera, this._appearanceLighting?.gain, this.ring?.visible && this._hasTarget);
+    if (this._hairOcclusion) { this.updateHairRegions(dt); this.updateLimbOccluders(dt); }
     const renderStart = performance.now();
     this.renderer.render(this.scene, this.camera);
-    this._renderTiming.record(renderStart, performance.now(), this.renderer.info.render, this.renderer.getPixelRatio());
+    this._hairOcclusion?.render(this.renderer, this);
+    const renderEnd = performance.now();
+    this._renderTiming.record(renderStart, renderEnd, this.renderer.info.render, this.renderer.getPixelRatio());
+    this.updateRenderScale(renderEnd - renderStart, now);
+    if (this._captureRequest) this.completeCapture();
   };
+
+  updateHairRegions(dt) {
+    const hair = this._hairOcclusion;
+    const metrics = this.videoMetrics();
+    if (!hair.mask || !this.ring?.visible || !this._hasTarget) { hair.setRegions([], metrics); return; }
+    this._hairRegionTick = (this._hairRegionTick || 0) + 1;
+    if (this._hairRegionTick % 3 !== 0 && this._hairRegionCache) {
+      hair.setRegions(this._hairRegionCache, metrics);
+      return;
+    }
+    const v = this._vTmpA;
+    const toStage = (point) => { v.copy(point).project(this.camera); return { x: (v.x + 1) / 2 * metrics.width, y: (1 - v.y) / 2 * metrics.height }; };
+    const toVideo = (p) => {
+      let u = (p.x - metrics.offsetX) / metrics.drawWidth;
+      if (this.isMirrored) u = 1 - u;
+      return { u, v: (p.y - metrics.offsetY) / metrics.drawHeight };
+    };
+    const rectOf = (object) => {
+      const box = new THREE.Box3().setFromObject(object);
+      if (box.isEmpty()) return null;
+      let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+      for (const x of [box.min.x, box.max.x]) for (const y of [box.min.y, box.max.y]) for (const z of [box.min.z, box.max.z]) {
+        const p = toStage(this._vTmpB.set(x, y, z));
+        minX = Math.min(minX, p.x); maxX = Math.max(maxX, p.x); minY = Math.min(minY, p.y); maxY = Math.max(maxY, p.y);
+      }
+      return { x: (minX + maxX) / 2, y: (minY + maxY) / 2, rx: (maxX - minX) / 2, ry: (maxY - minY) / 2 };
+    };
+    const regions = [];
+    this._hairStrength ||= {};
+    const ease = 1 - Math.exp(-(dt * 3) / 0.25);
+    if (this.pieceType === "Necklace") {
+      const rect = rectOf(this.ring);
+      if (rect) regions.push({ ...rect, rx: rect.rx * 1.12 + 10, ry: rect.ry * 1.15 + 10, strength: 1 });
+    } else {
+      for (const ear of this._wearable?.earNodes || []) {
+        if (!ear.visible) continue;
+        const side = ear.userData.wearableEar;
+        const rect = rectOf(ear);
+        if (!rect) continue;
+        const anchor = toVideo(toStage(ear.getWorldPosition(this._vTmpB)));
+        const covered = hair.coverageAt(anchor.u, anchor.v, 0.018);
+        const target = smoothstep(0.32, 0.6, covered);
+        this._hairStrength[side] = (this._hairStrength[side] ?? target) + (target - (this._hairStrength[side] ?? target)) * ease;
+        regions.push({ ...rect, rx: rect.rx * 1.4 + 8, ry: rect.ry * 1.3 + 8, strength: this._hairStrength[side] });
+      }
+    }
+    this._hairRegionCache = regions;
+    hair.setRegions(regions, metrics);
+  }
+
+  /* Forearms and hands the pose tracker places in front of the chest hide
+   * the necklace behind them. BlazePose gives elbow, wrist and three hand
+   * points per arm; each arm becomes two capsules (forearm, hand) in stage
+   * pixels, used only when the wrist is clearly nearer the camera than the
+   * shoulders. */
+  updateLimbTargets(landmarks, world, metrics, shoulderPx) {
+    const toPx = (p) => {
+      let x = metrics.offsetX + p.x * metrics.drawWidth;
+      if (this.isMirrored) x = metrics.width - x;
+      return { x, y: metrics.offsetY + p.y * metrics.drawHeight };
+    };
+    const limbs = [];
+    const shoulderZ = world?.[POSE_LEFT_SHOULDER] && world?.[POSE_RIGHT_SHOULDER]
+      ? (world[POSE_LEFT_SHOULDER].z + world[POSE_RIGHT_SHOULDER].z) / 2 : null;
+    const imageShoulderZ = (landmarks[POSE_LEFT_SHOULDER].z + landmarks[POSE_RIGHT_SHOULDER].z) / 2;
+    for (const [elbowI, wristI, pinkyI, indexI, thumbI] of [[13, 15, 17, 19, 21], [14, 16, 18, 20, 22]]) {
+      const wrist = landmarks[wristI], elbow = landmarks[elbowI];
+      const hand = [landmarks[pinkyI], landmarks[indexI], landmarks[thumbI]].filter((p) => landmarkPresence(p) > 0.35);
+      const visibility = landmarkPresence(wrist);
+      if (visibility < 0.55 || hand.length < 2) continue;
+      // Metres in front of the shoulder plane (world), or the image-space z fallback.
+      const ahead = shoulderZ != null && world?.[wristI] ? shoulderZ - world[wristI].z : (imageShoulderZ - wrist.z) * 0.5;
+      const front = smoothstep(0.06, 0.16, ahead) * smoothstep(0.55, 0.8, visibility);
+      if (front <= 0.01) continue;
+      const w = toPx(wrist);
+      const tip = hand.reduce((acc, p) => { const q = toPx(p); return { x: acc.x + q.x / hand.length, y: acc.y + q.y / hand.length }; }, { x: 0, y: 0 });
+      const handLen = Math.hypot(tip.x - w.x, tip.y - w.y);
+      const spread = hand.length > 1 ? Math.max(...hand.map((p) => { const q = toPx(p); return Math.hypot(q.x - tip.x, q.y - tip.y); })) : 0;
+      // Pose "index" sits near the knuckles; extend toward the fingertips.
+      const ext = 1.55;
+      const handEnd = { x: w.x + (tip.x - w.x) * ext, y: w.y + (tip.y - w.y) * ext };
+      limbs.push({ ax: w.x, ay: w.y, bx: handEnd.x, by: handEnd.y, r: Math.max(spread * 1.1, handLen * 0.42, shoulderPx * 0.07), strength: front });
+      if (landmarkPresence(elbow) > 0.5) {
+        const e = toPx(elbow);
+        limbs.push({ ax: e.x, ay: e.y, bx: w.x, by: w.y, r: shoulderPx * 0.105, strength: front });
+      }
+    }
+    this._limbTargets = limbs;
+  }
+
+  updateLimbOccluders(dt) {
+    const hair = this._hairOcclusion;
+    if (!hair) return;
+    const targets = this.pieceType === "Necklace" && this.ring?.visible && this._hasTarget ? this._limbTargets || [] : [];
+    const ease = 1 - Math.exp(-dt / 0.08);
+    const current = this._limbs || [];
+    // Geometry follows the latest pose; strength eases so arms don't pop.
+    this._limbs = targets.map((t, i) => ({ ...t, strength: (current[i]?.strength ?? 0) + (t.strength - (current[i]?.strength ?? 0)) * ease }));
+    hair.setLimbs(this._limbs);
+  }
+
+  /* Presence: instead of popping the jewellery in and out when tracking
+   * drops for a moment, hold the last pose and fade. Reacquisition fades
+   * back in. The canvas only contains the jewellery, so its opacity is a
+   * cheap, artefact-free fade. */
+  showPiece() {
+    if (!this.ring) return;
+    const wasHidden = !this.ring.visible || this._presenceTarget === 0;
+    this.ring.visible = true;
+    this._presenceTarget = 1;
+    if (wasHidden) this._experience?.onTargetState(true);
+  }
+
+  hidePiece(immediate = false) {
+    if (!this.ring) return;
+    this._presenceTarget = 0;
+    if (immediate || this._frozen || !this.ring.visible) {
+      this.ring.visible = false;
+      this._presence = 0;
+      if (this.canvas) this.canvas.style.opacity = "0";
+    }
+    this._experience?.onTargetState(false);
+  }
+
+  updatePresence(dt) {
+    if (!this.canvas || !this.ring) return;
+    const target = this._presenceTarget ?? 1;
+    const current = this._presence ?? 0;
+    const tau = target > current ? 0.09 : 0.16;
+    let next = current + (target - current) * (1 - Math.exp(-dt / tau));
+    if (Math.abs(target - next) < 0.01) next = target;
+    this._presence = next;
+    if (next === 0 && target === 0) this.ring.visible = false;
+    const opacity = this.ring.visible ? next : 0;
+    if (Math.abs(opacity - (this._appliedOpacity ?? -1)) > 0.01 || (opacity === 0) !== (this._appliedOpacity === 0)) {
+      this.canvas.style.opacity = opacity.toFixed(3);
+      this._appliedOpacity = opacity;
+    }
+  }
+
+  /* Render resolution follows two goals: (1) match the camera's own
+   * sharpness, so the jewellery doesn't look pasted-on over a softer video;
+   * (2) keep frame time healthy, stepping resolution down under load and
+   * back up when there is headroom. */
+  updateRenderScale(renderMs, now) {
+    this._renderCostEMA = this._renderCostEMA == null ? renderMs : lerp(this._renderCostEMA, renderMs, 0.08);
+    if (now - (this._lastScaleChange || 0) < 900) return;
+    const metrics = this.videoMetrics();
+    const videoPixelsPerCss = (this.video?.videoWidth || metrics.width) / Math.max(1, metrics.drawWidth);
+    const device = Math.min(window.devicePixelRatio || 1, MAX_PIXEL_RATIO);
+    const ceiling = clamp(Math.max(videoPixelsPerCss * 1.15, 1), 0.75, device);
+    const current = this.renderer.getPixelRatio();
+    let next = current;
+    if (this._renderCostEMA > 20 && current > 0.75) next = Math.max(0.75, current - 0.15);
+    else if (this._renderCostEMA < 9 && current < ceiling) next = Math.min(ceiling, current + 0.1);
+    else if (current > ceiling + 0.01) next = ceiling;
+    if (Math.abs(next - current) < 0.01) return;
+    this._lastScaleChange = now;
+    const stage = this.modal.querySelector(".ar-tryon-stage").getBoundingClientRect();
+    this.renderer.setPixelRatio(next);
+    this.renderer.setSize(stage.width, stage.height, false);
+  }
+
+  /* Live variant switching (metal / stone). The new piece is built from the
+   * same design state + change, swapped in place, and keeps the current pose
+   * so the jewellery changes on the body without a tracking hiccup. */
+  async applyDesignChange(changes) {
+    if (!this.scene || !window.__tjcDesigner?.buildPiece) return;
+    const state = { ...this._designState, ...changes };
+    await new Promise((resolve) => requestAnimationFrame(resolve));
+    let next;
+    try {
+      const piece = window.__tjcDesigner.buildPiece(state, { wearable: true, neckCircumferenceMm: this._neckCircumferenceMm || 320, wristWidthMm: this._wristWidthMm || 55 });
+      next = createWearableAsset(piece, state);
+    } catch (error) {
+      this.setStatus(error.message || "That option could not be shown.");
+      return;
+    }
+    const previous = this.ring;
+    const previousWearable = this._wearable;
+    next.pose.position.copy(previous.position);
+    next.pose.quaternion.copy(previous.quaternion);
+    next.pose.scale.copy(previous.scale);
+    next.pose.visible = previous.visible;
+    this._designState = state;
+    this._wearable = next;
+    this.ring = next.pose;
+    this._articulation = new WearableArticulation(this.ring);
+    this._physicalSpec = next.spec;
+    this._ringLocalInnerR = next.innerRadius;
+    this._ringLocalOuterR = next.outerRadius;
+    this.ring.traverse((node) => {
+      if (!node.isMesh) return;
+      for (const material of Array.isArray(node.material) ? node.material : [node.material]) {
+        if ("envMapIntensity" in material) material.envMapIntensity = Math.min(material.envMapIntensity ?? 1, 1.15);
+      }
+    });
+    this.scene.remove(previous);
+    previousWearable?.renderBatches.dispose();
+    disposeObjectTree(previous);
+    this.scene.add(this.ring);
+    if (this.pieceType === "Ring" || this.pieceType === "Bracelet") this.attachContactShadow();
+    this.addWearableBody();
+    if (this.scene.environment) configureWearableGemOptics(next, state);
+    this._glints?.setTarget(next, state);
+    if (this.pieceType === "Necklace") {
+      const bounds = new THREE.Box3().setFromObject(this.ring);
+      this.prepareNecklaceFit(bounds.getSize(new THREE.Vector3()));
+      this.resetTrackingFilters();
+    }
+    if (this._lastTrackingResult && (this._frozen || this.pieceType === "Necklace")) this.applyTrackingResult(this._lastTrackingResult);
+  }
+
+  /* Photo capture happens right after a render (the WebGL buffer is not
+   * preserved), composited exactly as displayed: the same cover crop and
+   * mirroring as the video element, plus the jewellery layer. */
+  capture({ watermark = "" } = {}) {
+    if (!this.renderer || !this.video?.videoWidth) return Promise.resolve(null);
+    return new Promise((resolve) => {
+      if (this._suspended) { resolve(null); return; }
+      this._captureRequest = { resolve, watermark };
+    });
+  }
+
+  completeCapture() {
+    const { resolve, watermark } = this._captureRequest;
+    this._captureRequest = null;
+    try {
+      const metrics = this.videoMetrics();
+      const scale = Math.min(2, Math.max(1, this.video.videoWidth / metrics.drawWidth) * (window.devicePixelRatio || 1));
+      const out = document.createElement("canvas");
+      out.width = Math.round(metrics.width * scale);
+      out.height = Math.round(metrics.height * scale);
+      const ctx = out.getContext("2d");
+      ctx.save();
+      ctx.scale(scale, scale);
+      if (this.isMirrored) { ctx.translate(metrics.width, 0); ctx.scale(-1, 1); }
+      ctx.drawImage(this.video, metrics.offsetX, metrics.offsetY, metrics.drawWidth, metrics.drawHeight);
+      ctx.restore();
+      const compareSplit = this._experience?.compareActive ? parseFloat(this.modal.querySelector("[data-arx-compare]").style.getPropertyValue("--split")) || 50 : 0;
+      ctx.globalAlpha = this._presence ?? 1;
+      if (compareSplit) {
+        const x = out.width * compareSplit / 100;
+        ctx.drawImage(this.canvas, (this.canvas.width * compareSplit) / 100, 0, this.canvas.width * (1 - compareSplit / 100), this.canvas.height, x, 0, out.width - x, out.height);
+        ctx.globalAlpha = 1;
+        ctx.fillStyle = "#fff";
+        ctx.fillRect(x - scale, 0, 2 * scale, out.height);
+      } else {
+        ctx.drawImage(this.canvas, 0, 0, out.width, out.height);
+      }
+      ctx.globalAlpha = 1;
+      if (watermark) {
+        const size = Math.round(out.width * 0.028);
+        ctx.font = `500 ${size}px Georgia, "Times New Roman", serif`;
+        ctx.textAlign = "center";
+        ctx.fillStyle = "rgba(255,255,255,0.86)";
+        ctx.shadowColor = "rgba(0,0,0,0.35)";
+        ctx.shadowBlur = size * 0.6;
+        ctx.fillText(watermark.toUpperCase().split("").join(String.fromCharCode(8202)), out.width / 2, out.height - size * 1.6);
+      }
+      out.toBlob((blob) => resolve(blob), "image/jpeg", 0.92);
+    } catch (error) {
+      console.error("[AR] capture failed", error);
+      resolve(null);
+    }
+  }
 
   applyResult(result, now = performance.now()) {
     const [baseIdx, tipIdx] = this.fingerLandmarks();
@@ -2256,7 +2284,7 @@ export class ARTryOn {
       this.handLostFrames++;
       this._poseConfidenceTarget = 0;
       if (this.handLostFrames > 8) {
-        this.ring.visible = false;
+        this.hidePiece();
         this._hasTarget = false;  // snap on re-acquire, don't lerp from stale
         if (this.sizeEl) this.sizeEl.hidden = true;
         if (this.qualityEl) this.qualityEl.hidden = true;
@@ -2346,7 +2374,7 @@ export class ARTryOn {
     if (confidence < 0.22) {
       this._badPoseFrames += 1;
       if (this._badPoseFrames > 5) {
-        this.ring.visible = false;
+        this.hidePiece();
         this._hasTarget = false;
         this.hideHandSilhouetteOccluder();
         this.setStatus("Hold your hand steady in the camera");
@@ -2356,7 +2384,7 @@ export class ARTryOn {
     this._badPoseFrames = 0;
     if (this.handLostFrames > 0) this.setStatus("");
     this.setStatus("");
-    this.ring.visible = true;
+    this.showPiece();
 
     /* --- physical product scale, separate from inferred body width --- */
     const localOuterR = this._ringLocalOuterR || 1.0;
@@ -2525,7 +2553,7 @@ export class ARTryOn {
       this.handLostFrames++;
       this._poseConfidenceTarget = 0;
       if (this.handLostFrames > 8) {
-        this.ring.visible = false;
+        this.hidePiece();
         this._hasTarget = false;
         if (this.qualityEl) this.qualityEl.hidden = true;
         if (this.handLostFrames === 9) this.setStatus("Show your wrist to the camera");
@@ -2560,7 +2588,10 @@ export class ARTryOn {
     const observation=observeForearm(result.forearmPose,landmarks,metrics,this.isMirrored,deliveryAge);
     const forearm=fitForearmOrientation({x:dx/imgLen,y:dy/imgLen,pitch:handPitch,roll:this._lastHandRoll},observation);
     this._forearmSource=forearm.observed ? "elbow/wrist observation" : "palm estimate";
-    const fx=forearm.x,fy=forearm.y,rawPitch=forearm.pitch;
+    // Without an elbow in view the forearm axis comes from the palm, which
+    // also carries wrist flexion; a bent wrist would tip the bangle almost
+    // face-on. Forearms in wrist shots sit near the image plane, so damp it.
+    const fx=forearm.x,fy=forearm.y,rawPitch=forearm.observed ? forearm.pitch : clamp(forearm.pitch*.6,-.7,.7);
     const rawRoll=forearm.roll+THREE.MathUtils.degToRad(this.calibration.roll||0);
     const sideX=-fy,sideY=fx;
     // Place the band 10 mm along the forearm from the observed wrist joint.
@@ -2585,7 +2616,7 @@ export class ARTryOn {
     if (confidence < 0.22) {
       this._badPoseFrames = (this._badPoseFrames || 0) + 1;
       if (this._badPoseFrames > 5) {
-        this.ring.visible = false;
+        this.hidePiece();
         this._hasTarget = false;
         this.hideHandSilhouetteOccluder();
         this.setStatus("Hold your wrist steady in the camera");
@@ -2594,7 +2625,7 @@ export class ARTryOn {
     }
     this._badPoseFrames = 0;
     this.setStatus("");
-    this.ring.visible = true;
+    this.showPiece();
 
     // Honest physical scale — identical maths to the ring pipeline: the
     // bangle renders at its true spec size, never resized to the wrist.
@@ -2608,7 +2639,7 @@ export class ARTryOn {
       this._braceletFitWidth = localWristWidthMm;
     }
     if (this._braceletFits === false) {
-      this.ring.visible = false;
+      this.hidePiece();
       this._poseConfidenceTarget = 0;
       this.setStatus("This bracelet is too short for the wrist estimate. Check wrist width or choose a longer bracelet.");
       return;
@@ -2762,7 +2793,7 @@ export class ARTryOn {
       this.handLostFrames++;
       this._poseConfidenceTarget = 0;
       if (this.handLostFrames > 8) {
-        this.ring.visible = false;
+        this.hidePiece();
         this._hasTarget = false;
         if (this.qualityEl) this.qualityEl.hidden = true;
         if (this.handLostFrames === 9) this.setStatus("Face the camera so both ears are visible");
@@ -2801,7 +2832,7 @@ export class ARTryOn {
     if (confidence < 0.22) {
       this._badPoseFrames = (this._badPoseFrames || 0) + 1;
       if (this._badPoseFrames > 5) {
-        this.ring.visible = false;
+        this.hidePiece();
         this._hasTarget = false;
         this.setStatus("Hold your head steady in the camera");
       }
@@ -2809,7 +2840,7 @@ export class ARTryOn {
     }
     this._badPoseFrames = 0;
     this.setStatus("");
-    this.ring.visible = true;
+    this.showPiece();
     if (this.sizeEl) this.sizeEl.hidden = true;
 
     // Filter scalars (position + scale only — rotation comes from the
@@ -2963,7 +2994,7 @@ export class ARTryOn {
       this._poseConfidenceTarget = 0;
       this._targetNeckShadowOpacity = 0;
       if (this.handLostFrames > 8) {
-        this.ring.visible = false;
+        this.hidePiece();
         this._hasTarget = false;
         if (this.qualityEl) this.qualityEl.hidden = true;
         if (this.handLostFrames === 9) this.setStatus("Step back so head and shoulders are visible");
@@ -2982,7 +3013,7 @@ export class ARTryOn {
       this._poseConfidenceTarget = 0;
       this._targetNeckShadowOpacity = 0;
       if (this._badPoseFrames > 5) {
-        this.ring.visible = false;
+        this.hidePiece();
         this._hasTarget = false;
         this.setStatus("Hold still so both shoulders are visible");
       }
@@ -2996,6 +3027,7 @@ export class ARTryOn {
     const dxSh = lSh.x - rSh.x;
     const dySh = lSh.y - rSh.y;
     const shoulderPx = Math.hypot(dxSh, dySh) || 1;
+    this.updateLimbTargets(landmarks, world, metrics, shoulderPx);
 
     const stageIfVisible = (idx, minPresence = 0.34) => {
       const lm = landmarks[idx];
@@ -3089,7 +3121,7 @@ export class ARTryOn {
       this._badPoseFrames = (this._badPoseFrames || 0) + 1;
       this._targetNeckShadowOpacity = 0;
       if (this._badPoseFrames > 5) {
-        this.ring.visible = false;
+        this.hidePiece();
         this._hasTarget = false;
         this.setStatus("Hold still so both shoulders are visible");
       }
@@ -3097,7 +3129,8 @@ export class ARTryOn {
     }
     this._badPoseFrames = 0;
     this.setStatus("");
-    this.ring.visible = this.ring.userData.wearable.neck?.fits !== false;
+    if (this.ring.userData.wearable.neck?.fits !== false) this.showPiece();
+    else this.hidePiece(true);
     if (this.ring.visible) this._neckPlacementReference = neckReference;
     if (!this.ring.visible) this.setStatus("This chain is too short for the current neck estimate. Choose a longer chain.");
     const chainLengthMm = Number(this._physicalSpec?.necklace?.chainLengthMm);
@@ -3221,44 +3254,6 @@ export class ARTryOn {
     }
   }
 
-  snapshot() {
-    try {
-      // Composite: mirrored video + un-mirrored overlay into one PNG.
-      // The overlay canvas already has the ring drawn at mirrored coordinates
-      // (we flipped X in landmark math), so it should be drawn straight.
-      const w = this.video.videoWidth;
-      const h = this.video.videoHeight;
-      if (!w || !h) return;
-      const out = document.createElement("canvas");
-      out.width = w; out.height = h;
-      const ctx = out.getContext("2d");
-      if (this.isMirrored) {
-        ctx.save();
-        ctx.translate(w, 0);
-        ctx.scale(-1, 1);
-        ctx.drawImage(this.video, 0, 0, w, h);
-        ctx.restore();
-      } else {
-        ctx.drawImage(this.video, 0, 0, w, h);
-      }
-      // Overlay (no flip)
-      ctx.drawImage(this.canvas, 0, 0, w, h);
-      out.toBlob((blob) => {
-        if (!blob) return;
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = `tjc-tryon-${Date.now()}.png`;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        setTimeout(() => URL.revokeObjectURL(url), 1000);
-      }, "image/png");
-    } catch (err) {
-      console.error("[AR] snapshot failed", err);
-    }
-  }
-
   close() {
     if (this._closed) return;
     this._closed = true;
@@ -3303,6 +3298,11 @@ export class ARTryOn {
       try { this.poseLandmarker.close(); } catch {}
       this.poseLandmarker = null;
     }
+    this._glints?.dispose();
+    this._glints = null;
+    this._hairOcclusion?.dispose();
+    this._hairOcclusion = null;
+    this._experience?.dispose();
     this._fingerContactBody?.dispose();
     this._fingerContactBody = null;
     this._wristContactBody?.dispose();
@@ -3350,6 +3350,7 @@ export class ARTryOn {
     this._handMaskSourceInverse = null;
     document.body.style.overflow = this._previousOverflow || "";
     this._previousFocus?.focus?.();
+    try { this._context?.onClose?.(this._designState); } catch { /* page callback */ }
   }
 }
 
@@ -3368,7 +3369,9 @@ function init() {
 
       const app = new ARTryOn();
       window.__arTryOn = app;
-      await app.open();
+      // Pages can describe what is being tried on (product name, allowed
+      // metals/stones, callbacks) through window.__arContext.
+      await app.open(window.__arContext || {});
 
     });
   });

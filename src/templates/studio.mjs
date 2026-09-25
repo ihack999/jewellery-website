@@ -95,7 +95,15 @@ const FAQ = [
 export function renderStudio(ctx) {
   const studio = ctx.site.studio;
   const markup = fs.readFileSync(MARKUP, "utf8");
-  const body = `<section class="studio-head">
+  const body = `<div class="tryon-launch" data-tryon-launch aria-live="polite">
+  <div class="tryon-launch__inner">
+    <span class="tryon-launch__mark">${icon("sparkle", { size: 26 })}</span>
+    <p class="eyebrow">Virtual try-on</p>
+    <p class="tryon-launch__title" data-tryon-launch-title>Preparing your try-on…</p>
+    <span class="tryon-launch__bar"><span></span></span>
+  </div>
+</div>
+<section class="studio-head">
   <div class="wrap">
     ${breadcrumbs([{ label: "Home", href: "/" }, { label: studio.title }])}
     <div class="studio-head__row">
@@ -131,7 +139,9 @@ ${requestForm(ctx)}
     ogImage: "/assets/images/optimized/studio-ring-pink-gemstone-1600.jpg",
     bodyClass: "page--studio",
     bodyAttrs: 'data-page="customs"',
-    head: `<link rel="stylesheet" href="/static/studio.css?v=${ctx.assetVersion("studio.css")}">`,
+    // ?tryon=1 (from a product page) covers the studio at first paint and goes straight to the camera.
+    head: `<script>if(/[?&]tryon=1(&|$)/.test(location.search))document.documentElement.classList.add("is-tryon-launch")</script>
+<link rel="stylesheet" href="/static/studio.css?v=${ctx.assetVersion("studio.css")}">`,
     scripts: `<script type="module" src="/static/studio-page.js?v=${ctx.assetVersion("studio-page.js")}"></script>`,
     body,
     jsonLd: {

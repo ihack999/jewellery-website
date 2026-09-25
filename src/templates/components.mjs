@@ -31,6 +31,7 @@ const ICONS = {
   play: '<path d="M8 5.5v13l10.5-6.5z" fill="currentColor"/>',
   pause: '<path d="M8 5.5v13M16 5.5v13"/>',
   zoom: '<circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5M11 8v6M8 11h6"/>',
+  camera: '<path d="M4 8h3.2L9 5.5h6L16.8 8H20v11H4z"/><circle cx="12" cy="13.2" r="3.6"/>',
   cube: '<path d="m12 3 8 4.5v9L12 21l-8-4.5v-9z"/><path d="m4 7.5 8 4.5 8-4.5M12 12v9"/>',
   sparkle: '<path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M6 18l2.5-2.5M15.5 8.5 18 6"/>',
   check: '<path d="m5 12.5 4.5 4.5L19 7.5"/>',

@@ -653,6 +653,14 @@ button.swatch { cursor: pointer; }
 .pdp__actions .btn { grid-column: 1; }
 .pdp__wish { grid-column: 2; grid-row: 1; width: 52px; height: 50px; display: grid; place-items: center; border: 1px solid var(--color-line); color: var(--color-ink); }
 .pdp__wish:hover { border-color: var(--color-ink); }
+.gallery__tryon {
+  position: absolute; z-index: 2; top: 14px; left: 14px; display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 16px;
+  border-radius: 999px; background: rgba(255,255,255,.92); color: var(--color-ink); font-size: 11.5px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase;
+  box-shadow: 0 6px 20px rgba(0,0,0,.08); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); transition: background .2s, color .2s;
+}
+.gallery__tryon:hover { background: var(--color-ink); color: var(--color-inverse); }
+.pdp__tryon { gap: 10px; }
+.quick__tryon { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--color-ink); text-decoration: underline; text-underline-offset: 3px; }
 .studio-cta {
   display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 16px; padding: 16px 18px;
   background: var(--color-surface); border: 1px solid var(--color-line); color: var(--color-ink); transition: border-color .2s, background .2s;

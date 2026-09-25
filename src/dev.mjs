@@ -78,7 +78,8 @@ const server = http.createServer((req, res) => {
   res.writeHead(404); res.end("Not found");
 });
 
-await rebuild();
+const serveOnly = process.argv.includes("--serve-only") && fs.existsSync(path.join(DIST, "index.html"));
+if (serveOnly) loadRedirects(); else await rebuild();
 server.listen(PORT, () => console.log(`  → Preview: http://localhost:${PORT}\n  Watching /store, /src and /assets for changes…\n`));
 
 let timer;
@@ -90,7 +91,7 @@ function snapshot(dir) {
     else { const st = fs.statSync(file); seen.set(file, `${st.mtimeMs}:${st.size}`); }
   }
 }
-for (const dir of ["store", "src", "assets/css", "assets/js"]) {
+for (const dir of serveOnly ? [] : ["store", "src", "assets/css", "assets/js"]) {
   const full = path.join(ROOT, dir);
   if (!fs.existsSync(full)) continue;
   snapshot(full);

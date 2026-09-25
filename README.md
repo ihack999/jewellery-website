@@ -63,7 +63,7 @@ That's it — the product automatically appears in the shop, the right category 
 | `summary`, `description` | text | blank line = new paragraph; `**bold**` and `[links](/url)` work |
 | `details` | `{ "Metal": "14K gold" }` | the Details table |
 | `options` | see below | metal swatches, buttons, size dropdown, engraving text |
-| `studio` | `{ "piece": "Ring", "shape": "Oval" }` | adds **“Make it yours in 3D”** that opens the Design Studio pre-set |
+| `studio` | `{ "piece": "Ring", "shape": "Oval" }` | adds **“Try it on”** (live camera AR) and **“Make it yours in 3D”** (Design Studio, pre-set) |
 | `related` | `["the-rise-ring"]` | hand-picked “You may also like” (auto-filled otherwise) |
 | `sort` | `10` | lower = earlier in “Featured” order |
 
@@ -131,7 +131,16 @@ Lives at `/design-studio/`. The engine is `assets/js/designer.js` (Three.js) plu
 
 Any product with a `studio` field links into the studio with its settings (e.g. `?piece=Ring&shape=Oval&setting=Bezel`). The studio stamps `brand.monogram` as the hallmark inside rings.
 
-Detailed studio, AR, Blender render and test notes: [docs/README-v1.md](docs/README-v1.md).
+### Virtual try-on (AR)
+
+Every product with a `studio` field gets a **Try it on** button (on the photo, under Add to bag, and in quick view). It opens `/design-studio/?…&tryon=1&product=<slug>`, which goes straight to the camera with the product's name, only the metals the product is made in (`metals`), and returns to the product page when closed. Rings track the hand, bracelets the wrist, earrings the face and necklaces the shoulders.
+
+- **Runs on the device, nothing uploaded.** Google MediaPipe runs in a Web Worker so the page stays smooth. Everything is self-hosted: the library in `assets/vendor/mediapipe-0.10.14/`, the models in `assets/models/` (checksums in `SHA256SUMS.txt`; `scripts/fetch-ar-models.sh` downloads them again). A public CDN is used only as a fallback.
+- **Experience** (`assets/js/ar/experience.js`): an intro screen with tips, **Use a photo instead** (no camera needed), metal/stone swatches that swap live without losing the fit, a before/after **Compare** slider, and a shutter that saves or shares a branded photo.
+- **Realism**: diamond glints that follow real facet/light geometry (`ar/glints.js`); hair in front of earrings or a necklace, and a hand raised in front of a necklace, hide the jewellery behind them (`ar/hair-occlusion.js`); the piece fades instead of blinking when tracking drops; true-to-scale sizing anchored to an adult hand.
+- Shoppers can fine-tune the fit with **Adjust**. It is a visual preview, not a sizing tool.
+
+Detailed studio, AR, Blender render and test notes: [docs/README-v1.md](docs/README-v1.md) and `docs/ar-*.md`.
 
 ## Deploy
 

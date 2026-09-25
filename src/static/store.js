@@ -31,6 +31,7 @@
     minus: '<svg class="icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M5 12h14"/></svg>',
     plus: '<svg class="icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>',
     chevron: '<svg class="icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.35" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>',
+    camera: '<svg class="icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.35" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3.2L9 5.5h6L16.8 8H20v11H4z"/><circle cx="12" cy="13.2" r="3.6"/></svg>',
     info: '<svg class="icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.35" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 11v5.5M12 7.8v.1"/></svg>'
   };
 
@@ -574,6 +575,44 @@
     }
   }
 
+  // ------------------------------------------------------------ AR try-on links
+  // [data-tryon] links open the Design Studio straight into the camera. The
+  // chosen metal on the product form rides along, and the heavy AR files are
+  // warmed up on hover/touch so the camera starts sooner.
+  function setupTryOn() {
+    const warmed = new Set();
+    const warm = (link) => {
+      const url = new URL(link.href, location.href);
+      const piece = url.searchParams.get("piece") || "Ring";
+      const files = ["/assets/js/ar-tryon.js?v=20260925-arx", "/assets/js/designer.js?v=20260914-studio", "/assets/vendor/mediapipe-0.10.14/vision_bundle.mjs",
+        "/assets/vendor/mediapipe-0.10.14/wasm/vision_wasm_internal.js", "/assets/vendor/mediapipe-0.10.14/wasm/vision_wasm_internal.wasm",
+        ...({ Ring: ["hand_landmarker.task"], Bracelet: ["hand_landmarker.task", "pose_landmarker_lite.task"], Earrings: ["face_landmarker.task", "hair_segmenter.tflite"], Necklace: ["pose_landmarker_full.task", "hair_segmenter.tflite"] }[piece] || []).map((f) => `/assets/models/${f}`)];
+      for (const href of files) {
+        if (warmed.has(href)) continue;
+        warmed.add(href);
+        const hint = document.createElement("link");
+        hint.rel = "prefetch";
+        hint.href = href;
+        document.head.appendChild(hint);
+      }
+    };
+    const saveData = navigator.connection?.saveData;
+    ["pointerenter", "focusin", "touchstart"].forEach((type) => document.addEventListener(type, (e) => {
+      const link = e.target instanceof Element && e.target.closest("[data-tryon]");
+      if (link && !saveData) warm(link);
+    }, { capture: true, passive: true }));
+    document.addEventListener("click", (e) => {
+      const link = e.target instanceof Element && e.target.closest("[data-tryon]");
+      if (!link) return;
+      const scope = link.closest("[data-pdp], .quick");
+      const metal = scope?.querySelector("input[data-studio-metal]:checked")?.dataset.studioMetal;
+      if (!metal) return;
+      const url = new URL(link.href, location.href);
+      url.searchParams.set("metal", metal);
+      link.href = url.pathname + url.search + url.hash;
+    }, true);
+  }
+
   // ------------------------------------------------------------ quick view
   function setupQuickView() {
     const modal = $("[data-quick-modal]");
@@ -602,7 +641,7 @@
       if (o.type === "text") return `<div class="option"><label class="option__label" for="${id}">${esc(o.name)}</label><input class="option__input" id="${id}" name="${esc(o.name)}" ${o.maxLength ? `maxlength="${o.maxLength}"` : ""} placeholder="${esc(o.placeholder || "")}" ${o.required ? "required" : ""} data-option data-option-text autocomplete="off"></div>`;
       if (o.type === "size") return `<div class="option"><label class="option__label" for="${id}">${esc(o.name)}</label><div class="select"><select id="${id}" name="${esc(o.name)}" ${o.required ? "required" : ""} data-option><option value="">Select ${esc(o.name.toLowerCase())}</option>${o.values.map((v) => `<option value="${esc(v.value)}">${esc(v.label)}</option>`).join("")}</select>${ICON.chevron}</div></div>`;
       const sw = o.type === "swatch";
-      return `<fieldset class="option" data-option-group><legend class="option__label">${esc(o.name)}: <span class="option__value" data-option-value>${esc(o.values[0].label)}</span></legend><div class="${sw ? "option__swatches" : "option__buttons"}">${o.values.map((v, i) => `<label class="${sw ? "swatch-choice" : "pill"}"><input type="radio" name="${esc(o.name)}" value="${esc(v.value)}" ${i === 0 ? "checked" : ""} data-option ${v.add ? `data-add="${v.add}"` : ""} ${v.inquire ? "data-inquire" : ""} ${v.image !== undefined && v.image !== null ? `data-image="${v.image}"` : ""}>${sw ? `<span class="swatch swatch--lg" style="--swatch:${esc(v.swatch || "#ddd")}"></span><span class="visually-hidden">${esc(v.label)}</span>` : `<span>${esc(v.label)}</span>`}</label>`).join("")}</div></fieldset>`;
+      return `<fieldset class="option" data-option-group><legend class="option__label">${esc(o.name)}: <span class="option__value" data-option-value>${esc(o.values[0].label)}</span></legend><div class="${sw ? "option__swatches" : "option__buttons"}">${o.values.map((v, i) => `<label class="${sw ? "swatch-choice" : "pill"}"><input type="radio" name="${esc(o.name)}" value="${esc(v.value)}" ${i === 0 ? "checked" : ""} data-option ${v.add ? `data-add="${v.add}"` : ""} ${v.inquire ? "data-inquire" : ""} ${v.image !== undefined && v.image !== null ? `data-image="${v.image}"` : ""} ${v.studioMetal ? `data-studio-metal="${esc(v.studioMetal)}"` : ""}>${sw ? `<span class="swatch swatch--lg" style="--swatch:${esc(v.swatch || "#ddd")}"></span><span class="visually-hidden">${esc(v.label)}</span>` : `<span>${esc(v.label)}</span>`}</label>`).join("")}</div></fieldset>`;
     }).join("");
     const sold = p.availability === "sold";
     return `<div class="quick">
@@ -622,6 +661,7 @@
           </div>
           <p class="form-status" data-form-status role="status"></p>
         </form>
+        ${p.tryon ? `<a class="quick__tryon" href="${esc(p.tryon)}" data-tryon>${ICON.camera} Try it on with your camera</a>` : ""}
         <a class="quick__more" href="${esc(p.url)}">View full details</a>
       </div>
     </div>`;
@@ -1005,6 +1045,7 @@
     setupWishlist();
     setupSearch();
     setupQuickView();
+    setupTryOn();
     setupProductPage();
     setupCollection();
     setupRails();

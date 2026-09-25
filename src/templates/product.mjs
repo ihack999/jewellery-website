@@ -29,7 +29,8 @@ export function optionFields(p, ctx) {
       const data = [
         v.add ? `data-add="${v.add}"` : "",
         v.inquire ? "data-inquire" : "",
-        v.image !== undefined ? `data-image="${v.image}"` : ""
+        v.image !== undefined ? `data-image="${v.image}"` : "",
+        STUDIO_METALS[v.metal] ? `data-studio-metal="${h(STUDIO_METALS[v.metal])}"` : ""
       ].filter(Boolean).join(" ");
       return `<label class="${swatch ? "swatch-choice" : "pill"}"${swatch ? ` title="${h(v.label)}"` : ""}>
         <input type="radio" name="${h(o.name)}" value="${h(v.value)}"${i === 0 ? " checked" : ""} data-option ${data}>
@@ -48,6 +49,26 @@ export function studioHref(p, ctx) {
   return `${ctx.site.studio.path}${q ? `?${q}` : ""}#design-studio`;
 }
 
+// Store metal keys (store/site.json vocab) → names the 3D studio / try-on understands.
+export const STUDIO_METALS = { "yellow-gold": "Yellow Gold", "white-gold": "White Gold", "rose-gold": "Rose Gold", "platinum": "Platinum" };
+
+/** Live AR try-on link for any product with a `studio` recipe: opens the studio straight into the camera. */
+export function tryOnHref(p, ctx) {
+  if (!p.studio || !ctx.site.studio?.enabled) return "";
+  const params = new URLSearchParams(p.studio === true ? {} : p.studio);
+  const metal = tryOnMetals(p)[0];
+  if (!params.get("metal") && metal) params.set("metal", metal);
+  params.set("tryon", "1");
+  params.set("product", p.slug);
+  return `${ctx.site.studio.path}?${params}#design-studio`;
+}
+
+/** Metals the try-on offers for this product (only the ones it's actually made in). */
+export function tryOnMetals(p) {
+  const list = (p.metals || []).map((m) => STUDIO_METALS[m]).filter(Boolean);
+  return [...new Set(list)];
+}
+
 function gallery(p, ctx) {
   const items = p.images.map((img, i) => `<figure class="gallery__item${i === 0 ? " gallery__item--lead" : ""}" data-gallery-item data-index="${i}">
     <button type="button" class="gallery__zoom" data-zoom="${i}" aria-label="Zoom image ${i + 1} of ${p.images.length}">
@@ -60,7 +81,9 @@ function gallery(p, ctx) {
     ${v.label ? `<figcaption class="gallery__note">${h(v.label)}</figcaption>` : ""}
   </figure>`);
   const all = [...items, ...videos];
+  const tryon = tryOnHref(p, ctx);
   return `<div class="gallery" data-gallery>
+  ${tryon ? `<a class="gallery__tryon" href="${h(tryon)}" data-tryon>${icon("camera", { size: 16 })}<span>Try it on</span></a>` : ""}
   <div class="gallery__track" data-gallery-track>${all.join("")}</div>
   <div class="gallery__dots" aria-hidden="true">${all.map((_, i) => `<span class="gallery__dot${i === 0 ? " is-active" : ""}"></span>`).join("")}</div>
   <p class="gallery__counter" aria-hidden="true"><span data-gallery-current>1</span> / ${all.length}</p>
@@ -113,6 +136,7 @@ export function renderProduct(p, ctx) {
         </div>
         <p class="form-status" data-form-status role="status"></p>
       </form>
+      ${tryOnHref(p, ctx) ? `<a class="btn btn--ghost btn--block pdp__tryon" href="${h(tryOnHref(p, ctx))}" data-tryon>${icon("camera", { size: 18 })} Try it on with your camera</a>` : ""}
       ${studio ? `<a class="studio-cta" href="${h(studio)}">
         <span class="studio-cta__icon">${icon("cube", { size: 22 })}</span>
         <span><strong>Make it yours in 3D</strong><span>Open this design in the Design Studio and change the metal, stone or setting.</span></span>

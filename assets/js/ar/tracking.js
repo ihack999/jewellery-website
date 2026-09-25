@@ -33,11 +33,11 @@ export class TrackingFrameGate {
     this.lastTimestamp = -Infinity;
   }
 
-  accept(message, now) {
+  accept(message, now, maxAge = 450) {
     if (message.generation !== this.generation || !Number.isFinite(message.timestamp)
       || !Number.isSafeInteger(message.frameId) || message.frameId <= 0
       || message.frameId <= this.lastFrame || message.timestamp <= this.lastTimestamp
-      || now - message.timestamp > 450 || message.timestamp > now + 10) return false;
+      || now - message.timestamp > maxAge || message.timestamp > now + 10) return false;
     this.lastFrame = message.frameId;
     this.lastTimestamp = message.timestamp;
     return true;

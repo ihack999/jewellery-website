@@ -16,7 +16,7 @@ import { buildStudioCss } from "./lib/legacy-css.mjs";
 import { layout } from "./templates/layout.mjs";
 import { renderHome } from "./templates/home.mjs";
 import { renderCollection } from "./templates/collection.mjs";
-import { renderProduct } from "./templates/product.mjs";
+import { renderProduct, tryOnHref, tryOnMetals, STUDIO_METALS } from "./templates/product.mjs";
 import { renderStudio } from "./templates/studio.mjs";
 import { renderPage, renderWishlist, renderNotFound, renderOrderSuccess } from "./templates/pages.mjs";
 import { priceText } from "./templates/components.mjs";
@@ -120,6 +120,8 @@ export async function build({ quiet = false } = {}) {
     tags: [...p.tags, ...p.collections],
     metals: p.metals,
     stones: p.stones,
+    tryon: tryOnHref(p, ctx) || undefined,
+    tryonMetals: p.studio ? tryOnMetals(p) : undefined,
     badge: p.badge || "",
     summary: p.summary || "",
     image: images.url(p.images[0].src, 720),
@@ -127,7 +129,7 @@ export async function build({ quiet = false } = {}) {
     images: p.images.slice(0, 6).map((img) => ({ src: images.url(img.src, 960), alt: img.alt })),
     options: p.options.map((o) => ({
       id: o.id, name: o.name, type: o.type, required: o.required, maxLength: o.maxLength, placeholder: o.placeholder, help: o.help,
-      values: o.type === "text" ? undefined : o.values.map((v) => ({ label: v.label, value: v.value, add: v.add || 0, inquire: Boolean(v.inquire), image: v.image, swatch: store.vocab.metals[v.metal]?.swatch || v.swatch }))
+      values: o.type === "text" ? undefined : o.values.map((v) => ({ label: v.label, value: v.value, add: v.add || 0, inquire: Boolean(v.inquire), image: v.image, studioMetal: STUDIO_METALS[v.metal], swatch: store.vocab.metals[v.metal]?.swatch || v.swatch }))
     }))
   }));
   writeFile(path.join(DIST, "products.json"), JSON.stringify(catalog));

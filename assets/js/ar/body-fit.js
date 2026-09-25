@@ -4,8 +4,13 @@ export function palmScale(landmarks, world, metrics, measuredWidthMm = 0) {
   const valid = (point) => point && [point.x, point.y, point.z].every(Number.isFinite);
   if (![5, 17].every((index) => valid(world?.[index]))) return null;
   const estimatedWidth = Math.hypot(world[5].x - world[17].x, world[5].y - world[17].y, world[5].z - world[17].z);
-  if (estimatedWidth < 0.025 || estimatedWidth > 0.16) return null;
-  const widthM = measuredWidthMm > 0 ? measuredWidthMm / 1000 : estimatedWidth;
+  if (estimatedWidth < 0.012 || estimatedWidth > 0.16) return null;
+  // The world model recovers the hand's shape well, but its absolute size
+  // collapses when the palm is steeply foreshortened (back of the hand, bent
+  // wrist) — a 2–3 cm "hand" makes jewellery render several times too large.
+  // Keep the shape, but anchor the knuckle breadth to the adult range unless
+  // the shopper measured it.
+  const widthM = measuredWidthMm > 0 ? measuredWidthMm / 1000 : Math.min(0.092, Math.max(0.066, estimatedWidth));
   const referenceScale = widthM / estimatedWidth;
   const samples = [];
   for (const [first, second] of [[0, 5], [0, 9], [0, 17], [5, 17], [5, 9], [9, 17]]) {
