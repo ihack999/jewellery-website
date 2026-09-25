@@ -150,7 +150,15 @@ export async function build({ quiet = false } = {}) {
       options: p.options.map((o) => ({ name: o.name, type: o.type, required: o.required, maxLength: o.maxLength, values: o.type === "text" ? undefined : o.values.map((v) => ({ value: v.value, add: v.add || 0, inquire: Boolean(v.inquire) })) }))
     }]))
   };
-  writeFile(path.join(ROOT, "netlify", "functions", "lib", "catalog.json"), JSON.stringify(serverCatalog, null, 2) + "\n");
+  // Only rewrite when prices/options actually changed, so a rebuild doesn't
+  // leave a timestamp-only diff in git.
+  const serverCatalogPath = path.join(ROOT, "netlify", "functions", "lib", "catalog.json");
+  const withoutStamp = (catalog) => JSON.stringify({ ...catalog, generatedAt: undefined });
+  let previousCatalog = null;
+  try { previousCatalog = JSON.parse(fs.readFileSync(serverCatalogPath, "utf8")); } catch { /* first build */ }
+  if (!previousCatalog || withoutStamp(previousCatalog) !== withoutStamp(serverCatalog)) {
+    writeFile(serverCatalogPath, JSON.stringify(serverCatalog, null, 2) + "\n");
+  }
 
   // 7. SEO + platform files.
   const b = store.site.brand;
