@@ -7,6 +7,7 @@
 // dist/media, caching results in .cache/media so rebuilds are instant.
 // Without sharp the original file is served as-is — the site still works.
 
+import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import { createRequire } from "node:module";
@@ -113,6 +114,27 @@ export function createImagePipeline({ distDir, cacheDir = path.join(ROOT, ".cach
     return fs.existsSync(file) ? file : null;
   }
 
+  // Output names hash the image *content* (not its modification time), so a
+  // fresh clone or another machine produces the same URLs and a deploy only
+  // busts caches for images that really changed. Content hashes are memoised
+  // on disk by path/size/mtime to keep rebuilds fast.
+  const keysFile = path.join(cacheDir, "content-keys.json");
+  let keys = {};
+  try { keys = JSON.parse(fs.readFileSync(keysFile, "utf8")); } catch { keys = {}; }
+  let keysDirty = false;
+  function contentKey(file, stat) {
+    const id = `${rel(file)}:${stat.size}:${stat.mtimeMs}`;
+    if (!keys[id]) {
+      keys[id] = hash(`${rel(file)}:${crypto.createHash("sha1").update(fs.readFileSync(file)).digest("hex")}`);
+      keysDirty = true;
+    }
+    return keys[id];
+  }
+  function saveKeys() {
+    if (!keysDirty) return;
+    try { fs.mkdirSync(cacheDir, { recursive: true }); fs.writeFileSync(keysFile, JSON.stringify(keys)); keysDirty = false; } catch { /* cache is optional */ }
+  }
+
   function info(src) {
     if (sizes.has(src)) return sizes.get(src);
     const file = resolveSource(src);
@@ -121,7 +143,7 @@ export function createImagePipeline({ distDir, cacheDir = path.join(ROOT, ".cach
       const stat = fs.statSync(file);
       let dims = null;
       try { dims = imageSize(file); } catch { dims = null; }
-      result = { file, dims, key: hash(`${rel(file)}:${stat.size}:${stat.mtimeMs}`), base: slugify(path.basename(file, path.extname(file))).slice(0, 48) || "image" };
+      result = { file, dims, key: contentKey(file, stat), base: slugify(path.basename(file, path.extname(file))).slice(0, 48) || "image" };
     } else if (src && !/^(https?:)?\/\//.test(src) && !src.startsWith("data:")) {
       warnings.add(`Image not found: ${src}`);
     }
@@ -171,6 +193,7 @@ export function createImagePipeline({ distDir, cacheDir = path.join(ROOT, ".cach
   }
 
   async function flush() {
+    saveKeys();
     if (!sharp) {
       log("  images: sharp not installed — serving original files (run `npm install` for optimized images).");
       return { generated: 0, cached: 0 };
