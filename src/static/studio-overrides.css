@@ -57,3 +57,27 @@ body[data-page="customs"] {
 @keyframes tryon-spin { to { transform: rotate(360deg); } }
 @keyframes tryon-bar { from { transform: translateX(-100%); } to { transform: translateX(250%); } }
 @media (prefers-reduced-motion: reduce) { .tryon-launch__mark, .tryon-launch__bar span { animation: none; } }
+
+/* ---- Customer-facing polish (hide workshop/developer tools, calmer controls) ---- */
+/* Heuristic "Checks / ~g metal / Fix" readout and workshop exports are for the atelier, not shoppers. */
+.studio-shell .reality-score,
+.studio-shell .generator-offline-output,
+.studio-shell .generator-export-note,
+.studio-shell [data-audit-mesh],
+.studio-shell [data-export-glb] { display: none !important; }
+.studio-shell .design-studio__intro h2 { max-width: none; font-size: clamp(2rem, 3vw, 2.6rem); line-height: 1.05; text-wrap: balance; }
+@media (max-width: 700px) { .studio-shell .design-studio__intro h2 { max-width: none; font-size: 2.1rem; } }
+/* Dark, quiet selects that belong to the dark panel (they were near-white bars). */
+.studio-shell .designer-panel select,
+.studio-shell .designer-panel input[type="text"],
+.studio-shell .designer-panel input[type="number"] {
+  background: #1b1b1b; color: #fff; border: 1px solid rgba(255,255,255,.2); border-radius: 0; box-shadow: none;
+}
+.studio-shell .designer-panel select {
+  appearance: none; -webkit-appearance: none; padding-right: 2.4rem;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right .9rem center;
+}
+.studio-shell .designer-panel select option { color: #111; background: #fff; }
+.studio-shell .designer-panel select:hover,
+.studio-shell .designer-panel input[type="text"]:hover { border-color: rgba(255,255,255,.45); }

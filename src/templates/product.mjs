@@ -142,7 +142,7 @@ export function renderProduct(p, ctx) {
         <span><strong>Make it yours in 3D</strong><span>Open this design in the Design Studio and change the metal, stone or setting.</span></span>
         ${icon("arrowRight", { size: 18 })}
       </a>` : ""}
-      <ul class="promises">${(ctx.site.productPromises || []).map((pr) => `<li>${icon(pr.icon, { size: 18 })}<span>${h(pr.text)}</span></li>`).join("")}</ul>
+      <ul class="promises">${(ctx.site.productPromises || []).filter((pr) => !(pr.excludeCategories || []).includes(p.category) && (!pr.categories || pr.categories.includes(p.category))).map((pr) => `<li>${icon(pr.icon, { size: 18 })}<span>${h(pr.text)}</span></li>`).join("")}</ul>
       <div class="pdp__help">
         <span>Questions?</span>
         <a href="/pages/contact/?product=${encodeURIComponent(p.name)}">${icon("calendar", { size: 16 })} Book an appointment</a>

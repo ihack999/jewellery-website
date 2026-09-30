@@ -58,7 +58,7 @@ const sections = {
     const image = s.image && ctx.images.info(s.image) ? s.image : s.fallbackImage;
     return `<section class="studio-feature">
   <div class="studio-feature__media">
-    ${ctx.images.tag(image, { alt: "The 3D Design Studio showing a custom ring", sizes: "(max-width: 900px) 100vw, 55vw" })}
+    ${ctx.images.tag(image, { alt: "A custom halo ring rendered in the 3D Design Studio", sizes: "(max-width: 900px) 100vw, 55vw" })}
     <span class="studio-feature__badge">${icon("cube", { size: 16 })} Live 3D</span>
   </div>
   <div class="studio-feature__content">

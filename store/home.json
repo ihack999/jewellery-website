@@ -45,7 +45,7 @@
       "text": "Choose the piece, silhouette, metal, stone shape and setting — then turn it, zoom in and see how it catches the light. When it feels right, send it straight to our atelier for a personal quote.",
       "steps": ["Choose a silhouette", "Pick metal & stone", "Send it to our atelier"],
       "cta": { "label": "Open the Studio", "href": "/design-studio/" },
-      "image": "/assets/images/store/studio-preview.jpg",
+      "image": "/assets/images/store/studio-hero.jpg",
       "fallbackImage": "/assets/images/optimized/studio-ring-pink-gemstone-1600.jpg"
     },
     {

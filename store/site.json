@@ -152,9 +152,9 @@
   ],
 
   "productPromises": [
-    { "icon": "document", "text": "Confirmed in writing before payment" },
-    { "icon": "shield", "text": "Lifetime craftsmanship warranty" },
-    { "icon": "certificate", "text": "GIA / IGI certification available" }
+    { "icon": "document", "text": "Confirmed in writing before payment", "$comment": "Each promise can be limited with \"categories\" (only these) or \"excludeCategories\" (not these), using keys from vocabulary.categories." },
+    { "icon": "shield", "text": "Lifetime craftsmanship warranty", "excludeCategories": ["watches", "handbags"] },
+    { "icon": "certificate", "text": "GIA / IGI certification available", "excludeCategories": ["watches", "handbags"] }
   ],
 
   "newsletter": {

@@ -549,7 +549,14 @@
     const actions = $(".pdp__actions", pdp);
     if (sticky && actions) {
       sticky.hidden = false;
-      new IntersectionObserver(([en]) => sticky.classList.toggle("is-visible", !en.isIntersecting && en.boundingClientRect.top < 0), { threshold: 0 }).observe(actions);
+      // Visible only once the main buttons have scrolled up out of view. A
+      // scroll check (not only IntersectionObserver) also catches jumps past
+      // the buttons, which never "cross" the viewport edge.
+      let queued = false;
+      const update = () => { queued = false; sticky.classList.toggle("is-visible", actions.getBoundingClientRect().bottom < 0); };
+      addEventListener("scroll", () => { if (!queued) { queued = true; requestAnimationFrame(update); } }, { passive: true });
+      addEventListener("resize", update, { passive: true });
+      update();
       $("[data-sticky-action]", sticky).addEventListener("click", () => {
         const visibleBtn = $$(".pdp__actions .btn", pdp).find((b) => !b.hidden);
         actions.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "center" });
@@ -584,7 +591,7 @@
     const warm = (link) => {
       const url = new URL(link.href, location.href);
       const piece = url.searchParams.get("piece") || "Ring";
-      const files = ["/assets/js/ar-tryon.js?v=20260926-real", "/assets/js/designer.js?v=20260914-studio", "/assets/vendor/mediapipe-0.10.14/vision_bundle.mjs",
+      const files = ["/assets/js/ar-tryon.js?v=20260930-site", "/assets/js/designer.js?v=20260930-site", "/assets/vendor/mediapipe-0.10.14/vision_bundle.mjs",
         "/assets/vendor/mediapipe-0.10.14/wasm/vision_wasm_internal.js", "/assets/vendor/mediapipe-0.10.14/wasm/vision_wasm_internal.wasm",
         ...({ Ring: ["hand_landmarker.task"], Bracelet: ["hand_landmarker.task", "pose_landmarker_lite.task"], Earrings: ["face_landmarker.task", "hair_segmenter.tflite"], Necklace: ["pose_landmarker_full.task", "hair_segmenter.tflite"] }[piece] || []).map((f) => `/assets/models/${f}`)];
       for (const href of files) {

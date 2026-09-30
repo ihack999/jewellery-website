@@ -2348,7 +2348,7 @@ let arModulePromise;
 
 function loadDesignerModule() {
   if (!designerModulePromise) {
-    designerModulePromise = import("/assets/js/designer.js?v=20260914-studio").catch((error) => {
+    designerModulePromise = import("/assets/js/designer.js?v=20260930-site").catch((error) => {
       designerModulePromise = null;
       throw error;
     });
@@ -2359,7 +2359,7 @@ function loadDesignerModule() {
 
 function loadArModule() {
   if (!arModulePromise) {
-    arModulePromise = import("/assets/js/ar-tryon.js?v=20260926-real");
+    arModulePromise = import("/assets/js/ar-tryon.js?v=20260930-site");
   }
 
   return arModulePromise;

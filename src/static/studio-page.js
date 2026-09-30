@@ -12,7 +12,7 @@ if (arrivalHash !== STUDIO_HASH) {
   history.replaceState(null, "", url);
 }
 
-import("/assets/js/designer.js?v=20260914-studio") // keep in sync with the import inside ar-tryon.js
+import("/assets/js/designer.js?v=20260930-site") // keep in sync with the import inside ar-tryon.js
   .then(() => {
     if (arrivalHash && arrivalHash !== STUDIO_HASH) {
       const url = new URL(location.href);
@@ -34,7 +34,7 @@ document.addEventListener("click", async (event) => {
   event.preventDefault();
   event.stopImmediatePropagation();
   try {
-    arLoading ||= import("/assets/js/ar-tryon.js?v=20260926-real");
+    arLoading ||= import("/assets/js/ar-tryon.js?v=20260930-site");
     await arLoading;
     window.__arModuleReady = true;
     trigger.click();

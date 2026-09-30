@@ -3733,7 +3733,9 @@ async function createThreeStudioScene(root, canvas, THREE, renderer, cleanup, op
   scene.add(studioSet);
 
   const backdrop = new THREE.Mesh(
-    new THREE.PlaneGeometry(8.4, 5.2, 1, 1),
+    // Tall enough to run down behind the (now feathered) floor, so no
+    // lighter strip of page background shows under the horizon.
+    new THREE.PlaneGeometry(8.4, 9.2, 1, 1),
     new THREE.MeshBasicMaterial({
       color: 0x071012,
       transparent: true,
@@ -3745,7 +3747,7 @@ async function createThreeStudioScene(root, canvas, THREE, renderer, cleanup, op
       toneMapped: false
     })
   );
-  backdrop.position.set(0.3, 0.55, -3.2);
+  backdrop.position.set(0.3, -1.45, -3.2);
   studioSet.add(backdrop);
 
   function addSoftbox(width, height, x, y, z, color, opacity, rotationZ = 0) {
@@ -3792,6 +3794,25 @@ async function createThreeStudioScene(root, canvas, THREE, renderer, cleanup, op
   floor.rotation.x = -Math.PI / 2;
   floor.position.set(0, -1.38, -0.22);
   floor.receiveShadow = true;
+  // Feather the floor disc into the backdrop: a hard circular edge reads as
+  // a grey "planet horizon" behind the piece instead of an infinite studio
+  // surface. The alpha map fades the outer ~45% of the radius to nothing.
+  floor.material.alphaMap = (() => {
+    const size = 256;
+    const fadeCanvas = document.createElement("canvas");
+    fadeCanvas.width = fadeCanvas.height = size;
+    const ctx = fadeCanvas.getContext("2d");
+    const gradient = ctx.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
+    gradient.addColorStop(0, "#fff");
+    gradient.addColorStop(0.5, "#fff");
+    gradient.addColorStop(0.78, "#6a6a6a");
+    gradient.addColorStop(1, "#000");
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, size, size);
+    const texture = new THREE.CanvasTexture(fadeCanvas);
+    texture.colorSpace = THREE.NoColorSpace;
+    return texture;
+  })();
   scene.add(floor);
 
   const plinth = new THREE.Mesh(

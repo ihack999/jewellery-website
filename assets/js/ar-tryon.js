@@ -604,7 +604,7 @@ export class ARTryOn {
     const progress = (fraction, label) => this._experience?.setProgress(fraction, label);
     const prepare = (async () => {
       progress(0.12, "Preparing your piece in 3D…");
-      const designer = await import("./designer.js?v=20260914-studio");
+      const designer = await import("./designer.js?v=20260930-site");
       await designer.prepareDesignerForAR();
       if (this._closed) return;
       this._designState = readDesignState() || this._designState;
