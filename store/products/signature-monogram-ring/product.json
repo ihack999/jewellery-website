@@ -45,6 +45,7 @@
     {
       "name": "Initials",
       "type": "text",
+      "uppercase": true,
       "maxLength": 3,
       "required": true,
       "placeholder": "e.g. JMC",

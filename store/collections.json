@@ -13,6 +13,27 @@
       "image": "/assets/images/optimized/graduated-tennis-necklace-worn-1600.jpg",
       "promo": { "after": 6, "title": "Can't find it? Design it.", "text": "Build your own ring, necklace or bracelet in real-time 3D.", "cta": "Open the Design Studio", "href": "/design-studio/", "image": "/assets/images/optimized/studio-ring-pink-gemstone-1600.jpg" }
     },
+    {
+      "handle": "engagement-rings",
+      "title": "Engagement Rings",
+      "tileLabel": "Engagement",
+      "parent": { "label": "Bridal", "href": "/collections/engagement-rings/" },
+      "match": { "tags": ["engagement"] },
+      "image": "/store/products/the-solara-serpentine-ring/01-studio.jpg",
+      "description": "Made to order in Toronto, with every detail confirmed with you in writing before payment. Choosing yours is simple:",
+      "steps": [
+        { "title": "Choose your stone", "text": "Lab-grown or natural, white or softly coloured — we'll guide you to the right one." },
+        { "title": "Choose your carat weight", "text": "Pick the size that feels like you; other weights are quoted personally." },
+        { "title": "Choose your ring size", "text": "Not sure? Choose \"help me size\" and we'll confirm it with you." }
+      ],
+      "links": [
+        { "label": "Design your custom ring", "href": "/pages/custom-engagement-rings-toronto/" },
+        { "label": "Build your ring online in 3D", "href": "/design-studio/?piece=Ring#design-studio" },
+        { "label": "Book an engagement ring appointment", "href": "/pages/contact/?topic=engagement" }
+      ],
+      "tiles": [],
+      "seoDescription": "Engagement rings made to order in Toronto — choose your stone, carat weight and ring size, or design your own ring in 3D."
+    },
     { "handle": "rings", "title": "Rings", "tileLabel": "Rings", "match": { "category": "rings" }, "image": "/assets/images/studio/rise-ring-polished.webp",
       "description": "Sculptural pinky rings, cushion and oval solitaires, rare coloured diamonds and personalised signets.",
       "promo": { "after": 4, "title": "Your ring, from scratch", "text": "Choose the silhouette, stone, metal and setting in the 3D Studio.", "cta": "Design a ring", "href": "/design-studio/?piece=Ring#design-studio", "image": "/assets/images/products/rise-ring/rise-ring-worn.jpeg" } },

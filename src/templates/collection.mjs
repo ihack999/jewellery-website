@@ -51,12 +51,15 @@ export function renderCollection(c, ctx) {
     </a>`);
   }
   const crumbs = [{ label: "Home", href: "/" }];
-  if (c.handle !== "all") crumbs.push({ label: "Jewellery", href: ctx.byHandle.all?.path || "/shop/" });
+  if (c.parent) crumbs.push(c.parent);
+  else if (c.handle !== "all") crumbs.push({ label: "Jewellery", href: ctx.byHandle.all?.path || "/shop/" });
   crumbs.push({ label: c.title });
 
   const body = `<section class="collection-head wrap">
   <h1 class="collection-title">${h(c.title)}</h1>
   ${c.description ? `<p class="collection-desc">${h(c.description)}</p>` : ""}
+  ${c.steps?.length ? `<ol class="collection-steps">${c.steps.map((st, i) => `<li><span class="collection-steps__num">${String(i + 1).padStart(2, "0")}</span><strong>${h(st.title)}</strong>${st.text ? `<p>${h(st.text)}</p>` : ""}</li>`).join("")}</ol>` : ""}
+  ${c.links?.length ? `<p class="collection-links">${c.links.map((l) => `<a class="link-arrow" href="${h(l.href)}">${h(l.label)} ${icon("arrowRight", { size: 14 })}</a>`).join("")}</p>` : ""}
 </section>
 <div class="wrap">${categoryTiles(c.tiles.filter((t) => ctx.byHandle[t]), ctx, { current: c.handle })}</div>
 <div class="wrap">${breadcrumbs(crumbs)}</div>

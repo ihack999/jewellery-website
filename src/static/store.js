@@ -450,7 +450,7 @@
       update();
     });
     form.addEventListener("input", (e) => {
-      if (e.target.matches("[data-option-text]")) e.target.value = e.target.value.toUpperCase();
+      if (e.target.matches("[data-option-text][data-uppercase]")) e.target.value = e.target.value.toUpperCase();
     });
     form.addEventListener("submit", (e) => {
       e.preventDefault();
@@ -643,13 +643,15 @@
     });
   }
   function quickHtml(p) {
-    const opts = p.options.map((o) => {
+    let stepNo = 0;
+    const withStep = (o, html) => o.step ? `<div class="option-step"><p class="option-step__head"><span class="option-step__num">${String(++stepNo).padStart(2, "0")}</span>${esc(o.step)}</p>${html}</div>` : html;
+    const opts = p.options.map((o) => withStep(o, (() => {
       const id = `q-${p.slug}-${o.id}`;
-      if (o.type === "text") return `<div class="option"><label class="option__label" for="${id}">${esc(o.name)}</label><input class="option__input" id="${id}" name="${esc(o.name)}" ${o.maxLength ? `maxlength="${o.maxLength}"` : ""} placeholder="${esc(o.placeholder || "")}" ${o.required ? "required" : ""} data-option data-option-text autocomplete="off"></div>`;
+      if (o.type === "text") return `<div class="option"><label class="option__label" for="${id}">${esc(o.name)}</label><input class="option__input" id="${id}" name="${esc(o.name)}" ${o.maxLength ? `maxlength="${o.maxLength}"` : ""} placeholder="${esc(o.placeholder || "")}" ${o.required ? "required" : ""} data-option data-option-text${o.uppercase ? " data-uppercase" : ""} autocomplete="off"></div>`;
       if (o.type === "size") return `<div class="option"><label class="option__label" for="${id}">${esc(o.name)}</label><div class="select"><select id="${id}" name="${esc(o.name)}" ${o.required ? "required" : ""} data-option><option value="">Select ${esc(o.name.toLowerCase())}</option>${o.values.map((v) => `<option value="${esc(v.value)}">${esc(v.label)}</option>`).join("")}</select>${ICON.chevron}</div></div>`;
       const sw = o.type === "swatch";
       return `<fieldset class="option" data-option-group><legend class="option__label">${esc(o.name)}: <span class="option__value" data-option-value>${esc(o.values[0].label)}</span></legend><div class="${sw ? "option__swatches" : "option__buttons"}">${o.values.map((v, i) => `<label class="${sw ? "swatch-choice" : "pill"}"><input type="radio" name="${esc(o.name)}" value="${esc(v.value)}" ${i === 0 ? "checked" : ""} data-option ${v.add ? `data-add="${v.add}"` : ""} ${v.inquire ? "data-inquire" : ""} ${v.image !== undefined && v.image !== null ? `data-image="${v.image}"` : ""} ${v.studioMetal ? `data-studio-metal="${esc(v.studioMetal)}"` : ""}>${sw ? `<span class="swatch swatch--lg" style="--swatch:${esc(v.swatch || "#ddd")}"></span><span class="visually-hidden">${esc(v.label)}</span>` : `<span>${esc(v.label)}</span>`}</label>`).join("")}</div></fieldset>`;
-    }).join("");
+    })())).join("");
     const sold = p.availability === "sold";
     return `<div class="quick">
       <div class="quick__media"><div class="quick__track">${p.images.map((img) => `<img src="${esc(img.src)}" alt="${esc(img.alt)}">`).join("")}</div></div>

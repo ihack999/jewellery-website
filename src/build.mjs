@@ -128,7 +128,7 @@ export async function build({ quiet = false } = {}) {
     hover: p.images[p.hoverImage] && p.hoverImage ? images.url(p.images[p.hoverImage].src, 720) : "",
     images: p.images.slice(0, 6).map((img) => ({ src: images.url(img.src, 960), alt: img.alt })),
     options: p.options.map((o) => ({
-      id: o.id, name: o.name, type: o.type, required: o.required, maxLength: o.maxLength, placeholder: o.placeholder, help: o.help,
+      id: o.id, name: o.name, step: o.step, uppercase: o.uppercase, type: o.type, required: o.required, maxLength: o.maxLength, placeholder: o.placeholder, help: o.help,
       values: o.type === "text" ? undefined : o.values.map((v) => ({ label: v.label, value: v.value, add: v.add || 0, inquire: Boolean(v.inquire), image: v.image, studioMetal: STUDIO_METALS[v.metal], swatch: store.vocab.metals[v.metal]?.swatch || v.swatch }))
     }))
   }));

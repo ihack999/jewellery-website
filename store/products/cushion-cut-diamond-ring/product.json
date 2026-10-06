@@ -32,6 +32,7 @@
   },
   "options": [
     {
+      "step": "Choose your metal",
       "name": "Metal",
       "type": "swatch",
       "values": [
@@ -39,7 +40,7 @@
         { "label": "14K White Gold", "metal": "white-gold" }
       ]
     },
-    { "name": "Ring size", "type": "size", "values": "ringSizes", "required": true }
+    { "step": "Choose your ring size", "name": "Ring size", "type": "size", "values": "ringSizes", "required": true }
   ],
   "care": "Store separately and clean with a soft jewellery cloth after wear.",
   "shipping": "Made to order with timing confirmed during inquiry.",

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-25T17:47:41.103Z",
+  "generatedAt": "2026-10-06T16:00:43.709Z",
   "currency": "CAD",
   "checkoutMode": "request",
   "shippingCountries": [
@@ -7,13 +7,160 @@
     "US"
   ],
   "products": {
+    "the-solara-serpentine-ring": {
+      "name": "The Solara Serpentine Ring",
+      "price": 9500,
+      "currency": "CAD",
+      "purchasable": true,
+      "maxQuantity": 1,
+      "image": "https://torontojewelscuration.com/media/01-studio-a578d3af-720.webp",
+      "options": [
+        {
+          "name": "Centre stone",
+          "type": "button",
+          "required": true,
+          "values": [
+            {
+              "value": "Light yellow lab diamond",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "White lab diamond",
+              "add": 0,
+              "inquire": true
+            },
+            {
+              "value": "Natural diamond",
+              "add": 0,
+              "inquire": true
+            }
+          ]
+        },
+        {
+          "name": "Carat weight",
+          "type": "button",
+          "required": true,
+          "values": [
+            {
+              "value": "4.00 ct",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "3.00 ct",
+              "add": 0,
+              "inquire": true
+            },
+            {
+              "value": "5.00 ct",
+              "add": 0,
+              "inquire": true
+            }
+          ]
+        },
+        {
+          "name": "Ring size",
+          "type": "size",
+          "required": true,
+          "values": [
+            {
+              "value": "3",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "3.5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "4",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "4.5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "5.5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "6",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "6.5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "7",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "7.5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "8",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "8.5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "9",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "9.5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "10",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "Not sure — help me size",
+              "add": 0,
+              "inquire": false
+            }
+          ]
+        },
+        {
+          "name": "Engraving",
+          "type": "text",
+          "required": false,
+          "maxLength": 30
+        }
+      ]
+    },
     "the-rise-ring": {
       "name": "The Rise Ring",
       "price": 2200,
       "currency": "CAD",
       "purchasable": true,
       "maxQuantity": 5,
-      "image": "https://torontojewelscuration.com/assets/images/studio/rise-ring-polished.webp",
+      "image": "https://torontojewelscuration.com/media/rise-ring-polished-f726683b-720.webp",
       "options": [
         {
           "name": "Finish",
@@ -127,7 +274,7 @@
       "currency": "CAD",
       "purchasable": true,
       "maxQuantity": 5,
-      "image": "https://torontojewelscuration.com/assets/images/studio/signature-monogram-ring.webp",
+      "image": "https://torontojewelscuration.com/media/signature-monogram-ring-19d5312a-720.webp",
       "options": [
         {
           "name": "Initials",
@@ -230,7 +377,7 @@
       "currency": "CAD",
       "purchasable": true,
       "maxQuantity": 5,
-      "image": "https://torontojewelscuration.com/assets/images/studio/diamond-tennis-necklace.webp",
+      "image": "https://torontojewelscuration.com/media/diamond-tennis-necklace-548a37eb-720.webp",
       "options": [
         {
           "name": "Metal",
@@ -274,7 +421,7 @@
       "currency": "CAD",
       "purchasable": true,
       "maxQuantity": 5,
-      "image": "https://torontojewelscuration.com/assets/images/studio/quiet-power-tennis-bracelet.webp",
+      "image": "https://torontojewelscuration.com/media/quiet-power-tennis-bracelet-88fd9311-720.webp",
       "options": [
         {
           "name": "Diamonds",
@@ -301,7 +448,7 @@
       "currency": "CAD",
       "purchasable": true,
       "maxQuantity": 5,
-      "image": "https://torontojewelscuration.com/assets/images/studio/half-eternity-pinky-band.webp",
+      "image": "https://torontojewelscuration.com/media/half-eternity-pinky-band-9de5d2e4-720.webp",
       "options": [
         {
           "name": "Ring size",
@@ -398,7 +545,7 @@
       "currency": "CAD",
       "purchasable": true,
       "maxQuantity": 5,
-      "image": "https://torontojewelscuration.com/assets/images/studio/cushion-cut-diamond-ring.webp",
+      "image": "https://torontojewelscuration.com/media/cushion-cut-diamond-ring-475ae5f8-720.webp",
       "options": [
         {
           "name": "Metal",
@@ -512,7 +659,7 @@
       "currency": "CAD",
       "purchasable": false,
       "maxQuantity": 5,
-      "image": "https://torontojewelscuration.com/assets/images/studio/rare-blue-diamond-ring.webp",
+      "image": "https://torontojewelscuration.com/media/rare-blue-diamond-ring-c23ca71c-720.webp",
       "options": [
         {
           "name": "Blue diamond",
@@ -626,7 +773,7 @@
       "currency": "CAD",
       "purchasable": true,
       "maxQuantity": 5,
-      "image": "https://torontojewelscuration.com/assets/images/studio/oval-bezel-diamond-bracelet.webp",
+      "image": "https://torontojewelscuration.com/media/oval-bezel-diamond-bracelet-cb763257-720.webp",
       "options": [
         {
           "name": "Metal",
@@ -653,7 +800,7 @@
       "currency": "USD",
       "purchasable": true,
       "maxQuantity": 5,
-      "image": "https://torontojewelscuration.com/assets/images/studio/diamond-hand-chain.webp",
+      "image": "https://torontojewelscuration.com/media/diamond-hand-chain-d45fd4c7-720.webp",
       "options": []
     },
     "yellow-diamond-oval-stud-earrings": {
@@ -662,7 +809,7 @@
       "currency": "CAD",
       "purchasable": false,
       "maxQuantity": 5,
-      "image": "https://torontojewelscuration.com/assets/images/studio/yellow-diamond-oval-studs.webp",
+      "image": "https://torontojewelscuration.com/media/yellow-diamond-oval-studs-f8fc24fe-720.webp",
       "options": [
         {
           "name": "Diamonds",
@@ -689,7 +836,7 @@
       "currency": "CAD",
       "purchasable": true,
       "maxQuantity": 1,
-      "image": "https://torontojewelscuration.com/assets/images/studio/estate-cushion-halo.webp",
+      "image": "https://torontojewelscuration.com/media/estate-cushion-halo-593215bb-720.webp",
       "options": []
     },
     "15-carat-graduated-diamond-tennis-necklace": {
@@ -698,7 +845,7 @@
       "currency": "CAD",
       "purchasable": true,
       "maxQuantity": 1,
-      "image": "https://torontojewelscuration.com/assets/images/studio/graduated-diamond-necklace.webp",
+      "image": "https://torontojewelscuration.com/media/graduated-diamond-necklace-a06bb716-720.webp",
       "options": []
     },
     "classic-tennis-necklace-estate-collection": {
@@ -707,7 +854,7 @@
       "currency": "CAD",
       "purchasable": true,
       "maxQuantity": 1,
-      "image": "https://torontojewelscuration.com/assets/images/products/classic-tennis-necklace/classic-tennis-necklace-white-gold.jpeg",
+      "image": "https://torontojewelscuration.com/media/classic-tennis-necklace-white-gold-6703b30a-720.webp",
       "options": [
         {
           "name": "Metal",
@@ -734,7 +881,7 @@
       "currency": "CAD",
       "purchasable": false,
       "maxQuantity": 1,
-      "image": "https://torontojewelscuration.com/assets/images/studio/emerald-floral-earring.webp",
+      "image": "https://torontojewelscuration.com/media/emerald-floral-earring-d50b49d3-720.webp",
       "options": []
     },
     "ladies-patek-philippe-diamond-watch": {
@@ -743,7 +890,7 @@
       "currency": "CAD",
       "purchasable": false,
       "maxQuantity": 1,
-      "image": "https://torontojewelscuration.com/assets/images/studio/patek-philippe-detail.webp",
+      "image": "https://torontojewelscuration.com/media/patek-philippe-detail-3b4b9f3e-720.webp",
       "options": []
     },
     "ladies-piaget-diamond-watch": {
@@ -752,7 +899,7 @@
       "currency": "CAD",
       "purchasable": false,
       "maxQuantity": 1,
-      "image": "https://torontojewelscuration.com/assets/images/studio/piaget-detail.webp",
+      "image": "https://torontojewelscuration.com/media/piaget-detail-9829e916-720.webp",
       "options": []
     },
     "audemars-piguet-royal-oak-diamond-watch": {
@@ -761,7 +908,7 @@
       "currency": "CAD",
       "purchasable": false,
       "maxQuantity": 1,
-      "image": "https://torontojewelscuration.com/assets/images/studio/royal-oak-detail.webp",
+      "image": "https://torontojewelscuration.com/media/royal-oak-detail-718a27be-720.webp",
       "options": []
     },
     "rare-white-birkin": {
@@ -770,7 +917,7 @@
       "currency": "CAD",
       "purchasable": false,
       "maxQuantity": 5,
-      "image": "https://torontojewelscuration.com/assets/images/studio/white-birkin.webp",
+      "image": "https://torontojewelscuration.com/media/white-birkin-f8bf5d9a-720.webp",
       "options": []
     }
   }

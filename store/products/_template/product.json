@@ -47,6 +47,7 @@
     {
       "name": "Engraving",
       "type": "text",
+      "uppercase": true,
       "maxLength": 12,
       "required": false,
       "placeholder": "Initials or a date"

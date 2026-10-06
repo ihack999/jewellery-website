@@ -94,6 +94,30 @@
       }
     },
     {
+      "label": "Bridal",
+      "href": "/collections/engagement-rings/",
+      "mega": {
+        "columns": [
+          { "title": "Engagement rings", "links": [
+            { "label": "Shop Engagement Rings", "href": "/collections/engagement-rings/" },
+            { "label": "Design Your Custom Ring", "href": "/pages/custom-engagement-rings-toronto/" },
+            { "label": "Build Your Ring Online", "href": "/design-studio/?piece=Ring#design-studio" }
+          ]},
+          { "title": "Wedding bands", "links": [
+            { "label": "Design Your Custom Band", "href": "/design-studio/?piece=Ring&band=Eternity&halo=0&accent=1#design-studio" },
+            { "label": "Ask About a Matching Band", "href": "/pages/contact/?topic=wedding-band" }
+          ]},
+          { "title": "Virtual or in-person appointment", "links": [
+            { "label": "Engagement Ring Appointment", "href": "/pages/contact/?topic=engagement" },
+            { "label": "Wedding Band Appointment", "href": "/pages/contact/?topic=wedding-band" }
+          ]}
+        ],
+        "features": [
+          { "title": "The Solara Serpentine Ring", "href": "/products/the-solara-serpentine-ring/", "image": "/store/products/the-solara-serpentine-ring/03-worn-hand.jpg" }
+        ]
+      }
+    },
+    {
       "label": "Estate & Rare",
       "href": "/collections/estate/",
       "mega": {
@@ -156,6 +180,28 @@
     { "icon": "shield", "text": "Lifetime craftsmanship warranty", "excludeCategories": ["watches", "handbags"] },
     { "icon": "certificate", "text": "GIA / IGI certification available", "excludeCategories": ["watches", "handbags"] }
   ],
+
+  "promise": {
+    "$comment": "Shown on every product page in the listed categories (in place of the short promises list). Edit the wording and terms freely.",
+    "categories": ["rings"],
+    "title": "Our Promise To You",
+    "text": "Every ring is made to order by our Toronto atelier, and every detail — stone, metal, size and timing — is confirmed with you in writing before payment.",
+    "includedTitle": "Included with every purchase:",
+    "items": [
+      { "icon": "shield", "text": "Lifetime limited warranty" },
+      { "icon": "document", "text": "Professional appraisal" },
+      { "icon": "certificate", "text": "Diamond certificate" },
+      { "icon": "ring", "text": "Complimentary resizing*" }
+    ],
+    "note": "* The first resizing of your ring is complimentary within one year from the date of purchase. A change of more than 1.5 finger sizes, or a design that cannot be resized (such as a full eternity or fully engraved band), may incur additional fees."
+  },
+
+  "returnsPolicy": {
+    "$comment": "Shown under the promise, in every product's 'Ordering, shipping & returns' section, in the bag, and on the Shipping & Returns page.",
+    "title": "Refund policy",
+    "text": "All sales are final — we do not accept returns or offer refunds. Exchanges may be considered depending on the circumstances; contact us and we'll review your request personally.",
+    "short": "All sales are final. Exchanges may be considered depending on the circumstances."
+  },
 
   "newsletter": {
     "enabled": true,

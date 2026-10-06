@@ -156,17 +156,23 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
 .header__search { display: none; }
 
 @media (min-width: 1100px) {
-  .header__bar { height: 76px; }
+  /* Two rows, like a fine-jewellery house: wordmark centred on top, the
+     department nav centred beneath it — room for every department. */
+  .header__bar { height: auto; grid-template-rows: 70px 44px; }
+  .header__left { display: contents; }
+  .header__bar > .logo { grid-row: 1; grid-column: 2; }
+  .header__right { grid-row: 1; grid-column: 3; }
+  .primary-nav { grid-row: 2; grid-column: 1 / -1; justify-self: center; }
   .header__menu, .header__search-mobile { display: none; }
   .header__search { display: inline-grid; }
   .primary-nav { display: block; }
-  .primary-nav > ul { display: flex; gap: 28px; }
+  .primary-nav > ul { display: flex; gap: clamp(28px, 3vw, 48px); }
   .primary-nav__link {
-    position: relative; display: inline-flex; align-items: center; height: 76px;
-    font-size: 11.5px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: var(--color-ink);
+    position: relative; display: inline-flex; align-items: center; height: 44px;
+    font-size: 11.5px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: var(--color-ink); white-space: nowrap;
   }
   .primary-nav__link::after {
-    content: ""; position: absolute; left: 0; right: 0; bottom: 22px; height: 1px; background: currentColor;
+    content: ""; position: absolute; left: 0; right: 0; bottom: 10px; height: 1px; background: currentColor;
     transform: scaleX(0); transform-origin: left; transition: transform .3s ease;
   }
   .primary-nav__item:hover .primary-nav__link::after, .primary-nav__link[aria-expanded="true"]::after, .primary-nav__link.is-current::after { transform: scaleX(1); }
@@ -277,6 +283,18 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
 .section-head--center { text-align: center; display: grid; justify-items: center; }
 .section-head--left { display: flex; align-items: end; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
 .section-head .link-arrow { margin-top: 18px; }
+
+/* ---------- collection steps (bridal: stone → carat → size) ---------- */
+.collection-steps { display: grid; gap: 0; margin: clamp(22px, 3vw, 34px) auto 0; max-width: 980px; text-align: left; border-top: 1px solid var(--color-line); }
+.collection-steps li { display: grid; grid-template-columns: auto 1fr; column-gap: 16px; padding: 16px 0; border-bottom: 1px solid var(--color-line); }
+.collection-steps__num { grid-row: span 2; font-family: var(--font-display); font-size: 22px; color: var(--color-accent); line-height: 1.1; }
+.collection-steps strong { font-family: var(--font-display); font-weight: 400; font-size: 21px; color: var(--color-ink); line-height: 1.2; }
+.collection-steps p { font-size: 13.5px; color: var(--color-muted); margin-top: 4px; }
+@media (min-width: 800px) {
+  .collection-steps { grid-template-columns: repeat(3, 1fr); column-gap: clamp(20px, 3vw, 44px); border-top: 0; }
+  .collection-steps li { border-bottom: 0; border-top: 1px solid var(--color-ink); padding-top: 18px; }
+}
+.collection-links { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px 28px; margin-top: clamp(18px, 2.4vw, 26px); }
 
 /* ---------- category tiles ---------- */
 .tiles__list {
@@ -682,6 +700,25 @@ button.swatch { cursor: pointer; }
 .studio-cta__icon { width: 44px; height: 44px; display: grid; place-items: center; background: var(--color-ink); color: var(--color-inverse); border-radius: 50%; }
 .studio-cta strong { display: block; font-size: 14px; font-weight: 600; }
 .studio-cta span span { display: block; font-size: 12.5px; color: var(--color-muted); }
+/* Numbered option steps (bridal flow: stone → carat → size) */
+.option-step { display: grid; gap: 12px; }
+.option-step + .option-step { padding-top: 22px; border-top: 1px solid var(--color-line); }
+.option-step__head { display: flex; align-items: baseline; gap: 12px; font-family: var(--font-display); font-size: 21px; line-height: 1.2; color: var(--color-ink); }
+.option-step__num { font-family: var(--font-body); font-size: 11px; font-weight: 700; letter-spacing: .14em; color: var(--color-accent); }
+.option-step .option__label { font-size: 10.5px; color: var(--color-muted); }
+
+/* "Our Promise To You" */
+.promise { display: grid; gap: 12px; padding: clamp(22px, 2.6vw, 30px); background: var(--color-surface); border: 1px solid var(--color-line); }
+.promise__title { font-family: var(--font-display); font-weight: 400; font-size: clamp(26px, 2.4vw, 32px); line-height: 1.1; color: var(--color-ink); }
+.promise__text { color: var(--color-text); }
+.promise__lead { font-size: 11px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: var(--color-ink); margin-top: 4px; }
+.promise__list { display: grid; gap: 9px; }
+.promise__list li { display: flex; gap: 10px; align-items: center; font-size: 14px; color: var(--color-ink); }
+.promise__list .icon { color: var(--color-accent); flex: none; }
+.promise__note { font-size: 12.5px; font-style: italic; color: var(--color-muted); }
+.promise__policy { margin-top: 6px; padding-top: 14px; border-top: 1px solid var(--color-line); display: grid; gap: 6px; font-size: 13.5px; color: var(--color-text); }
+.promise__policy-title { font-size: 11px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: var(--color-ink); }
+
 .promises { display: grid; gap: 10px; font-size: 13px; color: var(--color-ink); }
 .promises li { display: flex; align-items: center; gap: 10px; }
 .pdp__help { display: flex; flex-wrap: wrap; gap: 8px 18px; align-items: center; font-size: 13px; color: var(--color-muted); padding-top: 4px; }
@@ -778,6 +815,7 @@ button.swatch { cursor: pointer; }
 .cart-total { display: flex; justify-content: space-between; align-items: baseline; font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: var(--color-ink); }
 .cart-total strong { font-size: 18px; letter-spacing: 0; }
 .cart-note { font-size: 12px; color: var(--color-muted); }
+.cart-note--policy a { color: var(--color-ink); text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--color-line); }
 .cart-request { display: grid; gap: 14px; padding-top: 20px; }
 .cart-request__intro { font-size: 14px; color: var(--color-muted); }
 

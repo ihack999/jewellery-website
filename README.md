@@ -81,11 +81,13 @@ Options:
     { "label": "2 ct centre", "add": 1500 }
   ]},
   { "name": "Ring size", "type": "size", "values": "ringSizes" },
-  { "name": "Initials", "type": "text", "maxLength": 3, "required": true }
+  { "name": "Initials", "type": "text", "maxLength": 3, "required": true, "uppercase": true }
 ]
 ```
 
 `image` switches the gallery to that photo (counting from 0), `add` increases the price, `inquire` turns the button into “Enquire” for that choice.
+
+**Bridal step-by-step:** give options a `"step"` title and they show as numbered steps — e.g. `{ "step": "Choose your stone", "name": "Centre stone", … }`, then “Choose your carat weight”, “Choose your ring size”. See `store/products/the-solara-serpentine-ring/`. Weights or stones you price personally get `"inquire": true`.
 
 If something is wrong, the build tells you exactly which file and what to fix (`npm run check` validates without building).
 
@@ -101,6 +103,9 @@ If something is wrong, the build tells you exactly which file and what to fix (`
 | Add a content page | create `store/pages/<slug>.html` (published at `/pages/<slug>/`) |
 | Add a new metal, stone or category | `store/site.json → vocabulary` |
 | Add a redirect for an old URL | `store/site.json → redirects` |
+| “Our Promise To You” box on ring pages | `store/site.json → promise` (choose which categories show it) |
+| Refund / exchange policy (product pages, bag, Shipping & Returns) | `store/site.json → returnsPolicy` |
+| Bridal menu | `store/site.json → navigation` (“Bridal”); the Engagement Rings page lists every product tagged `engagement` |
 | Footer links, contact details, socials, trust badges | `store/site.json → footer`, `contact`, `trust` |
 
 Content pages start with a small settings comment and can use shortcodes:

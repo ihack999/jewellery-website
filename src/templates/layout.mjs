@@ -148,6 +148,7 @@ function cartDrawer(ctx) {
     <div class="drawer__foot" data-cart-foot hidden>
       <div class="cart-total"><span>Estimated total</span><strong data-cart-total>—</strong></div>
       <p class="cart-note">${h(co.requestNote || "")}</p>
+      ${ctx.site.returnsPolicy?.short ? `<p class="cart-note cart-note--policy"><a href="/pages/shipping-returns/">${h(ctx.site.returnsPolicy.short)}</a></p>` : ""}
       <button type="button" class="btn btn--solid btn--block" data-cart-checkout>${request ? "Request to order" : "Checkout"}</button>
       <a class="btn btn--link" href="/shop/" data-drawer-close>Continue shopping</a>
     </div>

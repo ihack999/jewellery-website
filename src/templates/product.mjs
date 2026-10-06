@@ -2,13 +2,25 @@
 import { h, cx, paragraphs, absoluteUrl } from "../lib/util.mjs";
 import { icon, priceHtml, badgeHtml, breadcrumbs, productCard, carousel } from "./components.mjs";
 
+/** Options can carry a `step` title ("Choose your stone") — they are then shown as
+ *  numbered steps, the simple bridal flow: stone → carat → ring size. */
 export function optionFields(p, ctx) {
+  let stepNo = 0;
   return p.options.map((o) => {
+    const html = optionField(p, o, ctx);
+    if (!o.step) return html;
+    stepNo += 1;
+    return `<div class="option-step"><p class="option-step__head"><span class="option-step__num">${String(stepNo).padStart(2, "0")}</span>${h(o.step)}</p>${html}</div>`;
+  }).join("\n");
+}
+
+function optionField(p, o, ctx) {
+  {
     const id = `opt-${p.slug}-${o.id}`;
     if (o.type === "text") {
       return `<div class="option">
   <label class="option__label" for="${id}">${h(o.name)}${o.required ? "" : ' <span class="optional">(optional)</span>'}</label>
-  <input class="option__input" id="${id}" name="${h(o.name)}" type="text" ${o.maxLength ? `maxlength="${o.maxLength}"` : ""} placeholder="${h(o.placeholder || "")}"${o.required ? " required" : ""} data-option data-option-text autocomplete="off">
+  <input class="option__input" id="${id}" name="${h(o.name)}" type="text" ${o.maxLength ? `maxlength="${o.maxLength}"` : ""} placeholder="${h(o.placeholder || "")}"${o.required ? " required" : ""} data-option data-option-text${o.uppercase ? " data-uppercase" : ""} autocomplete="off">
   ${o.help ? `<p class="option__help">${h(o.help)}</p>` : ""}
 </div>`;
     }
@@ -39,7 +51,22 @@ export function optionFields(p, ctx) {
     }).join("")}
   </div>
 </fieldset>`;
-  }).join("\n");
+  }
+}
+
+/** "Our Promise To You" (store/site.json → promise), shown on the categories it lists. */
+function promiseBlock(p, ctx) {
+  const pr = ctx.site.promise;
+  if (!pr || (pr.categories && !pr.categories.includes(p.category))) return "";
+  const rp = ctx.site.returnsPolicy;
+  return `<section class="promise" aria-labelledby="promise-title">
+  <h2 class="promise__title" id="promise-title">${h(pr.title || "Our promise to you")}</h2>
+  ${pr.text ? `<p class="promise__text">${h(pr.text)}</p>` : ""}
+  ${pr.items?.length ? `<p class="promise__lead">${h(pr.includedTitle || "Included with every purchase:")}</p>
+  <ul class="promise__list">${pr.items.map((item) => `<li>${icon(item.icon || "check", { size: 16 })}<span>${h(item.text || item)}</span></li>`).join("")}</ul>` : ""}
+  ${pr.note ? `<p class="promise__note">${h(pr.note)}</p>` : ""}
+  ${rp?.text ? `<div class="promise__policy"><p class="promise__policy-title">${h(rp.title || "Refund policy")}</p><p>${h(rp.text)}</p></div>` : ""}
+</section>`;
 }
 
 export function studioHref(p, ctx) {
@@ -142,7 +169,7 @@ export function renderProduct(p, ctx) {
         <span><strong>Make it yours in 3D</strong><span>Open this design in the Design Studio and change the metal, stone or setting.</span></span>
         ${icon("arrowRight", { size: 18 })}
       </a>` : ""}
-      <ul class="promises">${(ctx.site.productPromises || []).filter((pr) => !(pr.excludeCategories || []).includes(p.category) && (!pr.categories || pr.categories.includes(p.category))).map((pr) => `<li>${icon(pr.icon, { size: 18 })}<span>${h(pr.text)}</span></li>`).join("")}</ul>
+      ${promiseBlock(p, ctx) || `<ul class="promises">${(ctx.site.productPromises || []).filter((pr) => !(pr.excludeCategories || []).includes(p.category) && (!pr.categories || pr.categories.includes(p.category))).map((pr) => `<li>${icon(pr.icon, { size: 18 })}<span>${h(pr.text)}</span></li>`).join("")}</ul>`}
       <div class="pdp__help">
         <span>Questions?</span>
         <a href="/pages/contact/?product=${encodeURIComponent(p.name)}">${icon("calendar", { size: 16 })} Book an appointment</a>
@@ -163,7 +190,7 @@ export function renderProduct(p, ctx) {
         </details>` : ""}
         <details class="accordion">
           <summary>Ordering, shipping &amp; returns ${icon("plus", { size: 16 })}</summary>
-          <div class="accordion__body prose">${paragraphs(p.shipping || "")}${paragraphs(ctx.site.checkout?.requestNote || "")}<p><a href="/pages/shipping-returns/">Shipping &amp; returns policy</a></p></div>
+          <div class="accordion__body prose">${paragraphs(p.shipping || "")}${paragraphs(ctx.site.checkout?.requestNote || "")}${ctx.site.returnsPolicy?.text ? `<p><strong>${h(ctx.site.returnsPolicy.title || "Refund policy")}.</strong> ${h(ctx.site.returnsPolicy.text)}</p>` : ""}<p><a href="/pages/shipping-returns/">Shipping &amp; returns policy</a></p></div>
         </details>
       </div>
     </div>

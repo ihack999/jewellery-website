@@ -1,0 +1,64 @@
+{
+  "name": "The Solara Serpentine Ring",
+  "subtitle": "4 CT Light Yellow Lab Diamond",
+  "category": "rings",
+  "tags": ["engagement", "bridal", "signature", "personalized", "yellow-diamond"],
+  "availability": "made-to-order",
+  "badge": "New",
+  "price": 9500,
+  "metals": ["yellow-gold"],
+  "stones": ["lab-diamond", "coloured-diamond"],
+  "images": [
+    { "src": "01-studio.jpg", "alt": "The Solara Serpentine Ring — 4 ct light yellow lab diamond in an engraved 14K yellow gold serpentine band" },
+    { "src": "02-studio-angle.jpg", "alt": "The Solara Serpentine Ring — side view of the engraved serpentine band and pavé diamonds" },
+    { "src": "03-worn-hand.jpg", "alt": "The Solara Serpentine Ring worn on the ring finger" },
+    { "src": "04-worn-portrait.jpg", "alt": "The Solara Serpentine Ring worn, close-up portrait" }
+  ],
+  "hoverImage": 2,
+  "summary": "A symbol of light, transformation and new beginnings — an approx. 4.00 ct light yellow lab-grown diamond in an elongated antique cushion cut, wrapped in a sculptural, engraved 14K yellow gold serpentine band.",
+  "description": "A symbol of light, transformation and new beginnings, the Solara Serpentine Ring is designed as a modern heirloom with an old-world soul.\n\nAt its centre is an approximately 4.00 carat light yellow lab-grown diamond, custom cut in an elongated antique cushion silhouette. Its soft champagne-yellow tone and antique-inspired faceting give the diamond a warmer, more romantic character than a traditional modern brilliant cut.\n\nThe sculptural serpentine band wraps gracefully around the finger in polished 14K yellow gold, finished with intricate detailing and personalized engraving. Designed to feel collected rather than conventional, Solara is a statement ring meant to carry meaning from one generation to the next.\n\n**Personalized engraving.** Engraving is included with your ring — enter your requested engraving above, or in your order notes. For more detailed or custom engraving requests, please contact us before ordering.\n\n**Please note.** Each Solara ring is individually made. Because diamonds are unique, slight variations in colour, measurements, proportions and faceting may occur. These variations are part of the character of a custom-made piece.\n\n**Customization available.** Looking for a different diamond size, shade of yellow, gold colour or other design modification? [Contact us](/pages/contact/?topic=engagement&product=The%20Solara%20Serpentine%20Ring) to create your own version of Solara.",
+  "details": {
+    "Centre stone": "Approx. 4.00 ct lab-grown diamond",
+    "Colour": "Light yellow / soft champagne-yellow",
+    "Cut": "Elongated antique cushion",
+    "Metal": "14K solid yellow gold",
+    "Design": "Serpentine-inspired wrap with intricate engraved detailing",
+    "Engraving": "Custom engraving included",
+    "Availability": "Made to order — custom crafted by Toronto Jewels Curation"
+  },
+  "options": [
+    {
+      "step": "Choose your stone",
+      "name": "Centre stone",
+      "type": "button",
+      "values": [
+        { "label": "Light yellow lab diamond" },
+        { "label": "White lab diamond", "inquire": true },
+        { "label": "Natural diamond", "inquire": true }
+      ]
+    },
+    {
+      "step": "Choose your carat weight",
+      "name": "Carat weight",
+      "type": "button",
+      "values": [
+        { "label": "4.00 ct" },
+        { "label": "3.00 ct", "inquire": true },
+        { "label": "5.00 ct", "inquire": true }
+      ]
+    },
+    { "step": "Choose your ring size", "name": "Ring size", "type": "size", "values": "ringSizes", "required": true },
+    {
+      "step": "Add your engraving",
+      "name": "Engraving",
+      "type": "text",
+      "maxLength": 30,
+      "placeholder": "e.g. Always · 06.20.26",
+      "help": "Included with your ring. For longer or custom engraving, contact us before ordering."
+    }
+  ],
+  "care": "Store separately in a soft pouch and clean gently with a soft jewellery cloth. Avoid harsh chemicals and remove before heavy work or exercise to protect the engraving and setting.",
+  "shipping": "Made to order. Your diamond, ring size, engraving, production timing and insured delivery are confirmed with you in writing before payment.",
+  "maxQuantity": 1,
+  "sort": 0
+}

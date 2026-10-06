@@ -42,7 +42,7 @@ function contactBlock(ctx) {
 }
 
 function contactForm() {
-  const topics = [["general", "General question"], ["appointment", "Book an appointment"], ["custom", "Custom design"], ["sourcing", "Estate & private sourcing"], ["sizing", "Sizing help"], ["order", "An existing order"]];
+  const topics = [["general", "General question"], ["appointment", "Book an appointment"], ["custom", "Custom design"], ["sourcing", "Estate & private sourcing"], ["engagement", "Engagement ring"], ["wedding-band", "Wedding band"], ["sizing", "Sizing help"], ["order", "An existing order"]];
   return `<form class="contact-form" name="contact" method="POST" data-netlify="true" netlify-honeypot="company" data-ajax-form data-contact-form data-success="Thank you — we'll reply personally, usually within one business day.">
   <input type="hidden" name="form-name" value="contact">
   <input type="hidden" name="product" data-prefill="product">
