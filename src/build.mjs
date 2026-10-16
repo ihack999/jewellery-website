@@ -96,7 +96,24 @@ export async function build({ quiet = false } = {}) {
   emit(renderHome(ctx));
   for (const c of store.collections) emit(renderCollection(c, ctx));
   for (const p of store.products) emit(renderProduct(p, ctx));
-  if (store.site.studio?.enabled) emit(renderStudio(ctx));
+  if (store.site.studio?.enabled) {
+    const studioPage = renderStudio(ctx);
+    emit(studioPage);
+    emit({
+      ...studioPage,
+      path: "/customs",
+      title: "Book a Custom Jewellery Consultation in Toronto",
+      canonical: absoluteUrl(store.site.brand.url, "/customs"),
+      body: studioPage.body.replace(
+        `<h1 class="collection-title">${h(store.site.studio.title)}</h1>`,
+        '<h1 class="collection-title">Custom Jewellery Design in Toronto</h1>'
+      ),
+      jsonLd: {
+        ...studioPage.jsonLd,
+        url: absoluteUrl(store.site.brand.url, "/customs")
+      }
+    });
+  }
   for (const page of store.pages) emit(renderPage(page, ctx));
   emit(renderWishlist(ctx));
   emit(renderOrderSuccess(ctx));
