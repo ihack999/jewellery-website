@@ -41,7 +41,7 @@ function megaPanel(item, index, ctx) {
     </div>
     <div class="mega__features">
       ${(m.features || []).map((f) => `<a class="mega__feature" href="${h(f.href)}">
-        <span class="mega__feature-media">${ctx.images.tag(f.image, { alt: "", sizes: "240px", widths: [360, 540] })}</span>
+        <span class="mega__feature-media">${ctx.images.tag(f.image, { alt: f.title ? `${f.title} — Fine Jewellery Toronto` : "Toronto Jewels Curation", sizes: "240px", widths: [360, 540] })}</span>
         <span class="mega__feature-title">${h(f.title)} ${icon("arrowRight", { size: 14 })}</span>
       </a>`).join("")}
     </div>
@@ -98,7 +98,7 @@ function mobileMenu(ctx) {
         <li><a class="mobile-nav__top" href="/wishlist/">Wishlist</a></li>
       </ul>
       <div class="mobile-nav__feature">
-        ${ctx.images.tag("/assets/images/optimized/studio-ring-pink-gemstone-1600.jpg", { alt: "", sizes: "80vw", widths: [540, 720] })}
+        ${ctx.images.tag("/assets/images/optimized/studio-ring-pink-gemstone-1600.jpg", { alt: "Bespoke custom jewellery in Toronto — pink gemstone ring", sizes: "80vw", widths: [540, 720] })}
         <div><p class="eyebrow">${h(site.studio?.title || "Design Studio")}</p><a class="btn btn--solid btn--block" href="${h(site.studio?.path || "/design-studio/")}">Design your own</a></div>
       </div>
       <div class="mobile-nav__contact">
@@ -244,10 +244,11 @@ export function layout(ctx, page) {
   const b = site.brand;
   const title = page.title ? (page.title.includes(b.name) ? page.title : `${page.title} | ${b.name}`) : b.name;
   const description = page.description || b.description;
-  const canonical = absoluteUrl(b.url, page.path || "/");
+  const canonical = page.canonical || absoluteUrl(b.url, page.path || "/");
   const og = page.ogImage || b.ogImage;
   const ogUrl = og ? (/^https?:/.test(og) ? og : absoluteUrl(b.url, og.startsWith("/media/") ? og : ctx.images.url(og, 1280))) : "";
   const preloads = (site.theme.fontFiles || []).filter((f) => f.preload).map((f) => `<link rel="preload" href="${f.src}" as="font" type="font/woff2" crossorigin>`).join("\n");
+  const imagePreload = page.preloadImage ? `<link rel="preload" as="image" href="${h(ctx.images.url(page.preloadImage, 960))}" fetchpriority="high">` : "";
   const jsonLd = [].concat(page.jsonLd || []).map((d) => `<script type="application/ld+json">${jsonForScript(d)}</script>`).join("\n");
   const storeConfig = {
     currency: b.currency,
@@ -265,6 +266,7 @@ export function layout(ctx, page) {
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>${h(title)}</title>
 <meta name="description" content="${h(description)}">
+${b.googleSiteVerification ? `<meta name="google-site-verification" content="${h(b.googleSiteVerification)}">` : ""}
 <link rel="canonical" href="${h(canonical)}">
 ${page.noindex ? '<meta name="robots" content="noindex">' : '<meta name="robots" content="index, follow, max-image-preview:large">'}
 <meta name="theme-color" content="${h(site.theme.colors.background)}">
@@ -277,7 +279,7 @@ ${ogUrl ? `<meta property="og:image" content="${h(ogUrl)}">` : ""}
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="manifest" href="/site.webmanifest">
-${preloads}
+${preloads}${imagePreload ? "\n" + imagePreload : ""}
 <style>${themeCss(site)}</style>
 <link rel="stylesheet" href="/static/store.css?v=${ctx.assetVersion("store.css")}">
 ${page.head || ""}

@@ -2,23 +2,23 @@
   "$comment": "The homepage is a list of sections, rendered top to bottom. Reorder, delete or duplicate them freely. Section types: hero, categoryTiles, productTabs, productRow, studioFeature, editorialSplit, priceTiles, clientMoments, services, quote, trust.",
 
   "seo": {
-    "title": "Toronto Jewels Curation | Custom Fine Jewellery, Diamonds & Estate Pieces",
-    "description": "Women-led Toronto atelier for custom fine jewellery, signature diamond pieces and rare estate finds. Design your own piece in our 3D studio."
+    "title": "Toronto Jewels Curation | Fine and Custom Diamond Jewellery",
+    "description": "Toronto fine jewellery studio for custom engagement rings, diamond tennis pieces, and estate finds. Book a private atelier or virtual consultation."
   },
 
   "sections": [
     {
       "type": "hero",
       "eyebrow": "Toronto · Custom · Estate",
-      "title": "Jewellery made your way.",
+      "title": "Fine and Custom Diamond Jewellery in Toronto",
       "text": "Signature diamond pieces, one-of-a-kind estate finds and a 3D studio to design your own — all confirmed personally by our atelier.",
       "ctas": [
         { "label": "Shop Jewellery", "href": "/shop/" },
         { "label": "Design Your Own", "href": "/design-studio/", "style": "ghost" }
       ],
       "images": [
-        { "src": "/assets/images/optimized/graduated-tennis-necklace-worn-1600.jpg", "alt": "Graduated diamond tennis necklace worn with an ivory blouse", "position": "50% 30%" },
-        { "src": "/assets/images/customer-stories/diamond-jewellery-portrait.jpeg", "alt": "Client wearing a diamond ring and tennis bracelet", "position": "50% 35%" }
+        { "src": "/assets/images/optimized/graduated-tennis-necklace-worn-1600.jpg", "alt": "Graduated diamond tennis necklace in 14K gold — fine diamond jewellery Toronto", "position": "50% 30%" },
+        { "src": "/assets/images/customer-stories/diamond-jewellery-portrait.jpeg", "alt": "Toronto atelier custom diamond engagement ring and tennis bracelet", "position": "50% 35%" }
       ]
     },
     {

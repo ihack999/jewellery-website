@@ -94,7 +94,7 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
 
 .icon-btn {
   position: relative; display: inline-grid; place-items: center;
-  width: 42px; height: 42px; color: var(--color-ink);
+  width: 44px; height: 44px; min-width: 44px; min-height: 44px; color: var(--color-ink);
   border-radius: 50%;
   transition: background-color .2s;
 }
@@ -123,7 +123,7 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
 .announce__track { position: relative; min-width: 0; text-align: center; }
 .announce__item { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; animation: announceIn .5s ease; max-width: calc(100vw - 110px); }
 .announce__item a { text-decoration: underline; text-decoration-color: rgba(255,255,255,.35); text-underline-offset: 3px; }
-.announce__btn { color: inherit; opacity: .7; width: 28px; height: 28px; display: grid; place-items: center; }
+.announce__btn { color: inherit; opacity: .7; width: 44px; height: 38px; display: grid; place-items: center; }
 .announce__btn:hover { opacity: 1; }
 @keyframes announceIn { from { opacity: 0; transform: translateY(4px); } }
 
@@ -149,7 +149,7 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
   .header__bar { grid-template-columns: 84px 1fr 84px; }
   .logo { min-width: 0; }
   .logo__text { font-size: 13px; letter-spacing: .16em; white-space: normal; text-align: center; line-height: 1.25; max-width: 58vw; text-wrap: balance; }
-  .header__right .icon-btn, .header__left .icon-btn { width: 40px; }
+  .header__right .icon-btn, .header__left .icon-btn { width: 44px; height: 44px; }
 }
 .primary-nav { display: none; }
 .header__text-link { display: none; }
@@ -345,7 +345,7 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
 .pdp__meta .badge { position: static; }
 .card__wish {
   position: absolute; top: 6px; right: 6px; z-index: 2;
-  width: 40px; height: 40px; display: grid; place-items: center; color: var(--color-ink);
+  width: 44px; height: 44px; display: grid; place-items: center; color: var(--color-ink);
   transition: transform .2s;
 }
 .card__wish:hover { transform: scale(1.1); }
@@ -673,7 +673,7 @@ button.swatch { cursor: pointer; }
 .select { position: relative; }
 .select select, .option__input, .field input, .field textarea, .field select {
   width: 100%; min-height: 50px; padding: 12px 14px; border: 1px solid var(--color-line); border-radius: var(--radius);
-  background: var(--color-bg); color: var(--color-ink); font-size: 15px; appearance: none; transition: border-color .2s;
+  background: var(--color-bg); color: var(--color-ink); font-size: 16px; appearance: none; transition: border-color .2s;
 }
 .select select { padding-right: 40px; cursor: pointer; }
 .select .icon { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); pointer-events: none; }

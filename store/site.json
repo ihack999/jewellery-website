@@ -12,7 +12,8 @@
     "url": "https://torontojewelscuration.com",
     "locale": "en-CA",
     "currency": "CAD",
-    "ogImage": "/assets/images/seo/toronto-jewels-curation-og.jpg"
+    "ogImage": "/assets/images/seo/toronto-jewels-curation-og.jpg",
+    "googleSiteVerification": "tEbgsHyR3ZP247FU9xhA19WW_vipb7VNE4ZdBOvKqz0"
   },
 
   "theme": {
@@ -51,7 +52,7 @@
 
   "contact": {
     "email": "info@torontojewelscuration.com",
-    "phone": "",
+    "phone": "+1-416-451-8578",
     "whatsapp": "14164518578",
     "whatsappLabel": "WhatsApp 416-451-8578",
     "city": "Toronto, Ontario",
@@ -222,8 +223,10 @@
   "studio": {
     "enabled": true,
     "path": "/design-studio/",
-    "title": "The Design Studio",
-    "intro": "Build your piece in real-time 3D — silhouette, metal, stone and setting — then send it to our atelier for a personal quote."
+    "title": "Start Your Custom Jewellery Request",
+    "seoTitle": "Book a Custom Jewellery Consultation in Toronto",
+    "seoDescription": "Start your custom jewellery request in Toronto. Share your idea, budget, and timeline, then book a private virtual or atelier consultation.",
+    "intro": "Start your custom jewellery request in Toronto. Share your idea, budget, and timeline, then book a private virtual or atelier consultation."
   },
 
   "footer": {
@@ -298,7 +301,7 @@
 
   "redirects": [
     { "from": "/shop.html", "to": "/shop/" },
-    { "from": "/customs.html", "to": "/design-studio/" },
+    { "from": "/customs.html", "to": "/customs" },
     { "from": "/dream-design.html", "to": "/design-studio/" },
     { "from": "/jewellery-editor/*", "to": "/design-studio/" },
     { "from": "/curated-luxuries.html", "to": "/collections/estate/" },
