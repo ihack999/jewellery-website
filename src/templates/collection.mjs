@@ -56,7 +56,8 @@ export function renderCollection(c, ctx) {
   crumbs.push({ label: c.title });
 
   const body = `<section class="collection-head wrap">
-  <h1 class="collection-title">${h(c.title)}</h1>
+  <h1 class="collection-title">${h(c.heading || c.title)}</h1>
+  ${c.subheading ? `<h2 class="collection-subheading" style="font-size:1.15rem;font-weight:400;color:var(--color-muted);margin:0.25rem 0 0.5rem;">${h(c.subheading)}</h2>` : ""}
   ${c.description ? `<p class="collection-desc">${h(c.description)}</p>` : ""}
   ${c.steps?.length ? `<ol class="collection-steps">${c.steps.map((st, i) => `<li><span class="collection-steps__num">${String(i + 1).padStart(2, "0")}</span><strong>${h(st.title)}</strong>${st.text ? `<p>${h(st.text)}</p>` : ""}</li>`).join("")}</ol>` : ""}
   ${c.links?.length ? `<p class="collection-links">${c.links.map((l) => `<a class="link-arrow" href="${h(l.href)}">${h(l.label)} ${icon("arrowRight", { size: 14 })}</a>`).join("")}</p>` : ""}

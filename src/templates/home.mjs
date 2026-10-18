@@ -1,5 +1,5 @@
 // Homepage: renders the ordered sections from store/home.json.
-import { h, cx } from "../lib/util.mjs";
+import { h, cx, absoluteUrl } from "../lib/util.mjs";
 import { icon, productCard, categoryTiles, sectionHead, button, carousel } from "./components.mjs";
 
 const sections = {
@@ -159,22 +159,73 @@ export function renderHome(ctx) {
     .join("\n");
   if (unknown.length) ctx.warn(`store/home.json: unknown section type(s): ${unknown.join(", ")} (available: ${Object.keys(sections).join(", ")}).`);
   const b = ctx.site.brand;
+  const heroImg = home.sections?.find((s) => s.type === "hero")?.images?.[0]?.src;
   return {
     path: "/",
     title: home.seo?.title || b.name,
     description: home.seo?.description,
+    preloadImage: heroImg,
     bodyClass: "page--home",
     body,
-    jsonLd: {
-      "@context": "https://schema.org",
-      "@type": "JewelryStore",
-      name: b.name,
-      url: b.url,
-      description: b.description,
-      email: ctx.site.contact?.email,
-      address: { "@type": "PostalAddress", addressLocality: (ctx.site.contact?.city || "").split(",")[0], addressCountry: "CA" },
-      sameAs: [ctx.site.contact?.instagram, ctx.site.contact?.tiktok].filter(Boolean)
-    }
+    jsonLd: [
+      {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "@id": `${b.url}/#organization`,
+        name: b.name,
+        url: b.url,
+        logo: absoluteUrl(b.url, b.logoImage || "/assets/images/seo/toronto-jewels-curation-og.jpg"),
+        description: b.description,
+        email: ctx.site.contact?.email,
+        telephone: ctx.site.contact?.phone || "+1-416-451-8578",
+        sameAs: [ctx.site.contact?.instagram, ctx.site.contact?.tiktok].filter(Boolean),
+        contactPoint: [
+          {
+            "@type": "ContactPoint",
+            telephone: ctx.site.contact?.phone || "+1-416-451-8578",
+            contactType: "customer service",
+            areaServed: "CA",
+            availableLanguage: ["en"]
+          }
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": ["JewelryStore", "LocalBusiness"],
+        "@id": `${b.url}/#store`,
+        name: b.name,
+        url: b.url,
+        description: b.description,
+        image: absoluteUrl(b.url, b.ogImage || "/assets/images/seo/toronto-jewels-curation-og.jpg"),
+        telephone: ctx.site.contact?.phone || "+1-416-451-8578",
+        email: ctx.site.contact?.email,
+        priceRange: "$$$$",
+        currenciesAccepted: "CAD",
+        paymentAccepted: "Cash, Credit Card, Bank Transfer",
+        address: {
+          "@type": "PostalAddress",
+          addressLocality: "Toronto",
+          addressRegion: "ON",
+          addressCountry: "CA"
+        },
+        geo: {
+          "@type": "GeoCoordinates",
+          latitude: 43.6532,
+          longitude: -79.3832
+        },
+        openingHoursSpecification: [
+          {
+            "@type": "OpeningHoursSpecification",
+            dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
+            opens: "10:00",
+            closes: "18:00"
+          }
+        ],
+        parentOrganization: {
+          "@id": `${b.url}/#organization`
+        }
+      }
+    ]
   };
 }
 

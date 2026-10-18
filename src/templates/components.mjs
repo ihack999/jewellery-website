@@ -101,8 +101,8 @@ export function productCard(p, ctx, { priority = false, headingLevel = 3, classN
   return `<article class="${cx("card", p.availability === "sold" && "card--sold", className)}" data-product-card ${data}>
   <div class="card__frame">
     <a class="card__media" href="${p.url}" tabindex="-1" aria-hidden="true">
-      ${ctx.images.tag(primary.src, { alt: "", sizes: CARD_SIZES, className: "card__img", priority, widths: [360, 540, 720, 960] })}
-      ${hover ? ctx.images.tag(hover.src, { alt: "", sizes: CARD_SIZES, className: "card__img card__img--hover", widths: [360, 540, 720, 960] }) : ""}
+      ${ctx.images.tag(primary.src, { alt: primary.alt || `${p.name} — Fine Jewellery Toronto`, sizes: CARD_SIZES, className: "card__img", priority, widths: [360, 540, 720, 960] })}
+      ${hover ? ctx.images.tag(hover.src, { alt: hover.alt || `${p.name} — Alternative Angle`, sizes: CARD_SIZES, className: "card__img card__img--hover", widths: [360, 540, 720, 960] }) : ""}
     </a>
     ${badgeHtml(p)}
     <button type="button" class="card__wish" data-wish="${h(p.slug)}" aria-pressed="false" aria-label="Save ${h(p.name)} to wishlist">${icon("heart", { size: 20 })}</button>
@@ -123,7 +123,7 @@ export function categoryTiles(handles, ctx, { current = "", title = "" } = {}) {
   return `<nav class="tiles" aria-label="${h(title || "Browse categories")}">
   <ul class="tiles__list" style="--tile-cols:${items.length <= 6 ? items.length : Math.ceil(items.length / 2)}">
     ${items.map((c) => `<li><a class="${cx("tile", c.handle === current && "is-current")}" href="${c.path}"${c.handle === current ? ' aria-current="page"' : ""}>
-      <span class="tile__media">${ctx.images.tag(c.image || c.products[0]?.images[0]?.src, { alt: "", sizes: "(max-width: 700px) 38vw, 16vw", widths: [360, 540, 720] })}</span>
+      <span class="tile__media">${ctx.images.tag(c.image || c.products[0]?.images[0]?.src, { alt: `${c.title} Collection — Toronto Jewels Curation`, sizes: "(max-width: 700px) 38vw, 16vw", widths: [360, 540, 720] })}</span>
       <span class="tile__label">${h(c.tileLabel)}</span>
     </a></li>`).join("\n    ")}
   </ul>

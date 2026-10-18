@@ -1,5 +1,5 @@
 // Content pages from store/pages/*.html plus built-in utility pages.
-import { h } from "../lib/util.mjs";
+import { h, absoluteUrl } from "../lib/util.mjs";
 import { icon, breadcrumbs, productCard } from "./components.mjs";
 
 /** Expand simple shortcodes inside page bodies. */
@@ -60,13 +60,71 @@ function contactForm() {
 </form>`;
 }
 
+const PAGE_FAQS = {
+  "custom-jewellery-toronto": [
+    {
+      q: "What can be customized?",
+      a: "Depending on the piece, decisions may include natural or lab-grown diamonds, coloured gemstones, 14K or 18K gold, metal colour, centre-stone shape, setting style, halo or side stones, band profile, engraving, length, clasp, and overall proportions."
+    },
+    {
+      q: "What should I prepare for a custom jewellery consultation?",
+      a: "A few reference images and a realistic budget range are useful, but you do not need a complete design. Explain what you like about each reference and how the piece will be worn. That gives the consultation a clearer starting point."
+    },
+    {
+      q: "How are price and timing confirmed?",
+      a: "Custom jewellery depends on the final stone, metal, size, complexity, and sourcing. Price and timing are therefore confirmed for the individual project before you commit. Use the request form to share the details needed for an informed reply."
+    },
+    {
+      q: "From first reference to finished direction: how does the process work?",
+      a: "The process begins with sharing your idea and reference images, followed by discussing stone type, metal colour, setting, dimensions, and cost choices. We confirm the agreed design direction and measurements before work proceeds, with made-to-order timing and delivery confirmed for your project."
+    }
+  ],
+  "custom-engagement-rings-toronto": [
+    {
+      q: "How do I choose the centre stone for a custom engagement ring?",
+      a: "Begin with shape and overall look, then compare size, proportions, quality details, origin preference, and budget. Natural and lab-grown diamonds can both be considered. A coloured gemstone can also become the centre of the design."
+    },
+    {
+      q: "How do I choose a setting for real life?",
+      a: "A low or high profile, prong style, halo, side stones, and band width affect both appearance and wearability. Share the wearer's routine so the design direction can account for comfort and practicality as well as beauty."
+    },
+    {
+      q: "What metal and finishing choices are available?",
+      a: "Yellow, white, and rose gold each change how the stone and setting read. Finish, band shape, and matching-band plans should be considered together so the ring feels resolved from every angle."
+    },
+    {
+      q: "How are budget and timing confirmed for an engagement ring?",
+      a: "The final price depends on the stone, metal, setting, size, and complexity. Made-to-order timing is confirmed for the specific project. If the ring is tied to a date, include that date in the first request."
+    }
+  ],
+  "natural-vs-lab-grown-diamonds": [
+    {
+      q: "What is the fundamental difference between natural and lab-grown diamonds?",
+      a: "A natural diamond forms through geological processes and is recovered from the earth. A lab-grown diamond is created in a controlled environment using technology that reproduces the conditions needed for diamond crystal growth. Both are diamonds; origin is the key distinction that should be disclosed clearly."
+    },
+    {
+      q: "How should you compare diamond specifications?",
+      a: "Do not compare by carat weight alone. Review cut or proportions, colour, clarity, measurements, fluorescence where relevant, and the grading document offered with the stone. Two diamonds with the same headline grade can still present differently in person."
+    },
+    {
+      q: "How do you decide what the budget should accomplish?",
+      a: "One client may prioritize natural origin and rarity. Another may prioritize a larger visual spread, higher specifications, or allocating more of the budget to the setting. Establish the total project budget before choosing the centre stone so the ring remains balanced."
+    },
+    {
+      q: "How does the finished setting impact the diamond?",
+      a: "The setting changes how a diamond appears and wears. Shape, setting height, prong style, halo, side stones, band width, metal colour, and the wedding-band pairing should be considered alongside the centre stone rather than after it."
+    }
+  ]
+};
+
 export function renderPage(page, ctx) {
   const crumbs = [{ label: "Home", href: "/" }];
   if (page.parent) crumbs.push(page.parent);
   crumbs.push({ label: page.navTitle || page.title });
+  const b = ctx.site.brand;
   const hero = page.image
     ? `<section class="page-hero">
-        <div class="page-hero__media">${ctx.images.tag(page.image, { alt: "", sizes: "100vw", priority: true })}</div>
+        <div class="page-hero__media">${ctx.images.tag(page.image, { alt: page.imageAlt || `${page.heading || page.title} — Toronto Jewels Curation`, sizes: "100vw", priority: true })}</div>
         <div class="page-hero__content wrap">${page.eyebrow ? `<p class="eyebrow eyebrow--light">${h(page.eyebrow)}</p>` : ""}<h1 class="page-hero__title">${h(page.heading || page.title)}</h1>${page.intro ? `<p class="page-hero__intro">${h(page.intro)}</p>` : ""}</div>
       </section>`
     : `<section class="page-head wrap ${page.layout === "wide" ? "" : "wrap--narrow"}">
@@ -79,14 +137,47 @@ ${hero}
 <div class="page-body wrap ${page.layout === "wide" ? "" : "wrap--narrow"} prose">
 ${shortcodes(page.body, ctx)}
 </div>`;
+
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: crumbs.map((cr, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      name: cr.label,
+      item: absoluteUrl(b.url, cr.href || page.path)
+    }))
+  };
+
+  const jsonLdList = [breadcrumbSchema];
+  if (PAGE_FAQS[page.slug]) {
+    jsonLdList.push({
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      mainEntity: PAGE_FAQS[page.slug].map((item) => ({
+        "@type": "Question",
+        name: item.q,
+        acceptedAnswer: {
+          "@type": "Answer",
+          text: item.a
+        }
+      }))
+    });
+  }
+  if (page.jsonLd) {
+    if (Array.isArray(page.jsonLd)) jsonLdList.push(...page.jsonLd);
+    else jsonLdList.push(page.jsonLd);
+  }
+
   return {
     path: page.path,
     title: page.seoTitle || page.title,
     description: page.description || page.intro,
+    preloadImage: page.image,
     ogImage: page.image,
     bodyClass: `page--content page--${page.slug}`,
     body,
-    jsonLd: page.jsonLd
+    jsonLd: jsonLdList
   };
 }
 

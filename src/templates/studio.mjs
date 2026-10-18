@@ -134,8 +134,8 @@ ${requestForm(ctx)}
 
   return {
     path: studio.path,
-    title: "3D Jewellery Design Studio — Design Your Own Ring, Necklace or Bracelet",
-    description: studio.intro,
+    title: studio.seoTitle || "Book a Custom Jewellery Consultation in Toronto",
+    description: studio.seoDescription || studio.intro,
     ogImage: "/assets/images/optimized/studio-ring-pink-gemstone-1600.jpg",
     bodyClass: "page--studio",
     bodyAttrs: 'data-page="customs"',

@@ -199,7 +199,7 @@ export function renderProduct(p, ctx) {
 
 <div class="sticky-atc" data-sticky-atc hidden>
   <div class="sticky-atc__info">
-    ${ctx.images.tag(p.images[0].src, { alt: "", sizes: "48px", widths: [360] })}
+    ${ctx.images.tag(p.images[0].src, { alt: `${p.name} preview — Toronto Jewels Curation`, sizes: "48px", widths: [360] })}
     <div><p class="sticky-atc__name">${h(p.name)}</p>${priceHtml(p, ctx, { className: "sticky-atc__price" })}</div>
   </div>
   <button type="button" class="btn btn--solid" data-sticky-action>${sold ? "Find similar" : inquireOnly ? "Enquire" : "Add to bag"}</button>
@@ -231,7 +231,7 @@ ${p.collections.length ? `<section class="section section--tight">
   <div class="modal__panel" role="dialog" aria-modal="true" aria-labelledby="enq-title" tabindex="-1">
     <button type="button" class="icon-btn modal__close" data-modal-close aria-label="Close">${icon("close")}</button>
     <div class="modal__body enquire">
-      <div class="enquire__product">${ctx.images.tag(p.images[0].src, { alt: "", sizes: "96px", widths: [360] })}<div><p class="eyebrow">Enquiry</p><h2 id="enq-title">${h(p.name)}</h2></div></div>
+      <div class="enquire__product">${ctx.images.tag(p.images[0].src, { alt: `${p.name} — enquiry`, sizes: "96px", widths: [360] })}<div><p class="eyebrow">Enquiry</p><h2 id="enq-title">${h(p.name)}</h2></div></div>
       <form name="product-inquiry" method="POST" data-netlify="true" netlify-honeypot="company" data-ajax-form data-success="Thank you — we'll be in touch personally, usually within one business day.">
         <input type="hidden" name="form-name" value="product-inquiry">
         <input type="hidden" name="product" value="${h(p.name)}">
@@ -259,18 +259,25 @@ ${p.collections.length ? `<section class="section section--tight">
 </div>`;
 
   const b = ctx.site.brand;
+  const certClaim = p.details?.Certification || (p.details?.Stone && /certified/i.test(p.details.Stone) ? p.details.Stone : null);
   const offers = p.price !== null ? {
     "@type": "Offer",
     url: absoluteUrl(b.url, p.url),
-    priceCurrency: p.currency,
+    priceCurrency: p.currency || b.currency || "CAD",
     price: p.price,
+    priceValidUntil: "2027-12-31",
     availability: sold ? "https://schema.org/SoldOut" : p.availability === "ready" ? "https://schema.org/InStock" : "https://schema.org/PreOrder",
-    itemCondition: p.tags.includes("estate") ? "https://schema.org/UsedCondition" : "https://schema.org/NewCondition"
+    itemCondition: p.tags.includes("estate") ? "https://schema.org/UsedCondition" : "https://schema.org/NewCondition",
+    seller: {
+      "@type": "Organization",
+      name: b.name
+    }
   } : undefined;
   return {
     path: p.url,
     title: p.seo?.title || `${p.name}${p.subtitle ? ` — ${p.subtitle}` : ""}`,
     description: p.seo?.description || p.summary,
+    preloadImage: p.images[0]?.src,
     ogImage: p.images[0].src,
     ogType: "product",
     bodyClass: "page--product",
@@ -286,6 +293,19 @@ ${p.collections.length ? `<section class="section section--tight">
         category: category,
         image: p.images.slice(0, 4).map((img) => absoluteUrl(b.url, ctx.images.url(img.src, 1280))),
         url: absoluteUrl(b.url, p.url),
+        ...(certClaim ? {
+          hasCertification: {
+            "@type": "Certification",
+            name: certClaim
+          },
+          additionalProperty: [
+            {
+              "@type": "PropertyValue",
+              name: "Certification",
+              value: certClaim
+            }
+          ]
+        } : {}),
         ...(offers ? { offers } : {})
       },
       {
