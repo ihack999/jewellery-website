@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-18T20:44:17.724Z",
+  "generatedAt": "2026-10-18T20:47:58.283Z",
   "currency": "CAD",
   "checkoutMode": "request",
   "shippingCountries": [
@@ -13,7 +13,7 @@
       "currency": "CAD",
       "purchasable": true,
       "maxQuantity": 1,
-      "image": "https://torontojewelscuration.com/media/oval-split-shank-diamond-ring-7c690ae5-720.webp",
+      "image": "https://torontojewelscuration.com/media/oval-split-shank-diamond-ring-c25e3349-720.webp",
       "options": [
         {
           "name": "Centre diamond",
@@ -246,7 +246,7 @@
       "currency": "CAD",
       "purchasable": true,
       "maxQuantity": 1,
-      "image": "https://torontojewelscuration.com/media/pear-shaped-diamond-station-necklace-7c9dbc63-720.webp",
+      "image": "https://torontojewelscuration.com/media/pear-shaped-diamond-station-necklace-12e7c5d1-720.webp",
       "options": []
     },
     "pear-shaped-diamond-stud-earrings": {
