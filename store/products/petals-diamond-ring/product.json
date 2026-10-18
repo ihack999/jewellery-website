@@ -1,0 +1,94 @@
+{
+  "name": "Petals Diamond Ring",
+  "subtitle": "1.50 CTW Pear-Cut Lab Diamonds",
+  "category": "rings",
+  "tags": [
+    "new-arrival",
+    "floral"
+  ],
+  "availability": "made-to-order",
+  "badge": "New",
+  "price": 1895,
+  "currency": "CAD",
+  "metals": [
+    "white-gold",
+    "yellow-gold",
+    "rose-gold"
+  ],
+  "stones": [
+    "lab-diamond"
+  ],
+  "images": [
+    {
+      "src": "/assets/images/studio/petals-diamond-ring.webp",
+      "alt": "Petals Diamond Ring with five pear-cut diamonds forming a flower on a plain white gold band",
+      "note": "AI-restyled studio view. Original photographs follow."
+    },
+    {
+      "src": "01-worn.jpeg",
+      "alt": "Petals Diamond Ring styled with separate diamond bands",
+      "note": "Additional rings are shown for styling only and are not included."
+    },
+    {
+      "src": "02-worn.jpeg",
+      "alt": "Five-petal diamond ring worn with a green knit sleeve",
+      "note": "Additional rings are shown for styling only and are not included."
+    },
+    {
+      "src": "03-worn.jpeg",
+      "alt": "Alternate worn view of the Petals Diamond Ring",
+      "note": "Additional rings are shown for styling only and are not included."
+    }
+  ],
+  "hoverImage": 1,
+  "videos": [
+    {
+      "src": "/assets/videos/petals-diamond-ring.mp4",
+      "poster": "/store/products/petals-diamond-ring/02-worn.jpeg",
+      "label": "Petals Diamond Ring in motion. Additional rings are not included."
+    }
+  ],
+  "summary": "Five pear-shaped lab-grown diamonds, approximately 0.30 ct each, arranged into a delicate flower in 14K solid gold.",
+  "description": "A delicate floral-inspired design featuring five brilliant pear-shaped lab-grown diamonds arranged into a flower. Elegant, feminine and timeless.\n\nAvailable in 14K solid white, yellow or rose gold, with approximately 1.50 ct total diamond weight.\n\nAll diamond weights and measurements are approximate and may vary slightly. Each piece may have minor variations in stone appearance and setting. Product colours may differ slightly due to lighting and screen settings. **Additional rings shown in photos are for styling purposes only and are not included.**",
+  "details": {
+    "Metal": "14K solid gold",
+    "Gold colours": "White, yellow or rose gold",
+    "Diamonds": "Lab-grown diamonds",
+    "Diamond shape": "Pear cut",
+    "Diamond count": "5 stones",
+    "Individual diamond weight": "Approx. 0.30 ct each",
+    "Total diamond weight": "Approx. 1.50 CTW"
+  },
+  "options": [
+    {
+      "name": "Metal",
+      "type": "swatch",
+      "help": "Studio cover shows white gold.",
+      "values": [
+        {
+          "label": "14K White Gold",
+          "metal": "white-gold"
+        },
+        {
+          "label": "14K Yellow Gold",
+          "metal": "yellow-gold"
+        },
+        {
+          "label": "14K Rose Gold",
+          "metal": "rose-gold"
+        }
+      ]
+    },
+    {
+      "step": "Choose your ring size",
+      "name": "Ring size",
+      "type": "size",
+      "values": "ringSizes",
+      "required": true
+    }
+  ],
+  "care": "Store separately in a soft pouch. Clean gently with a soft jewellery cloth and avoid harsh chemicals.",
+  "shipping": "Your specifications, availability, production timing and insured delivery are confirmed with you in writing before payment.",
+  "maxQuantity": 1,
+  "sort": -6
+}

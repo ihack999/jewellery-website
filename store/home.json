@@ -27,6 +27,14 @@
       "collections": ["rings", "necklaces", "bracelets", "earrings", "tennis", "estate"]
     },
     {
+      "type": "productRow",
+      "eyebrow": "Just added",
+      "title": "New arrivals",
+      "collection": "new-arrivals",
+      "limit": 7,
+      "ctaLabel": "Shop new arrivals"
+    },
+    {
       "type": "productTabs",
       "eyebrow": "Most loved",
       "title": "The Signatures",

@@ -1,0 +1,88 @@
+{
+  "date": "2026-10-18",
+  "source": "MAT’s WhatsApp product messages, read through the WhatsApp desktop UI",
+  "scope": [
+    "October 17: pear diamond studs, station necklace, Petals ring, oval split-shank ring",
+    "October 6 and October 14: add the three September 22 ring designs to Bridal",
+    "October 6 at 16:42: Solara metal selector"
+  ],
+  "pricing": {
+    "splitShank": {
+      "fourCaratCAD": 5900,
+      "sixCaratCAD": 7900,
+      "beforeTax": true
+    },
+    "necklaceCAD": 1950,
+    "hiddenHaloStartingCAD": 2500,
+    "emeraldThreeStoneStartingCAD": 4200,
+    "petalsCAD": 1895,
+    "petalsNote": "MAT wrote '$1,895 - price / 30% off'. Used the explicit $1,895 price without an additional unconfirmed discount or invented compare-at price; clarification requested.",
+    "studs": "Price on request: product description was deleted; metal, diamond origin and carat-weight basis unconfirmed.",
+    "sculpturalPear": "Price on request: no price or centre weight supplied."
+  },
+  "notes": [
+    "Additional bands in Petals photos are styling only and are not separate products or included.",
+    "Necklace diamond origin and centre weight were not supplied.",
+    "Hidden-halo diamond origin and oval/emerald metal were not supplied.",
+    "Solara alternative metals use enquiry pricing; original yellow-gold price remains."
+  ],
+  "imageMode": "Built-in image_gen; all originals preserved; covers labelled as restyled studio views in product galleries.",
+  "jobs": [
+    {
+      "id": "oval-split-shank-diamond-ring",
+      "prompt": "Use case: precise-object-edit. Asset type: matching fine-jewellery e-commerce catalogue cover for Toronto Jewels Curation. Input image 1 is the edit target. Input image 2 is a PHOTOGRAPHIC STYLE REFERENCE ONLY: do not copy its ring or yellow metal. Match its seamless matte warm ivory background approximately #f4f0e9, neutral diffuse upper-left lighting, restrained true-colour reflections, short soft contact shadow, square 1:1 format and generous margins. Centre the complete target product at about 72% canvas width. Photorealistic macro photography. No props, people, hands, lettering, logos, borders or artificial starburst sparkle. Preserve the target jewellery design, gemstone shapes, stone count, metal colour and proportions; do not embellish or redesign. Keep the exact elongated oval white diamond ring, its four sculpted prongs, extremely delicate white-metal pavé split shank, small round accent diamond between each split shoulder, and original three-quarter camera angle unchanged. Change only background, lighting and framing.",
+      "sourceFilename": "WhatsApp Image 2026-10-17 at 19.23.43.jpeg",
+      "generatedPath": "/Users/exce11ent1/.codex/generated_images/01a150b2-cb38-7660-958c-3646db2f9578/exec-b1eb35c4-37d6-4ea0-950a-921a9f5f927a.png",
+      "asset": "/assets/images/studio/oval-split-shank-diamond-ring.webp",
+      "source": "/assets/images/studio/sources/oval-split-shank-diamond-ring.png"
+    },
+    {
+      "id": "petals-diamond-ring",
+      "prompt": "Use case: precise-object-edit. Asset type: matching fine-jewellery e-commerce catalogue cover for Toronto Jewels Curation. Input image 1 is the edit target. Input image 2 is a PHOTOGRAPHIC STYLE REFERENCE ONLY: do not copy its ring or yellow metal. Match its seamless matte warm ivory background approximately #f4f0e9, neutral diffuse upper-left lighting, restrained true-colour reflections, short soft contact shadow, square 1:1 format and generous margins. Centre the complete target product at about 72% canvas width. Photorealistic macro photography. No props, people, hands, lettering, logos, borders or artificial starburst sparkle. Preserve the target jewellery design, gemstone shapes, stone count, metal colour and proportions; do not embellish or redesign. Isolate ONLY the floral ring on the middle ring finger in the source: five pear-cut white diamonds arranged radially like five petals, their points meeting in the centre, on its plain delicate polished white-metal band. Remove the hand, green sweater, table and the TWO SEPARATE diamond bands worn on other fingers. Those other bands are NOT part of this product. Show only ONE five-petal ring, front three-quarter angle with the plain shank visible below; preserve the five-stone flower's shape, proportions and setting.",
+      "sourceFilename": "WhatsApp Image 2026-10-17 at 18.13.00.jpeg",
+      "generatedPath": "/Users/exce11ent1/.codex/generated_images/01a150b2-cb38-7660-958c-3646db2f9578/exec-7ddfaab9-dae4-4b27-96d8-8bb6ebcdb55c.png",
+      "asset": "/assets/images/studio/petals-diamond-ring.webp",
+      "source": "/assets/images/studio/sources/petals-diamond-ring.png"
+    },
+    {
+      "id": "pear-shaped-diamond-station-necklace",
+      "prompt": "Use case: precise-object-edit. Asset type: matching fine-jewellery e-commerce catalogue cover for Toronto Jewels Curation. Input image 1 is the edit target. Input image 2 is a PHOTOGRAPHIC STYLE REFERENCE ONLY: do not copy its ring or yellow metal. Match its seamless matte warm ivory background approximately #f4f0e9, neutral diffuse upper-left lighting, restrained true-colour reflections, short soft contact shadow, square 1:1 format and generous margins. Centre the complete target product at about 72% canvas width. Photorealistic macro photography. No props, people, hands, lettering, logos, borders or artificial starburst sparkle. Preserve the target jewellery design, gemstone shapes, stone count, metal colour and proportions; do not embellish or redesign. Remove the person and blouse, isolating the exact delicate white-metal necklace: pear-shaped white diamond pendant pointing downward, attached by its small round loop to a fine oval-link chain, with the FOUR visible round bezel-set diamond stations, two on each side. Preserve the relative size and spacing of all four stations and the pear pendant. Arrange the necklace front in a natural symmetric U on the ivory surface, pendant at bottom. Let the chain's upper ends gently continue out of the top edge if needed; do not invent extra stones or clasps. Keep the pendant as the focal point while showing all four visible stations.",
+      "sourceFilename": "WhatsApp Image 2026-10-17 at 17.57.38.jpeg",
+      "generatedPath": "/Users/exce11ent1/.codex/generated_images/01a150b2-cb38-7660-958c-3646db2f9578/exec-104b406b-b4fe-4206-901f-55bf6158dd44.png",
+      "asset": "/assets/images/studio/pear-shaped-diamond-station-necklace.webp",
+      "source": "/assets/images/studio/sources/pear-shaped-diamond-station-necklace.png"
+    },
+    {
+      "id": "pear-shaped-diamond-stud-earrings",
+      "prompt": "Use case: precise-object-edit. Asset type: matching fine-jewellery e-commerce catalogue cover for Toronto Jewels Curation. Input image 1 is the edit target. Input image 2 is a PHOTOGRAPHIC STYLE REFERENCE ONLY: do not copy its ring or yellow metal. Match its seamless matte warm ivory background approximately #f4f0e9, neutral diffuse upper-left lighting, restrained true-colour reflections, short soft contact shadow, square 1:1 format and generous margins. Centre the complete target product at about 72% canvas width. Photorealistic macro photography. No props, people, hands, lettering, logos, borders or artificial starburst sparkle. Preserve the target jewellery design, gemstone shapes, stone count, metal colour and proportions; do not embellish or redesign. Isolate the exact single pear-cut white diamond stud shown on the ear, with its minimal three white-metal prongs, then display a matching PAIR of those studs, identical pear geometry, subtle mirrored diagonal orientation, fully visible. Remove the person, hair, neckline and ALL printed carat text. Show each pear's face clearly, no halo, no other stones, no dangling element, no necklace. Keep the minimalist three-prong construction exactly as shown.",
+      "sourceFilename": "WhatsApp Image 2026-10-17 at 17.35.40.jpeg",
+      "generatedPath": "/Users/exce11ent1/.codex/generated_images/01a150b2-cb38-7660-958c-3646db2f9578/exec-2c676c9f-759b-4dcf-a9bd-de4a5b957a3a.png",
+      "asset": "/assets/images/studio/pear-shaped-diamond-stud-earrings.webp",
+      "source": "/assets/images/studio/sources/pear-shaped-diamond-stud-earrings.png"
+    },
+    {
+      "id": "pear-shaped-hidden-halo-diamond-ring",
+      "prompt": "Use case: precise-object-edit. Asset type: matching fine-jewellery e-commerce catalogue cover for Toronto Jewels Curation. Image 1 is the product photograph to edit; image 2 is a PHOTOGRAPHIC STYLE REFERENCE ONLY. Keep the exact jewellery from image 1 unchanged: preserve stone shapes, colour, count, proportions, prongs, all band geometry, details and the camera angle. Change only background, lighting and framing. Match image 2's seamless matte warm ivory surface approximately #f4f0e9, soft neutral diffuse daylight from the upper left, short soft contact shadow, restrained true-colour reflections and natural macro detail. Square 1:1 image, complete product centred at 72% canvas width with generous balanced margins. No people, props, lettering, logos, borders or artificial sparkle. Preserve this pear-shaped white diamond solitaire in white gold with the same six visible eagle-claw prongs and delicate plain shank; preserve the hidden halo below the centre rather than adding a visible halo around the pear.",
+      "sourceFilename": "WhatsApp Image 2026-09-22 at 14.37.15.jpeg",
+      "generatedPath": "/Users/exce11ent1/.codex/generated_images/01a150b2-cb38-7660-958c-3646db2f9578/exec-cbdc31ad-c74f-4299-a67c-04eff2a89602.png",
+      "asset": "/assets/images/studio/pear-shaped-hidden-halo-diamond-ring.webp",
+      "source": "/assets/images/studio/sources/pear-shaped-hidden-halo-diamond-ring.png"
+    },
+    {
+      "id": "oval-diamond-emerald-three-stone-ring",
+      "prompt": "Use case: precise-object-edit. Asset type: matching fine-jewellery e-commerce catalogue cover for Toronto Jewels Curation. Image 1 is the product photograph to edit; image 2 is a PHOTOGRAPHIC STYLE REFERENCE ONLY. Keep the exact jewellery from image 1 unchanged: preserve stone shapes, colour, count, proportions, prongs, all band geometry, details and the camera angle. Change only background, lighting and framing. Match image 2's seamless matte warm ivory surface approximately #f4f0e9, soft neutral diffuse daylight from the upper left, short soft contact shadow, restrained true-colour reflections and natural macro detail. Square 1:1 image, complete product centred at 72% canvas width with generous balanced margins. No people, props, lettering, logos, borders or artificial sparkle. Preserve this oval white diamond with exactly TWO vivid green triangular emerald side stones, the same prong construction, polished white metal band and original three-quarter view. Do not copy any yellow gold or oval bezel from the style reference.",
+      "sourceFilename": "WhatsApp Image 2026-09-22 at 14.45.29 (1).jpeg",
+      "generatedPath": "/Users/exce11ent1/.codex/generated_images/01a150b2-cb38-7660-958c-3646db2f9578/exec-c8e76626-062e-4da4-9725-6f1eb2cfb44b.png",
+      "asset": "/assets/images/studio/oval-diamond-emerald-three-stone-ring.webp",
+      "source": "/assets/images/studio/sources/oval-diamond-emerald-three-stone-ring.png"
+    },
+    {
+      "id": "sculptural-pear-diamond-engagement-ring",
+      "prompt": "Use case: precise-object-edit. Asset type: matching fine-jewellery e-commerce catalogue cover for Toronto Jewels Curation. Image 1 is the product photograph to edit; image 2 is a PHOTOGRAPHIC STYLE REFERENCE ONLY. Keep the exact jewellery from image 1 unchanged: preserve stone shapes, colour, count, proportions, prongs, all band geometry, details and the camera angle. Change only background, lighting and framing. Match image 2's seamless matte warm ivory surface approximately #f4f0e9, soft neutral diffuse daylight from the upper left, short soft contact shadow, restrained true-colour reflections and natural macro detail. Square 1:1 image, complete product centred at 72% canvas width with generous balanced margins. No people, props, lettering, logos, borders or artificial sparkle. Preserve this exact yellow-gold pear diamond ring's unusual sculptural curved band, open bezel-inspired pear outline, gold claws and the curved flourish extending below the pear. Keep the proportions, asymmetric sweep and original three-quarter angle exactly.",
+      "sourceFilename": "WhatsApp Image 2026-09-22 at 14.53.21 (1).jpeg",
+      "generatedPath": "/Users/exce11ent1/.codex/generated_images/01a150b2-cb38-7660-958c-3646db2f9578/exec-5ac9d379-98f9-432d-9c66-b6a88144b47d.png",
+      "asset": "/assets/images/studio/sculptural-pear-diamond-engagement-ring.webp",
+      "source": "/assets/images/studio/sources/sculptural-pear-diamond-engagement-ring.png"
+    }
+  ]
+}

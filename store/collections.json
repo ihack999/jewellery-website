@@ -14,6 +14,14 @@
       "promo": { "after": 6, "title": "Can't find it? Design it.", "text": "Build your own ring, necklace or bracelet in real-time 3D.", "cta": "Open the Design Studio", "href": "/design-studio/", "image": "/assets/images/optimized/studio-ring-pink-gemstone-1600.jpg" }
     },
     {
+      "handle": "new-arrivals",
+      "title": "New Arrivals",
+      "tileLabel": "New Arrivals",
+      "match": { "tags": ["new-arrival"] },
+      "image": "/assets/images/studio/oval-split-shank-diamond-ring.webp",
+      "description": "Discover our latest diamond rings, pear-shaped studs and delicate station necklace — with every detail confirmed personally by our Toronto atelier."
+    },
+    {
       "handle": "engagement-rings",
       "title": "Engagement Rings",
       "tileLabel": "Engagement",

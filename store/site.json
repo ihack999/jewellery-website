@@ -75,6 +75,7 @@
             { "label": "Earrings", "href": "/collections/earrings/" }
           ]},
           { "title": "Collections", "links": [
+            { "label": "New Arrivals", "href": "/collections/new-arrivals/" },
             { "label": "Signatures", "href": "/collections/signatures/" },
             { "label": "Tennis", "href": "/collections/tennis/" },
             { "label": "Lab-Grown Diamonds", "href": "/collections/lab-grown/" },
@@ -275,6 +276,7 @@
       "silver": { "label": "Sterling Silver", "swatch": "#d9dadc" }
     },
     "stones": {
+      "diamond": "Diamond",
       "natural-diamond": "Natural Diamond",
       "lab-diamond": "Lab-Grown Diamond",
       "coloured-diamond": "Coloured Diamond",

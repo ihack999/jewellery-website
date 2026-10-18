@@ -1,0 +1,86 @@
+{
+  "name": "Elongated Oval Split-Shank Diamond Ring",
+  "subtitle": "4 or 6 CT Lab-Grown Diamond",
+  "category": "rings",
+  "tags": [
+    "new-arrival",
+    "engagement",
+    "bridal"
+  ],
+  "availability": "made-to-order",
+  "badge": "New",
+  "price": 5900,
+  "priceFrom": true,
+  "currency": "CAD",
+  "metals": [
+    "white-gold"
+  ],
+  "stones": [
+    "lab-diamond"
+  ],
+  "images": [
+    {
+      "src": "/assets/images/studio/oval-split-shank-diamond-ring.webp",
+      "alt": "Elongated oval lab diamond ring with a delicate pavé split shank in 14K white gold",
+      "note": "AI-restyled studio view. Original photographs follow."
+    },
+    {
+      "src": "01-worn.jpeg",
+      "alt": "Elongated oval split-shank diamond ring worn on the hand"
+    },
+    {
+      "src": "02-original-angle.jpeg",
+      "alt": "Original three-quarter view of the oval centre and split pavé shoulders"
+    },
+    {
+      "src": "03-original-front.jpeg",
+      "alt": "Original front view of the elongated oval diamond and split band"
+    },
+    {
+      "src": "04-original-angle.jpeg",
+      "alt": "Original alternate angle of the oval split-shank ring"
+    },
+    {
+      "src": "05-original-side.jpeg",
+      "alt": "Original side view of the oval ring setting"
+    }
+  ],
+  "hoverImage": 1,
+  "summary": "An elongated oval lab-grown diamond above an ultra-thin 1.5 mm pavé split shank, with small diamond accents nestled between the delicate shoulders.",
+  "description": "A refined elongated oval centre stone meets a subtle split band in 14K white gold. Small pavé diamonds sit between the delicate split sections, adding detail without overwhelming the centre.\n\nChoose a 4.00 ct centre for $5,900 CAD or a 6.00 ct centre for $7,900 CAD, before taxes. Accent diamonds in the band total approximately 0.30–0.50 ct, depending on finger size.",
+  "details": {
+    "Centre stone": "4.00 ct elongated oval lab-grown diamond; 6.00 ct option available",
+    "Metal": "14K white gold",
+    "Band": "Approx. 1.5 mm pavé split shank",
+    "Band diamonds": "Approx. 0.30–0.50 CTW, depending on finger size",
+    "Accent setting": "Small diamonds between the split shoulders",
+    "Pricing": "CAD, before taxes"
+  },
+  "options": [
+    {
+      "step": "Choose your carat weight",
+      "name": "Centre diamond",
+      "type": "button",
+      "values": [
+        {
+          "label": "4.00 ct"
+        },
+        {
+          "label": "6.00 ct",
+          "add": 2000
+        }
+      ]
+    },
+    {
+      "step": "Choose your ring size",
+      "name": "Ring size",
+      "type": "size",
+      "values": "ringSizes",
+      "required": true
+    }
+  ],
+  "care": "Store separately in a soft pouch. Clean gently with a soft jewellery cloth and avoid harsh chemicals.",
+  "shipping": "Your specifications, availability, production timing and insured delivery are confirmed with you in writing before payment.",
+  "maxQuantity": 1,
+  "sort": -7
+}

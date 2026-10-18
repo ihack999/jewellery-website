@@ -1,0 +1,92 @@
+{
+  "name": "Pear-Shaped Diamond Stud Earrings",
+  "subtitle": "Pear-Cut Solitaire Studs",
+  "category": "earrings",
+  "tags": [
+    "new-arrival",
+    "studs"
+  ],
+  "availability": "made-to-order",
+  "badge": "New",
+  "price": null,
+  "metals": [],
+  "stones": [
+    "diamond"
+  ],
+  "images": [
+    {
+      "src": "/assets/images/studio/pear-shaped-diamond-stud-earrings.webp",
+      "alt": "Pair of pear-shaped diamond solitaire stud earrings with minimal three-prong settings",
+      "note": "AI-restyled studio view. Original photographs follow."
+    },
+    {
+      "src": "01-size-reference.jpeg",
+      "alt": "Pear diamond stud worn — 1.00 ct size reference supplied by the atelier"
+    },
+    {
+      "src": "02-size-reference.jpeg",
+      "alt": "Pear diamond stud worn — 2.00 ct size reference supplied by the atelier"
+    },
+    {
+      "src": "03-size-reference.jpeg",
+      "alt": "Pear diamond stud worn — 3.00 ct size reference supplied by the atelier"
+    },
+    {
+      "src": "04-size-reference.jpeg",
+      "alt": "Pear diamond stud worn — 4.00 ct size reference supplied by the atelier"
+    }
+  ],
+  "hoverImage": 1,
+  "videos": [
+    {
+      "src": "/assets/videos/pear-shaped-diamond-stud-earrings-detail.mp4",
+      "poster": "/store/products/pear-shaped-diamond-stud-earrings/04-size-reference.jpeg",
+      "label": "Original close-up video of the pear diamond studs"
+    },
+    {
+      "src": "/assets/videos/pear-shaped-diamond-stud-earrings-worn.mp4",
+      "poster": "/store/products/pear-shaped-diamond-stud-earrings/01-size-reference.jpeg",
+      "label": "Pear diamond studs worn with the station necklace"
+    }
+  ],
+  "summary": "Pear-shaped diamond solitaire studs with a clean, minimal setting. Explore the size references and enquire for your preferred pair.",
+  "description": "A simple pear-shaped diamond brings a soft point of light to each ear. The minimal prong setting keeps the diamond at the centre of the design.\n\nThe supplied photographs show four size references labelled 1.00, 2.00, 3.00 and 4.00 ct. Confirm individual and total diamond weight, diamond origin, metal and pricing with our atelier when choosing your pair. The necklace shown in the styling video is sold separately.",
+  "details": {
+    "Design": "Pear-shaped diamond solitaire studs",
+    "Size references": "1.00, 2.00, 3.00 and 4.00 ct, as labelled in the supplied photographs",
+    "Specifications": "Diamond weight, origin, metal and price confirmed on enquiry"
+  },
+  "options": [
+    {
+      "name": "Size preference",
+      "type": "button",
+      "help": "Reference images only. Individual and total diamond weights are confirmed on enquiry.",
+      "values": [
+        {
+          "label": "1.00 ct reference",
+          "image": 1,
+          "inquire": true
+        },
+        {
+          "label": "2.00 ct reference",
+          "image": 2,
+          "inquire": true
+        },
+        {
+          "label": "3.00 ct reference",
+          "image": 3,
+          "inquire": true
+        },
+        {
+          "label": "4.00 ct reference",
+          "image": 4,
+          "inquire": true
+        }
+      ]
+    }
+  ],
+  "care": "Store separately in a soft pouch. Clean gently with a soft jewellery cloth and avoid harsh chemicals.",
+  "shipping": "Your specifications, availability, production timing and insured delivery are confirmed with you in writing before payment.",
+  "maxQuantity": 1,
+  "sort": -4
+}

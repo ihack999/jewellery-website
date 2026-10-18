@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-06T16:00:43.709Z",
+  "generatedAt": "2026-10-18T20:44:17.724Z",
   "currency": "CAD",
   "checkoutMode": "request",
   "shippingCountries": [
@@ -7,6 +7,673 @@
     "US"
   ],
   "products": {
+    "oval-split-shank-diamond-ring": {
+      "name": "Elongated Oval Split-Shank Diamond Ring",
+      "price": 5900,
+      "currency": "CAD",
+      "purchasable": true,
+      "maxQuantity": 1,
+      "image": "https://torontojewelscuration.com/media/oval-split-shank-diamond-ring-7c690ae5-720.webp",
+      "options": [
+        {
+          "name": "Centre diamond",
+          "type": "button",
+          "required": true,
+          "values": [
+            {
+              "value": "4.00 ct",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "6.00 ct",
+              "add": 2000,
+              "inquire": false
+            }
+          ]
+        },
+        {
+          "name": "Ring size",
+          "type": "size",
+          "required": true,
+          "values": [
+            {
+              "value": "3",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "3.5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "4",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "4.5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "5.5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "6",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "6.5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "7",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "7.5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "8",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "8.5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "9",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "9.5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "10",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "Not sure — help me size",
+              "add": 0,
+              "inquire": false
+            }
+          ]
+        }
+      ]
+    },
+    "petals-diamond-ring": {
+      "name": "Petals Diamond Ring",
+      "price": 1895,
+      "currency": "CAD",
+      "purchasable": true,
+      "maxQuantity": 1,
+      "image": "https://torontojewelscuration.com/media/petals-diamond-ring-497c2e5b-720.webp",
+      "options": [
+        {
+          "name": "Metal",
+          "type": "swatch",
+          "required": true,
+          "values": [
+            {
+              "value": "14K White Gold",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "14K Yellow Gold",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "14K Rose Gold",
+              "add": 0,
+              "inquire": false
+            }
+          ]
+        },
+        {
+          "name": "Ring size",
+          "type": "size",
+          "required": true,
+          "values": [
+            {
+              "value": "3",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "3.5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "4",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "4.5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "5.5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "6",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "6.5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "7",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "7.5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "8",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "8.5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "9",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "9.5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "10",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "Not sure — help me size",
+              "add": 0,
+              "inquire": false
+            }
+          ]
+        }
+      ]
+    },
+    "pear-shaped-diamond-station-necklace": {
+      "name": "Pear-Shaped Diamond Station Necklace",
+      "price": 1950,
+      "currency": "CAD",
+      "purchasable": true,
+      "maxQuantity": 1,
+      "image": "https://torontojewelscuration.com/media/pear-shaped-diamond-station-necklace-7c9dbc63-720.webp",
+      "options": []
+    },
+    "pear-shaped-diamond-stud-earrings": {
+      "name": "Pear-Shaped Diamond Stud Earrings",
+      "price": null,
+      "currency": "CAD",
+      "purchasable": false,
+      "maxQuantity": 1,
+      "image": "https://torontojewelscuration.com/media/pear-shaped-diamond-stud-earrings-cc320e5d-720.webp",
+      "options": [
+        {
+          "name": "Size preference",
+          "type": "button",
+          "required": true,
+          "values": [
+            {
+              "value": "1.00 ct reference",
+              "add": 0,
+              "inquire": true
+            },
+            {
+              "value": "2.00 ct reference",
+              "add": 0,
+              "inquire": true
+            },
+            {
+              "value": "3.00 ct reference",
+              "add": 0,
+              "inquire": true
+            },
+            {
+              "value": "4.00 ct reference",
+              "add": 0,
+              "inquire": true
+            }
+          ]
+        }
+      ]
+    },
+    "pear-shaped-hidden-halo-diamond-ring": {
+      "name": "Pear-Shaped Hidden Halo Diamond Ring",
+      "price": 2500,
+      "currency": "CAD",
+      "purchasable": true,
+      "maxQuantity": 1,
+      "image": "https://torontojewelscuration.com/media/pear-shaped-hidden-halo-diamond-ring-858d3347-720.webp",
+      "options": [
+        {
+          "name": "Centre diamond",
+          "type": "button",
+          "required": true,
+          "values": [
+            {
+              "value": "1.00 ct",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "Other carat weight",
+              "add": 0,
+              "inquire": true
+            }
+          ]
+        },
+        {
+          "name": "Metal",
+          "type": "button",
+          "required": true,
+          "values": [
+            {
+              "value": "14K White Gold",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "Other metal",
+              "add": 0,
+              "inquire": true
+            }
+          ]
+        },
+        {
+          "name": "Ring size",
+          "type": "size",
+          "required": true,
+          "values": [
+            {
+              "value": "3",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "3.5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "4",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "4.5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "5.5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "6",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "6.5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "7",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "7.5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "8",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "8.5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "9",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "9.5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "10",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "Not sure — help me size",
+              "add": 0,
+              "inquire": false
+            }
+          ]
+        }
+      ]
+    },
+    "oval-diamond-emerald-three-stone-ring": {
+      "name": "Oval Lab Diamond & Emerald Three-Stone Engagement Ring",
+      "price": 4200,
+      "currency": "CAD",
+      "purchasable": true,
+      "maxQuantity": 1,
+      "image": "https://torontojewelscuration.com/media/oval-diamond-emerald-three-stone-ring-d7185df9-720.webp",
+      "options": [
+        {
+          "name": "Centre diamond",
+          "type": "button",
+          "required": true,
+          "values": [
+            {
+              "value": "1.00 ct oval lab diamond",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "Other carat weight",
+              "add": 0,
+              "inquire": true
+            }
+          ]
+        },
+        {
+          "name": "Metal preference",
+          "type": "text",
+          "required": false,
+          "maxLength": 60
+        },
+        {
+          "name": "Ring size",
+          "type": "size",
+          "required": true,
+          "values": [
+            {
+              "value": "3",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "3.5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "4",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "4.5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "5.5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "6",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "6.5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "7",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "7.5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "8",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "8.5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "9",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "9.5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "10",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "Not sure — help me size",
+              "add": 0,
+              "inquire": false
+            }
+          ]
+        }
+      ]
+    },
+    "sculptural-pear-diamond-engagement-ring": {
+      "name": "Pear-Shaped Sculptural Gold Engagement Ring",
+      "price": null,
+      "currency": "CAD",
+      "purchasable": false,
+      "maxQuantity": 1,
+      "image": "https://torontojewelscuration.com/media/sculptural-pear-diamond-engagement-ring-ba967603-720.webp",
+      "options": [
+        {
+          "name": "Centre stone",
+          "type": "button",
+          "required": true,
+          "values": [
+            {
+              "value": "Lab-grown diamond",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "Natural diamond",
+              "add": 0,
+              "inquire": true
+            }
+          ]
+        },
+        {
+          "name": "Preferred carat weight",
+          "type": "text",
+          "required": false,
+          "maxLength": 30
+        },
+        {
+          "name": "Metal",
+          "type": "button",
+          "required": true,
+          "values": [
+            {
+              "value": "14K Yellow Gold",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "Other metal",
+              "add": 0,
+              "inquire": true
+            }
+          ]
+        },
+        {
+          "name": "Ring size",
+          "type": "size",
+          "required": true,
+          "values": [
+            {
+              "value": "3",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "3.5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "4",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "4.5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "5.5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "6",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "6.5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "7",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "7.5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "8",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "8.5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "9",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "9.5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "10",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "Not sure — help me size",
+              "add": 0,
+              "inquire": false
+            }
+          ]
+        }
+      ]
+    },
     "the-solara-serpentine-ring": {
       "name": "The Solara Serpentine Ring",
       "price": 9500,
@@ -54,6 +721,33 @@
             },
             {
               "value": "5.00 ct",
+              "add": 0,
+              "inquire": true
+            }
+          ]
+        },
+        {
+          "name": "Metal",
+          "type": "swatch",
+          "required": true,
+          "values": [
+            {
+              "value": "14K Yellow Gold",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "14K White Gold",
+              "add": 0,
+              "inquire": true
+            },
+            {
+              "value": "Platinum",
+              "add": 0,
+              "inquire": true
+            },
+            {
+              "value": "14K Rose Gold",
               "add": 0,
               "inquire": true
             }

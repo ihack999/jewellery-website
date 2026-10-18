@@ -1,0 +1,99 @@
+{
+  "name": "Pear-Shaped Hidden Halo Diamond Ring",
+  "subtitle": "1 CT Pear Solitaire · Hidden Diamond Halo",
+  "category": "rings",
+  "tags": [
+    "new-arrival",
+    "engagement",
+    "bridal",
+    "solitaire"
+  ],
+  "availability": "made-to-order",
+  "badge": "New",
+  "price": 2500,
+  "priceFrom": true,
+  "currency": "CAD",
+  "metals": [
+    "white-gold"
+  ],
+  "stones": [
+    "diamond"
+  ],
+  "images": [
+    {
+      "src": "/assets/images/studio/pear-shaped-hidden-halo-diamond-ring.webp",
+      "alt": "Pear diamond solitaire in polished white gold with eagle-claw prongs and a hidden halo",
+      "note": "AI-restyled studio view. Original photographs follow."
+    },
+    {
+      "src": "01-original-angle.jpeg",
+      "alt": "Original three-quarter view of the pear hidden-halo ring"
+    },
+    {
+      "src": "02-worn.jpeg",
+      "alt": "Pear hidden-halo diamond ring worn on the hand"
+    },
+    {
+      "src": "03-original-side.jpeg",
+      "alt": "Side view showing the hidden diamond halo beneath the pear centre"
+    }
+  ],
+  "hoverImage": 2,
+  "videos": [
+    {
+      "src": "/assets/videos/pear-shaped-hidden-halo-diamond-ring.mp4",
+      "poster": "/store/products/pear-shaped-hidden-halo-diamond-ring/02-worn.jpeg",
+      "label": "Original pear hidden-halo ring video"
+    }
+  ],
+  "summary": "A timeless pear-shaped solitaire with eagle-claw prongs, a hidden diamond halo and a slim 1.8 mm band in 14K white gold.",
+  "description": "A timeless pear-shaped solitaire with a delicate hidden halo tucked beneath the centre stone, adding an unexpected touch of sparkle from every angle. Elegant eagle-claw prongs keep the pear-shaped centre as the focus.\n\nCrafted in polished 14K white gold with a slim 1.8 mm band, the setting feels delicate while showcasing the diamond. The hidden halo adds brilliance beneath the centre while keeping a clean solitaire view from above.\n\nStarting at $2,500 CAD with a 1.00 ct pear-shaped centre diamond. Centre diamond size and metal can be customized on request; tell us your preferences for a personal quote.",
+  "details": {
+    "Centre stone": "1.00 ct pear-shaped diamond at the starting price",
+    "Setting": "Hidden diamond halo with eagle-claw prongs",
+    "Metal": "14K white gold",
+    "Band width": "Approx. 1.8 mm",
+    "Customization": "Centre diamond size and metal quoted on request"
+  },
+  "options": [
+    {
+      "step": "Choose your carat weight",
+      "name": "Centre diamond",
+      "type": "button",
+      "values": [
+        {
+          "label": "1.00 ct"
+        },
+        {
+          "label": "Other carat weight",
+          "inquire": true
+        }
+      ]
+    },
+    {
+      "step": "Choose your metal",
+      "name": "Metal",
+      "type": "button",
+      "values": [
+        {
+          "label": "14K White Gold"
+        },
+        {
+          "label": "Other metal",
+          "inquire": true
+        }
+      ]
+    },
+    {
+      "step": "Choose your ring size",
+      "name": "Ring size",
+      "type": "size",
+      "values": "ringSizes",
+      "required": true
+    }
+  ],
+  "care": "Store separately in a soft pouch. Clean gently with a soft jewellery cloth and avoid harsh chemicals.",
+  "shipping": "Your specifications, availability, production timing and insured delivery are confirmed with you in writing before payment.",
+  "maxQuantity": 1,
+  "sort": -3
+}

@@ -1,0 +1,85 @@
+{
+  "name": "Oval Lab Diamond & Emerald Three-Stone Engagement Ring",
+  "subtitle": "1 CT Oval Lab Diamond · Two Lab Emeralds",
+  "category": "rings",
+  "tags": [
+    "new-arrival",
+    "engagement",
+    "bridal",
+    "three-stone"
+  ],
+  "availability": "made-to-order",
+  "badge": "New",
+  "price": 4200,
+  "priceFrom": true,
+  "currency": "CAD",
+  "metals": [],
+  "stones": [
+    "lab-diamond",
+    "gemstone"
+  ],
+  "images": [
+    {
+      "src": "/assets/images/studio/oval-diamond-emerald-three-stone-ring.webp",
+      "alt": "Oval white diamond framed by two vivid green triangular emeralds in a three-stone ring",
+      "note": "AI-restyled studio view. Original photographs follow."
+    },
+    {
+      "src": "01-worn.jpeg",
+      "alt": "Oval lab diamond and emerald three-stone ring worn on the hand"
+    },
+    {
+      "src": "02-original-angle.jpeg",
+      "alt": "Original three-quarter view of the oval diamond and emerald side stones"
+    },
+    {
+      "src": "03-original-details.jpeg",
+      "alt": "Original front and side views showing the emeralds and hidden diamond detailing"
+    }
+  ],
+  "hoverImage": 1,
+  "summary": "A 1.00 ct oval lab-grown diamond framed by two triangular lab-grown emeralds of approximately 0.30 ct each, with hidden diamond detailing beneath the centre.",
+  "description": "A striking three-stone engagement ring featuring a brilliant oval lab-grown diamond centre, framed by two vivid lab-grown emerald side stones. Their triangular shapes create a bold contrast with the oval diamond while keeping a balanced silhouette.\n\nA delicate row of hidden diamonds beneath the centre adds sparkle that reveals itself from the side. The refined 2 mm band gives the ring a substantial yet elegant profile.\n\nStarting at $4,200 CAD, including a 1.00 ct oval lab-grown diamond and approximately 0.30 ct of lab-grown emerald on each side. Centre diamond size and other design elements can be customized on request. Metal specifications are confirmed with your personal quote.",
+  "details": {
+    "Centre stone": "1.00 ct oval lab-grown diamond",
+    "Side stones": "Two triangular lab-grown emeralds, approx. 0.30 ct each",
+    "Detailing": "Hidden diamonds beneath the centre stone",
+    "Band width": "Approx. 2 mm",
+    "Setting": "Three-stone",
+    "Metal": "Confirmed with your personal quote"
+  },
+  "options": [
+    {
+      "step": "Choose your carat weight",
+      "name": "Centre diamond",
+      "type": "button",
+      "values": [
+        {
+          "label": "1.00 ct oval lab diamond"
+        },
+        {
+          "label": "Other carat weight",
+          "inquire": true
+        }
+      ]
+    },
+    {
+      "step": "Choose your metal",
+      "name": "Metal preference",
+      "type": "text",
+      "maxLength": 60,
+      "placeholder": "Tell us your preferred metal"
+    },
+    {
+      "step": "Choose your ring size",
+      "name": "Ring size",
+      "type": "size",
+      "values": "ringSizes",
+      "required": true
+    }
+  ],
+  "care": "Store separately in a soft pouch. Clean gently with a soft jewellery cloth and avoid harsh chemicals.",
+  "shipping": "Your specifications, availability, production timing and insured delivery are confirmed with you in writing before payment.",
+  "maxQuantity": 1,
+  "sort": -2
+}
