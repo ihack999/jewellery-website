@@ -13,7 +13,8 @@
     "locale": "en-CA",
     "currency": "CAD",
     "ogImage": "/assets/images/seo/toronto-jewels-curation-og.jpg",
-    "googleSiteVerification": "tEbgsHyR3ZP247FU9xhA19WW_vipb7VNE4ZdBOvKqz0"
+    "googleSiteVerification": "tEbgsHyR3ZP247FU9xhA19WW_vipb7VNE4ZdBOvKqz0",
+    "googleAnalyticsId": "G-P3H39HP0Z6"
   },
 
   "theme": {

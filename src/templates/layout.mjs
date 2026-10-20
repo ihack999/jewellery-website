@@ -259,10 +259,20 @@ export function layout(ctx, page) {
     catalog: `/products.json?v=${ctx.version}`,
     studio: site.studio?.path || "/design-studio/"
   };
+  const gaId = b.googleAnalyticsId || "G-P3H39HP0Z6";
+  const gaTag = gaId ? `<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=${h(gaId)}"></script>
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+
+gtag('config', '${h(gaId)}');
+</script>` : "";
   return `<!doctype html>
 <html lang="${h((b.locale || "en").split("-")[0])}">
 <head>
-<meta charset="utf-8">
+${gaTag ? `${gaTag}\n` : ""}<meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>${h(title)}</title>
 <meta name="description" content="${h(description)}">
