@@ -1,0 +1,93 @@
+{
+  "name": "Pear-Shaped Sculptural Gold Engagement Ring",
+  "subtitle": "Pear Lab Diamond · Sculptural 14K Yellow Gold",
+  "category": "rings",
+  "tags": [
+    "new-arrival",
+    "engagement",
+    "bridal",
+    "unconventional"
+  ],
+  "availability": "made-to-order",
+  "badge": "New",
+  "price": null,
+  "metals": [
+    "yellow-gold"
+  ],
+  "stones": [
+    "lab-diamond"
+  ],
+  "images": [
+    {
+      "src": "/assets/images/studio/sculptural-pear-diamond-engagement-ring.webp",
+      "alt": "Pear lab diamond in a sculptural yellow gold bezel-inspired setting with a sweeping curved flourish",
+      "note": "AI-restyled studio view. Original photographs follow."
+    },
+    {
+      "src": "01-worn.jpeg",
+      "alt": "Sculptural pear-shaped gold engagement ring worn on the hand"
+    },
+    {
+      "src": "02-original-angle.jpeg",
+      "alt": "Original studio view of the curved gold band and bezel-inspired pear setting"
+    }
+  ],
+  "hoverImage": 1,
+  "summary": "A pear-shaped lab-grown diamond framed by a fluid, bezel-inspired setting and an organically curved, tapered band in 14K yellow gold.",
+  "description": "Part of our 2026 Unconventional Engagement Ring Collection, this pear-shaped diamond ring is designed for someone looking beyond the traditional solitaire. Polished yellow gold sweeps organically around a pear-shaped lab-grown diamond for a fluid, modern silhouette.\n\nThe curved band begins at approximately 2 mm at its widest starting point and gradually tapers toward the centre stone. Crafted in 14K yellow gold, the design balances bold goldwork with the brilliance of the pear-shaped diamond.\n\nCentre diamond size, lab-grown or natural diamond, metal colour and other details can be adjusted on request. Tell us your preferred specifications for a personal quote.",
+  "details": {
+    "Centre stone": "Pear-shaped lab-grown diamond; size confirmed on enquiry",
+    "Setting": "Bezel-inspired sculptural setting",
+    "Metal": "14K yellow gold",
+    "Band": "Curved and tapered; approx. 2 mm at its widest starting point",
+    "Customization": "Natural diamond, centre size, metal colour and design details on request"
+  },
+  "options": [
+    {
+      "step": "Choose your stone",
+      "name": "Centre stone",
+      "type": "button",
+      "values": [
+        {
+          "label": "Lab-grown diamond"
+        },
+        {
+          "label": "Natural diamond",
+          "inquire": true
+        }
+      ]
+    },
+    {
+      "step": "Choose your carat weight",
+      "name": "Preferred carat weight",
+      "type": "text",
+      "maxLength": 30,
+      "placeholder": "Tell us your preferred centre size"
+    },
+    {
+      "step": "Choose your metal",
+      "name": "Metal",
+      "type": "button",
+      "values": [
+        {
+          "label": "14K Yellow Gold"
+        },
+        {
+          "label": "Other metal",
+          "inquire": true
+        }
+      ]
+    },
+    {
+      "step": "Choose your ring size",
+      "name": "Ring size",
+      "type": "size",
+      "values": "ringSizes",
+      "required": true
+    }
+  ],
+  "care": "Store separately in a soft pouch. Clean gently with a soft jewellery cloth and avoid harsh chemicals.",
+  "shipping": "Your specifications, availability, production timing and insured delivery are confirmed with you in writing before payment.",
+  "maxQuantity": 1,
+  "sort": -1
+}

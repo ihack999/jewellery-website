@@ -46,10 +46,11 @@ function optionField(p, o, ctx) {
       ].filter(Boolean).join(" ");
       return `<label class="${swatch ? "swatch-choice" : "pill"}"${swatch ? ` title="${h(v.label)}"` : ""}>
         <input type="radio" name="${h(o.name)}" value="${h(v.value)}"${i === 0 ? " checked" : ""} data-option ${data}>
-        ${swatch ? `<span class="swatch swatch--lg" style="--swatch:${h(ctx.vocab.metals[v.metal]?.swatch || v.swatch || "#ddd")}"></span><span class="visually-hidden">${h(v.label)}</span>` : `<span>${h(v.label)}${v.add ? ` <small>+${h(ctx.money(v.add, p.currency))}</small>` : ""}</span>`}
+        ${swatch ? `<span class="swatch swatch--lg" style="--swatch:${h(ctx.vocab.metals[v.metal]?.swatch || v.swatch || "#ddd")}"></span><span class="visually-hidden">${h(v.label)}</span>` : `<span>${h(v.label)}${o.showPrices ? ` <small>${h(ctx.money(p.price + (v.add || 0), p.currency))}${v.salePercent ? ` · ${h(v.salePercent)}% off` : ""}</small>` : v.add ? ` <small>+${h(ctx.money(v.add, p.currency))}</small>` : ""}</span>`}
       </label>`;
     }).join("")}
   </div>
+  ${o.help ? `<p class="option__help">${h(o.help)}</p>` : ""}
 </fieldset>`;
   }
 }
@@ -70,7 +71,7 @@ function promiseBlock(p, ctx) {
 }
 
 export function studioHref(p, ctx) {
-  if (!p.studio || !ctx.site.studio?.enabled) return "";
+  if (!p.studio || !ctx.site.studio?.enabled || ctx.site.studio.editorEnabled === false) return "";
   const params = new URLSearchParams(p.studio === true ? {} : p.studio);
   const q = params.toString();
   return `${ctx.site.studio.path}${q ? `?${q}` : ""}#design-studio`;
@@ -81,7 +82,7 @@ export const STUDIO_METALS = { "yellow-gold": "Yellow Gold", "white-gold": "Whit
 
 /** Live AR try-on link for any product with a `studio` recipe: opens the studio straight into the camera. */
 export function tryOnHref(p, ctx) {
-  if (!p.studio || !ctx.site.studio?.enabled) return "";
+  if (!p.studio || !ctx.site.studio?.enabled || ctx.site.studio.editorEnabled === false) return "";
   const params = new URLSearchParams(p.studio === true ? {} : p.studio);
   const metal = tryOnMetals(p)[0];
   if (!params.get("metal") && metal) params.set("metal", metal);
@@ -99,7 +100,7 @@ export function tryOnMetals(p) {
 function gallery(p, ctx) {
   const items = p.images.map((img, i) => `<figure class="gallery__item${i === 0 ? " gallery__item--lead" : ""}" data-gallery-item data-index="${i}">
     <button type="button" class="gallery__zoom" data-zoom="${i}" aria-label="Zoom image ${i + 1} of ${p.images.length}">
-      ${ctx.images.tag(img.src, { alt: img.alt, sizes: i === 0 ? "(max-width: 900px) 100vw, 58vw" : "(max-width: 900px) 100vw, 29vw", priority: i === 0, loading: i < 3 ? "eager" : "lazy", widths: [540, 720, 960, 1280, 1600] })}
+      ${ctx.images.tag(img.src, { alt: img.alt, sizes: i === 0 ? "(max-width: 900px) 100vw, 58vw" : "(max-width: 900px) 100vw, 29vw", priority: i === 0, loading: i < 3 ? "eager" : "lazy", widths: [540, 720, 960, 1280, 1600], attrs: img.fit === "contain" ? 'style="object-fit:contain"' : "" })}
     </button>
     ${img.note ? `<figcaption class="gallery__note">${h(img.note)}</figcaption>` : ""}
   </figure>`);

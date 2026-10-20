@@ -1,0 +1,70 @@
+{
+  "category": "rings",
+  "tags": [
+    "new-arrival",
+    "engagement",
+    "bridal"
+  ],
+  "availability": "made-to-order",
+  "currency": "CAD",
+  "hoverImage": 1,
+  "maxQuantity": 1,
+  "care": "Store separately in a soft pouch. Clean gently with a soft jewellery cloth and avoid harsh chemicals.",
+  "shipping": "Your specifications, availability, production timing and insured delivery are confirmed with you in writing before payment.",
+  "name": "Moval Diamond Engagement Ring with Pink Sapphires",
+  "subtitle": "4 CT Moval Diamond · 14K White Gold",
+  "price": 5900,
+  "compareAtPrice": 8429,
+  "salePercent": 30,
+  "badge": "30% off",
+  "sort": -9,
+  "metals": [
+    "white-gold"
+  ],
+  "stones": [
+    "diamond",
+    "gemstone"
+  ],
+  "summary": "A 4.00 ct Moval-cut centre diamond framed by two triangular pink sapphires in a slim, polished 14K white gold three-stone setting.",
+  "description": "An elongated Moval-cut diamond combines the soft curves of an oval with the long silhouette of a marquise. Two triangular pink sapphires add a romantic touch of colour on either side.\n\nCrafted in solid 14K white gold with a three-stone prong setting and a slim polished band. Each pink sapphire weighs approximately 0.30–0.50 ct, bringing the total gemstone weight to approximately 4.60–5.00 ct.\n\nLimited-time promotional price: $5,900 CAD, reduced from $8,429 CAD (30% off). Each ring is made to order, and customization is available on request. Diamond and sapphire origin are confirmed with your order. Carat weights and gemstone proportions may vary slightly.",
+  "details": {
+    "Centre stone": "4.00 ct Moval-cut diamond",
+    "Side stones": "Two triangular pink sapphires, approx. 0.30–0.50 ct each",
+    "Total gemstone weight": "Approx. 4.60–5.00 ct",
+    "Metal": "Solid 14K white gold",
+    "Setting": "Three-stone prong setting",
+    "Band": "Slim, polished white gold",
+    "Gemstone origin": "Confirmed with your order"
+  },
+  "options": [
+    {
+      "name": "Ring size",
+      "type": "size",
+      "values": "ringSizes",
+      "required": true
+    }
+  ],
+  "images": [
+    {
+      "src": "/assets/images/studio/moval-diamond-pink-sapphire-ring.webp",
+      "alt": "Moval Diamond Engagement Ring with Pink Sapphires in a warm ivory studio view",
+      "note": "AI-restyled studio view. Supplied reference views follow.",
+      "fit": "contain"
+    },
+    {
+      "src": "01-worn.jpeg",
+      "alt": "Moval diamond and pink sapphire ring worn on the hand",
+      "fit": "contain"
+    },
+    {
+      "src": "02-reference-details.jpeg",
+      "alt": "Supplied front and side reference views of the Moval three-stone ring",
+      "fit": "contain"
+    },
+    {
+      "src": "03-reference-angle.jpeg",
+      "alt": "Supplied three-quarter view of the elongated Moval diamond and pink sapphires",
+      "fit": "contain"
+    }
+  ]
+}

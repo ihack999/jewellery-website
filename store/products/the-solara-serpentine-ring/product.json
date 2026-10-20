@@ -6,7 +6,7 @@
   "availability": "made-to-order",
   "badge": "New",
   "price": 9500,
-  "metals": ["yellow-gold"],
+  "metals": ["yellow-gold", "white-gold", "platinum", "rose-gold"],
   "stones": ["lab-diamond", "coloured-diamond"],
   "images": [
     { "src": "01-studio.jpg", "alt": "The Solara Serpentine Ring — 4 ct light yellow lab diamond in an engraved 14K yellow gold serpentine band" },
@@ -21,7 +21,8 @@
     "Centre stone": "Approx. 4.00 ct lab-grown diamond",
     "Colour": "Light yellow / soft champagne-yellow",
     "Cut": "Elongated antique cushion",
-    "Metal": "14K solid yellow gold",
+    "Metal shown": "14K solid yellow gold",
+    "Metal options": "14K yellow, white or rose gold, or platinum; alternative metals quoted on request",
     "Design": "Serpentine-inspired wrap with intricate engraved detailing",
     "Engraving": "Custom engraving included",
     "Availability": "Made to order — custom crafted by Toronto Jewels Curation"
@@ -45,6 +46,18 @@
         { "label": "4.00 ct" },
         { "label": "3.00 ct", "inquire": true },
         { "label": "5.00 ct", "inquire": true }
+      ]
+    },
+    {
+      "step": "Choose your metal",
+      "name": "Metal",
+      "type": "swatch",
+      "help": "The listed price is for 14K yellow gold. Other metals are quoted personally. Contact us for additional options.",
+      "values": [
+        { "label": "14K Yellow Gold", "metal": "yellow-gold" },
+        { "label": "14K White Gold", "metal": "white-gold", "inquire": true },
+        { "label": "Platinum", "metal": "platinum", "inquire": true },
+        { "label": "14K Rose Gold", "metal": "rose-gold", "inquire": true }
       ]
     },
     { "step": "Choose your ring size", "name": "Ring size", "type": "size", "values": "ringSizes", "required": true },

@@ -113,6 +113,8 @@ function normalizeProduct(raw, { folder, dir, where, site, errors, warnings }) {
 
   const price = raw.price === undefined || raw.price === "" ? null : raw.price;
   if (price !== null && !(typeof price === "number" && price >= 0)) fail(`"price" must be a number like 2500 (no $ or commas), or null for "price on request".`);
+  const validSale = (n) => Number.isInteger(n) && n > 0 && n < 100;
+  if (raw.salePercent !== undefined && !validSale(raw.salePercent)) fail(`"salePercent" must be a whole percentage between 1 and 99.`);
 
   for (const m of raw.metals || []) if (!vocab.metals[m]) fail(`metal "${m}" is not defined. Use one of: ${Object.keys(vocab.metals).join(", ")}.`);
   for (const s of raw.stones || []) if (!vocab.stones[s]) fail(`stone "${s}" is not defined. Use one of: ${Object.keys(vocab.stones).join(", ")}.`);
@@ -152,6 +154,7 @@ function normalizeProduct(raw, { folder, dir, where, site, errors, warnings }) {
       opt.values = (opt.values || []).map((v) => (typeof v === "string" ? { label: v } : v));
       if (!opt.values.length) fail(`option "${opt.name}" has no values.`);
       for (const v of opt.values) {
+        if (v.salePercent !== undefined && !validSale(v.salePercent)) fail(`option "${opt.name}" has an invalid sale percentage.`);
         v.value ||= v.label;
         if (v.metal && !vocab.metals[v.metal]) fail(`option "${opt.name}" uses metal "${v.metal}" which is not defined in site.json.`);
         if (v.image !== undefined && !images[v.image]) {

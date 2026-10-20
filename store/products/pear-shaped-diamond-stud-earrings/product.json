@@ -1,0 +1,123 @@
+{
+  "name": "Pear-Shaped Lab-Grown Diamond Stud Earrings",
+  "subtitle": "1–4 CTW per Pair · 14K Gold",
+  "category": "earrings",
+  "tags": [
+    "new-arrival",
+    "studs"
+  ],
+  "availability": "made-to-order",
+  "badge": "Up to 40% off",
+  "price": 1200,
+  "metals": [
+    "white-gold",
+    "yellow-gold"
+  ],
+  "stones": [
+    "lab-diamond"
+  ],
+  "images": [
+    {
+      "src": "/assets/images/studio/pear-shaped-diamond-stud-earrings.webp",
+      "alt": "Pair of pear-shaped diamond solitaire stud earrings with minimal three-prong settings",
+      "note": "AI-restyled studio view. Original photographs follow."
+    },
+    {
+      "src": "01-size-reference.jpeg",
+      "alt": "Pear diamond stud worn — 1.00 ct size reference supplied by the atelier",
+      "fit": "contain"
+    },
+    {
+      "src": "02-size-reference.jpeg",
+      "alt": "Pear diamond stud worn — 2.00 ct size reference supplied by the atelier",
+      "fit": "contain"
+    },
+    {
+      "src": "03-size-reference.jpeg",
+      "alt": "Pear diamond stud worn — 3.00 ct size reference supplied by the atelier",
+      "fit": "contain"
+    },
+    {
+      "src": "04-size-reference.jpeg",
+      "alt": "Pear diamond stud worn — 4.00 ct size reference supplied by the atelier",
+      "fit": "contain"
+    }
+  ],
+  "hoverImage": 0,
+  "videos": [
+    {
+      "src": "/assets/videos/pear-shaped-diamond-stud-earrings-detail.mp4",
+      "poster": "/store/products/pear-shaped-diamond-stud-earrings/04-size-reference.jpeg",
+      "label": "Original close-up video of the pear diamond studs"
+    },
+    {
+      "src": "/assets/videos/pear-shaped-diamond-stud-earrings-worn.mp4",
+      "poster": "/store/products/pear-shaped-diamond-stud-earrings/01-size-reference.jpeg",
+      "label": "Pear diamond studs worn with the station necklace"
+    }
+  ],
+  "summary": "Matched pear-shaped lab-grown diamond studs in solid 14K white or yellow gold, with E–F colour and VS clarity or better. Choose 1–4 ct total diamond weight per pair.",
+  "description": "Two carefully matched pear-shaped lab-grown diamonds bring an elongated point of light to each ear. Each pair is selected for complementary shape, proportions and brilliance.\n\nChoose approximately 1.00 CTW for $1,200 CAD, 2.00 CTW for $1,900 CAD (40% off), 3.00 CTW for $3,100 CAD (30% off), or 4.00 CTW for $4,200 CAD (30% off). Prices are per pair, before taxes; carat weights are the total for both earrings.\n\nAvailable in solid 14K white or yellow gold, with E–F diamond colour and VS clarity or better. All weights are approximate. The necklace in the styling video is sold separately.",
+  "details": {
+    "Diamonds": "Matched pear-shaped lab-grown diamonds",
+    "Colour": "E–F",
+    "Clarity": "VS or better",
+    "Metal": "Solid 14K white or yellow gold",
+    "Total diamond weight": "Approx. 1.00, 2.00, 3.00 or 4.00 CTW per pair",
+    "Pricing": "CAD per pair, before taxes",
+    "Promotion": "2.00 CTW: 40% off; 3.00 and 4.00 CTW: 30% off"
+  },
+  "options": [
+    {
+      "step": "Choose your total carat weight",
+      "name": "Total diamond weight per pair",
+      "type": "button",
+      "help": "Total weight of both earrings. Prices are per pair; all weights are approximate.",
+      "values": [
+        {
+          "label": "1.00 CTW",
+          "image": 1
+        },
+        {
+          "label": "2.00 CTW",
+          "add": 700,
+          "image": 2,
+          "salePercent": 40
+        },
+        {
+          "label": "3.00 CTW",
+          "add": 1900,
+          "image": 3,
+          "salePercent": 30
+        },
+        {
+          "label": "4.00 CTW",
+          "add": 3000,
+          "image": 4,
+          "salePercent": 30
+        }
+      ],
+      "showPrices": true
+    },
+    {
+      "step": "Choose your metal",
+      "name": "Metal",
+      "type": "swatch",
+      "values": [
+        {
+          "label": "14K White Gold",
+          "metal": "white-gold"
+        },
+        {
+          "label": "14K Yellow Gold",
+          "metal": "yellow-gold"
+        }
+      ]
+    }
+  ],
+  "care": "Store separately in a soft pouch. Clean gently with a soft jewellery cloth and avoid harsh chemicals.",
+  "shipping": "Your specifications, availability, production timing and insured delivery are confirmed with you in writing before payment.",
+  "maxQuantity": 1,
+  "sort": -4,
+  "priceFrom": true
+}

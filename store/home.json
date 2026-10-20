@@ -11,10 +11,10 @@
       "type": "hero",
       "eyebrow": "Toronto · Custom · Estate",
       "title": "Fine and Custom Diamond Jewellery in Toronto",
-      "text": "Signature diamond pieces, one-of-a-kind estate finds and a 3D studio to design your own — all confirmed personally by our atelier.",
+      "text": "Signature diamond pieces, one-of-a-kind estate finds and custom jewellery shaped around your ideas — all confirmed personally by our atelier.",
       "ctas": [
         { "label": "Shop Jewellery", "href": "/shop/" },
-        { "label": "Design Your Own", "href": "/design-studio/", "style": "ghost" }
+        { "label": "Start a Custom Request", "href": "/design-studio/", "style": "ghost" }
       ],
       "images": [
         { "src": "/assets/images/optimized/graduated-tennis-necklace-worn-1600.jpg", "alt": "Graduated diamond tennis necklace in 14K gold — fine diamond jewellery Toronto", "position": "50% 30%" },
@@ -25,6 +25,14 @@
       "type": "categoryTiles",
       "title": "Shop by category",
       "collections": ["rings", "necklaces", "bracelets", "earrings", "tennis", "estate"]
+    },
+    {
+      "type": "productRow",
+      "eyebrow": "Just added",
+      "title": "New arrivals",
+      "collection": "new-arrivals",
+      "limit": 9,
+      "ctaLabel": "Shop new arrivals"
     },
     {
       "type": "productTabs",

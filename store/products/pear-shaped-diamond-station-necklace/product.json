@@ -1,0 +1,57 @@
+{
+  "name": "Pear-Shaped Diamond Station Necklace",
+  "subtitle": "Pear Pendant & Bezel-Set Diamond Stations",
+  "category": "necklaces",
+  "tags": [
+    "new-arrival",
+    "pendant",
+    "layering"
+  ],
+  "availability": "made-to-order",
+  "badge": "New",
+  "price": 1950,
+  "currency": "CAD",
+  "metals": [
+    "white-gold"
+  ],
+  "stones": [
+    "diamond"
+  ],
+  "images": [
+    {
+      "src": "/assets/images/studio/pear-shaped-diamond-station-necklace.webp",
+      "alt": "Pear-shaped diamond pendant on a fine white gold chain with bezel-set round diamond stations",
+      "note": "AI-restyled studio view. Original photographs follow."
+    },
+    {
+      "src": "01-worn.jpeg",
+      "alt": "Pear-shaped diamond station necklace worn with a white blouse"
+    }
+  ],
+  "hoverImage": 1,
+  "videos": [
+    {
+      "src": "/assets/videos/pear-shaped-diamond-station-necklace-detail.mp4",
+      "poster": "/store/products/pear-shaped-diamond-station-necklace/01-worn.jpeg",
+      "label": "Original video of the pendant and diamond stations"
+    },
+    {
+      "src": "/assets/videos/pear-shaped-diamond-station-necklace-worn.mp4",
+      "poster": "/store/products/pear-shaped-diamond-station-necklace/01-worn.jpeg",
+      "label": "The diamond station necklace worn"
+    }
+  ],
+  "summary": "A pear-shaped diamond pendant in 14K white gold, suspended from a delicate 10K white gold chain with approximately 0.30 CTW of bezel-set diamond accents.",
+  "description": "Timeless elegance with a delicate touch of sparkle. A pear-shaped diamond pendant set in 14K white gold hangs from a delicate 10K white gold chain adorned with bezel-set diamonds.\n\nEffortlessly elegant for everyday wear or layering. The diamond stations along the chain total approximately 0.30 CTW. Centre-stone weight and final specifications are confirmed with our atelier.",
+  "details": {
+    "Pendant": "14K white gold",
+    "Chain": "10K white gold",
+    "Centre stone": "Pear-shaped diamond",
+    "Accent diamonds": "Approx. 0.30 CTW along the chain",
+    "Setting": "Bezel-set diamond stations"
+  },
+  "care": "Store separately in a soft pouch. Clean gently with a soft jewellery cloth and avoid harsh chemicals.",
+  "shipping": "Your specifications, availability, production timing and insured delivery are confirmed with you in writing before payment.",
+  "maxQuantity": 1,
+  "sort": -5
+}

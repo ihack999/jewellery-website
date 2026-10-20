@@ -215,7 +215,7 @@
       </div>
       <div class="card__body">
         <h3 class="card__title"><a href="${esc(p.url)}">${esc(p.name)}</a></h3>
-        <p class="card__price${p.price === null || p.availability === "sold" ? " price--quiet" : ""}">${esc(p.priceText)}</p>
+        <p class="card__price${p.price === null || p.availability === "sold" ? " price--quiet" : ""}">${productPriceHtml(p)}</p>
         ${swatches.length > 1 ? `<ul class="card__swatches">${swatches.map((s, i) => `<li><span class="swatch${i === 0 ? " is-active" : ""}" style="--swatch:${esc(s.swatch || "#ddd")}" title="${esc(s.label)}"></span></li>`).join("")}</ul>` : ""}
       </div>
     </article>`;
@@ -290,6 +290,16 @@
       if (v?.add) total += v.add;
     }
     return total;
+  }
+  function productPriceHtml(p, options) {
+    if (p.price === null || p.availability === "sold") return esc(p.priceText);
+    const selected = p.options.flatMap((o) => o.values?.filter((v) => v.value === options?.[o.name]) || []);
+    const sale = selected.find((v) => v.salePercent !== undefined)?.salePercent ?? p.salePercent;
+    const text = options && p.options.some((o) => o.values?.some((v) => v.add))
+      ? (p.priceFrom ? "From " : "") + money(unitPrice(p, options), p.currency)
+      : p.priceText;
+    const compare = p.compareAtPrice ? ` <s class="price__compare">${esc(money(p.compareAtPrice, p.currency))}</s>` : "";
+    return `${esc(text)}${compare}${sale ? ` <span class="price__sale">${esc(sale)}% off</span>` : ""}`;
   }
   function totals() {
     const byCurrency = {};
@@ -434,10 +444,10 @@
         if (note) note.hidden = !(inquire && p.purchasable);
       }
       if (p.price !== null && p.availability !== "sold") {
-        const hasAdd = p.options.some((o) => o.values?.some((v) => v.add));
-        if (hasAdd) priceEls.forEach((el) => (el.textContent = (p.priceFrom ? "From " : "") + money(unitPrice(p, opts), p.currency)));
         if (inquire && p.purchasable) priceEls.forEach((el) => (el.textContent = "Price on request"));
-        else if (!hasAdd) priceEls.forEach((el) => (el.textContent = p.priceText));
+        else priceEls.forEach((el) => (el.innerHTML = productPriceHtml(p, opts)));
+        const stickyPrice = form.closest("[data-pdp]") && $("[data-sticky-atc] [data-price-display]");
+        if (stickyPrice) stickyPrice.innerHTML = inquire ? "Price on request" : productPriceHtml(p, opts);
       }
       form.dataset.inquire = String(inquire);
     };
@@ -510,10 +520,18 @@
           // Swap into the lead position so the choice is visible without scrolling.
           const [src, srcset] = [img.currentSrc || img.src, img.srcset];
           lead.srcset = srcset; lead.src = src;
+          lead.alt = p.images[index]?.alt || img.alt;
+          lead.style.objectFit = p.images[index]?.fit || "cover";
           lead.animate?.([{ opacity: .4 }, { opacity: 1 }], { duration: 350 });
         } else if (index === 0 && lead) {
           lead.srcset = lead.dataset.origSrcset ?? lead.srcset; lead.src = lead.dataset.origSrc ?? lead.src;
+          lead.alt = p.images[0].alt;
+          lead.style.objectFit = p.images[0].fit || "cover";
         }
+        const note = $(".gallery__note", items[0]);
+        if (note) { note.textContent = p.images[index]?.note || ""; note.hidden = !note.textContent; }
+        const zoom = $("[data-zoom]", items[0]);
+        if (zoom) zoom.dataset.zoom = index;
       }
     };
     const lead = $("img", items[0]);
@@ -650,15 +668,15 @@
       if (o.type === "text") return `<div class="option"><label class="option__label" for="${id}">${esc(o.name)}</label><input class="option__input" id="${id}" name="${esc(o.name)}" ${o.maxLength ? `maxlength="${o.maxLength}"` : ""} placeholder="${esc(o.placeholder || "")}" ${o.required ? "required" : ""} data-option data-option-text${o.uppercase ? " data-uppercase" : ""} autocomplete="off"></div>`;
       if (o.type === "size") return `<div class="option"><label class="option__label" for="${id}">${esc(o.name)}</label><div class="select"><select id="${id}" name="${esc(o.name)}" ${o.required ? "required" : ""} data-option><option value="">Select ${esc(o.name.toLowerCase())}</option>${o.values.map((v) => `<option value="${esc(v.value)}">${esc(v.label)}</option>`).join("")}</select>${ICON.chevron}</div></div>`;
       const sw = o.type === "swatch";
-      return `<fieldset class="option" data-option-group><legend class="option__label">${esc(o.name)}: <span class="option__value" data-option-value>${esc(o.values[0].label)}</span></legend><div class="${sw ? "option__swatches" : "option__buttons"}">${o.values.map((v, i) => `<label class="${sw ? "swatch-choice" : "pill"}"><input type="radio" name="${esc(o.name)}" value="${esc(v.value)}" ${i === 0 ? "checked" : ""} data-option ${v.add ? `data-add="${v.add}"` : ""} ${v.inquire ? "data-inquire" : ""} ${v.image !== undefined && v.image !== null ? `data-image="${v.image}"` : ""} ${v.studioMetal ? `data-studio-metal="${esc(v.studioMetal)}"` : ""}>${sw ? `<span class="swatch swatch--lg" style="--swatch:${esc(v.swatch || "#ddd")}"></span><span class="visually-hidden">${esc(v.label)}</span>` : `<span>${esc(v.label)}</span>`}</label>`).join("")}</div></fieldset>`;
+      return `<fieldset class="option" data-option-group><legend class="option__label">${esc(o.name)}: <span class="option__value" data-option-value>${esc(o.values[0].label)}</span></legend><div class="${sw ? "option__swatches" : "option__buttons"}">${o.values.map((v, i) => `<label class="${sw ? "swatch-choice" : "pill"}"><input type="radio" name="${esc(o.name)}" value="${esc(v.value)}" ${i === 0 ? "checked" : ""} data-option ${v.add ? `data-add="${v.add}"` : ""} ${v.inquire ? "data-inquire" : ""} ${v.image !== undefined && v.image !== null ? `data-image="${v.image}"` : ""} ${v.studioMetal ? `data-studio-metal="${esc(v.studioMetal)}"` : ""}>${sw ? `<span class="swatch swatch--lg" style="--swatch:${esc(v.swatch || "#ddd")}"></span><span class="visually-hidden">${esc(v.label)}</span>` : `<span>${esc(v.label)}${o.showPrices ? ` <small>${esc(money(p.price + (v.add || 0), p.currency))}${v.salePercent ? ` · ${esc(v.salePercent)}% off` : ""}</small>` : ""}</span>`}</label>`).join("")}</div>${o.help ? `<p class="option__help">${esc(o.help)}</p>` : ""}</fieldset>`;
     })())).join("");
     const sold = p.availability === "sold";
     return `<div class="quick">
-      <div class="quick__media"><div class="quick__track">${p.images.map((img) => `<img src="${esc(img.src)}" alt="${esc(img.alt)}">`).join("")}</div></div>
+      <div class="quick__media"><div class="quick__track">${p.images.map((img) => `<img src="${esc(img.src)}" alt="${esc(img.alt)}"${img.fit === "contain" ? ' style="object-fit:contain"' : ""}>`).join("")}</div></div>
       <div class="quick__info">
         <p class="pdp__meta">${p.badge ? `<span class="badge">${esc(p.badge)}</span>` : ""}<span>${esc(p.categoryLabel)}</span></p>
         <h2 class="pdp__title">${esc(p.name)}</h2>
-        <p class="pdp__price${p.price === null ? " price--quiet" : ""}" data-price-display>${esc(p.priceText)}</p>
+        <p class="pdp__price${p.price === null ? " price--quiet" : ""}" data-price-display aria-live="polite">${productPriceHtml(p)}</p>
         ${p.summary ? `<p class="pdp__summary">${esc(p.summary)}</p>` : ""}
         <form class="pdp__form" data-product-form novalidate>
           ${sold ? "" : opts}
@@ -960,7 +978,7 @@
         suggest.hidden = hits.length > 0;
         results.innerHTML = hits.length
           ? `<p class="search__label">${hits.length} ${hits.length === 1 ? "piece" : "pieces"}</p><div class="grid">${hits.slice(0, 8).map(cardHtml).join("")}</div>${hits.length > 8 ? `<p style="text-align:center;margin-top:24px"><a class="link-arrow" href="/shop/?q=${encodeURIComponent(input.value)}">See all results</a></p>` : ""}`
-          : `<p class="search__empty">No pieces match “${esc(input.value)}”. Try “ring”, “tennis” or “yellow diamond” — or <a href="${esc(S.studio)}" style="text-decoration:underline">design it yourself</a>.</p>`;
+          : `<p class="search__empty">No pieces match “${esc(input.value)}”. Try “ring”, “tennis” or “yellow diamond” — or <a href="${esc(S.studio)}" style="text-decoration:underline">start a custom request</a>.</p>`;
         syncWish();
       }, 120);
     });

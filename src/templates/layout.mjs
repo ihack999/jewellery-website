@@ -99,7 +99,7 @@ function mobileMenu(ctx) {
       </ul>
       <div class="mobile-nav__feature">
         ${ctx.images.tag("/assets/images/optimized/studio-ring-pink-gemstone-1600.jpg", { alt: "Bespoke custom jewellery in Toronto — pink gemstone ring", sizes: "80vw", widths: [540, 720] })}
-        <div><p class="eyebrow">${h(site.studio?.title || "Design Studio")}</p><a class="btn btn--solid btn--block" href="${h(site.studio?.path || "/design-studio/")}">Design your own</a></div>
+        <div><p class="eyebrow">${h(site.studio?.title || "Design Studio")}</p><a class="btn btn--solid btn--block" href="${h(site.studio?.path || "/design-studio/")}">${ctx.site.studio?.editorEnabled === false ? "Start a custom request" : "Design your own"}</a></div>
       </div>
       <div class="mobile-nav__contact">
         ${c.email ? `<a href="mailto:${h(c.email)}">${icon("mail", { size: 18 })} ${h(c.email)}</a>` : ""}
@@ -126,7 +126,7 @@ function cartDrawer(ctx) {
         <p>Start with our signatures, or design something that's entirely yours.</p>
         <div class="cart-empty__links">
           <a class="btn btn--solid" href="/shop/">Shop jewellery</a>
-          <a class="btn btn--ghost" href="${h(ctx.site.studio?.path || "/design-studio/")}">Design your own</a>
+          <a class="btn btn--ghost" href="${h(ctx.site.studio?.path || "/design-studio/")}">${ctx.site.studio?.editorEnabled === false ? "Start a custom request" : "Design your own"}</a>
         </div>
       </div>
       <ul class="cart-lines" data-cart-lines></ul>
@@ -170,7 +170,7 @@ function searchOverlay(ctx) {
       </form>
       <div class="search__suggest" data-search-suggest>
         <p class="search__label">Popular</p>
-        <ul class="search__chips">${popular.map((c) => `<li><a class="chip" href="${c.path}">${h(c.title)}</a></li>`).join("")}<li><a class="chip" href="${h(ctx.site.studio?.path || "/design-studio/")}">Design Studio</a></li></ul>
+        <ul class="search__chips">${popular.map((c) => `<li><a class="chip" href="${c.path}">${h(c.title)}</a></li>`).join("")}<li><a class="chip" href="${h(ctx.site.studio?.path || "/design-studio/")}">${ctx.site.studio?.editorEnabled === false ? "Custom Requests" : "Design Studio"}</a></li></ul>
       </div>
       <div class="search__results" data-search-results aria-live="polite"></div>
     </div>

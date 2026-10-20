@@ -107,7 +107,7 @@ export function renderCollection(c, ctx) {
     <div class="grid-empty" data-grid-empty hidden>
       <p class="grid-empty__title">Nothing matches — yet.</p>
       <p>Try removing a filter, or design exactly what you have in mind.</p>
-      <div class="grid-empty__actions"><button type="button" class="btn btn--ghost" data-filters-clear>Clear filters</button><a class="btn btn--solid" href="${h(ctx.site.studio?.path || "/design-studio/")}">Open the Design Studio</a></div>
+      <div class="grid-empty__actions"><button type="button" class="btn btn--ghost" data-filters-clear>Clear filters</button><a class="btn btn--solid" href="${h(ctx.site.studio?.path || "/design-studio/")}">${ctx.site.studio?.editorEnabled === false ? "Start a custom request" : "Open the Design Studio"}</a></div>
     </div>
     <div class="load-more" data-load-more hidden>
       <p class="load-more__text">Showing <span data-shown></span> of <span data-total></span></p>

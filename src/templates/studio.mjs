@@ -8,19 +8,20 @@ import { icon, breadcrumbs } from "./components.mjs";
 const MARKUP = path.join(ROOT, "src", "studio", "studio-markup.html");
 
 function requestForm(ctx) {
+  const editor = ctx.site.studio.editorEnabled !== false;
   const budgets = [["500 to 1000", "$500 – $1,000"], ["1000 to 5000", "$1,000 – $5,000"], ["5000 to 10000", "$5,000 – $10,000"], ["10000 plus", "$10,000+"]];
   return `<section class="section request" id="request-form" aria-labelledby="request-title">
   <div class="wrap request__grid">
     <div class="request__intro">
       <p class="eyebrow">Custom request</p>
       <h2 class="section-title" id="request-title">Tell us what you're imagining.</h2>
-      <p>Send your studio design — or just an idea and a reference photo. We review every request personally and reply with next steps, a recommended direction and a quote.</p>
+      <p>${editor ? "Send your studio design — or just an idea and a reference photo." : "Share an idea, a sketch or a reference photo."} We review every request personally and reply with next steps, a recommended direction and a quote.</p>
       <ol class="request__steps">
-        <li><span>01</span><div><strong>Share the idea</strong><p>Your 3D design, references, budget and timing.</p></div></li>
+        <li><span>01</span><div><strong>Share the idea</strong><p>${editor ? "Your 3D design, references, budget and timing." : "Your references, budget and timing."}</p></div></li>
         <li><span>02</span><div><strong>Refine together</strong><p>Stone, metal, proportions and wearability — in person in Toronto or virtually.</p></div></li>
         <li><span>03</span><div><strong>Approve &amp; create</strong><p>Price and timing are confirmed in writing before any work begins.</p></div></li>
       </ol>
-      <a class="btn btn--ghost" href="#design-studio">${icon("cube", { size: 18 })} Back to the 3D studio</a>
+      ${editor ? `<a class="btn btn--ghost" href="#design-studio">${icon("cube", { size: 18 })} Back to the 3D studio</a>` : ""}
     </div>
 
     <form class="request__form" name="custom-request" method="POST" action="${h(ctx.site.studio.path)}" data-netlify="true" netlify-honeypot="bot-field" enctype="multipart/form-data" data-custom-request>
@@ -64,7 +65,7 @@ function requestForm(ctx) {
             <label for="inspiration-upload">
               ${icon("sparkle", { size: 22 })}
               <strong>Add a reference photo</strong>
-              <span data-file-name>Your 3D design is attached here automatically when you send it from the studio.</span>
+              <span data-file-name>${editor ? "Your 3D design is attached here automatically when you send it from the studio." : "Upload a photo, sketch or inspiration image for your piece."}</span>
               <span class="file-drop__preview" data-design-preview hidden></span>
             </label>
           </div>
@@ -94,6 +95,29 @@ const FAQ = [
 
 export function renderStudio(ctx) {
   const studio = ctx.site.studio;
+  // Temporarily show the request form alone. The editor and its assets stay intact.
+  if (studio.editorEnabled === false) {
+    return {
+      path: studio.path,
+      title: studio.seoTitle || studio.title,
+      description: studio.seoDescription || studio.intro,
+      ogImage: "/assets/images/optimized/studio-ring-pink-gemstone-1600.jpg",
+      bodyClass: "page--custom-request",
+      scripts: `<script type="module" src="/static/request-form.js?v=${ctx.assetVersion("request-form.js")}"></script>`,
+      body: `<section class="studio-head"><div class="wrap">
+        ${breadcrumbs([{ label: "Home", href: "/" }, { label: studio.title }])}
+        <h1 class="collection-title">${h(studio.title)}</h1>
+        <p class="collection-desc">${h(studio.intro)}</p>
+      </div></section>${requestForm(ctx)}`,
+      jsonLd: {
+        "@context": "https://schema.org", "@type": "Service",
+        name: "Custom Jewellery Consultation",
+        serviceType: "Custom jewellery design",
+        provider: { "@type": "Organization", name: ctx.site.brand.name, url: ctx.site.brand.url },
+        areaServed: "Toronto", url: ctx.site.brand.url + studio.path
+      }
+    };
+  }
   const markup = fs.readFileSync(MARKUP, "utf8");
   const body = `<div class="tryon-launch" data-tryon-launch aria-live="polite">
   <div class="tryon-launch__inner">

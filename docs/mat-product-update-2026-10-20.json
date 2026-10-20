@@ -1,0 +1,31 @@
+{
+  "date": "2026-10-20",
+  "source": "MAT WhatsApp product messages and website follow-ups of October 17–20, 2026",
+  "updates": [
+    "Added Moval Diamond Engagement Ring with Pink Sapphires: 4 ct centre, 0.30–0.50 ct sapphires each, 14K white gold, $5,900 promotional price, $8,429 regular price, 30% off.",
+    "Added Vintage Moval Diamond Ring: full bezel, 14K yellow gold, 2 mm band; starting prices 3 ct $4,900 / 4 ct $5,900 / 5 ct $7,200.",
+    "Updated pear lab diamond studs: 14K white/yellow gold, E–F, VS or better; per-pair CTW prices 1 $1,200 / 2 $1,900 (40% off) / 3 $3,100 (30% off) / 4 $4,200 (30% off). The quoted promotional prices are used directly; unprovided regular prices are not invented.",
+    "Petals: retained stated $1,895 price and displayed requested 30% off promotion. Clarification requested whether $1,895 is the sale price or the pre-discount price.",
+    "Made earring size-reference images contain within gallery and quick view, so embedded captions are not cropped.",
+    "Set studio.editorEnabled to false: retain request form at /design-studio/ and /customs, hide 3D editor and try-on entry points, preserve editor source/assets. Set true to restore editor rendering and product try-on.",
+    "Payment review: checkout.mode remains request; no instant card payment collection is active in the storefront configuration."
+  ],
+  "missingSpecifications": [
+    "New Moval rings: natural/lab diamond origin unprovided; pink sapphire origin unprovided. Confirm on order."
+  ],
+  "imageMode": "Built-in imagegen image editing",
+  "images": [
+    {
+      "slug": "moval-diamond-pink-sapphire-ring",
+      "cover": "assets/images/studio/moval-diamond-pink-sapphire-ring.webp",
+      "source": "assets/images/studio/sources/moval-diamond-pink-sapphire-ring.png",
+      "prompt": "Use case: precise-object-edit. Asset type: fine jewellery storefront product cover. Image 1 is the edit target; Image 2 is a lighting and background style reference only. Restyle ONLY the background, illumination and framing of the ring in Image 1 to match the warm neutral studio presentation of Image 2. Preserve the exact elongated moval clear centre diamond, its six claw prongs, two triangular pink sapphire side stones, their shapes, relative scale and light pink hue, and the slim white gold band. Preserve the same three-quarter viewing angle. Seamless matte warm ivory backdrop (#f4f0e9), soft diffuse upper-left studio light, delicate short contact shadow, restrained realistic sparkle, clean premium product photography. Portrait 4:5 canvas, entire ring centered, ring occupies about 65 percent of canvas width and no more than 65 percent of height, generous space on all sides. No crop, text, logo, props, new stones or changes to the product design. Do not copy the ring design from Image 2."
+    },
+    {
+      "slug": "vintage-moval-diamond-ring",
+      "cover": "assets/images/studio/vintage-moval-diamond-ring.webp",
+      "source": "assets/images/studio/sources/vintage-moval-diamond-ring.png",
+      "prompt": "Use case: precise-object-edit. Asset type: fine jewellery storefront product cover. Image 1 is the edit target; Image 2 is a lighting and background style reference only. Restyle ONLY the background, illumination and framing of the ring in Image 1 to match the warm neutral studio presentation of Image 2. Preserve the exact elongated moval clear centre diamond, full yellow gold bezel, beaded milgrain rim, small round diamond accents in the triangular shoulders, and smooth yellow gold band. Preserve the front view, symmetry and all relative proportions. Seamless matte warm ivory backdrop (#f4f0e9), soft diffuse upper-left studio light, delicate short contact shadow, restrained realistic sparkle, clean premium product photography. Portrait 4:5 canvas, entire ring centered, ring occupies about 65 percent of canvas width and no more than 65 percent of height, generous space on all sides. No crop, text, logo, props, new stones or changes to the product design. Do not copy the ring design from Image 2."
+    }
+  ]
+}
