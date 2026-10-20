@@ -55,6 +55,7 @@ const sections = {
   },
 
   studioFeature(s, ctx) {
+    if (ctx.site.studio?.editorEnabled === false) return "";
     const image = s.image && ctx.images.info(s.image) ? s.image : s.fallbackImage;
     return `<section class="studio-feature">
   <div class="studio-feature__media">

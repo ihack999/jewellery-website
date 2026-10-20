@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-18T20:47:58.283Z",
+  "generatedAt": "2026-10-20T18:00:16.556Z",
   "currency": "CAD",
   "checkoutMode": "request",
   "shippingCountries": [
@@ -7,6 +7,222 @@
     "US"
   ],
   "products": {
+    "moval-diamond-pink-sapphire-ring": {
+      "name": "Moval Diamond Engagement Ring with Pink Sapphires",
+      "price": 5900,
+      "currency": "CAD",
+      "purchasable": true,
+      "maxQuantity": 1,
+      "image": "https://torontojewelscuration.com/media/moval-diamond-pink-sapphire-ring-6dcf11cd-720.webp",
+      "options": [
+        {
+          "name": "Ring size",
+          "type": "size",
+          "required": true,
+          "values": [
+            {
+              "value": "3",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "3.5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "4",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "4.5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "5.5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "6",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "6.5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "7",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "7.5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "8",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "8.5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "9",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "9.5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "10",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "Not sure — help me size",
+              "add": 0,
+              "inquire": false
+            }
+          ]
+        }
+      ]
+    },
+    "vintage-moval-diamond-ring": {
+      "name": "Vintage Moval Diamond Ring",
+      "price": 4900,
+      "currency": "CAD",
+      "purchasable": true,
+      "maxQuantity": 1,
+      "image": "https://torontojewelscuration.com/media/vintage-moval-diamond-ring-d9eef750-720.webp",
+      "options": [
+        {
+          "name": "Centre diamond",
+          "type": "button",
+          "required": true,
+          "values": [
+            {
+              "value": "3.00 ct",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "4.00 ct",
+              "add": 1000,
+              "inquire": false
+            },
+            {
+              "value": "5.00 ct",
+              "add": 2300,
+              "inquire": false
+            }
+          ]
+        },
+        {
+          "name": "Ring size",
+          "type": "size",
+          "required": true,
+          "values": [
+            {
+              "value": "3",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "3.5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "4",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "4.5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "5.5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "6",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "6.5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "7",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "7.5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "8",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "8.5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "9",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "9.5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "10",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "Not sure — help me size",
+              "add": 0,
+              "inquire": false
+            }
+          ]
+        }
+      ]
+    },
     "oval-split-shank-diamond-ring": {
       "name": "Elongated Oval Split-Shank Diamond Ring",
       "price": 5900,
@@ -250,37 +466,54 @@
       "options": []
     },
     "pear-shaped-diamond-stud-earrings": {
-      "name": "Pear-Shaped Diamond Stud Earrings",
-      "price": null,
+      "name": "Pear-Shaped Lab-Grown Diamond Stud Earrings",
+      "price": 1200,
       "currency": "CAD",
-      "purchasable": false,
+      "purchasable": true,
       "maxQuantity": 1,
       "image": "https://torontojewelscuration.com/media/pear-shaped-diamond-stud-earrings-cc320e5d-720.webp",
       "options": [
         {
-          "name": "Size preference",
+          "name": "Total diamond weight per pair",
           "type": "button",
           "required": true,
           "values": [
             {
-              "value": "1.00 ct reference",
+              "value": "1.00 CTW",
               "add": 0,
-              "inquire": true
+              "inquire": false
             },
             {
-              "value": "2.00 ct reference",
-              "add": 0,
-              "inquire": true
+              "value": "2.00 CTW",
+              "add": 700,
+              "inquire": false
             },
             {
-              "value": "3.00 ct reference",
-              "add": 0,
-              "inquire": true
+              "value": "3.00 CTW",
+              "add": 1900,
+              "inquire": false
             },
             {
-              "value": "4.00 ct reference",
+              "value": "4.00 CTW",
+              "add": 3000,
+              "inquire": false
+            }
+          ]
+        },
+        {
+          "name": "Metal",
+          "type": "swatch",
+          "required": true,
+          "values": [
+            {
+              "value": "14K White Gold",
               "add": 0,
-              "inquire": true
+              "inquire": false
+            },
+            {
+              "value": "14K Yellow Gold",
+              "add": 0,
+              "inquire": false
             }
           ]
         }

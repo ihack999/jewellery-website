@@ -7,7 +7,7 @@
     "floral"
   ],
   "availability": "made-to-order",
-  "badge": "New",
+  "badge": "30% off",
   "price": 1895,
   "currency": "CAD",
   "metals": [
@@ -90,5 +90,6 @@
   "care": "Store separately in a soft pouch. Clean gently with a soft jewellery cloth and avoid harsh chemicals.",
   "shipping": "Your specifications, availability, production timing and insured delivery are confirmed with you in writing before payment.",
   "maxQuantity": 1,
-  "sort": -6
+  "sort": -6,
+  "salePercent": 30
 }

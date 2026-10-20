@@ -134,6 +134,10 @@ All forms are Netlify Forms: `order-request`, `product-inquiry`, `custom-request
 
 Lives at `/design-studio/`. The engine is `assets/js/designer.js` (Three.js) plus `assets/js/ar-tryon.js` for camera try-on; its markup is `src/studio/studio-markup.html`. The storefront wraps it with the site header/footer, a custom-request form it fills automatically (“Send design to request form” attaches a rendered image), and a studio stylesheet generated from the original CSS (`src/lib/legacy-css.mjs`, re-coloured to the brand).
 
+The editor is temporarily hidden with `studio.editorEnabled: false` in `store/site.json`. Both `/design-studio/` and `/customs` show the custom-request form, using `src/static/request-form.js`, without loading the editor or offering product try-on. All editor source and assets are retained. Set `editorEnabled` to `true` and rebuild to restore the editor, homepage studio section and product try-on; navigation currently uses consultation and request wording.
+
+Promotional products can set `salePercent` and, when supplied, `compareAtPrice`. An option value can set its own `salePercent`, so the percentage updates with the selected carat weight. Set `showPrices: true` on an option to show each choice's full price. Image entries can use `fit: "contain"` to preserve embedded captions in product galleries and quick view.
+
 Any product with a `studio` field links into the studio with its settings (e.g. `?piece=Ring&shape=Oval&setting=Bezel`). The studio stamps `brand.monogram` as the hallmark inside rings.
 
 ### Virtual try-on (AR)

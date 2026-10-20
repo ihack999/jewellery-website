@@ -15,7 +15,7 @@
       "description": "Signature diamond pieces, custom-made favourites and rare estate finds — each one confirmed personally before it's yours.",
       "match": { "excludeTags": ["estate-luxury"] },
       "image": "/assets/images/optimized/graduated-tennis-necklace-worn-1600.jpg",
-      "promo": { "after": 6, "title": "Can't find it? Design it.", "text": "Build your own ring, necklace or bracelet in real-time 3D.", "cta": "Open the Design Studio", "href": "/design-studio/", "image": "/assets/images/optimized/studio-ring-pink-gemstone-1600.jpg" }
+      "promo": { "after": 6, "title": "Can't find it? Design it.", "text": "Share your ideas for a custom ring, necklace or bracelet with our atelier.", "cta": "Start a custom request", "href": "/design-studio/", "image": "/assets/images/optimized/studio-ring-pink-gemstone-1600.jpg" }
     },
     {
       "handle": "new-arrivals",
@@ -40,15 +40,15 @@
       ],
       "links": [
         { "label": "Design your custom ring", "href": "/pages/custom-engagement-rings-toronto/" },
-        { "label": "Build your ring online in 3D", "href": "/design-studio/?piece=Ring#design-studio" },
+        { "label": "Share your ring idea", "href": "/design-studio/#request-form" },
         { "label": "Book an engagement ring appointment", "href": "/pages/contact/?topic=engagement" }
       ],
       "tiles": [],
-      "seoDescription": "Engagement rings made to order in Toronto — choose your stone, carat weight and ring size, or design your own ring in 3D."
+      "seoDescription": "Engagement rings made to order in Toronto — choose your stone, carat weight and ring size, or share your idea for a custom design."
     },
     { "handle": "rings", "title": "Rings", "tileLabel": "Rings", "heading": "Diamond Rings, Curated and Made for You", "seoTitle": "Diamond Rings Toronto | Custom and Curated Rings", "seoDescription": "Explore diamond rings in Toronto, including blue diamond, cushion cut, oval, and custom engagement designs in natural or lab-grown diamonds.", "match": { "category": "rings" }, "image": "/assets/images/studio/rise-ring-polished.webp",
       "description": "Sculptural pinky rings, cushion and oval solitaires, rare coloured diamonds and personalised signets.",
-      "promo": { "after": 4, "title": "Your ring, from scratch", "text": "Choose the silhouette, stone, metal and setting in the 3D Studio.", "cta": "Design a ring", "href": "/design-studio/?piece=Ring#design-studio", "image": "/assets/images/products/rise-ring/rise-ring-worn.jpeg" } },
+      "promo": { "after": 4, "title": "Your ring, from scratch", "text": "Share your preferred silhouette, stone, metal and setting with our atelier.", "cta": "Design a ring", "href": "/design-studio/#request-form", "image": "/assets/images/products/rise-ring/rise-ring-worn.jpeg" } },
     { "handle": "necklaces", "title": "Necklaces", "tileLabel": "Necklaces", "heading": "Diamond Necklaces Made to Hold the Light", "seoTitle": "Diamond Necklaces Toronto | Tennis Necklaces", "seoDescription": "Shop diamond and tennis necklaces in Toronto in white or yellow gold, made to order with natural or lab-grown diamond options.", "match": { "category": "necklaces" }, "image": "/assets/images/studio/diamond-tennis-necklace.webp",
       "description": "Tennis necklaces and graduated diamond lines designed to be worn every day — not saved for someday." },
     { "handle": "bracelets", "title": "Bracelets", "tileLabel": "Bracelets", "heading": "Diamond Bracelets for Everyday Confidence", "seoTitle": "Diamond Bracelets Toronto | Tennis and Hand Chains", "seoDescription": "Explore diamond bracelets in Toronto, from lab-grown tennis bracelets to 14K gold diamond hand chains, made to order to your fit.", "match": { "category": "bracelets" }, "image": "/assets/images/studio/oval-bezel-diamond-bracelet.webp",

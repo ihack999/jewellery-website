@@ -1,0 +1,95 @@
+{
+  "category": "rings",
+  "tags": [
+    "new-arrival",
+    "engagement",
+    "bridal"
+  ],
+  "availability": "made-to-order",
+  "currency": "CAD",
+  "hoverImage": 1,
+  "maxQuantity": 1,
+  "care": "Store separately in a soft pouch. Clean gently with a soft jewellery cloth and avoid harsh chemicals.",
+  "shipping": "Your specifications, availability, production timing and insured delivery are confirmed with you in writing before payment.",
+  "name": "Vintage Moval Diamond Ring",
+  "subtitle": "3–5 CT Moval Diamond · 14K Yellow Gold",
+  "price": 4900,
+  "priceFrom": true,
+  "badge": "New",
+  "sort": -8,
+  "metals": [
+    "yellow-gold"
+  ],
+  "stones": [
+    "diamond"
+  ],
+  "summary": "An elongated Moval centre stone in a full 14K yellow gold bezel, with delicate vintage details and a substantial 2 mm polished band.",
+  "description": "A vintage-inspired design with an elongated Moval centre stone, combining the soft curves of an oval with the long silhouette of a marquise. A full yellow gold bezel surrounds the stone, with delicate beaded detailing and diamond accents at the shoulders.\n\nThe 2 mm band has a slightly heavier gold presence and finishes in a plain polished band at the back. The supplied images show a 3 ct centre.\n\nStarting prices: 3 ct from $4,900 CAD; 4 ct from $5,900 CAD; 5 ct from $7,200 CAD. Diamond origin, quality, exact measurements and final pricing are confirmed with the selected stone. Carat weight and final appearance may vary slightly; pricing depends on stone quality, availability and custom modifications.",
+  "details": {
+    "Centre shape": "Moval",
+    "Centre size": "3 ct shown; 4 ct and 5 ct options available",
+    "Metal": "14K yellow gold",
+    "Setting": "Full bezel with vintage-inspired detailing",
+    "Band width": "Approx. 2 mm",
+    "Band finish": "Plain polished gold at the back",
+    "Diamond origin": "Confirmed with the selected stone",
+    "Pricing": "Starting prices in CAD, before taxes"
+  },
+  "options": [
+    {
+      "step": "Choose your carat weight",
+      "name": "Centre diamond",
+      "type": "button",
+      "help": "Starting prices; final specifications and quote are confirmed with your chosen stone.",
+      "values": [
+        {
+          "label": "3.00 ct"
+        },
+        {
+          "label": "4.00 ct",
+          "add": 1000
+        },
+        {
+          "label": "5.00 ct",
+          "add": 2300
+        }
+      ],
+      "showPrices": true
+    },
+    {
+      "step": "Choose your ring size",
+      "name": "Ring size",
+      "type": "size",
+      "values": "ringSizes",
+      "required": true
+    }
+  ],
+  "images": [
+    {
+      "src": "/assets/images/studio/vintage-moval-diamond-ring.webp",
+      "alt": "Vintage Moval Diamond Ring in a warm ivory studio view",
+      "note": "AI-restyled studio view. Supplied reference views follow.",
+      "fit": "contain"
+    },
+    {
+      "src": "01-reference-back.jpeg",
+      "alt": "Supplied rear view of the Vintage Moval ring and polished gold band",
+      "fit": "contain"
+    },
+    {
+      "src": "02-reference-front.jpeg",
+      "alt": "Supplied front view of the Vintage Moval bezel and diamond shoulders",
+      "fit": "contain"
+    },
+    {
+      "src": "03-worn.jpeg",
+      "alt": "Vintage Moval ring worn on the hand",
+      "fit": "contain"
+    },
+    {
+      "src": "04-reference-front.jpeg",
+      "alt": "Alternate supplied front view of the Vintage Moval ring",
+      "fit": "contain"
+    }
+  ]
+}

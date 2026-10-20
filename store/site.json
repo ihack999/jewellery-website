@@ -46,7 +46,7 @@
 
   "announcements": [
     { "text": "Women-led Toronto atelier · Custom, signature & estate fine jewellery", "href": "/pages/about/" },
-    { "text": "Design your own piece in our 3D Studio", "href": "/design-studio/" },
+    { "text": "Share your idea with our atelier — start a custom request", "href": "/design-studio/" },
     { "text": "Private appointments in Toronto — book a consultation", "href": "/pages/contact/" }
   ],
 
@@ -103,10 +103,10 @@
           { "title": "Engagement rings", "links": [
             { "label": "Shop Engagement Rings", "href": "/collections/engagement-rings/" },
             { "label": "Design Your Custom Ring", "href": "/pages/custom-engagement-rings-toronto/" },
-            { "label": "Build Your Ring Online", "href": "/design-studio/?piece=Ring#design-studio" }
+            { "label": "Start a Ring Request", "href": "/design-studio/#request-form" }
           ]},
           { "title": "Wedding bands", "links": [
-            { "label": "Design Your Custom Band", "href": "/design-studio/?piece=Ring&band=Eternity&halo=0&accent=1#design-studio" },
+            { "label": "Design Your Custom Band", "href": "/design-studio/#request-form" },
             { "label": "Ask About a Matching Band", "href": "/pages/contact/?topic=wedding-band" }
           ]},
           { "title": "Virtual or in-person appointment", "links": [
@@ -142,12 +142,11 @@
       }
     },
     {
-      "label": "Design Studio",
+      "label": "Custom Design",
       "href": "/design-studio/",
       "mega": {
         "columns": [
           { "title": "Create", "links": [
-            { "label": "Open the 3D Design Studio", "href": "/design-studio/" },
             { "label": "Custom Engagement Rings", "href": "/pages/custom-engagement-rings-toronto/" },
             { "label": "Custom Jewellery", "href": "/pages/custom-jewellery-toronto/" },
             { "label": "Start a Custom Request", "href": "/design-studio/#request-form" }
@@ -159,7 +158,7 @@
           ]}
         ],
         "features": [
-          { "title": "Design it in 3D", "href": "/design-studio/", "image": "/assets/images/optimized/studio-ring-pink-gemstone-1600.jpg" }
+          { "title": "Your idea, made personal", "href": "/design-studio/", "image": "/assets/images/optimized/studio-ring-pink-gemstone-1600.jpg" }
         ]
       }
     },
@@ -208,7 +207,7 @@
   "newsletter": {
     "enabled": true,
     "title": "5% off your first piece",
-    "text": "Join the private list for first access to new signatures, estate arrivals and studio previews.",
+    "text": "Join the private list for first access to new signatures, estate arrivals and custom designs.",
     "formName": "vip-welcome",
     "button": "Join the list"
   },
@@ -223,6 +222,8 @@
 
   "studio": {
     "enabled": true,
+    "editorEnabled": false,
+    "$comment": "Set editorEnabled to true to restore the retained 3D editor and product try-on. The request form remains available either way.",
     "path": "/design-studio/",
     "title": "Start Your Custom Jewellery Request",
     "seoTitle": "Book a Custom Jewellery Consultation in Toronto",
@@ -242,7 +243,7 @@
         { "label": "Estate & Rare", "href": "/collections/estate/" }
       ]},
       { "title": "Custom", "links": [
-        { "label": "3D Design Studio", "href": "/design-studio/" },
+        { "label": "Custom Requests", "href": "/design-studio/" },
         { "label": "Custom Engagement Rings", "href": "/pages/custom-engagement-rings-toronto/" },
         { "label": "Custom Jewellery Toronto", "href": "/pages/custom-jewellery-toronto/" },
         { "label": "Estate Sourcing", "href": "/pages/estate-jewellery-toronto/" }

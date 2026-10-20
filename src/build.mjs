@@ -128,6 +128,8 @@ export async function build({ quiet = false } = {}) {
     price: p.price,
     priceFrom: p.priceFrom,
     priceText: priceText(p, ctx),
+    compareAtPrice: p.compareAtPrice,
+    salePercent: p.salePercent,
     currency: p.currency,
     availability: p.availability,
     purchasable: p.purchasable,
@@ -143,10 +145,10 @@ export async function build({ quiet = false } = {}) {
     summary: p.summary || "",
     image: images.url(p.images[0].src, 720),
     hover: p.images[p.hoverImage] && p.hoverImage ? images.url(p.images[p.hoverImage].src, 720) : "",
-    images: p.images.slice(0, 6).map((img) => ({ src: images.url(img.src, 960), alt: img.alt })),
+    images: p.images.slice(0, 6).map((img) => ({ src: images.url(img.src, 960), alt: img.alt, fit: img.fit, note: img.note })),
     options: p.options.map((o) => ({
-      id: o.id, name: o.name, step: o.step, uppercase: o.uppercase, type: o.type, required: o.required, maxLength: o.maxLength, placeholder: o.placeholder, help: o.help,
-      values: o.type === "text" ? undefined : o.values.map((v) => ({ label: v.label, value: v.value, add: v.add || 0, inquire: Boolean(v.inquire), image: v.image, studioMetal: STUDIO_METALS[v.metal], swatch: store.vocab.metals[v.metal]?.swatch || v.swatch }))
+      id: o.id, name: o.name, step: o.step, uppercase: o.uppercase, type: o.type, required: o.required, maxLength: o.maxLength, placeholder: o.placeholder, help: o.help, showPrices: o.showPrices,
+      values: o.type === "text" ? undefined : o.values.map((v) => ({ label: v.label, value: v.value, add: v.add || 0, salePercent: v.salePercent, inquire: Boolean(v.inquire), image: v.image, studioMetal: STUDIO_METALS[v.metal], swatch: store.vocab.metals[v.metal]?.swatch || v.swatch }))
     }))
   }));
   writeFile(path.join(DIST, "products.json"), JSON.stringify(catalog));

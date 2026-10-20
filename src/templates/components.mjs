@@ -58,8 +58,9 @@ export function priceText(p, ctx) {
 export function priceHtml(p, ctx, { className = "price" } = {}) {
   const text = priceText(p, ctx);
   const compare = p.compareAtPrice && p.price !== null ? ` <s class="price__compare">${h(ctx.money(p.compareAtPrice, p.currency))}</s>` : "";
+  const sale = p.salePercent && p.price !== null && p.availability !== "sold" ? ` <span class="price__sale">${h(p.salePercent)}% off</span>` : "";
   const quiet = p.price === null || p.availability === "sold" ? " price--quiet" : "";
-  return `<p class="${className}${quiet}" data-price-display>${h(text)}${compare}</p>`;
+  return `<p class="${className}${quiet}" data-price-display aria-live="polite">${h(text)}${compare}${sale}</p>`;
 }
 
 // ---------------------------------------------------------------- badges
