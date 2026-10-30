@@ -424,6 +424,7 @@
   function bindProductForm(form, p, { onImage } = {}) {
     const addBtn = $("[data-add-to-bag]", form);
     const enqBtn = $("[data-enquire]", form);
+    const enqLink = $("[data-enquire-link]", form);
     const note = $("[data-inquire-note]", form);
     const priceEls = $$("[data-price-display]", form.closest("[data-pdp], .quick") || document);
     const update = () => {
@@ -441,6 +442,7 @@
       if (p.availability !== "sold") {
         if (addBtn) addBtn.hidden = inquire;
         if (enqBtn) { enqBtn.hidden = !inquire; enqBtn.classList.toggle("btn--solid", inquire); enqBtn.classList.toggle("btn--ghost", !inquire); }
+        if (enqLink) enqLink.hidden = !inquire;
         if (note) note.hidden = !(inquire && p.purchasable);
       }
       if (p.price !== null && p.availability !== "sold") {
@@ -666,7 +668,7 @@
     const opts = p.options.map((o) => withStep(o, (() => {
       const id = `q-${p.slug}-${o.id}`;
       if (o.type === "text") return `<div class="option"><label class="option__label" for="${id}">${esc(o.name)}</label><input class="option__input" id="${id}" name="${esc(o.name)}" ${o.maxLength ? `maxlength="${o.maxLength}"` : ""} placeholder="${esc(o.placeholder || "")}" ${o.required ? "required" : ""} data-option data-option-text${o.uppercase ? " data-uppercase" : ""} autocomplete="off"></div>`;
-      if (o.type === "size") return `<div class="option"><label class="option__label" for="${id}">${esc(o.name)}</label><div class="select"><select id="${id}" name="${esc(o.name)}" ${o.required ? "required" : ""} data-option><option value="">Select ${esc(o.name.toLowerCase())}</option>${o.values.map((v) => `<option value="${esc(v.value)}">${esc(v.label)}</option>`).join("")}</select>${ICON.chevron}</div></div>`;
+      if (o.type === "size" || o.type === "select") return `<div class="option"><label class="option__label" for="${id}">${esc(o.name)}</label><div class="select"><select id="${id}" name="${esc(o.name)}" ${o.required ? "required" : ""} data-option>${o.type === "size" ? `<option value="">Select ${esc(o.name.toLowerCase())}</option>` : ""}${o.values.map((v) => `<option value="${esc(v.value)}">${esc(v.label)}${o.showPrices ? ` — ${esc(money(p.price + (v.add || 0), p.currency))}` : ""}</option>`).join("")}</select>${ICON.chevron}</div>${o.help ? `<p class="option__help">${esc(o.help)}</p>` : ""}</div>`;
       const sw = o.type === "swatch";
       return `<fieldset class="option" data-option-group><legend class="option__label">${esc(o.name)}: <span class="option__value" data-option-value>${esc(o.values[0].label)}</span></legend><div class="${sw ? "option__swatches" : "option__buttons"}">${o.values.map((v, i) => `<label class="${sw ? "swatch-choice" : "pill"}"><input type="radio" name="${esc(o.name)}" value="${esc(v.value)}" ${i === 0 ? "checked" : ""} data-option ${v.add ? `data-add="${v.add}"` : ""} ${v.inquire ? "data-inquire" : ""} ${v.image !== undefined && v.image !== null ? `data-image="${v.image}"` : ""} ${v.studioMetal ? `data-studio-metal="${esc(v.studioMetal)}"` : ""}>${sw ? `<span class="swatch swatch--lg" style="--swatch:${esc(v.swatch || "#ddd")}"></span><span class="visually-hidden">${esc(v.label)}</span>` : `<span>${esc(v.label)}${o.showPrices ? ` <small>${esc(money(p.price + (v.add || 0), p.currency))}${v.salePercent ? ` · ${esc(v.salePercent)}% off` : ""}</small>` : ""}</span>`}</label>`).join("")}</div>${o.help ? `<p class="option__help">${esc(o.help)}</p>` : ""}</fieldset>`;
     })())).join("");

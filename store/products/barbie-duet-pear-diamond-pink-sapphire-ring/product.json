@@ -1,0 +1,95 @@
+{
+  "category": "rings",
+  "tags": [
+    "new-arrival",
+    "engagement",
+    "bridal"
+  ],
+  "availability": "made-to-order",
+  "currency": "CAD",
+  "badge": "New",
+  "maxQuantity": 1,
+  "care": "Store separately in a soft pouch. Clean gently with a soft jewellery cloth and avoid harsh chemicals.",
+  "shipping": "Your specifications, availability, production timing and insured delivery are confirmed with you in writing before payment.",
+  "name": "Barbie Duet Pear Diamond & Pink Sapphire Ring",
+  "subtitle": "Pear Lab Diamond & Blush Pink Sapphire · 14K White Gold",
+  "sort": -11,
+  "price": 3495,
+  "metals": [
+    "white-gold"
+  ],
+  "stones": [
+    "lab-diamond",
+    "gemstone"
+  ],
+  "summary": "A pear-shaped white lab-grown diamond and blush pink lab-created sapphire meet in a curved Toi et Moi bypass setting, finished with pavé shoulders.",
+  "description": "Two pear-shaped stones, one softly coloured statement. A 1.00 ct white lab-grown diamond sits beside a 1.00 ct blush pink lab-created sapphire in a curved Toi et Moi bypass design.\n\nCrafted in 14K white gold, lab-grown pavé diamonds extend halfway down each side of the band, with a smooth polished finish at the back. The band diamond weight is estimated at 0.30–0.50 ct.\n\nThe lab-grown diamond and lab-created sapphire version is $3,495 CAD. A natural white diamond and natural pink diamond version is available by special order with a personal quote, depending on stone quality and carat weight. Gemstone colour and measurements may vary slightly. Other jewellery shown in the styling photos is not included.",
+  "details": {
+    "White centre": "1.00 ct pear-shaped lab-grown white diamond",
+    "Pink centre": "1.00 ct pear-shaped lab-created blush pink sapphire",
+    "Combined centre weight": "2.00 ct",
+    "Band diamonds": "Estimated 0.30–0.50 ct lab-grown pavé diamonds",
+    "Metal": "14K white gold",
+    "Setting": "Toi et Moi curved bypass",
+    "Band finish": "Pavé halfway down each side; polished back",
+    "Natural alternative": "Natural white diamond + natural pink diamond, quoted by special order"
+  },
+  "options": [
+    {
+      "step": "Choose your stones",
+      "name": "Stone selection",
+      "type": "button",
+      "help": "The natural option uses a natural pink diamond and is quoted personally.",
+      "values": [
+        {
+          "label": "Lab diamond + lab-created pink sapphire"
+        },
+        {
+          "label": "Natural white + natural pink diamonds",
+          "inquire": true
+        }
+      ]
+    },
+    {
+      "step": "Choose your ring size",
+      "name": "Ring size",
+      "type": "size",
+      "values": "ringSizes",
+      "required": true
+    }
+  ],
+  "hoverImage": 4,
+  "images": [
+    {
+      "src": "/assets/images/studio/barbie-duet-pear-diamond-pink-sapphire-ring.webp",
+      "alt": "Barbie Duet Pear Diamond & Pink Sapphire Ring in a warm ivory studio view",
+      "note": "AI-restyled studio view. Supplied reference views follow.",
+      "fit": "contain"
+    },
+    {
+      "src": "01-reference-angle.jpeg",
+      "alt": "Supplied angled view of the white diamond and blush pink sapphire",
+      "fit": "contain"
+    },
+    {
+      "src": "02-reference-front.jpeg",
+      "alt": "Supplied front view of the two pear stones and pavé bypass band",
+      "fit": "contain"
+    },
+    {
+      "src": "03-reference-side.jpeg",
+      "alt": "Supplied side view of the two-stone basket and polished lower band",
+      "fit": "contain"
+    },
+    {
+      "src": "04-worn.jpeg",
+      "alt": "Barbie Duet ring styled with other jewellery; other pieces are not included",
+      "fit": "contain"
+    },
+    {
+      "src": "05-worn.jpeg",
+      "alt": "Alternate supplied styling view of the Barbie Duet ring",
+      "fit": "contain"
+    }
+  ]
+}

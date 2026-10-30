@@ -24,13 +24,14 @@ function optionField(p, o, ctx) {
   ${o.help ? `<p class="option__help">${h(o.help)}</p>` : ""}
 </div>`;
     }
-    if (o.type === "size") {
+    if (o.type === "size" || o.type === "select") {
       return `<div class="option">
-  <div class="option__row"><label class="option__label" for="${id}">${h(o.name)}</label>${p.category === "rings" ? `<a class="option__aside" href="/pages/contact/?topic=sizing">Size guide</a>` : ""}</div>
+  <div class="option__row"><label class="option__label" for="${id}">${h(o.name)}</label>${o.type === "size" && p.category === "rings" ? `<a class="option__aside" href="/pages/contact/?topic=sizing">Size guide</a>` : ""}</div>
   <div class="select"><select id="${id}" name="${h(o.name)}"${o.required ? " required" : ""} data-option>
-    <option value="">Select ${h(o.name.toLowerCase())}</option>
-    ${o.values.map((v) => `<option value="${h(v.value)}">${h(v.label)}</option>`).join("")}
+    ${o.type === "size" ? `<option value="">Select ${h(o.name.toLowerCase())}</option>` : ""}
+    ${o.values.map((v) => `<option value="${h(v.value)}">${h(v.label)}${o.showPrices ? ` — ${h(ctx.money(p.price + (v.add || 0), p.currency))}` : ""}</option>`).join("")}
   </select>${icon("chevronDown", { size: 14 })}</div>
+  ${o.help ? `<p class="option__help">${h(o.help)}</p>` : ""}
 </div>`;
     }
     const swatch = o.type === "swatch";

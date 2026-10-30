@@ -1,0 +1,111 @@
+{
+  "category": "rings",
+  "tags": [
+    "new-arrival",
+    "engagement",
+    "bridal"
+  ],
+  "availability": "made-to-order",
+  "currency": "CAD",
+  "badge": "New",
+  "maxQuantity": 1,
+  "care": "Store separately in a soft pouch. Clean gently with a soft jewellery cloth and avoid harsh chemicals.",
+  "shipping": "Your specifications, availability, production timing and insured delivery are confirmed with you in writing before payment.",
+  "name": "Vintage Tulip Diamond Ring",
+  "subtitle": "1 CT Antique-Cut Oval Lab Diamond · 10K or 14K Gold",
+  "sort": -10,
+  "price": 1495,
+  "priceFrom": true,
+  "metals": [
+    "yellow-gold",
+    "white-gold"
+  ],
+  "stones": [
+    "lab-diamond"
+  ],
+  "summary": "An antique-cut oval lab-grown diamond held by eight eagle-claw prongs above a tulip-inspired petal basket, with a slim polished gold band.",
+  "description": "Vintage-inspired faceting meets a sculptural tulip setting. A 1.00 ct antique-cut oval lab-grown diamond is held by eight eagle-claw prongs, with petal-like gold details beneath the centre.\n\nThe plain, polished 1.8 mm band keeps the focus on the stone and its floral basket. Choose solid 10K or 14K gold in yellow or white. Antique-cut describes the diamond’s vintage-style faceting.\n\n10K gold: $1,495 CAD. 14K gold: $1,750 CAD. Both gold colours are available at the same price for the selected purity.",
+  "details": {
+    "Centre stone": "1.00 ct antique-cut oval lab-grown diamond",
+    "Prongs": "Eight eagle-claw prongs",
+    "Basket": "Tulip-inspired petals",
+    "Band width": "Approx. 1.8 mm",
+    "Band finish": "Plain polished gold",
+    "Metal": "Solid 10K or 14K yellow or white gold",
+    "10K price": "$1,495 CAD",
+    "14K price": "$1,750 CAD"
+  },
+  "options": [
+    {
+      "step": "Choose your gold purity",
+      "name": "Gold purity",
+      "type": "select",
+      "showPrices": true,
+      "values": [
+        {
+          "label": "10K solid gold"
+        },
+        {
+          "label": "14K solid gold",
+          "add": 255
+        }
+      ]
+    },
+    {
+      "step": "Choose your gold colour",
+      "name": "Gold colour",
+      "type": "swatch",
+      "values": [
+        {
+          "label": "Yellow Gold",
+          "metal": "yellow-gold"
+        },
+        {
+          "label": "White Gold",
+          "metal": "white-gold"
+        }
+      ]
+    },
+    {
+      "step": "Choose your ring size",
+      "name": "Ring size",
+      "type": "size",
+      "values": "ringSizes",
+      "required": true
+    }
+  ],
+  "hoverImage": 3,
+  "images": [
+    {
+      "src": "/assets/images/studio/vintage-tulip-diamond-ring.webp",
+      "alt": "Vintage Tulip Diamond Ring in a warm ivory studio view",
+      "note": "AI-restyled studio view. Supplied reference views follow.",
+      "fit": "contain"
+    },
+    {
+      "src": "01-reference-angle.jpeg",
+      "alt": "Supplied three-quarter view of the tulip basket and yellow gold band",
+      "fit": "contain"
+    },
+    {
+      "src": "02-reference-front.jpeg",
+      "alt": "Supplied front view of the antique-cut oval diamond and eight claws",
+      "fit": "contain"
+    },
+    {
+      "src": "03-worn.jpeg",
+      "alt": "Vintage Tulip ring worn on the hand",
+      "fit": "contain"
+    },
+    {
+      "src": "04-reference-basket.jpeg",
+      "alt": "Supplied view of the floral petal basket beneath the diamond",
+      "fit": "contain"
+    },
+    {
+      "src": "05-worn.jpeg",
+      "alt": "Alternate supplied styling view of the Vintage Tulip ring",
+      "fit": "contain"
+    }
+  ]
+}

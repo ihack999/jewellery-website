@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-20T18:00:16.556Z",
+  "generatedAt": "2026-10-30T01:38:19.542Z",
   "currency": "CAD",
   "checkoutMode": "request",
   "shippingCountries": [
@@ -7,6 +7,348 @@
     "US"
   ],
   "products": {
+    "classic-round-natural-diamond-split-shank-ring": {
+      "name": "Classic Round Natural Diamond Split Shank Ring",
+      "price": 17000,
+      "currency": "CAD",
+      "purchasable": true,
+      "maxQuantity": 1,
+      "image": "https://torontojewelscuration.com/media/classic-round-natural-diamond-split-shank-ring-42ac18f3-720.webp",
+      "options": [
+        {
+          "name": "Ring size",
+          "type": "size",
+          "required": true,
+          "values": [
+            {
+              "value": "3",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "3.5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "4",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "4.5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "5.5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "6",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "6.5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "7",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "7.5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "8",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "8.5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "9",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "9.5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "10",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "Not sure — help me size",
+              "add": 0,
+              "inquire": false
+            }
+          ]
+        }
+      ]
+    },
+    "barbie-duet-pear-diamond-pink-sapphire-ring": {
+      "name": "Barbie Duet Pear Diamond & Pink Sapphire Ring",
+      "price": 3495,
+      "currency": "CAD",
+      "purchasable": true,
+      "maxQuantity": 1,
+      "image": "https://torontojewelscuration.com/media/barbie-duet-pear-diamond-pink-sapphire-ring-51311bc2-720.webp",
+      "options": [
+        {
+          "name": "Stone selection",
+          "type": "button",
+          "required": true,
+          "values": [
+            {
+              "value": "Lab diamond + lab-created pink sapphire",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "Natural white + natural pink diamonds",
+              "add": 0,
+              "inquire": true
+            }
+          ]
+        },
+        {
+          "name": "Ring size",
+          "type": "size",
+          "required": true,
+          "values": [
+            {
+              "value": "3",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "3.5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "4",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "4.5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "5.5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "6",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "6.5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "7",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "7.5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "8",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "8.5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "9",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "9.5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "10",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "Not sure — help me size",
+              "add": 0,
+              "inquire": false
+            }
+          ]
+        }
+      ]
+    },
+    "vintage-tulip-diamond-ring": {
+      "name": "Vintage Tulip Diamond Ring",
+      "price": 1495,
+      "currency": "CAD",
+      "purchasable": true,
+      "maxQuantity": 1,
+      "image": "https://torontojewelscuration.com/media/vintage-tulip-diamond-ring-1dfc9c6c-720.webp",
+      "options": [
+        {
+          "name": "Gold purity",
+          "type": "select",
+          "required": true,
+          "values": [
+            {
+              "value": "10K solid gold",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "14K solid gold",
+              "add": 255,
+              "inquire": false
+            }
+          ]
+        },
+        {
+          "name": "Gold colour",
+          "type": "swatch",
+          "required": true,
+          "values": [
+            {
+              "value": "Yellow Gold",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "White Gold",
+              "add": 0,
+              "inquire": false
+            }
+          ]
+        },
+        {
+          "name": "Ring size",
+          "type": "size",
+          "required": true,
+          "values": [
+            {
+              "value": "3",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "3.5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "4",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "4.5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "5.5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "6",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "6.5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "7",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "7.5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "8",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "8.5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "9",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "9.5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "10",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "Not sure — help me size",
+              "add": 0,
+              "inquire": false
+            }
+          ]
+        }
+      ]
+    },
     "moval-diamond-pink-sapphire-ring": {
       "name": "Moval Diamond Engagement Ring with Pink Sapphires",
       "price": 5900,

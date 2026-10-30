@@ -103,13 +103,20 @@ const sections = {
   },
 
   clientMoments(s, ctx) {
-    const items = (s.videos || []).map((v) => `<figure class="moment">
+    const videos = (s.videos || []).map((v) => `<figure class="moment">
       <a class="moment__media" href="${h(v.href || "#")}" aria-label="${h(v.label)}">
         <video muted loop playsinline preload="none" ${v.poster ? `poster="${h(ctx.images.url(v.poster, 540))}"` : ""} data-src="${h(v.src)}" data-moment-video></video>
         <span class="moment__play" aria-hidden="true">${icon("play", { size: 14 })}</span>
       </a>
       <figcaption>${h(v.label)}</figcaption>
     </figure>`);
+    const photos = (s.images || []).map((img) => `<figure class="moment">
+      <a class="moment__media" href="${h(img.href || "/shop/")}" aria-label="${h(img.label)}">
+        ${ctx.images.tag(img.src, { alt: img.label, sizes: "(max-width: 700px) 46vw, 20vw", widths: [360, 540, 720], attrs: img.fit === "contain" ? 'style="object-fit:contain"' : "" })}
+      </a>
+      <figcaption>${h(img.label)}</figcaption>
+    </figure>`);
+    const items = [...videos, ...photos];
     return `<section class="section section--surface">
   <div class="wrap">
     ${sectionHead({ eyebrow: s.eyebrow, title: s.title, text: s.text })}

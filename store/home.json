@@ -31,7 +31,7 @@
       "eyebrow": "Just added",
       "title": "New arrivals",
       "collection": "new-arrivals",
-      "limit": 9,
+      "limit": 12,
       "ctaLabel": "Shop new arrivals"
     },
     {
@@ -88,16 +88,166 @@
       "type": "clientMoments",
       "eyebrow": "Worn, not stored",
       "title": "Client moments",
-      "text": "Real pieces, real people — filmed by our clients.",
+      "text": "Jewellery, styled and shared — moments from our clients and atelier.",
       "videos": [
-        { "src": "/assets/videos/customer-15-carat-graduated-tennis-necklace-01.mp4", "poster": "/assets/images/store/posters/customer-15-carat-graduated-tennis-necklace-01.jpg", "label": "15 ct graduated tennis necklace", "href": "/products/15-carat-graduated-diamond-tennis-necklace/" },
-        { "src": "/assets/videos/customer-oval-diamond-ring.mp4", "poster": "/assets/images/store/posters/customer-oval-diamond-ring.jpg", "label": "Oval diamond ring", "href": "/design-studio/" },
-        { "src": "/assets/videos/customer-15-carat-graduated-tennis-necklace-02.mp4", "poster": "/assets/images/store/posters/customer-15-carat-graduated-tennis-necklace-02.jpg", "label": "Graduated tennis necklace", "href": "/products/15-carat-graduated-diamond-tennis-necklace/" },
-        { "src": "/assets/videos/customer-story-green-clover-ring.mp4", "poster": "/assets/images/store/posters/customer-story-green-clover-ring.jpg", "label": "Green clover ring", "href": "/collections/coloured-stones/" },
-        { "src": "/assets/videos/customer-review-styling-01.mp4", "poster": "/assets/images/store/posters/customer-review-styling-01.jpg", "label": "Everyday styling", "href": "/shop/" },
-        { "src": "/assets/videos/customer-15-carat-graduated-tennis-necklace-03.mp4", "poster": "/assets/images/store/posters/customer-15-carat-graduated-tennis-necklace-03.jpg", "label": "Tennis necklace detail", "href": "/collections/tennis/" },
-        { "src": "/assets/videos/blue-stone-ring-styling.mp4", "poster": "/assets/images/store/posters/blue-stone-ring-styling.jpg", "label": "Blue stone ring", "href": "/products/rare-blue-diamond-ring/" },
-        { "src": "/assets/videos/customer-review-styling-02.mp4", "poster": "/assets/images/store/posters/customer-review-styling-02.jpg", "label": "Styled by a client", "href": "/shop/" }
+        {
+          "src": "/assets/videos/client-graduated-tennis-detail-2026-10.mp4",
+          "poster": "/assets/images/store/posters/client-graduated-tennis-detail-2026-10.jpg",
+          "label": "Graduated diamond necklace",
+          "href": "/collections/tennis/"
+        },
+        {
+          "src": "/assets/videos/client-diamond-eternity-detail-2026-10.mp4",
+          "poster": "/assets/images/store/posters/client-diamond-eternity-detail-2026-10.jpg",
+          "label": "Diamond eternity detail",
+          "href": "/design-studio/"
+        },
+        {
+          "src": "/assets/videos/client-diamond-hoops-detail-2026-10.mp4",
+          "poster": "/assets/images/store/posters/client-diamond-hoops-detail-2026-10.jpg",
+          "label": "Diamond hoops detail",
+          "href": "/design-studio/"
+        },
+        {
+          "src": "/assets/videos/client-round-diamond-ring-detail-2026-10.mp4",
+          "poster": "/assets/images/store/posters/client-round-diamond-ring-detail-2026-10.jpg",
+          "label": "Round diamond ring, worn",
+          "href": "/design-studio/"
+        },
+        {
+          "src": "/assets/videos/client-cushion-diamond-ring-worn-2026-10.mp4",
+          "poster": "/assets/images/store/posters/client-cushion-diamond-ring-worn-2026-10.jpg",
+          "label": "Cushion diamond ring, worn",
+          "href": "/design-studio/"
+        },
+        {
+          "src": "/assets/videos/client-pink-floral-earrings-2026-10.mp4",
+          "poster": "/assets/images/store/posters/client-pink-floral-earrings-2026-10.jpg",
+          "label": "Pink floral earrings",
+          "href": "/design-studio/"
+        },
+        {
+          "src": "/assets/videos/customer-15-carat-graduated-tennis-necklace-01.mp4",
+          "poster": "/assets/images/store/posters/customer-15-carat-graduated-tennis-necklace-01.jpg",
+          "label": "15 ct graduated tennis necklace",
+          "href": "/products/15-carat-graduated-diamond-tennis-necklace/"
+        },
+        {
+          "src": "/assets/videos/customer-oval-diamond-ring.mp4",
+          "poster": "/assets/images/store/posters/customer-oval-diamond-ring.jpg",
+          "label": "Oval diamond ring",
+          "href": "/design-studio/"
+        },
+        {
+          "src": "/assets/videos/customer-15-carat-graduated-tennis-necklace-02.mp4",
+          "poster": "/assets/images/store/posters/customer-15-carat-graduated-tennis-necklace-02.jpg",
+          "label": "Graduated tennis necklace",
+          "href": "/products/15-carat-graduated-diamond-tennis-necklace/"
+        },
+        {
+          "src": "/assets/videos/customer-story-green-clover-ring.mp4",
+          "poster": "/assets/images/store/posters/customer-story-green-clover-ring.jpg",
+          "label": "Green clover ring",
+          "href": "/collections/coloured-stones/"
+        },
+        {
+          "src": "/assets/videos/customer-review-styling-01.mp4",
+          "poster": "/assets/images/store/posters/customer-review-styling-01.jpg",
+          "label": "Everyday styling",
+          "href": "/shop/"
+        },
+        {
+          "src": "/assets/videos/customer-15-carat-graduated-tennis-necklace-03.mp4",
+          "poster": "/assets/images/store/posters/customer-15-carat-graduated-tennis-necklace-03.jpg",
+          "label": "Tennis necklace detail",
+          "href": "/collections/tennis/"
+        },
+        {
+          "src": "/assets/videos/blue-stone-ring-styling.mp4",
+          "poster": "/assets/images/store/posters/blue-stone-ring-styling.jpg",
+          "label": "Blue stone ring",
+          "href": "/products/rare-blue-diamond-ring/"
+        },
+        {
+          "src": "/assets/videos/customer-review-styling-02.mp4",
+          "poster": "/assets/images/store/posters/customer-review-styling-02.jpg",
+          "label": "Styled by a client",
+          "href": "/shop/"
+        }
+      ],
+      "images": [
+        {
+          "src": "/assets/images/customer-stories/october-2026/pink-diamond-styling.jpeg",
+          "label": "Pink diamond jewellery styling",
+          "href": "/design-studio/",
+          "fit": "cover"
+        },
+        {
+          "src": "/assets/images/customer-stories/october-2026/diamond-hoops-worn.jpeg",
+          "label": "Diamond hoops, worn",
+          "href": "/design-studio/",
+          "fit": "cover"
+        },
+        {
+          "src": "/assets/images/customer-stories/october-2026/emerald-cut-ring-watch-01.jpeg",
+          "label": "Emerald-cut ring styling",
+          "href": "/design-studio/",
+          "fit": "cover"
+        },
+        {
+          "src": "/assets/images/customer-stories/october-2026/emerald-cut-ring-watch-02.jpeg",
+          "label": "Jewellery and watch styling",
+          "href": "/design-studio/",
+          "fit": "cover"
+        },
+        {
+          "src": "/assets/images/customer-stories/october-2026/emerald-cut-ring-watch-03.jpeg",
+          "label": "Curated pieces, worn together",
+          "href": "/design-studio/",
+          "fit": "cover"
+        },
+        {
+          "src": "/assets/images/customer-stories/october-2026/emerald-cut-ring-watch-04.jpeg",
+          "label": "Everyday ring styling",
+          "href": "/design-studio/",
+          "fit": "cover"
+        },
+        {
+          "src": "/assets/images/customer-stories/october-2026/pear-duet-round-ring-01.jpeg",
+          "label": "Pear duet and round diamond rings",
+          "href": "/products/barbie-duet-pear-diamond-pink-sapphire-ring/",
+          "fit": "cover"
+        },
+        {
+          "src": "/assets/images/customer-stories/october-2026/pear-duet-round-ring-02.jpeg",
+          "label": "Diamond ring details",
+          "href": "/products/classic-round-natural-diamond-split-shank-ring/",
+          "fit": "cover"
+        },
+        {
+          "src": "/assets/images/customer-stories/october-2026/pear-duet-round-ring-03.jpeg",
+          "label": "White gold ring styling",
+          "href": "/products/classic-round-natural-diamond-split-shank-ring/",
+          "fit": "cover"
+        },
+        {
+          "src": "/assets/images/customer-stories/october-2026/client-love-emerald-bracelet.jpeg",
+          "label": "Client love · diamond bracelet",
+          "href": "/design-studio/",
+          "fit": "contain"
+        },
+        {
+          "src": "/assets/images/customer-stories/october-2026/client-love-yellow-diamond.jpeg",
+          "label": "Client love · yellow diamond ring",
+          "href": "/design-studio/",
+          "fit": "contain"
+        },
+        {
+          "src": "/assets/images/customer-stories/october-2026/client-love-watch.jpeg",
+          "label": "Client love · a graduation gift",
+          "href": "/collections/watches/",
+          "fit": "contain"
+        }
       ]
     },
     {

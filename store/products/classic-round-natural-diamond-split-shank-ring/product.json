@@ -1,0 +1,71 @@
+{
+  "category": "rings",
+  "tags": [
+    "new-arrival",
+    "engagement",
+    "bridal"
+  ],
+  "availability": "made-to-order",
+  "currency": "CAD",
+  "badge": "New",
+  "maxQuantity": 1,
+  "care": "Store separately in a soft pouch. Clean gently with a soft jewellery cloth and avoid harsh chemicals.",
+  "shipping": "Your specifications, availability, production timing and insured delivery are confirmed with you in writing before payment.",
+  "name": "Classic Round Natural Diamond Split Shank Ring",
+  "subtitle": "2 CT Natural Round Brilliant · 14K White Gold",
+  "sort": -12,
+  "price": 17000,
+  "metals": [
+    "white-gold"
+  ],
+  "stones": [
+    "natural-diamond",
+    "diamond"
+  ],
+  "summary": "A 2.00 ct round brilliant natural diamond in a delicate 14K white gold split-shank setting, with natural pavé diamonds along the shoulders.",
+  "description": "A classic round brilliant diamond with a graceful opening along the band. The 2.00 ct natural centre diamond is complemented by slender split-shank shoulders set with approximately 0.30–0.50 ct of natural pavé diamonds.\n\nCrafted in high-polish 14K white gold, the delicate split band draws the eye to the centre stone. The approximate total diamond weight is 2.30–2.50 ct.\n\n$17,000 CAD. The centre diamond is offered in the D–E colourless range with VS clarity. Exact colour, clarity and grading report are confirmed with the selected diamond. Band diamond weight may vary slightly with ring size. The separate band shown in the supplied styling photos is not included.",
+  "details": {
+    "Centre diamond": "2.00 ct round brilliant natural diamond",
+    "Colour": "D–E (colourless range)",
+    "Clarity": "VS",
+    "Band diamonds": "Approx. 0.30–0.50 ct total, natural pavé diamonds",
+    "Total diamond weight": "Approx. 2.30–2.50 ct",
+    "Metal": "14K white gold",
+    "Setting": "Delicate split-shank with pavé-set natural diamonds",
+    "Finish": "High polish",
+    "Grading": "Exact centre specifications and grading report confirmed with the selected diamond"
+  },
+  "options": [
+    {
+      "step": "Choose your ring size",
+      "name": "Ring size",
+      "type": "size",
+      "values": "ringSizes",
+      "required": true
+    }
+  ],
+  "hoverImage": 2,
+  "images": [
+    {
+      "src": "/assets/images/studio/classic-round-natural-diamond-split-shank-ring.webp",
+      "alt": "Classic Round Natural Diamond Split Shank Ring in a warm ivory studio view",
+      "note": "AI-restyled studio view. Supplied reference views follow.",
+      "fit": "contain"
+    },
+    {
+      "src": "01-reference-front.jpeg",
+      "alt": "Supplied front view of the natural round diamond and pavé split shank",
+      "fit": "contain"
+    },
+    {
+      "src": "02-worn.jpeg",
+      "alt": "Classic Round split-shank ring styled with a separate band and other jewellery",
+      "fit": "contain"
+    },
+    {
+      "src": "03-worn.jpeg",
+      "alt": "Alternate supplied styling view of the Classic Round split-shank ring",
+      "fit": "contain"
+    }
+  ]
+}
