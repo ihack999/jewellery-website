@@ -108,7 +108,10 @@ const sections = {
         <video muted loop playsinline preload="none" ${v.poster ? `poster="${h(ctx.images.url(v.poster, 540))}"` : ""} data-src="${h(v.src)}" data-moment-video></video>
         <span class="moment__play" aria-hidden="true">${icon("play", { size: 14 })}</span>
       </a>
-      <figcaption>${h(v.label)}</figcaption>
+      <figcaption>
+        ${h(v.label)}
+        ${v.review ? `<blockquote class="moment__review"><p>“${h(v.review)}”</p></blockquote>` : ""}
+      </figcaption>
     </figure>`);
     const photos = (s.images || []).map((img) => `<figure class="moment">
       <a class="moment__media" href="${h(img.href || "/shop/")}" aria-label="${h(img.label)}">
@@ -117,7 +120,7 @@ const sections = {
       <figcaption>${h(img.label)}</figcaption>
     </figure>`);
     const items = [...videos, ...photos];
-    return `<section class="section section--surface">
+    return `<section id="client-moments" class="section section--surface">
   <div class="wrap">
     ${sectionHead({ eyebrow: s.eyebrow, title: s.title, text: s.text })}
     ${carousel(items, { label: s.title, className: "rail--moments" })}
