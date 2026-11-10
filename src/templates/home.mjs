@@ -110,6 +110,7 @@ const sections = {
       </a>
       <figcaption>
         ${h(v.label)}
+        ${v.stylingNote ? `<p class="moment__note"><span class="moment__note-label">Atelier note</span> ${h(v.stylingNote)}</p>` : ""}
         ${v.review ? `<blockquote class="moment__review"><p>“${h(v.review)}”</p></blockquote>` : ""}
       </figcaption>
     </figure>`);

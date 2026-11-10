@@ -487,7 +487,8 @@ button.swatch { cursor: pointer; }
 .moment__play { position: absolute; right: 10px; bottom: 10px; width: 32px; height: 32px; display: grid; place-items: center; border-radius: 50%; background: rgba(255,255,255,.9); color: var(--color-ink); transition: opacity .3s; }
 .moment.is-playing .moment__play { opacity: 0; }
 .moment figcaption { margin-top: 10px; font-size: 13px; color: var(--color-ink); }
-.moment__review { margin: 4px 0 0; color: var(--color-muted); font-size: 12px; line-height: 1.5; overflow-wrap: anywhere; }
+.moment__note, .moment__review { margin: 4px 0 0; color: var(--color-muted); font-size: 12px; line-height: 1.5; overflow-wrap: anywhere; }
+.moment__note-label { display: block; margin-bottom: 2px; font-size: 10px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; }
 
 /* ---------- services ---------- */
 .services { display: grid; gap: 40px; }
