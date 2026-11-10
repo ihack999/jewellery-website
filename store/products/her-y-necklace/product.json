@@ -1,0 +1,49 @@
+{
+  "name": "HER Y Necklace",
+  "subtitle": "18K Solid Gold · Lab-Grown Diamond Y-Drop",
+  "category": "necklaces",
+  "tags": ["new-arrival", "y-drop"],
+  "availability": "made-to-order",
+  "badge": "New",
+  "price": 17900,
+  "currency": "CAD",
+  "metals": ["yellow-gold", "white-gold"],
+  "stones": ["lab-diamond"],
+  "summary": "A lab-grown diamond Y-drop necklace in 18K solid gold, with individually set round brilliants and an IGI-certified 3.00 ct oval diamond at the tip.",
+  "description": "HER Y traces a 35 cm neckline before falling into a 10 cm diamond drop. Approximately 50 round brilliant lab-grown diamonds are individually prong-set and joined by delicate articulated links. A 3.00 ct oval brilliant lab-grown diamond, graded E colour and VVS2 clarity by IGI, finishes the drop. Available in 18K solid yellow or white gold.\n\nHER Y was created for the woman who understands that her worth is never defined by anyone else.\n\nThe graceful Y-shaped silhouette represents her individuality, while the cascading diamonds celebrate her confidence, strength, and beauty.\n\nA piece designed to be worn not simply as jewellery, but as a reflection of the woman wearing it.\n\nFor the woman who knows her worth.\n\nToronto Jewels Curation — Your Jewellery, Your Way.",
+  "details": {
+    "Metal": "18K solid yellow gold or white gold",
+    "Design": "Diamond Y-drop necklace",
+    "Neckline length": "35 cm (approx. 13.8 in)",
+    "Vertical diamond drop": "10 cm (approx. 3.9 in)",
+    "Setting": "Individually prong-set diamonds with articulated links",
+    "Round diamonds": "Approx. 50 round brilliant lab-grown diamonds, including those along the drop",
+    "Round diamond size": "Approx. 5.0 mm each; estimated 0.47–0.50 ct (47–50 points) per diamond",
+    "Oval drop diamond": "3.00 ct oval brilliant lab-grown diamond at the base of the Y-drop",
+    "Oval diamond colour and clarity": "E colour, VVS2 clarity",
+    "Oval diamond certification": "IGI"
+  },
+  "options": [
+    {
+      "step": "Choose your gold colour",
+      "name": "Metal",
+      "type": "swatch",
+      "values": [
+        { "label": "18K Yellow Gold", "metal": "yellow-gold", "image": 0 },
+        { "label": "18K White Gold", "metal": "white-gold", "image": 1 }
+      ]
+    }
+  ],
+  "images": [
+    { "src": "/assets/images/studio/her-y-necklace-yellow-gold.webp", "alt": "HER Y necklace in yellow gold with round diamond links and a dangling oval diamond", "fit": "contain" },
+    { "src": "/assets/images/studio/her-y-necklace-white-gold.webp", "alt": "HER Y necklace in white gold with a vertical diamond drop and oval diamond tip", "fit": "contain" },
+    { "src": "her-y-yellow-gold-worn.jpeg", "alt": "HER Y yellow gold necklace worn, showing the neckline and full Y-drop", "fit": "contain" },
+    { "src": "her-y-yellow-gold-front.jpeg", "alt": "Front view of the HER Y necklace in yellow gold, showing the articulated links", "fit": "contain" },
+    { "src": "her-y-white-gold-front.jpeg", "alt": "Front view of the HER Y necklace in white gold, showing the prong settings and oval drop", "fit": "contain" }
+  ],
+  "hoverImage": 2,
+  "care": "Store flat in a soft pouch, avoid contact with fragrance and harsh chemicals, and clean gently with a soft jewellery cloth.",
+  "shipping": "Your specifications, availability, production timing and insured delivery are confirmed with you in writing before payment.",
+  "maxQuantity": 1,
+  "sort": -14
+}

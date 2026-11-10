@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-10T02:38:02.770Z",
+  "generatedAt": "2026-11-10T02:41:09.360Z",
   "currency": "CAD",
   "checkoutMode": "request",
   "shippingCountries": [
@@ -7,6 +7,33 @@
     "US"
   ],
   "products": {
+    "her-y-necklace": {
+      "name": "HER Y Necklace",
+      "price": 17900,
+      "currency": "CAD",
+      "purchasable": true,
+      "maxQuantity": 1,
+      "image": "https://torontojewelscuration.com/media/her-y-necklace-yellow-gold-9e2f8ccd-720.webp",
+      "options": [
+        {
+          "name": "Metal",
+          "type": "swatch",
+          "required": true,
+          "values": [
+            {
+              "value": "18K Yellow Gold",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "18K White Gold",
+              "add": 0,
+              "inquire": false
+            }
+          ]
+        }
+      ]
+    },
     "the-blush-halo-ring": {
       "name": "The Blush Halo | Round Diamond & Pink Sapphire Ring",
       "price": 4500,
