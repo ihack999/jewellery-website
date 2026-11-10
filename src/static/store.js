@@ -448,8 +448,11 @@
       if (p.price !== null && p.availability !== "sold") {
         if (inquire && p.purchasable) priceEls.forEach((el) => (el.textContent = "Price on request"));
         else priceEls.forEach((el) => (el.innerHTML = productPriceHtml(p, opts)));
-        const stickyPrice = form.closest("[data-pdp]") && $("[data-sticky-atc] [data-price-display]");
+        const sticky = form.closest("[data-pdp]") && $("[data-sticky-atc]");
+        const stickyPrice = sticky && $("[data-price-display]", sticky);
         if (stickyPrice) stickyPrice.innerHTML = inquire ? "Price on request" : productPriceHtml(p, opts);
+        const stickyAction = sticky && $("[data-sticky-action]", sticky);
+        if (stickyAction) stickyAction.textContent = inquire ? "Enquire" : "Add to bag";
       }
       form.dataset.inquire = String(inquire);
     };

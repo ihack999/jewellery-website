@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-10T02:42:57.126Z",
+  "generatedAt": "2026-11-10T02:44:47.478Z",
   "currency": "CAD",
   "checkoutMode": "request",
   "shippingCountries": [
@@ -7,6 +7,60 @@
     "US"
   ],
   "products": {
+    "the-solitaire-hand-chain": {
+      "name": "The Solitaire Hand Chain",
+      "price": 598,
+      "currency": "CAD",
+      "purchasable": true,
+      "maxQuantity": 1,
+      "image": "https://torontojewelscuration.com/media/solitaire-hand-chain-yellow-gold-studio-e9bb4ea3-720.webp",
+      "options": [
+        {
+          "name": "Metal",
+          "type": "swatch",
+          "required": true,
+          "values": [
+            {
+              "value": "14K Yellow Gold",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "14K White Gold",
+              "add": 0,
+              "inquire": false
+            }
+          ]
+        },
+        {
+          "name": "Centre stone",
+          "type": "button",
+          "required": true,
+          "values": [
+            {
+              "value": "Round cubic zirconia",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "Diamond",
+              "add": 0,
+              "inquire": true
+            },
+            {
+              "value": "Coloured gemstone",
+              "add": 0,
+              "inquire": true
+            },
+            {
+              "value": "Birthstone",
+              "add": 0,
+              "inquire": true
+            }
+          ]
+        }
+      ]
+    },
     "her-y-necklace": {
       "name": "HER Y Necklace",
       "price": 17900,

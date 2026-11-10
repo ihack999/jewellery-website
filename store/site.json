@@ -286,6 +286,7 @@
       "lab-diamond": "Lab-Grown Diamond",
       "coloured-diamond": "Coloured Diamond",
       "gemstone": "Coloured Gemstone",
+      "cubic-zirconia": "Cubic Zirconia",
       "none": "No Stone"
     },
     "availability": {

@@ -1,0 +1,56 @@
+{
+  "name": "The Solitaire Hand Chain",
+  "subtitle": "14K Gold · Round Cubic Zirconia",
+  "category": "bracelets",
+  "tags": ["new-arrival", "dainty", "hand-chain"],
+  "availability": "made-to-order",
+  "badge": "New",
+  "price": 598,
+  "currency": "CAD",
+  "metals": ["yellow-gold", "white-gold"],
+  "stones": ["cubic-zirconia"],
+  "summary": "A delicate 14K gold hand chain connects the wrist and finger, accented with a round cubic zirconia solitaire.",
+  "description": "A delicate statement. An effortless kind of luxury.\n\nAn elegant connection between bracelet and ring, the Solitaire Hand Chain is designed to bring a subtle sparkle to every movement.\n\nCrafted in 14K gold, a fine chain flows gracefully from the wrist to the finger, accented by a brilliant round cubic zirconia solitaire.\n\nWhat makes this piece truly special is the freedom to make it your own. Replace the centre stone with a diamond, a coloured gemstone, or a meaningful birthstone to create something uniquely yours.\n\nBeautiful worn alone or layered with your favourite fine jewellery.\n\nThe cubic zirconia version is $598 CAD in either gold colour. Custom stones are quoted on request. Other pieces shown in the styling photos are not included.",
+  "details": {
+    "Metal": "14K gold",
+    "Gold colours": "Yellow gold or white gold",
+    "Centre stone": "Round cubic zirconia",
+    "Customization": "Diamond, coloured gemstone or birthstone by request",
+    "Design": "Delicate hand chain connecting the bracelet to the finger"
+  },
+  "options": [
+    {
+      "step": "Choose your gold colour",
+      "name": "Metal",
+      "type": "swatch",
+      "values": [
+        { "label": "14K Yellow Gold", "metal": "yellow-gold", "image": 0 },
+        { "label": "14K White Gold", "metal": "white-gold", "image": 1 }
+      ]
+    },
+    {
+      "step": "Choose your centre stone",
+      "name": "Centre stone",
+      "type": "button",
+      "values": [
+        { "label": "Round cubic zirconia" },
+        { "label": "Diamond", "inquire": true },
+        { "label": "Coloured gemstone", "inquire": true },
+        { "label": "Birthstone", "inquire": true }
+      ]
+    }
+  ],
+  "images": [
+    { "src": "solitaire-hand-chain-yellow-gold-studio.jpeg", "alt": "Solitaire Hand Chain in yellow gold with a round centre stone and finger loop" },
+    { "src": "solitaire-hand-chain-white-gold-studio.jpeg", "alt": "Solitaire Hand Chain in white gold with a round centre stone and finger loop" },
+    { "src": "solitaire-hand-chain-yellow-gold-worn.jpeg", "alt": "Yellow gold Solitaire Hand Chain worn from wrist to finger", "fit": "contain" },
+    { "src": "solitaire-hand-chain-white-gold-worn.jpeg", "alt": "White gold Solitaire Hand Chain worn on the hand", "fit": "contain" },
+    { "src": "solitaire-hand-chain-layered.jpeg", "alt": "Yellow gold Solitaire Hand Chain layered with rings, a watch and a bracelet", "fit": "contain" },
+    { "src": "solitaire-hand-chain-layered-alt.jpeg", "alt": "Alternate view of the Solitaire Hand Chain worn with other jewellery", "fit": "contain" }
+  ],
+  "hoverImage": 2,
+  "care": "Store flat in a soft pouch, fasten before storing, and clean gently with a soft jewellery cloth.",
+  "shipping": "Your specifications, availability and delivery are confirmed with you in writing before payment.",
+  "maxQuantity": 1,
+  "sort": -15
+}
