@@ -5,7 +5,8 @@
   "tags": ["new-arrival", "engagement", "bridal", "halo"],
   "availability": "made-to-order",
   "badge": "New",
-  "price": null,
+  "price": 4500,
+  "priceFrom": true,
   "currency": "CAD",
   "metals": ["white-gold"],
   "stones": ["natural-diamond", "lab-diamond", "gemstone"],
@@ -23,7 +24,12 @@
       "step": "Choose your centre diamond",
       "name": "Centre diamond",
       "type": "button",
-      "values": ["Lab-grown diamond", "Natural diamond"]
+      "values": [
+        { "label": "Lab-grown round diamond" },
+        { "label": "1.00 ct natural round diamond", "add": 4000 },
+        { "label": "2.00 ct natural round diamond", "add": 12500 }
+      ],
+      "showPrices": true
     },
     {
       "step": "Choose your ring size",

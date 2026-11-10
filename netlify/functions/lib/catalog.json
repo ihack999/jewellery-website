@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-10T02:34:44.517Z",
+  "generatedAt": "2026-11-10T02:38:02.770Z",
   "currency": "CAD",
   "checkoutMode": "request",
   "shippingCountries": [
@@ -9,9 +9,9 @@
   "products": {
     "the-blush-halo-ring": {
       "name": "The Blush Halo | Round Diamond & Pink Sapphire Ring",
-      "price": null,
+      "price": 4500,
       "currency": "CAD",
-      "purchasable": false,
+      "purchasable": true,
       "maxQuantity": 1,
       "image": "https://torontojewelscuration.com/media/blush-halo-studio-front-6f6d4135-720.webp",
       "options": [
@@ -21,13 +21,18 @@
           "required": true,
           "values": [
             {
-              "value": "Lab-grown diamond",
+              "value": "Lab-grown round diamond",
               "add": 0,
               "inquire": false
             },
             {
-              "value": "Natural diamond",
-              "add": 0,
+              "value": "1.00 ct natural round diamond",
+              "add": 4000,
+              "inquire": false
+            },
+            {
+              "value": "2.00 ct natural round diamond",
+              "add": 12500,
               "inquire": false
             }
           ]
