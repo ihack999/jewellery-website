@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-30T01:38:19.542Z",
+  "generatedAt": "2026-11-10T02:30:30.766Z",
   "currency": "CAD",
   "checkoutMode": "request",
   "shippingCountries": [
@@ -9,12 +9,29 @@
   "products": {
     "classic-round-natural-diamond-split-shank-ring": {
       "name": "Classic Round Natural Diamond Split Shank Ring",
-      "price": 17000,
+      "price": 10450,
       "currency": "CAD",
       "purchasable": true,
       "maxQuantity": 1,
       "image": "https://torontojewelscuration.com/media/classic-round-natural-diamond-split-shank-ring-42ac18f3-720.webp",
       "options": [
+        {
+          "name": "Centre diamond",
+          "type": "button",
+          "required": true,
+          "values": [
+            {
+              "value": "1.00 ct",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "2.00 ct",
+              "add": 6550,
+              "inquire": false
+            }
+          ]
+        },
         {
           "name": "Ring size",
           "type": "size",
