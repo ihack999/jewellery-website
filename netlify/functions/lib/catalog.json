@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-10T02:41:09.360Z",
+  "generatedAt": "2026-11-10T02:42:57.126Z",
   "currency": "CAD",
   "checkoutMode": "request",
   "shippingCountries": [
@@ -2229,7 +2229,7 @@
     "diamond-hand-chain-bracelet": {
       "name": "Diamond Hand Chain Bracelet",
       "price": 750,
-      "currency": "USD",
+      "currency": "CAD",
       "purchasable": true,
       "maxQuantity": 5,
       "image": "https://torontojewelscuration.com/media/diamond-hand-chain-d45fd4c7-720.webp",
