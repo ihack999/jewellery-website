@@ -1,0 +1,47 @@
+{
+  "name": "The Blush Halo | Round Diamond & Pink Sapphire Ring",
+  "subtitle": "14K White Gold · Natural or Lab-Grown Diamond",
+  "category": "rings",
+  "tags": ["new-arrival", "engagement", "bridal", "halo"],
+  "availability": "made-to-order",
+  "badge": "New",
+  "price": null,
+  "currency": "CAD",
+  "metals": ["white-gold"],
+  "stones": ["natural-diamond", "lab-diamond", "gemstone"],
+  "summary": "A round brilliant diamond framed by a fine pink sapphire halo on a diamond-accented beaded band in polished 14K white gold.",
+  "description": "A timeless classic, with a delicate touch of pink.\n\nSome details deserve a second look.\n\nThe Blush Halo Ring features a beautiful round brilliant diamond surrounded by a whisper-thin halo of pink sapphires. The soft contrast adds just enough colour to make this timeless design feel beautifully distinctive.\n\nSet in polished 14K white gold, the ring features an exceptionally delicate, diamond-accented beaded band. Its fine detailing adds subtle sparkle while allowing the centre diamond to remain the star.\n\nRomantic without being overly traditional, the Blush Halo is for someone who loves a classic round diamond but appreciates an unexpected detail.\n\nAvailable with your choice of natural or lab-grown centre diamond.\n\nDiamond colour and clarity: Available upon request.\n\nContact Toronto Jewels Curation to discuss your preferred diamond and ring size.",
+  "details": {
+    "Centre diamond": "Round brilliant; natural or lab-grown",
+    "Halo": "Fine pink sapphire halo",
+    "Metal": "Polished 14K white gold",
+    "Band": "Delicate beaded band with diamond accents",
+    "Diamond colour and clarity": "Available upon request"
+  },
+  "options": [
+    {
+      "step": "Choose your centre diamond",
+      "name": "Centre diamond",
+      "type": "button",
+      "values": ["Lab-grown diamond", "Natural diamond"]
+    },
+    {
+      "step": "Choose your ring size",
+      "name": "Ring size",
+      "type": "size",
+      "values": "ringSizes"
+    }
+  ],
+  "images": [
+    { "src": "blush-halo-studio-front.jpeg", "alt": "The Blush Halo ring with a round diamond, fine pink sapphire halo and diamond-accented band" },
+    { "src": "blush-halo-studio-top.jpeg", "alt": "Top view of the Blush Halo ring showing the pink sapphires and beaded diamond shoulders", "fit": "contain" },
+    { "src": "blush-halo-studio-profile.jpeg", "alt": "Side profile of the Blush Halo ring showing the raised diamond setting and white gold band", "fit": "contain" },
+    { "src": "blush-halo-on-hand.jpeg", "alt": "The Blush Halo pink sapphire and diamond ring worn on the hand", "fit": "contain" },
+    { "src": "blush-halo-worn-portrait.jpeg", "alt": "The Blush Halo ring worn in a close portrait", "fit": "contain" }
+  ],
+  "hoverImage": 3,
+  "care": "Store separately in a soft pouch. Clean gently with a soft jewellery cloth and avoid harsh chemicals.",
+  "shipping": "Your specifications, availability, production timing and insured delivery are confirmed with you in writing before payment.",
+  "maxQuantity": 1,
+  "sort": -13
+}

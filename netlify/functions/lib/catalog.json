@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-10T02:30:30.766Z",
+  "generatedAt": "2026-11-10T02:34:44.517Z",
   "currency": "CAD",
   "checkoutMode": "request",
   "shippingCountries": [
@@ -7,6 +7,120 @@
     "US"
   ],
   "products": {
+    "the-blush-halo-ring": {
+      "name": "The Blush Halo | Round Diamond & Pink Sapphire Ring",
+      "price": null,
+      "currency": "CAD",
+      "purchasable": false,
+      "maxQuantity": 1,
+      "image": "https://torontojewelscuration.com/media/blush-halo-studio-front-6f6d4135-720.webp",
+      "options": [
+        {
+          "name": "Centre diamond",
+          "type": "button",
+          "required": true,
+          "values": [
+            {
+              "value": "Lab-grown diamond",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "Natural diamond",
+              "add": 0,
+              "inquire": false
+            }
+          ]
+        },
+        {
+          "name": "Ring size",
+          "type": "size",
+          "required": true,
+          "values": [
+            {
+              "value": "3",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "3.5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "4",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "4.5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "5.5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "6",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "6.5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "7",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "7.5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "8",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "8.5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "9",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "9.5",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "10",
+              "add": 0,
+              "inquire": false
+            },
+            {
+              "value": "Not sure — help me size",
+              "add": 0,
+              "inquire": false
+            }
+          ]
+        }
+      ]
+    },
     "classic-round-natural-diamond-split-shank-ring": {
       "name": "Classic Round Natural Diamond Split Shank Ring",
       "price": 10450,
