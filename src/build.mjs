@@ -144,6 +144,7 @@ export async function build({ quiet = false } = {}) {
     badge: p.badge || "",
     summary: p.summary || "",
     image: images.url(p.images[0].src, 720),
+    cardFit: p.cardFit,
     hover: p.images[p.hoverImage] && p.hoverImage ? images.url(p.images[p.hoverImage].src, 720) : "",
     images: p.images.slice(0, 6).map((img) => ({ src: images.url(img.src, 960), alt: img.alt, fit: img.fit, note: img.note })),
     options: p.options.map((o) => ({

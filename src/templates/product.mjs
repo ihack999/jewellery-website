@@ -106,7 +106,7 @@ function gallery(p, ctx) {
     ${img.note ? `<figcaption class="gallery__note">${h(img.note)}</figcaption>` : ""}
   </figure>`);
   const videos = p.videos.map((v) => `<figure class="gallery__item gallery__item--video" data-gallery-item>
-    <video controls muted playsinline preload="none"${v.poster ? ` poster="${h(ctx.images.url(v.poster, 720))}"` : ""}><source src="${h(v.src)}" type="video/mp4"></video>
+    <video controls muted playsinline preload="none"${v.poster ? ` poster="${h(ctx.images.url(v.poster, 720))}"` : ""}${v.fit === "contain" ? ' style="object-fit:contain"' : ""}${v.label ? ` aria-label="${h(v.label)}"` : ""}><source src="${h(v.src)}" type="video/mp4"></video>
     ${v.label ? `<figcaption class="gallery__note">${h(v.label)}</figcaption>` : ""}
   </figure>`);
   const all = [...items, ...videos];

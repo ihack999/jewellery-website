@@ -1,0 +1,66 @@
+{
+  "name": "Trio",
+  "subtitle": "14K Gold Lab Diamond Stacking Ring",
+  "category": "rings",
+  "tags": ["new-arrival", "stacking"],
+  "availability": "made-to-order",
+  "badge": "New",
+  "price": 1200,
+  "currency": "CAD",
+  "metals": ["yellow-gold"],
+  "stones": ["lab-diamond"],
+  "summary": "Three rings. One effortless statement.",
+  "description": "Meet The Linked Trio, a contemporary take on the classic stacking ring.\n\nCrafted in solid 14K yellow gold, this distinctive design brings together two polished gold bands and a centre band adorned with sparkling lab-grown diamonds. Each band measures a delicate 1.2 mm wide.\n\nTwo elongated oval gold links connect the bands, creating a beautifully layered look with subtle movement and dimension.\n\nDesigned to make a statement on its own, The Linked Trio gives you the appearance of a perfectly styled ring stack in one thoughtfully designed piece.",
+  "details": {
+    "Metal": "Solid 14K yellow gold",
+    "Diamonds": "Round brilliant lab-grown diamonds",
+    "Total diamond weight": "Approximately 0.11–0.24 CTW, depending on ring size",
+    "Setting": "Pavé",
+    "Design": "Three interconnected stacking bands",
+    "Band width": "1.2 mm per band",
+    "Finish": "High-polish yellow gold",
+    "Connectors": "Two polished oval gold links",
+    "Style": "Contemporary, everyday fine jewellery"
+  },
+  "options": [
+    {
+      "name": "Ring size",
+      "type": "size",
+      "required": true,
+      "showPrices": true,
+      "help": "Sizes up to 5 are $1,200 CAD. Above size 5, add $100 CAD per full size or $50 CAD per half size.",
+      "values": [
+        "3",
+        "3.5",
+        "4",
+        "4.5",
+        "5",
+        { "label": "5.5", "add": 50 },
+        { "label": "6", "add": 100 },
+        { "label": "6.5", "add": 150 },
+        { "label": "7", "add": 200 },
+        { "label": "7.5", "add": 250 },
+        { "label": "8", "add": 300 },
+        { "label": "8.5", "add": 350 },
+        { "label": "9", "add": 400 },
+        { "label": "9.5", "add": 450 },
+        { "label": "10", "add": 500 }
+      ]
+    }
+  ],
+  "images": [
+    { "src": "stacked-studio.jpeg", "alt": "Trio ring with three yellow gold bands, a pavé diamond centre band and two oval links", "fit": "contain" },
+    { "src": "worn-on-hand.jpeg", "alt": "Trio stacking ring worn on the hand against ivory fabric" },
+    { "src": "upright-studio.jpeg", "alt": "Upright view of the Trio ring showing the pavé centre band and polished gold links" },
+    { "src": "bands-spread.jpeg", "alt": "The three connected bands spread apart to show how the oval links join them" }
+  ],
+  "videos": [
+    {
+      "src": "/assets/videos/the-linked-trio-worn.mp4",
+      "poster": "/store/products/the-linked-trio/styling-video-poster.jpeg",
+      "label": "The pink arrow points to Trio in this styling video",
+      "fit": "contain"
+    }
+  ],
+  "sort": -16
+}

@@ -206,7 +206,7 @@
     return `<article class="card${p.availability === "sold" ? " card--sold" : ""}" data-product-card data-slug="${esc(p.slug)}">
       <div class="card__frame">
         <a class="card__media" href="${esc(p.url)}" tabindex="-1" aria-hidden="true">
-          <img class="card__img" src="${esc(p.image)}" alt="" loading="lazy">
+          <img class="card__img" src="${esc(p.image)}" alt="" loading="lazy"${p.cardFit === "contain" ? ' style="object-fit:contain"' : ""}>
           ${p.hover ? `<img class="card__img card__img--hover" src="${esc(p.hover)}" alt="" loading="lazy">` : ""}
         </a>
         ${p.badge ? `<span class="badge${p.availability === "sold" ? " badge--sold" : /estate|rare/i.test(p.badge) ? " badge--estate" : ""}">${esc(p.badge)}</span>` : ""}

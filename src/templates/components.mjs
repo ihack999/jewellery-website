@@ -102,7 +102,7 @@ export function productCard(p, ctx, { priority = false, headingLevel = 3, classN
   return `<article class="${cx("card", p.availability === "sold" && "card--sold", className)}" data-product-card ${data}>
   <div class="card__frame">
     <a class="card__media" href="${p.url}" tabindex="-1" aria-hidden="true">
-      ${ctx.images.tag(primary.src, { alt: primary.alt || `${p.name} — Fine Jewellery Toronto`, sizes: CARD_SIZES, className: "card__img", priority, widths: [360, 540, 720, 960] })}
+      ${ctx.images.tag(primary.src, { alt: primary.alt || `${p.name} — Fine Jewellery Toronto`, sizes: CARD_SIZES, className: "card__img", priority, widths: [360, 540, 720, 960], attrs: p.cardFit === "contain" ? 'style="object-fit:contain"' : "" })}
       ${hover ? ctx.images.tag(hover.src, { alt: hover.alt || `${p.name} — Alternative Angle`, sizes: CARD_SIZES, className: "card__img card__img--hover", widths: [360, 540, 720, 960] }) : ""}
     </a>
     ${badgeHtml(p)}

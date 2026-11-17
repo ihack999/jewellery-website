@@ -1,0 +1,56 @@
+{
+  "name": "Fancy Shape Diamond Tennis Bracelet",
+  "subtitle": "3.35 CTW · 14K Gold",
+  "category": "bracelets",
+  "tags": ["new-arrival", "tennis", "stacking"],
+  "availability": "made-to-order",
+  "badge": "New",
+  "price": 3200,
+  "currency": "CAD",
+  "metals": ["white-gold", "yellow-gold", "rose-gold"],
+  "stones": ["diamond"],
+  "summary": "Alternating round and marquise diamonds bring a delicate, distinctive sparkle to this 14K gold tennis bracelet.",
+  "description": "Our Fancy Shape Diamond Tennis Bracelet combines the brilliance of round-cut diamonds with the graceful, elongated silhouette of marquise-cut diamonds. Alternating shapes create a delicate, distinctive sparkle that makes this piece effortlessly elegant.\n\nFeaturing approximately 3.35 carats total diamond weight, this bracelet is crafted with 32 diamonds, each carefully secured in a delicate prong setting to showcase its natural brilliance.\n\nDesigned for beauty and security, the bracelet features a box clasp with double side safety locks, fastening securely from both sides for added peace of mind.\n\nBeautiful worn alone or layered with your favourite pieces, this bracelet transitions effortlessly from everyday elegance to special occasions.\n\nAn elegant twist on the traditional diamond tennis bracelet.",
+  "details": {
+    "Total diamond weight": "Approximately 3.35 CTW",
+    "Round diamonds": "16 diamonds, 2.5 mm each",
+    "Marquise diamonds": "16 diamonds, 5 × 2.5 mm each",
+    "Total diamonds": "32",
+    "Diamond setting": "Prong setting",
+    "Bracelet length": "6.5 inches",
+    "Clasp": "Box clasp with double side safety locks",
+    "Metal": "14K gold",
+    "Gold colours": "White gold, yellow gold or rose gold"
+  },
+  "options": [
+    {
+      "name": "Metal",
+      "type": "swatch",
+      "help": "Select rose gold to see the design sketch.",
+      "values": [
+        { "label": "14K White Gold", "metal": "white-gold", "image": 0 },
+        { "label": "14K Yellow Gold", "metal": "yellow-gold", "image": 1 },
+        { "label": "14K Rose Gold", "metal": "rose-gold", "image": 2 }
+      ]
+    }
+  ],
+  "images": [
+    { "src": "white-gold-studio.jpeg", "alt": "White gold tennis bracelet with alternating round and marquise diamonds", "note": "White gold", "fit": "contain" },
+    { "src": "yellow-gold-studio.jpeg", "alt": "Yellow gold tennis bracelet with alternating round and marquise diamonds", "note": "Yellow gold", "fit": "contain" },
+    { "src": "design-sketch.jpeg", "alt": "Design sketch of the bracelet with a close-up of the alternating diamond shapes", "note": "Design sketch", "fit": "contain" },
+    { "src": "white-gold-clasp.jpeg", "alt": "White gold box clasp shown closed and open with both safety locks visible", "fit": "contain" },
+    { "src": "yellow-gold-clasp.jpeg", "alt": "Yellow gold box clasp shown closed and open with both safety locks visible", "fit": "contain" },
+    { "src": "stacked-on-wrist.jpeg", "alt": "The Fancy Shape bracelet layered with a round-diamond tennis bracelet", "note": "Shown layered with another bracelet", "fit": "contain" }
+  ],
+  "cardFit": "contain",
+  "hoverImage": 0,
+  "videos": [
+    {
+      "src": "/assets/videos/fancy-shape-diamond-tennis-bracelet-worn.mp4",
+      "poster": "/store/products/fancy-shape-diamond-tennis-bracelet/styling-video-poster.jpeg",
+      "label": "The Fancy Shape bracelet worn in a stack",
+      "fit": "contain"
+    }
+  ],
+  "sort": -17
+}
