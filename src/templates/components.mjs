@@ -73,6 +73,12 @@ export function badgeHtml(p) {
 // ---------------------------------------------------------------- card
 const CARD_SIZES = "(max-width: 700px) 50vw, (max-width: 1100px) 33vw, 25vw";
 
+export function productSearchText(p, ctx) {
+  const labels = (keys, vocabulary) => keys.map((key) => vocabulary[key]?.label || vocabulary[key] || key);
+  return [p.name, p.subtitle, p.summary, ctx.vocab.categories[p.category], ...p.tags, ...p.collections,
+    ...labels(p.metals, ctx.vocab.metals), ...labels(p.stones, ctx.vocab.stones)].filter(Boolean).join(" ");
+}
+
 export function productCard(p, ctx, { priority = false, headingLevel = 3, className = "" } = {}) {
   const primary = p.images[0];
   const hover = p.images[p.hoverImage] && p.hoverImage !== 0 ? p.images[p.hoverImage] : null;
@@ -97,7 +103,8 @@ export function productCard(p, ctx, { priority = false, headingLevel = 3, classN
     `data-tags="${h([...p.tags, ...p.collections].join(" "))}"`,
     `data-availability="${h(p.availability)}"`,
     `data-sort="${p.sort}"`,
-    `data-name="${h(p.name.toLowerCase())}"`
+    `data-name="${h(p.name.toLowerCase())}"`,
+    `data-search-text="${h(productSearchText(p, ctx))}"`
   ].join(" ");
   return `<article class="${cx("card", p.availability === "sold" && "card--sold", className)}" data-product-card ${data}>
   <div class="card__frame">

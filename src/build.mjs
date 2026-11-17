@@ -19,7 +19,7 @@ import { renderCollection } from "./templates/collection.mjs";
 import { renderProduct, tryOnHref, tryOnMetals, STUDIO_METALS } from "./templates/product.mjs";
 import { renderStudio } from "./templates/studio.mjs";
 import { renderPage, renderWishlist, renderNotFound, renderOrderSuccess } from "./templates/pages.mjs";
-import { priceText } from "./templates/components.mjs";
+import { priceText, productSearchText } from "./templates/components.mjs";
 
 const DIST = path.join(ROOT, "dist");
 const STATIC_SRC = path.join(ROOT, "src", "static");
@@ -95,6 +95,10 @@ export async function build({ quiet = false } = {}) {
   // 4. Pages.
   emit(renderHome(ctx));
   for (const c of store.collections) emit(renderCollection(c, ctx));
+  emit(renderCollection({
+    handle: "search", path: "/search/", title: "Search jewellery",
+    tiles: [], products: store.products
+  }, ctx, { search: true }));
   for (const p of store.products) emit(renderProduct(p, ctx));
   if (store.site.studio?.enabled) {
     const studioPage = renderStudio(ctx);
@@ -143,6 +147,7 @@ export async function build({ quiet = false } = {}) {
     tryonMetals: p.studio ? tryOnMetals(p) : undefined,
     badge: p.badge || "",
     summary: p.summary || "",
+    searchText: productSearchText(p, ctx),
     image: images.url(p.images[0].src, 720),
     cardFit: p.cardFit,
     hover: p.images[p.hoverImage] && p.hoverImage ? images.url(p.images[p.hoverImage].src, 720) : "",

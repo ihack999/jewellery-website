@@ -143,7 +143,13 @@ function cartDrawer(ctx) {
         <button class="btn btn--solid btn--block" type="submit" data-cart-submit>Send order request</button>
         <button class="btn btn--link" type="button" data-cart-back>Back to bag</button>
         <p class="form-status" data-form-status role="status"></p>
-      </form>` : ""}
+      </form>
+      <div class="form-done" data-cart-done tabindex="-1" hidden>
+        ${icon("check", { size: 20 })}
+        <h2 class="cart-empty__title">Request received</h2>
+        <p class="muted">We'll confirm the details in writing before any payment.</p>
+        <button class="btn btn--link" type="button" data-cart-back>Back to bag</button>
+      </div>` : ""}
     </div>
     <div class="drawer__foot" data-cart-foot hidden>
       <div class="cart-total"><span>Estimated total</span><strong data-cart-total>—</strong></div>
@@ -162,7 +168,7 @@ function searchOverlay(ctx) {
   <div class="search__scrim" data-search-close></div>
   <div class="search__panel" role="dialog" aria-modal="true" aria-label="Search">
     <div class="wrap">
-      <form class="search__form" action="/shop/" role="search" data-search-form>
+      <form class="search__form" action="/search/" role="search" data-search-form>
         ${icon("search", { size: 22 })}
         <label class="visually-hidden" for="search-input">Search jewellery</label>
         <input id="search-input" name="q" type="search" placeholder="Search rings, tennis, yellow diamond…" autocomplete="off" data-search-input>
@@ -254,6 +260,7 @@ export function layout(ctx, page) {
     currency: b.currency,
     locale: b.locale,
     brand: b.name,
+    email: site.contact?.email,
     monogram: b.monogram || b.shortName || "",
     checkout: { mode: site.checkout?.mode || "request", formName: site.checkout?.requestFormName || "order-request" },
     catalog: `/products.json?v=${ctx.version}`,

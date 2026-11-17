@@ -48,7 +48,7 @@
   "announcements": [
     { "text": "Women-led Toronto atelier · Custom, signature & estate fine jewellery", "href": "/pages/about/" },
     { "text": "Share your idea with our atelier — start a custom request", "href": "/design-studio/" },
-    { "text": "Private appointments in Toronto — book a consultation", "href": "/pages/contact/" }
+    { "text": "Private appointments in Toronto — book a consultation", "href": "/pages/contact/?topic=appointment" }
   ],
 
   "contact": {
@@ -133,7 +133,7 @@
           ]},
           { "title": "Services", "links": [
             { "label": "Private Sourcing", "href": "/pages/estate-jewellery-toronto/" },
-            { "label": "Book an Appointment", "href": "/pages/contact/" }
+            { "label": "Book an Appointment", "href": "/pages/contact/?topic=appointment" }
           ]}
         ],
         "features": [
@@ -167,7 +167,7 @@
   ],
 
   "headerRight": [
-    { "label": "Book an Appointment", "href": "/pages/contact/" }
+    { "label": "Book an Appointment", "href": "/pages/contact/?topic=appointment" }
   ],
 
   "trust": [

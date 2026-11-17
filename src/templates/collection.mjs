@@ -36,10 +36,10 @@ function filterOptions(c, ctx) {
   return { categories, metals, stones, availability, prices };
 }
 
-export function renderCollection(c, ctx) {
+export function renderCollection(c, ctx, { search = false } = {}) {
   const f = filterOptions(c, ctx);
   const promo = c.promo;
-  const cards = c.products.map((p, i) => productCard(p, ctx, { priority: i < 4 }));
+  const cards = c.products.map((p, i) => productCard(p, ctx, { priority: i < 4, headingLevel: 2 }));
   if (promo && c.products.length > (promo.after || 6)) {
     cards.splice(promo.after || 6, 0, `<a class="promo-tile" href="${h(promo.href)}" data-promo-tile>
       ${ctx.images.tag(promo.image, { alt: "", sizes: "(max-width: 700px) 100vw, 50vw", className: "promo-tile__img" })}
@@ -57,8 +57,13 @@ export function renderCollection(c, ctx) {
 
   const body = `<section class="collection-head wrap">
   <h1 class="collection-title">${h(c.heading || c.title)}</h1>
-  ${c.subheading ? `<h2 class="collection-subheading" style="font-size:1.15rem;font-weight:400;color:var(--color-muted);margin:0.25rem 0 0.5rem;">${h(c.subheading)}</h2>` : ""}
+  ${c.subheading ? `<p class="collection-subheading" style="font-size:1.15rem;font-weight:400;color:var(--color-muted);margin:0.25rem 0 0.5rem;">${h(c.subheading)}</p>` : ""}
   ${c.description ? `<p class="collection-desc">${h(c.description)}</p>` : ""}
+  ${search ? `<form class="search__form collection-search" role="search" action="/search/">
+    <label class="visually-hidden" for="collection-query">Search jewellery</label>
+    <input id="collection-query" name="q" type="search" placeholder="Search jewellery" data-collection-query>
+    <button type="submit" class="icon-btn" aria-label="Search">${icon("search", { size: 22 })}</button>
+  </form>` : ""}
   ${c.steps?.length ? `<ol class="collection-steps">${c.steps.map((st, i) => `<li><span class="collection-steps__num">${String(i + 1).padStart(2, "0")}</span><strong>${h(st.title)}</strong>${st.text ? `<p>${h(st.text)}</p>` : ""}</li>`).join("")}</ol>` : ""}
   ${c.links?.length ? `<p class="collection-links">${c.links.map((l) => `<a class="link-arrow" href="${h(l.href)}">${h(l.label)} ${icon("arrowRight", { size: 14 })}</a>`).join("")}</p>` : ""}
 </section>
@@ -68,7 +73,7 @@ export function renderCollection(c, ctx) {
 <div class="collection" data-collection data-page-size="${PAGE_SIZE}">
   <div class="toolbar" data-toolbar>
     <div class="wrap toolbar__inner">
-      <button type="button" class="toolbar__mobile" data-filters-open aria-controls="filters-${c.handle}">${icon("filter", { size: 18 })} Filter &amp; sort <span data-active-count></span></button>
+      <button type="button" class="toolbar__mobile" data-filters-open aria-expanded="false" aria-controls="filters-${c.handle}">${icon("filter", { size: 18 })} Filter &amp; sort <span data-active-count></span></button>
       <form class="filters" id="filters-${c.handle}" data-filters aria-label="Filter products">
         <div class="filters__head">
           <p class="filters__title">Filter &amp; sort</p>
@@ -91,10 +96,10 @@ export function renderCollection(c, ctx) {
         </div>
         <div class="filters__foot">
           <button type="button" class="btn btn--ghost" data-filters-clear>Clear all</button>
-          <button type="button" class="btn btn--solid" data-filters-close>Show <span data-result-number>${c.products.length}</span> pieces</button>
+          <button type="button" class="btn btn--solid" data-filters-close>Show <span data-result-number>${c.products.length}</span> <span data-result-label>${c.products.length === 1 ? "piece" : "pieces"}</span></button>
         </div>
       </form>
-      <p class="toolbar__count"><span data-result-number>${c.products.length}</span> ${c.products.length === 1 ? "piece" : "pieces"}</p>
+      <p class="toolbar__count" role="status"><span data-result-number>${c.products.length}</span> <span data-result-label>${c.products.length === 1 ? "piece" : "pieces"}</span></p>
     </div>
     <div class="wrap active-filters" data-active-filters hidden></div>
   </div>
@@ -106,8 +111,8 @@ export function renderCollection(c, ctx) {
     </div>
     <div class="grid-empty" data-grid-empty hidden>
       <p class="grid-empty__title">Nothing matches — yet.</p>
-      <p>Try removing a filter, or design exactly what you have in mind.</p>
-      <div class="grid-empty__actions"><button type="button" class="btn btn--ghost" data-filters-clear>Clear filters</button><a class="btn btn--solid" href="${h(ctx.site.studio?.path || "/design-studio/")}">${ctx.site.studio?.editorEnabled === false ? "Start a custom request" : "Open the Design Studio"}</a></div>
+      <p>${search ? "Try another search or remove a filter." : "Try removing a filter, or design exactly what you have in mind."}</p>
+      <div class="grid-empty__actions"><button type="button" class="btn btn--ghost" data-filters-clear>Clear filters</button><a class="btn btn--solid" href="${search ? "/shop/" : h(ctx.site.studio?.path || "/design-studio/")}">${search ? "Shop jewellery" : ctx.site.studio?.editorEnabled === false ? "Start a custom request" : "Open the Design Studio"}</a></div>
     </div>
     <div class="load-more" data-load-more hidden>
       <p class="load-more__text">Showing <span data-shown></span> of <span data-total></span></p>
@@ -121,6 +126,7 @@ ${c.seoText ? `<section class="section wrap wrap--narrow prose collection-seo">$
   const b = ctx.site.brand;
   return {
     path: c.path,
+    noindex: search,
     title: c.seoTitle || `${c.title}${c.handle === "all" ? "" : " | Fine Jewellery"}`,
     description: c.seoDescription || c.description,
     ogImage: c.image,

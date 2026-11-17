@@ -198,7 +198,7 @@ export function renderWishlist(ctx) {
     <p>Tap the ${icon("heart", { size: 16 })} on any piece to keep it here.</p>
     <div class="grid-empty__actions"><a class="btn btn--solid" href="/shop/">Shop jewellery</a></div>
   </div>
-  <p class="wishlist-share" data-wishlist-share hidden><a class="btn btn--ghost" data-wishlist-email href="#">${icon("mail", { size: 18 })} Email my wishlist to the atelier</a></p>
+  ${ctx.site.contact?.email ? `<p class="wishlist-share" data-wishlist-share hidden><a class="btn btn--ghost" data-wishlist-email href="mailto:${h(ctx.site.contact.email)}">${icon("mail", { size: 18 })} Email my wishlist to the atelier</a></p>` : ""}
 </div>`
   };
 }
@@ -216,7 +216,7 @@ export function renderNotFound(ctx) {
   <p class="collection-desc">Try searching, or start with a few favourites.</p>
   <div class="grid-empty__actions"><a class="btn btn--solid" href="/shop/">Shop jewellery</a><button type="button" class="btn btn--ghost" data-search-open>Search</button></div>
 </section>
-<div class="wrap"><div class="grid">${picks.map((p) => productCard(p, ctx)).join("")}</div></div>`
+<div class="wrap"><div class="grid">${picks.map((p) => productCard(p, ctx, { headingLevel: 2 })).join("")}</div></div>`
   };
 }
 

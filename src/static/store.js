@@ -55,35 +55,47 @@
 
   // ------------------------------------------------------- overlays / focus
   const openLayers = [];
+  const inertSiblings = new Set();
   function focusables(root) {
-    return $$('a[href], button:not([disabled]), input:not([disabled]):not([type="hidden"]), select, textarea, [tabindex]:not([tabindex="-1"])', root).filter((el) => el.offsetParent !== null || el === document.activeElement);
+    return $$('a[href], button:enabled, input:enabled:not([type="hidden"]), select:enabled, textarea:enabled, summary, [tabindex]', root)
+      .filter((el) => el.tabIndex >= 0 && el.getClientRects().length && getComputedStyle(el).visibility === "visible");
   }
-  function openLayer(el, { onClose, initialFocus } = {}) {
-    if (!el || !el.hidden) return;
-    const layer = { el, onClose, returnFocus: document.activeElement };
+  function syncLayers() {
+    for (const sibling of inertSiblings) sibling.inert = false;
+    inertSiblings.clear();
+    const top = openLayers.at(-1);
+    document.body.classList.toggle("is-locked", Boolean(top));
+    if (!top) return;
+    for (let node = top.el; node !== document.body; node = node.parentElement) {
+      for (const sibling of node.parentElement.children) {
+        if (sibling === node || sibling === top.scrim || sibling.inert) continue;
+        sibling.inert = true;
+        inertSiblings.add(sibling);
+      }
+    }
+  }
+  function openLayer(el, { onClose, initialFocus, returnFocus = document.activeElement, persistent = false, scrim } = {}) {
+    if (!el || openLayers.some((layer) => layer.el === el)) return;
+    const layer = { el, onClose, persistent, scrim, returnFocus, zIndex: el.style.zIndex };
     el.hidden = false;
-    el.classList.remove("is-closing");
+    el.style.zIndex = String(150 + openLayers.length);
     openLayers.push(layer);
-    document.body.classList.add("is-locked");
+    syncLayers();
     const panel = el.querySelector('[role="dialog"]') || el;
-    requestAnimationFrame(() => (initialFocus || panel).focus({ preventScroll: true }));
+    (initialFocus || focusables(panel)[0] || panel).focus({ preventScroll: true });
     return layer;
   }
   function closeLayer(el) {
     const i = openLayers.findIndex((l) => l.el === el);
     if (i < 0) return;
     const [layer] = openLayers.splice(i, 1);
-    const finish = () => {
-      el.hidden = true;
-      el.classList.remove("is-closing");
-      layer.onClose?.();
-      if (!openLayers.length) document.body.classList.remove("is-locked");
+    if (!layer.persistent) el.hidden = true;
+    el.style.zIndex = layer.zIndex;
+    layer.onClose?.();
+    syncLayers();
+    if (i === openLayers.length) {
       layer.returnFocus?.focus?.({ preventScroll: true });
-    };
-    if (el.classList.contains("drawer") && !reduceMotion) {
-      el.classList.add("is-closing");
-      setTimeout(finish, 240);
-    } else finish();
+    }
   }
   document.addEventListener("keydown", (e) => {
     const top = openLayers[openLayers.length - 1];
@@ -94,8 +106,11 @@
       if (!items.length) return;
       const first = items[0];
       const last = items[items.length - 1];
-      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
-      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+      const active = document.activeElement;
+      if (!items.includes(active) || (e.shiftKey ? active === first : active === last)) {
+        e.preventDefault();
+        (e.shiftKey ? last : first).focus();
+      }
     }
   });
 
@@ -173,30 +188,40 @@
       i = (n + items.length) % items.length;
       items[i].hidden = false; items[i].classList.add("is-active");
     };
-    const start = () => { clearInterval(timer); if (!reduceMotion) timer = setInterval(() => show(i + 1), 5000); };
+    const stop = () => clearInterval(timer);
+    const start = () => {
+      stop();
+      if (!reduceMotion && !bar.matches(":hover") && !bar.contains(document.activeElement)) {
+        timer = setInterval(() => show(i + 1), 5000);
+      }
+    };
     $("[data-announce-next]", bar).addEventListener("click", () => { show(i + 1); start(); });
     $("[data-announce-prev]", bar).addEventListener("click", () => { show(i - 1); start(); });
-    bar.addEventListener("mouseenter", () => clearInterval(timer));
+    bar.addEventListener("mouseenter", stop);
     bar.addEventListener("mouseleave", start);
+    bar.addEventListener("focusin", stop);
+    bar.addEventListener("focusout", (event) => { if (!bar.contains(event.relatedTarget)) requestAnimationFrame(start); });
     start();
   }
 
   function setupDrawers() {
     const menu = $('[data-drawer="menu"]');
     const cart = $('[data-drawer="cart"]');
-    $$("[data-menu-open]").forEach((b) => b.addEventListener("click", () => { openLayer(menu); b.setAttribute("aria-expanded", "true"); }));
-    $$("[data-cart-open]").forEach((b) => b.addEventListener("click", () => openCart()));
-    $$("[data-drawer]").forEach((d) => d.addEventListener("click", (e) => {
-      if (e.target.closest("[data-drawer-close]")) {
-        closeLayer(d);
-        $$("[data-menu-open]").forEach((b) => b.setAttribute("aria-expanded", "false"));
-      }
+    $$("[data-menu-open]").forEach((b) => b.addEventListener("click", () => {
+      if (openLayer(menu, { returnFocus: b, onClose: () => b.setAttribute("aria-expanded", "false") })) b.setAttribute("aria-expanded", "true");
     }));
-    window.openCart = () => openCart();
-    function openCart() {
+    const cartButtons = $$("[data-cart-open]");
+    cartButtons.forEach((b) => b.addEventListener("click", () => openCart(b)));
+    $$("[data-drawer]").forEach((d) => d.addEventListener("click", (e) => {
+      if (e.target.closest("[data-drawer-close], .mobile-nav a[href]")) closeLayer(d);
+    }));
+    window.openCart = openCart;
+    function openCart(returnFocus) {
       renderCart();
       showCartStep("bag");
-      openLayer(cart);
+      if (openLayer(cart, { returnFocus, onClose: () => cartButtons.forEach((button) => button.setAttribute("aria-expanded", "false")) })) {
+        cartButtons.forEach((button) => button.setAttribute("aria-expanded", "true"));
+      }
     }
   }
 
@@ -253,12 +278,11 @@
     grid.innerHTML = items.map(cardHtml).join("");
     $("[data-wishlist-empty]").hidden = items.length > 0;
     const share = $("[data-wishlist-share]");
-    share.hidden = !items.length;
+    if (share) share.hidden = !items.length;
     const mail = $("[data-wishlist-email]");
     if (mail && items.length) {
-      const email = document.querySelector('a[href^="mailto:"]')?.getAttribute("href")?.slice(7) || "";
       const body = `Hello,\n\nI'd love to hear more about these pieces:\n\n${items.map((p) => `• ${p.name} — ${location.origin}${p.url}`).join("\n")}\n\nThank you!`;
-      mail.href = `mailto:${email}?subject=${encodeURIComponent("My wishlist")}&body=${encodeURIComponent(body)}`;
+      mail.href = `mailto:${S.email}?subject=${encodeURIComponent("My wishlist")}&body=${encodeURIComponent(body)}`;
     }
   }
 
@@ -313,7 +337,7 @@
     $("[data-cart-empty]").hidden = !empty;
     $("[data-cart-foot]").hidden = empty;
     list.innerHTML = cart.map((l, i) => `<li class="cart-line">
-      <a class="cart-line__img" href="${esc(l.url)}"><img src="${esc(l.image)}" alt=""></a>
+      <span class="cart-line__img"><img src="${esc(l.image)}" alt=""></span>
       <div>
         <div class="cart-line__top"><a class="cart-line__name" href="${esc(l.url)}">${esc(l.name)}</a><span class="cart-line__price">${money(l.unit * l.qty, l.currency)}</span></div>
         <div class="cart-line__opts">${Object.entries(l.options).filter(([, v]) => v).map(([k, v]) => `<span>${esc(k)}: ${esc(v)}</span>`).join("")}</div>
@@ -330,19 +354,27 @@
     $("[data-cart-total]").textContent = totals();
     syncCartCount();
   }
-  function showCartStep(step) {
+  function showCartStep(step, focus = false) {
     const form = $("[data-cart-request]");
     const lines = $("[data-cart-lines]");
     const foot = $("[data-cart-foot]");
     if (!form) return;
-    const requesting = step === "request" && cart.length;
+    const done = $("[data-cart-done]");
+    const requesting = step === "request" && cart.length > 0;
+    const confirmed = step === "done";
     form.hidden = !requesting;
-    lines.hidden = requesting;
-    foot.hidden = requesting || !cart.length;
+    done.hidden = !confirmed;
+    lines.hidden = requesting || confirmed;
+    $("[data-cart-empty]").hidden = requesting || confirmed || cart.length > 0;
+    foot.hidden = requesting || confirmed || !cart.length;
     if (requesting) {
       $("[data-cart-order-field]").value = cart.map((l) => `${l.qty} × ${l.name}${Object.keys(l.options).length ? ` (${Object.entries(l.options).filter(([, v]) => v).map(([k, v]) => `${k}: ${v}`).join(", ")})` : ""} — ${money(l.unit * l.qty, l.currency)} — ${location.origin}${l.url}`).join("\n");
       $("[data-cart-total-field]").value = totals();
-      form.querySelector("input:not([type=hidden])")?.focus();
+      $("input[required]", form)?.focus();
+    } else if (confirmed) {
+      done.focus();
+    } else if (focus) {
+      $(cart.length ? "[data-cart-checkout]" : "[data-cart-empty] a")?.focus();
     }
   }
   function setupCart() {
@@ -353,28 +385,38 @@
       const q = e.target.closest("[data-qty]");
       const r = e.target.closest("[data-remove]");
       if (q) {
+        const index = q.dataset.qty;
+        const delta = q.dataset.delta;
         const l = cart[Number(q.dataset.qty)];
-        l.qty = Math.max(1, Math.min(l.max, l.qty + Number(q.dataset.delta)));
+        l.qty = Math.max(1, Math.min(l.max, l.qty + Number(delta)));
         saveCart(); renderCart();
+        const controls = $$('[data-qty]', drawer).filter((button) => button.dataset.qty === index && !button.disabled);
+        (controls.find((button) => button.dataset.delta === delta) || controls[0])?.focus({ preventScroll: true });
       }
-      if (r) { cart.splice(Number(r.dataset.remove), 1); saveCart(); renderCart(); if (!cart.length) showCartStep("bag"); }
-      if (e.target.closest("[data-cart-back]")) showCartStep("bag");
+      if (r) {
+        const index = Number(r.dataset.remove);
+        cart.splice(index, 1);
+        saveCart(); renderCart();
+        const removeButtons = $$("[data-remove]", drawer);
+        (removeButtons[index] || removeButtons.at(-1) || $("[data-cart-empty] a", drawer))?.focus({ preventScroll: true });
+      }
+      if (e.target.closest("[data-cart-back]")) showCartStep("bag", true);
       if (e.target.closest("[data-cart-checkout]")) checkout();
     });
     const form = $("[data-cart-request]");
     form?.addEventListener("submit", async (e) => {
       e.preventDefault();
       if (!validate(form)) return;
-      const ok = await submitForm(form);
-      if (ok) {
-        cart = []; saveCart(); renderCart();
-        form.hidden = true;
-        $("[data-cart-empty]").hidden = true;
-        $("[data-cart-lines]").hidden = false;
-        $("[data-cart-body]").insertAdjacentHTML("beforeend", `<div class="form-done" data-cart-done>${ICON.check}<p class="cart-empty__title">Request received</p><p class="muted">Thank you — we'll reply personally to confirm every detail in writing before any payment.</p></div>`);
-        drawer.addEventListener("transitionend", () => {}, { once: true });
-        setTimeout(() => $("[data-cart-done]")?.remove(), 12000);
-      }
+      const submitted = new Map(cart.map(({ key, qty }) => [key, qty]));
+      if (!await submitForm(form)) return;
+      for (const line of cart) line.qty -= submitted.get(line.key) || 0;
+      cart = cart.filter((line) => line.qty > 0);
+      form.reset();
+      const status = $("[data-form-status]", form);
+      if (status) status.textContent = "";
+      saveCart(); renderCart();
+      if (!drawer.hidden && !form.hidden) showCartStep("done");
+      else toast("Order request received");
     });
   }
   async function checkout() {
@@ -409,6 +451,7 @@
     return out;
   }
   function validate(form) {
+    if (sendingForms.has(form)) return false;
     let ok = true;
     $$("[required]", form).forEach((el) => {
       const bad = el.type === "radio" ? !$(`[name="${CSS.escape(el.name)}"]:checked`, form) : !el.value.trim() || (el.type === "email" && !/^\S+@\S+\.\S+$/.test(el.value));
@@ -476,17 +519,23 @@
       if (form.closest("[data-quick-modal]")) closeLayer(form.closest("[data-quick-modal]"));
       window.openCart();
     });
-    enqBtn?.addEventListener("click", () => openEnquiry(p, selectedOptions(form)));
+    enqBtn?.addEventListener("click", () => openEnquiry(p, selectedOptions(form), enqBtn));
     update();
     return { update };
   }
 
-  function openEnquiry(p, opts) {
+  function openEnquiry(p, opts, trigger) {
     const modal = $("[data-enquire-modal]");
     if (!modal) { location.href = `/pages/contact/?product=${encodeURIComponent(p.name)}`; return; }
+    const form = $("form", modal);
+    if (form.hidden) {
+      $(".form-done", modal)?.remove();
+      $("[data-form-status]", form).textContent = "";
+      form.hidden = false;
+    }
     const field = $("[data-enquire-options]", modal);
     if (field) field.value = Object.entries(opts || {}).filter(([, v]) => v).map(([k, v]) => `${k}: ${v}`).join(", ");
-    openLayer(modal, { initialFocus: $("input:not([type=hidden])", modal) });
+    openLayer(modal, { initialFocus: $("input[required]", form), returnFocus: trigger });
   }
 
   // ---------------------------------------------------------------- PDP
@@ -498,26 +547,37 @@
     const gallery = $("[data-gallery]", pdp);
     const track = $("[data-gallery-track]", gallery);
     const items = $$("[data-gallery-item]", track);
-    const dots = $$(".gallery__dot", gallery);
     const current = $("[data-gallery-current]", gallery);
+    const prev = $("[data-gallery-prev]", gallery);
+    const next = $("[data-gallery-next]", gallery);
+    const mobileGallery = matchMedia("(max-width: 959px)");
+    let activeItem = 0;
+    const scrollToItem = (index) => {
+      const item = items[index];
+      if (item) track.scrollTo({ left: item.offsetLeft - track.offsetLeft, behavior: reduceMotion ? "auto" : "smooth" });
+    };
 
-    // Swipe gallery (mobile): update dots.
-    const io = new IntersectionObserver((entries) => {
-      entries.forEach((en) => {
-        if (en.isIntersecting && en.intersectionRatio > .6) {
-          const i = items.indexOf(en.target);
-          dots.forEach((d, n) => d.classList.toggle("is-active", n === i));
-          if (current) current.textContent = i + 1;
+    if (current) {
+      const observer = new IntersectionObserver((entries) => {
+        if (!mobileGallery.matches) return;
+        for (const entry of entries) {
+          if (!entry.isIntersecting || entry.intersectionRatio < .6) continue;
+          activeItem = items.indexOf(entry.target);
+          current.textContent = activeItem + 1;
+          prev.setAttribute("aria-disabled", String(activeItem === 0));
+          next.setAttribute("aria-disabled", String(activeItem === items.length - 1));
         }
-      });
-    }, { root: track, threshold: [.6] });
-    if (matchMedia("(max-width: 959px)").matches) items.forEach((it) => io.observe(it));
+      }, { root: track, threshold: [.6] });
+      items.forEach((item) => observer.observe(item));
+      prev.addEventListener("click", () => scrollToItem(activeItem - 1));
+      next.addEventListener("click", () => scrollToItem(activeItem + 1));
+    }
 
     const goToImage = (index) => {
       const el = items.find((it) => Number(it.dataset.index) === index);
       if (!el) return;
-      if (matchMedia("(max-width: 959px)").matches) {
-        track.scrollTo({ left: el.offsetLeft - track.offsetLeft, behavior: reduceMotion ? "auto" : "smooth" });
+      if (mobileGallery.matches) {
+        scrollToItem(index);
       } else {
         const img = $("img", el);
         const lead = $("img", items[0]);
@@ -536,7 +596,10 @@
         const note = $(".gallery__note", items[0]);
         if (note) { note.textContent = p.images[index]?.note || ""; note.hidden = !note.textContent; }
         const zoom = $("[data-zoom]", items[0]);
-        if (zoom) zoom.dataset.zoom = index;
+        if (zoom) {
+          zoom.dataset.zoom = index;
+          zoom.setAttribute("aria-label", `Zoom image ${index + 1} of ${p.images.length}`);
+        }
       }
     };
     const lead = $("img", items[0]);
@@ -556,7 +619,7 @@
         const z = e.target.closest("[data-zoom]");
         if (!z) return;
         show(Number(z.dataset.zoom));
-        openLayer(lb, { initialFocus: $("[data-lightbox-close]", lb) });
+        openLayer(lb, { initialFocus: $("[data-lightbox-close]", lb), returnFocus: z });
       });
       $("[data-lightbox-close]", lb).addEventListener("click", () => closeLayer(lb));
       $("[data-lightbox-prev]", lb).addEventListener("click", () => show(at - 1));
@@ -580,11 +643,10 @@
       addEventListener("scroll", () => { if (!queued) { queued = true; requestAnimationFrame(update); } }, { passive: true });
       addEventListener("resize", update, { passive: true });
       update();
-      $("[data-sticky-action]", sticky).addEventListener("click", () => {
+      $("[data-sticky-action]", sticky)?.addEventListener("click", () => {
         const visibleBtn = $$(".pdp__actions .btn", pdp).find((b) => !b.hidden);
         actions.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "center" });
-        if (visibleBtn && visibleBtn.tagName === "A") return;
-        setTimeout(() => visibleBtn?.click(), 350);
+        setTimeout(() => visibleBtn?.click(), reduceMotion ? 0 : 350);
       });
     }
 
@@ -656,7 +718,7 @@
       if (!p) return;
       const body = $("[data-quick-body]", modal);
       body.innerHTML = quickHtml(p);
-      openLayer(modal);
+      openLayer(modal, { returnFocus: btn });
       const form = $("[data-product-form]", body);
       const track = $(".quick__track", body);
       bindProductForm(form, p, {
@@ -723,10 +785,13 @@
         if (input) input.checked = true;
       });
     }
-    const q = (params.get("q") || "").trim().toLowerCase();
-    if (q) {
+    const query = (params.get("q") || "").trim();
+    const terms = searchTerms(query);
+    const searchInput = $("[data-collection-query]");
+    if (searchInput) searchInput.value = query;
+    if (terms.length) {
       const title = $(".collection-title");
-      if (title) title.textContent = `Results for “${params.get("q")}”`;
+      if (title) title.textContent = `Results for “${query}”`;
     }
 
     const state = () => {
@@ -746,7 +811,7 @@
         const [min, max] = r.split("-");
         return price !== null && price >= Number(min) && (max === "" || price < Number(max));
       })) return false;
-      if (q && !(`${d.name} ${d.tags} ${d.category} ${d.metals} ${d.stones}`.toLowerCase().includes(q))) return false;
+      if (terms.length && !matchesSearch(d.searchText, terms)) return false;
       return true;
     };
     const labelFor = (name, value) => $(`input[name="${CSS.escape(name)}"][value="${CSS.escape(value)}"]`, form)?.closest("label")?.querySelector("span:not(.swatch):not(.check__count)")?.textContent || value;
@@ -766,7 +831,7 @@
       });
       sorted.forEach((c) => grid.append(c));
       const matching = sorted.filter((c) => matchCard(c, s));
-      const filtering = Object.keys(s).length > 0 || sort !== "featured" || Boolean(q);
+      const filtering = Object.keys(s).length > 0 || sort !== "featured" || terms.length > 0;
       sorted.forEach((c) => { c.hidden = !matching.includes(c); });
       // The editorial tile takes two grid cells, so show two fewer products with it to keep rows even.
       const limit = shown - (promo && !filtering ? 2 : 0);
@@ -776,6 +841,7 @@
         if (!promo.hidden && promoBefore) grid.insertBefore(promo, promoBefore);
       }
       $$("[data-result-number]", root).forEach((n) => (n.textContent = matching.length));
+      $$("[data-result-label]", root).forEach((n) => (n.textContent = matching.length === 1 ? "piece" : "pieces"));
       $("[data-grid-empty]", root).hidden = matching.length > 0;
       if (loadMore) {
         loadMore.hidden = matching.length <= limit;
@@ -843,26 +909,35 @@
       }
     });
     // Mobile sheet
-    const openSheet = () => {
+    const filterTrigger = $("[data-filters-open]", root);
+    const desktopFilters = matchMedia("(min-width: 1000px)");
+    filterTrigger.addEventListener("click", () => {
       form.classList.add("is-open");
+      form.setAttribute("role", "dialog");
+      form.setAttribute("aria-modal", "true");
+      filterTrigger.setAttribute("aria-expanded", "true");
       form.closest("[data-toolbar]")?.classList.add("has-open-sheet");
       scrim.hidden = false;
-      document.body.classList.add("is-locked");
       $$("[data-filter-toggle]", form).forEach((t) => { t.setAttribute("aria-expanded", "false"); t.nextElementSibling.hidden = true; });
-      $("[data-filter-toggle]", form)?.focus();
-    };
-    const closeSheet = () => { form.classList.remove("is-open"); form.closest("[data-toolbar]")?.classList.remove("has-open-sheet"); scrim.hidden = true; document.body.classList.remove("is-locked"); };
-    $$("[data-filters-open]", root).forEach((b) => b.addEventListener("click", openSheet));
-    $$("[data-filters-close]").forEach((b) => b.addEventListener("click", closeSheet));
-    document.addEventListener("keydown", (e) => { if (e.key === "Escape" && form?.classList.contains("is-open")) closeSheet(); });
+      openLayer(form, { persistent: true, scrim, returnFocus: filterTrigger, onClose: () => {
+        form.classList.remove("is-open");
+        form.removeAttribute("role");
+        form.removeAttribute("aria-modal");
+        filterTrigger.setAttribute("aria-expanded", "false");
+        form.closest("[data-toolbar]")?.classList.remove("has-open-sheet");
+        scrim.hidden = true;
+      } });
+    });
+    $$("[data-filters-close]", root).forEach((b) => b.addEventListener("click", () => closeLayer(form)));
+    desktopFilters.addEventListener("change", () => { if (desktopFilters.matches) closeLayer(form); });
 
     $("[data-load-more-btn]", root)?.addEventListener("click", () => {
-      const before = shown;
+      const before = cards.filter((card) => !card.hidden && !card.classList.contains("is-paged-out")).length;
       shown += pageSize;
       apply({ resetPage: false });
-      const visible = $$("[data-product-card]:not([hidden])", grid);
-      visible.slice(before, shown).forEach((c, i) => { c.classList.add("is-entering"); c.style.animationDelay = `${i * 40}ms`; });
-      visible[before]?.querySelector("a")?.focus({ preventScroll: true });
+      const revealed = $$("[data-product-card]:not([hidden]):not(.is-paged-out)", grid).slice(before);
+      revealed.forEach((c, i) => { c.classList.add("is-entering"); c.style.animationDelay = `${i * 40}ms`; });
+      $(".card__title a", revealed[0] || grid)?.focus();
     });
     apply({ resetPage: true });
   }
@@ -959,6 +1034,16 @@
   }
 
   // ------------------------------------------------------------------ search
+  function normalizeSearch(text) {
+    return text.toLowerCase().normalize("NFD").replace(/\p{M}/gu, "").replace(/[^\p{L}\p{N}]+/gu, " ").trim();
+  }
+  function searchTerms(query) {
+    return normalizeSearch(query).split(" ").filter(Boolean);
+  }
+  function matchesSearch(text, terms) {
+    const haystack = normalizeSearch(text);
+    return terms.every((term) => haystack.includes(term));
+  }
   function setupSearch() {
     const overlay = $("[data-search]");
     if (!overlay) return;
@@ -966,37 +1051,43 @@
     const results = $("[data-search-results]", overlay);
     const suggest = $("[data-search-suggest]", overlay);
     document.addEventListener("click", (e) => {
-      if (e.target.closest("[data-search-open]")) { e.preventDefault(); openLayer(overlay, { initialFocus: input }); catalog(); }
+      const trigger = e.target.closest("[data-search-open]");
+      if (trigger) { e.preventDefault(); openLayer(overlay, { initialFocus: input, returnFocus: trigger }); catalog(); }
       if (e.target.closest("[data-search-close]")) closeLayer(overlay);
     });
     let timer;
+    let revision = 0;
     input.addEventListener("input", () => {
       clearTimeout(timer);
+      const current = ++revision;
+      const query = input.value.trim();
+      const terms = searchTerms(query);
       timer = setTimeout(async () => {
-        const q = input.value.trim().toLowerCase();
-        if (q.length < 2) { results.innerHTML = ""; suggest.hidden = false; return; }
-        const words = q.split(/\s+/);
-        const hits = (await catalog()).filter((p) => {
-          const hay = `${p.name} ${p.subtitle} ${p.categoryLabel} ${p.tags.join(" ")} ${p.metals.join(" ")} ${p.stones.join(" ")} ${p.summary}`.toLowerCase().replace(/-/g, " ");
-          return words.every((w) => hay.includes(w));
-        });
+        if (!terms.length) { results.innerHTML = ""; suggest.hidden = false; return; }
+        const products = await catalog();
+        if (current !== revision) return;
+        const hits = products.filter((p) => matchesSearch(p.searchText || p.name, terms));
         suggest.hidden = hits.length > 0;
         results.innerHTML = hits.length
-          ? `<p class="search__label">${hits.length} ${hits.length === 1 ? "piece" : "pieces"}</p><div class="grid">${hits.slice(0, 8).map(cardHtml).join("")}</div>${hits.length > 8 ? `<p style="text-align:center;margin-top:24px"><a class="link-arrow" href="/shop/?q=${encodeURIComponent(input.value)}">See all results</a></p>` : ""}`
-          : `<p class="search__empty">No pieces match “${esc(input.value)}”. Try “ring”, “tennis” or “yellow diamond” — or <a href="${esc(S.studio)}" style="text-decoration:underline">start a custom request</a>.</p>`;
+          ? `<p class="search__label">${hits.length} ${hits.length === 1 ? "piece" : "pieces"}</p><div class="grid">${hits.slice(0, 8).map(cardHtml).join("")}</div>${hits.length > 8 ? `<p style="text-align:center;margin-top:24px"><a class="link-arrow" href="/search/?q=${encodeURIComponent(query)}">See all results</a></p>` : ""}`
+          : `<p class="search__empty">No pieces match “${esc(query)}”. Try “ring”, “tennis” or “yellow diamond” — or <a href="${esc(S.studio)}" style="text-decoration:underline">start a custom request</a>.</p>`;
         syncWish();
       }, 120);
     });
   }
 
   // ------------------------------------------------------------------ forms
-  async function submitForm(form) {
+  const sendingForms = new WeakSet();
+  async function submitForm(form, generatedDesign) {
+    if (sendingForms.has(form)) return null;
+    sendingForms.add(form);
     const status = $("[data-form-status]", form);
     const btn = $('[type="submit"]', form);
     btn?.classList.add("is-busy");
     if (status) { status.textContent = "Sending…"; status.className = "form-status"; }
     try {
       const data = new FormData(form);
+      if (generatedDesign) data.set("inspiration-upload", generatedDesign);
       const hasFile = [...data.values()].some((v) => v instanceof File && v.size);
       const res = await fetch(form.getAttribute("action") || "/", hasFile
         ? { method: "POST", body: data }
@@ -1005,9 +1096,19 @@
       if (status) { status.textContent = form.dataset.success || "Thank you — we'll be in touch shortly."; status.className = "form-status is-success"; }
       return true;
     } catch {
-      if (status) { status.textContent = "Sorry, that didn't send. Please try again or email us directly."; status.className = "form-status is-error"; }
+      if (status) {
+        status.textContent = "Your submission could not be sent. Please try again.";
+        if (S.email) {
+          const email = document.createElement("a");
+          email.href = `mailto:${S.email}`;
+          email.textContent = "email the atelier";
+          status.append(" You can also ", email, ".");
+        }
+        status.className = "form-status is-error";
+      }
       return false;
     } finally {
+      sendingForms.delete(form);
       btn?.classList.remove("is-busy");
     }
   }
@@ -1020,10 +1121,15 @@
         if (!validate(form)) return;
         if (await submitForm(form)) {
           form.reset();
-          const done = document.createElement("div");
-          done.className = "form-done";
-          done.innerHTML = `${ICON.check}<p>${esc(form.dataset.success || "Thank you!")}</p>`;
-          if (!form.closest(".footer-news")) { form.hidden = true; form.after(done); }
+          if (!form.closest(".footer-news")) {
+            const done = document.createElement("div");
+            done.className = "form-done";
+            done.tabIndex = -1;
+            done.innerHTML = `${ICON.check}<p>${esc(form.dataset.success || "Thank you!")}</p>`;
+            form.hidden = true;
+            form.after(done);
+            done.focus();
+          }
         }
       });
     });
@@ -1032,6 +1138,7 @@
     $$("[data-prefill]").forEach((el) => {
       const v = params.get(el.dataset.prefill);
       if (!v) return;
+      if (el.tagName === "SELECT" && ![...el.options].some((option) => option.value === v)) return;
       el.value = v;
       if (el.dataset.prefill === "product") {
         const msg = $("textarea[name=message]", el.form);
@@ -1045,11 +1152,11 @@
     const box = $("[data-checkout-result]");
     const id = new URLSearchParams(location.search).get("session_id");
     if (!box || !id) return;
-    cart = []; saveCart();
     try {
       const res = await fetch(`/.netlify/functions/checkout-session?id=${encodeURIComponent(id)}`);
       const data = await res.json();
       if (res.ok && data.paymentStatus === "paid") {
+        cart = []; saveCart();
         $("[data-checkout-title]", box).textContent = "Thank you — your order is confirmed.";
         $("[data-checkout-message]", box).textContent = `We've received your payment of ${data.amountLabel}${data.email ? ` and sent a receipt to ${data.email}` : ""}. We'll be in touch personally with next steps.`;
       }

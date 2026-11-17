@@ -207,7 +207,7 @@ export function matches(p, rule = {}) {
   if (rule.availability && !any(p.availability, rule.availability)) return false;
   if (rule.excludeAvailability && any(p.availability, rule.excludeAvailability)) return false;
   if (rule.minPrice !== undefined && (p.price === null || p.price < rule.minPrice)) return false;
-  if (rule.maxPrice !== undefined && (p.price === null || p.price > rule.maxPrice)) return false;
+  if (rule.maxPrice !== undefined && (p.price === null || p.price >= rule.maxPrice)) return false;
   if (rule.products && !rule.products.includes(p.slug)) return false;
   return true;
 }

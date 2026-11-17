@@ -26,7 +26,7 @@ function optionField(p, o, ctx) {
     }
     if (o.type === "size" || o.type === "select") {
       return `<div class="option">
-  <div class="option__row"><label class="option__label" for="${id}">${h(o.name)}</label>${o.type === "size" && p.category === "rings" ? `<a class="option__aside" href="/pages/contact/?topic=sizing">Size guide</a>` : ""}</div>
+  <div class="option__row"><label class="option__label" for="${id}">${h(o.name)}</label>${o.type === "size" && p.category === "rings" ? `<a class="option__aside" href="/pages/contact/?topic=sizing&amp;product=${encodeURIComponent(p.name)}">Sizing help</a>` : ""}</div>
   <div class="select"><select id="${id}" name="${h(o.name)}"${o.required ? " required" : ""} data-option>
     ${o.type === "size" ? `<option value="">Select ${h(o.name.toLowerCase())}</option>` : ""}
     ${o.values.map((v) => `<option value="${h(v.value)}">${h(v.label)}${o.showPrices ? ` — ${h(ctx.money(p.price + (v.add || 0), p.currency))}` : ""}</option>`).join("")}
@@ -113,9 +113,12 @@ function gallery(p, ctx) {
   const tryon = tryOnHref(p, ctx);
   return `<div class="gallery" data-gallery>
   ${tryon ? `<a class="gallery__tryon" href="${h(tryon)}" data-tryon>${icon("camera", { size: 16 })}<span>Try it on</span></a>` : ""}
-  <div class="gallery__track" data-gallery-track>${all.join("")}</div>
-  <div class="gallery__dots" aria-hidden="true">${all.map((_, i) => `<span class="gallery__dot${i === 0 ? " is-active" : ""}"></span>`).join("")}</div>
-  <p class="gallery__counter" aria-hidden="true"><span data-gallery-current>1</span> / ${all.length}</p>
+  <div class="gallery__track" id="gallery-${h(p.slug)}" data-gallery-track>${all.join("")}</div>
+  ${all.length > 1 ? `<div class="gallery__controls">
+    <button type="button" class="icon-btn" data-gallery-prev aria-label="Previous gallery item" aria-controls="gallery-${h(p.slug)}" aria-disabled="true">${icon("chevronLeft", { size: 18 })}</button>
+    <p class="gallery__counter" role="status"><span class="visually-hidden">Gallery item </span><span data-gallery-current>1</span> / ${all.length}</p>
+    <button type="button" class="icon-btn" data-gallery-next aria-label="Next gallery item" aria-controls="gallery-${h(p.slug)}">${icon("chevronRight", { size: 18 })}</button>
+  </div>` : ""}
 </div>`;
 }
 
@@ -140,9 +143,10 @@ export function renderProduct(p, ctx) {
   const whatsappText = encodeURIComponent(`Hello ${ctx.site.brand.name}, I have a question about ${p.name}.`);
   const details = Object.entries(p.details || {});
   const availabilityLabel = ctx.vocab.availability[p.availability] || "";
+  const sourcingHref = `/pages/contact/?topic=sourcing&amp;product=${encodeURIComponent(p.name)}`;
 
   const primaryAction = sold
-    ? `<a class="btn btn--solid btn--block" href="/pages/contact/?topic=sourcing&product=${encodeURIComponent(p.name)}">Find me something similar</a>`
+    ? `<a class="btn btn--solid btn--block" href="${sourcingHref}">Find me something similar</a>`
     : `<button type="submit" class="btn btn--solid btn--block" data-add-to-bag${inquireOnly ? " hidden" : ""}>Add to bag</button>
        <button type="button" class="btn btn--${inquireOnly ? "solid" : "ghost"} btn--block" data-enquire${inquireOnly ? "" : " hidden"}>${p.availability === "one-of-a-kind" ? "Request a private viewing" : "Enquire about this piece"}</button>`;
 
@@ -174,7 +178,7 @@ export function renderProduct(p, ctx) {
       ${promiseBlock(p, ctx) || `<ul class="promises">${(ctx.site.productPromises || []).filter((pr) => !(pr.excludeCategories || []).includes(p.category) && (!pr.categories || pr.categories.includes(p.category))).map((pr) => `<li>${icon(pr.icon, { size: 18 })}<span>${h(pr.text)}</span></li>`).join("")}</ul>`}
       <div class="pdp__help">
         <span>Questions?</span>
-        <a href="/pages/contact/?product=${encodeURIComponent(p.name)}">${icon("calendar", { size: 16 })} Book an appointment</a>
+        <a href="/pages/contact/?topic=appointment&amp;product=${encodeURIComponent(p.name)}">${icon("calendar", { size: 16 })} Book an appointment</a>
         ${c.whatsapp ? `<a href="https://wa.me/${h(c.whatsapp)}?text=${whatsappText}" target="_blank" rel="noopener">${icon("whatsapp", { size: 16 })} WhatsApp</a>` : ""}
       </div>
       <div class="accordions">
@@ -204,7 +208,7 @@ export function renderProduct(p, ctx) {
     ${ctx.images.tag(p.images[0].src, { alt: `${p.name} preview — Toronto Jewels Curation`, sizes: "48px", widths: [360] })}
     <div><p class="sticky-atc__name">${h(p.name)}</p>${priceHtml(p, ctx, { className: "sticky-atc__price" })}</div>
   </div>
-  <button type="button" class="btn btn--solid" data-sticky-action>${sold ? "Find similar" : inquireOnly ? "Enquire" : "Add to bag"}</button>
+  ${sold ? `<a class="btn btn--solid" href="${sourcingHref}">Find similar</a>` : `<button type="button" class="btn btn--solid" data-sticky-action>${inquireOnly ? "Enquire" : "Add to bag"}</button>`}
 </div>
 
 <section class="section">
@@ -252,7 +256,7 @@ ${p.collections.length ? `<section class="section section--tight">
   </div>
 </div>
 
-<div class="lightbox" data-lightbox hidden>
+<div class="lightbox" role="dialog" aria-modal="true" aria-label="Product photos" tabindex="-1" data-lightbox hidden>
   <button type="button" class="icon-btn lightbox__close" data-lightbox-close aria-label="Close">${icon("close", { size: 24 })}</button>
   <button type="button" class="icon-btn lightbox__nav lightbox__nav--prev" data-lightbox-prev aria-label="Previous image">${icon("chevronLeft", { size: 28 })}</button>
   <figure class="lightbox__figure"><img data-lightbox-img alt=""></figure>
