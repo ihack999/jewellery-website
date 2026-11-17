@@ -16,10 +16,9 @@ import { buildStudioCss } from "./lib/legacy-css.mjs";
 import { layout } from "./templates/layout.mjs";
 import { renderHome } from "./templates/home.mjs";
 import { renderCollection } from "./templates/collection.mjs";
-import { renderProduct, tryOnHref, tryOnMetals, STUDIO_METALS } from "./templates/product.mjs";
+import { browserProduct, renderProduct } from "./templates/product.mjs";
 import { renderStudio } from "./templates/studio.mjs";
 import { renderPage, renderWishlist, renderNotFound, renderOrderSuccess } from "./templates/pages.mjs";
-import { priceText, productSearchText } from "./templates/components.mjs";
 
 const DIST = path.join(ROOT, "dist");
 const STATIC_SRC = path.join(ROOT, "src", "static");
@@ -124,39 +123,7 @@ export async function build({ quiet = false } = {}) {
   emit(renderNotFound(ctx));
 
   // 5. Data for the browser (search, wishlist, quick view, bag).
-  const catalog = store.products.map((p) => ({
-    slug: p.slug,
-    name: p.name,
-    subtitle: p.subtitle || "",
-    url: p.url,
-    price: p.price,
-    priceFrom: p.priceFrom,
-    priceText: priceText(p, ctx),
-    compareAtPrice: p.compareAtPrice,
-    salePercent: p.salePercent,
-    currency: p.currency,
-    availability: p.availability,
-    purchasable: p.purchasable,
-    maxQuantity: p.maxQuantity,
-    category: p.category,
-    categoryLabel: store.vocab.categories[p.category],
-    tags: [...p.tags, ...p.collections],
-    metals: p.metals,
-    stones: p.stones,
-    tryon: tryOnHref(p, ctx) || undefined,
-    tryonMetals: p.studio ? tryOnMetals(p) : undefined,
-    badge: p.badge || "",
-    summary: p.summary || "",
-    searchText: productSearchText(p, ctx),
-    image: images.url(p.images[0].src, 720),
-    cardFit: p.cardFit,
-    hover: p.images[p.hoverImage] && p.hoverImage ? images.url(p.images[p.hoverImage].src, 720) : "",
-    images: p.images.slice(0, 6).map((img) => ({ src: images.url(img.src, 960), alt: img.alt, fit: img.fit, note: img.note })),
-    options: p.options.map((o) => ({
-      id: o.id, name: o.name, step: o.step, uppercase: o.uppercase, type: o.type, required: o.required, maxLength: o.maxLength, placeholder: o.placeholder, help: o.help, showPrices: o.showPrices,
-      values: o.type === "text" ? undefined : o.values.map((v) => ({ label: v.label, value: v.value, add: v.add || 0, salePercent: v.salePercent, inquire: Boolean(v.inquire), image: v.image, studioMetal: STUDIO_METALS[v.metal], swatch: store.vocab.metals[v.metal]?.swatch || v.swatch }))
-    }))
-  }));
+  const catalog = store.products.map((p) => browserProduct(p, ctx));
   writeFile(path.join(DIST, "products.json"), JSON.stringify(catalog));
 
   // 6. Server-side price list for the checkout function (never trust prices from the browser).

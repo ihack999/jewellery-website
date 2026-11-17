@@ -543,7 +543,7 @@
     const pdp = $("[data-pdp]");
     if (!pdp) return;
     const slug = pdp.dataset.slug;
-    const p = await findProduct(slug);
+    const p = JSON.parse($("[data-product-config]", pdp).textContent);
     const gallery = $("[data-gallery]", pdp);
     const track = $("[data-gallery-track]", gallery);
     const items = $$("[data-gallery-item]", track);
@@ -606,7 +606,7 @@
     if (lead) { lead.dataset.origSrc = lead.src; lead.dataset.origSrcset = lead.srcset; }
 
     const form = $("[data-product-form]", pdp);
-    if (form && p) bindProductForm(form, p, { onImage: goToImage });
+    if (form) bindProductForm(form, p, { onImage: goToImage });
 
     // Lightbox
     const lb = $("[data-lightbox]");
@@ -657,6 +657,7 @@
     const RECENT_KEY = "store.recent";
     const recent = storage.get(RECENT_KEY, []).filter((s) => s !== slug);
     storage.set(RECENT_KEY, [slug, ...recent].slice(0, 12));
+    if (!recent.length) return;
     const all = await catalog();
     const recentProducts = recent.map((s) => all.find((x) => x.slug === s)).filter(Boolean).slice(0, 8);
     const section = $("[data-recent]");

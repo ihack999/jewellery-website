@@ -1,6 +1,6 @@
 // Product detail page.
-import { h, cx, paragraphs, absoluteUrl } from "../lib/util.mjs";
-import { icon, priceHtml, badgeHtml, breadcrumbs, productCard, carousel } from "./components.mjs";
+import { h, cx, paragraphs, absoluteUrl, jsonForScript } from "../lib/util.mjs";
+import { icon, priceHtml, priceText, badgeHtml, breadcrumbs, productCard, productSearchText, carousel } from "./components.mjs";
 
 /** Options can carry a `step` title ("Choose your stone") — they are then shown as
  *  numbered steps, the simple bridal flow: stone → carat → ring size. */
@@ -98,6 +98,42 @@ export function tryOnMetals(p) {
   return [...new Set(list)];
 }
 
+export function browserProduct(p, ctx, { imageLimit = 6 } = {}) {
+  return {
+    slug: p.slug,
+    name: p.name,
+    subtitle: p.subtitle || "",
+    url: p.url,
+    price: p.price,
+    priceFrom: p.priceFrom,
+    priceText: priceText(p, ctx),
+    compareAtPrice: p.compareAtPrice,
+    salePercent: p.salePercent,
+    currency: p.currency,
+    availability: p.availability,
+    purchasable: p.purchasable,
+    maxQuantity: p.maxQuantity,
+    category: p.category,
+    categoryLabel: ctx.vocab.categories[p.category],
+    tags: [...p.tags, ...p.collections],
+    metals: p.metals,
+    stones: p.stones,
+    tryon: tryOnHref(p, ctx) || undefined,
+    tryonMetals: p.studio ? tryOnMetals(p) : undefined,
+    badge: p.badge || "",
+    summary: p.summary || "",
+    searchText: productSearchText(p, ctx),
+    image: ctx.images.url(p.images[0].src, 720),
+    cardFit: p.cardFit,
+    hover: p.images[p.hoverImage] && p.hoverImage ? ctx.images.url(p.images[p.hoverImage].src, 720) : "",
+    images: p.images.slice(0, imageLimit).map((img) => ({ src: ctx.images.url(img.src, 960), alt: img.alt, fit: img.fit, note: img.note })),
+    options: p.options.map((o) => ({
+      id: o.id, name: o.name, step: o.step, uppercase: o.uppercase, type: o.type, required: o.required, maxLength: o.maxLength, placeholder: o.placeholder, help: o.help, showPrices: o.showPrices,
+      values: o.type === "text" ? undefined : o.values.map((v) => ({ label: v.label, value: v.value, add: v.add || 0, salePercent: v.salePercent, inquire: Boolean(v.inquire), image: v.image, studioMetal: STUDIO_METALS[v.metal], swatch: ctx.vocab.metals[v.metal]?.swatch || v.swatch }))
+    }))
+  };
+}
+
 function gallery(p, ctx) {
   const items = p.images.map((img, i) => `<figure class="gallery__item${i === 0 ? " gallery__item--lead" : ""}" data-gallery-item data-index="${i}">
     <button type="button" class="gallery__zoom" data-zoom="${i}" aria-label="Zoom image ${i + 1} of ${p.images.length}">
@@ -152,6 +188,7 @@ export function renderProduct(p, ctx) {
 
   const body = `<div class="wrap">${breadcrumbs(crumbs)}</div>
 <article class="wrap pdp" data-pdp data-slug="${h(p.slug)}">
+  <script type="application/json" data-product-config>${jsonForScript(browserProduct(p, ctx, { imageLimit: p.images.length }))}</script>
   <div class="pdp__gallery">${gallery(p, ctx)}</div>
   <div class="pdp__info">
     <div class="pdp__sticky">
