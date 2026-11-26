@@ -24,7 +24,7 @@ function requestForm(ctx) {
       ${editor ? `<a class="btn btn--ghost" href="#design-studio">${icon("cube", { size: 18 })} Back to the 3D studio</a>` : ""}
     </div>
 
-    <form class="request__form" name="custom-request" method="POST" action="${h(ctx.site.studio.path)}" data-netlify="true" netlify-honeypot="bot-field" enctype="multipart/form-data" data-custom-request>
+    <form class="request__form" id="custom-design-form" name="custom-request" method="POST" action="${h(ctx.site.studio.path)}" data-netlify="true" netlify-honeypot="bot-field" enctype="multipart/form-data" data-custom-request>
       <input type="hidden" name="form-name" value="custom-request">
       <input type="hidden" name="design-summary" data-design-summary-field>
       <p class="visually-hidden"><label>Leave empty <input name="bot-field" tabindex="-1" autocomplete="off"></label></p>
@@ -47,7 +47,7 @@ function requestForm(ctx) {
         <div class="field"><label for="full-name">Full name</label><input id="full-name" name="full-name" autocomplete="name" required></div>
         <div class="field"><label for="email-address">Email</label><input id="email-address" name="email-address" type="email" autocomplete="email" required></div>
         <div class="field"><label for="phone-number">Phone <span class="optional">(optional)</span></label><input id="phone-number" name="phone-number" type="tel" autocomplete="tel"></div>
-        <div class="field"><label for="piece-type">Piece</label><input id="piece-type" name="piece-type" list="piece-types" placeholder="Ring, necklace, bracelet, earrings…" required><datalist id="piece-types"><option value="Ring"><option value="Engagement ring"><option value="Necklace"><option value="Bracelet"><option value="Earrings"></datalist></div>
+        <div class="field"><label for="piece-type">Piece</label><input id="piece-type" name="piece-type"${editor ? "" : ' data-prefill="piece"'} list="piece-types" placeholder="Ring, necklace, bracelet, earrings…" required><datalist id="piece-types"><option value="Ring"><option value="Engagement ring"><option value="Necklace"><option value="Bracelet"><option value="Earrings"></datalist></div>
         <div class="field"><label for="metal-preference">Metal</label><input id="metal-preference" name="metal-preference" placeholder="e.g. 18K yellow gold"></div>
         <div class="field"><label for="stone-preference">Stone</label><input id="stone-preference" name="stone-preference" placeholder="e.g. 1.5 ct oval lab-grown diamond"></div>
         <div class="field"><label for="finish-preference">Setting &amp; details</label><input id="finish-preference" name="finish-preference" placeholder="e.g. hidden halo, pavé band"></div>

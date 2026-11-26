@@ -254,7 +254,10 @@ export function layout(ctx, page) {
   const og = page.ogImage || b.ogImage;
   const ogUrl = og ? (/^https?:/.test(og) ? og : absoluteUrl(b.url, og.startsWith("/media/") ? og : ctx.images.url(og, 1280))) : "";
   const preloads = (site.theme.fontFiles || []).filter((f) => f.preload).map((f) => `<link rel="preload" href="${f.src}" as="font" type="font/woff2" crossorigin>`).join("\n");
-  const imagePreload = page.preloadImage ? `<link rel="preload" as="image" href="${h(ctx.images.url(page.preloadImage, 960))}" fetchpriority="high">` : "";
+  const lead = page.preloadImage;
+  const image = lead?.src ? ctx.images.variants(lead.src, lead.widths) : null;
+  const responsive = image?.srcset ? ` imagesrcset="${h(image.srcset)}" imagesizes="${h(lead.sizes)}"` : "";
+  const imagePreload = image ? `<link rel="preload" as="image" href="${h(image.src)}"${responsive} fetchpriority="high">` : "";
   const jsonLd = [].concat(page.jsonLd || []).map((d) => `<script type="application/ld+json">${jsonForScript(d)}</script>`).join("\n");
   const storeConfig = {
     currency: b.currency,

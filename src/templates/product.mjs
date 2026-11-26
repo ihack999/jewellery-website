@@ -134,10 +134,13 @@ export function browserProduct(p, ctx, { imageLimit = 6 } = {}) {
   };
 }
 
+const galleryWidths = [540, 720, 960, 1280, 1600];
+const leadGallerySizes = "(min-width: 960px) 58vw, 100vw";
+
 function gallery(p, ctx) {
   const items = p.images.map((img, i) => `<figure class="gallery__item${i === 0 ? " gallery__item--lead" : ""}" data-gallery-item data-index="${i}">
     <button type="button" class="gallery__zoom" data-zoom="${i}" aria-label="Zoom image ${i + 1} of ${p.images.length}">
-      ${ctx.images.tag(img.src, { alt: img.alt, sizes: i === 0 ? "(max-width: 900px) 100vw, 58vw" : "(max-width: 900px) 100vw, 29vw", priority: i === 0, loading: i < 3 ? "eager" : "lazy", widths: [540, 720, 960, 1280, 1600], attrs: img.fit === "contain" ? 'style="object-fit:contain"' : "" })}
+      ${ctx.images.tag(img.src, { alt: img.alt, sizes: i === 0 ? leadGallerySizes : "(min-width: 960px) 29vw, 100vw", priority: i === 0, loading: i < 3 ? "eager" : "lazy", widths: galleryWidths, attrs: img.fit === "contain" ? 'style="object-fit:contain"' : "" })}
     </button>
     ${img.note ? `<figcaption class="gallery__note">${h(img.note)}</figcaption>` : ""}
   </figure>`);
@@ -320,7 +323,7 @@ ${p.collections.length ? `<section class="section section--tight">
     path: p.url,
     title: p.seo?.title || `${p.name}${p.subtitle ? ` — ${p.subtitle}` : ""}`,
     description: p.seo?.description || p.summary,
-    preloadImage: p.images[0]?.src,
+    preloadImage: { src: p.images[0]?.src, sizes: leadGallerySizes, widths: galleryWidths },
     ogImage: p.images[0].src,
     ogType: "product",
     bodyClass: "page--product",
