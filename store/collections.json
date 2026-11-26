@@ -29,6 +29,7 @@
       "handle": "engagement-rings",
       "title": "Engagement Rings",
       "tileLabel": "Engagement",
+      "seoTitle": "Engagement Rings in Toronto",
       "parent": { "label": "Bridal", "href": "/collections/engagement-rings/" },
       "match": { "tags": ["engagement"] },
       "image": "/store/products/the-solara-serpentine-ring/01-studio.jpg",
@@ -40,7 +41,7 @@
       ],
       "links": [
         { "label": "Design your custom ring", "href": "/pages/custom-engagement-rings-toronto/" },
-        { "label": "Share your ring idea", "href": "/design-studio/#request-form" },
+        { "label": "Share your ring idea", "href": "/design-studio/?piece=Ring#custom-design-form" },
         { "label": "Book an engagement ring appointment", "href": "/pages/contact/?topic=engagement" }
       ],
       "tiles": [],

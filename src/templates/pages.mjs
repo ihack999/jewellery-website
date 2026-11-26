@@ -173,7 +173,7 @@ ${shortcodes(page.body, ctx)}
     path: page.path,
     title: page.seoTitle || page.title,
     description: page.description || page.intro,
-    preloadImage: page.image,
+    preloadImage: { src: page.image, sizes: "100vw" },
     ogImage: page.image,
     bodyClass: `page--content page--${page.slug}`,
     body,

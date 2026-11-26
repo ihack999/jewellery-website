@@ -106,15 +106,11 @@ export async function build({ quiet = false } = {}) {
       ...studioPage,
       path: "/customs",
       title: "Book a Custom Jewellery Consultation in Toronto",
-      canonical: absoluteUrl(store.site.brand.url, "/customs"),
+      canonical: absoluteUrl(store.site.brand.url, studioPage.path),
       body: studioPage.body.replace(
         `<h1 class="collection-title">${h(store.site.studio.title)}</h1>`,
         '<h1 class="collection-title">Custom Jewellery Design in Toronto</h1>'
-      ),
-      jsonLd: {
-        ...studioPage.jsonLd,
-        url: absoluteUrl(store.site.brand.url, "/customs")
-      }
+      )
     });
   }
   for (const page of store.pages) emit(renderPage(page, ctx));
@@ -154,7 +150,8 @@ export async function build({ quiet = false } = {}) {
 
   // 7. SEO + platform files.
   const b = store.site.brand;
-  const indexable = pages.filter((p) => !p.noindex && !p.path.endsWith(".html"));
+  const indexable = pages.filter((p) => !p.noindex && !p.path.endsWith(".html")
+    && (!p.canonical || p.canonical === absoluteUrl(b.url, p.path)));
   writeFile(path.join(DIST, "sitemap.xml"), `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.w3.org/2000/sitemaps/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
 ${indexable.map((p) => {

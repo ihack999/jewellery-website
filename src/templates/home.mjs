@@ -2,12 +2,16 @@
 import { h, cx, absoluteUrl } from "../lib/util.mjs";
 import { icon, productCard, categoryTiles, sectionHead, button, carousel } from "./components.mjs";
 
+function heroSizes(images) {
+  return images.length > 1 ? "(min-width: 800px) 50vw, 100vw" : "100vw";
+}
+
 const sections = {
   hero(s, ctx) {
     const imgs = s.images || [];
     return `<section class="hero${imgs.length > 1 ? " hero--split" : ""}">
   <div class="hero__media">
-    ${imgs.map((img, i) => `<div class="hero__frame${i > 0 ? " hero__frame--secondary" : ""}">${ctx.images.tag(img.src, { alt: img.alt || "", sizes: imgs.length > 1 ? "(max-width: 800px) 100vw, 50vw" : "100vw", priority: i === 0, loading: i === 0 ? "eager" : "lazy", attrs: img.position ? `style="object-position:${h(img.position)}"` : "" })}</div>`).join("")}
+    ${imgs.map((img, i) => `<div class="hero__frame${i > 0 ? " hero__frame--secondary" : ""}">${ctx.images.tag(img.src, { alt: img.alt || "", sizes: heroSizes(imgs), priority: i === 0, loading: i === 0 ? "eager" : "lazy", attrs: img.position ? `style="object-position:${h(img.position)}"` : "" })}</div>`).join("")}
   </div>
   <div class="hero__content">
     ${s.eyebrow ? `<p class="eyebrow eyebrow--light">${h(s.eyebrow)}</p>` : ""}
@@ -105,7 +109,8 @@ const sections = {
   clientMoments(s, ctx) {
     const videos = (s.videos || []).map((v) => `<figure class="moment">
       <a class="moment__media" href="${h(v.href || "#")}" aria-label="${h(v.label)}">
-        <video muted loop playsinline preload="none" ${v.poster ? `poster="${h(ctx.images.url(v.poster, 540))}"` : ""} data-src="${h(v.src)}" data-moment-video></video>
+        ${v.poster ? ctx.images.tag(v.poster, { alt: "", sizes: "(min-width: 1100px) 16vw, (min-width: 700px) 22vw, 46vw", widths: [360, 540, 720] }) : ""}
+        <video muted loop playsinline preload="none" data-src="${h(v.src)}" data-moment-video></video>
         <span class="moment__play" aria-hidden="true">${icon("play", { size: 14 })}</span>
       </a>
       <figcaption>
@@ -171,12 +176,12 @@ export function renderHome(ctx) {
     .join("\n");
   if (unknown.length) ctx.warn(`store/home.json: unknown section type(s): ${unknown.join(", ")} (available: ${Object.keys(sections).join(", ")}).`);
   const b = ctx.site.brand;
-  const heroImg = home.sections?.find((s) => s.type === "hero")?.images?.[0]?.src;
+  const heroImages = home.sections?.find((s) => s.type === "hero")?.images || [];
   return {
     path: "/",
     title: home.seo?.title || b.name,
     description: home.seo?.description,
-    preloadImage: heroImg,
+    preloadImage: { src: heroImages[0]?.src, sizes: heroSizes(heroImages) },
     bodyClass: "page--home",
     body,
     jsonLd: [
